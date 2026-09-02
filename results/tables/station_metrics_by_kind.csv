@@ -1,0 +1,7 @@
+kind,experiment,obs_mean,model_mean,bias,rmse,r,diurnal_amp_obs,diurnal_amp_model,diurnal_phase_error_h
+inmet_auto,CTL,3.179,5.181,2.002,2.32,0.724,3.148,3.566,-0.333
+inmet_auto,EXP01,3.179,5.038,1.859,2.185,0.731,3.148,3.724,-0.333
+inmet_auto,EXP02,3.355,4.452,1.097,1.534,0.649,3.216,3.622,-0.5
+synop_airport,CTL,6.493,5.758,-0.735,1.591,0.675,3.968,2.419,0.833
+synop_airport,EXP01,6.493,5.689,-0.803,1.634,0.671,3.968,2.618,-0.167
+synop_airport,EXP02,6.12,5.264,-0.856,1.48,0.701,4.262,2.183,1.0

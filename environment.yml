@@ -1,0 +1,33 @@
+# Environment for the MeqBr experiment analysis.
+#
+#   conda env create -f environment.yml
+#   conda activate mpas-meqbr
+#
+# Every version listed is a lower bound that was tested, not a pin: this is an
+# analysis workspace, not a distributed package, and pinning exactly would make
+# the environment harder to build than the science warrants.
+#
+# The analysis also runs unchanged on the machine's base Anaconda (Python 3.11),
+# which already carries all of these — that is what produced the committed
+# results. `python -V` and the package versions are recorded in each figure's
+# provenance only indirectly, via the script name; if an exact rebuild is ever
+# needed, `conda list --explicit` from the env that produced a result is the
+# record to keep.
+name: mpas-meqbr
+channels:
+  - conda-forge
+dependencies:
+  - python >=3.10
+  - numpy >=1.24
+  - pandas >=2.0
+  - xarray >=2023.6
+  - netcdf4 >=1.6            # the reader used for all MPAS history access
+  - scipy >=1.10             # KD-trees, Weibull MLE, .mat reading, KDE
+  - matplotlib >=3.7
+  - cartopy >=0.22           # coastlines on the native-mesh maps
+  - pyyaml >=6.0
+  - dask >=2023.5            # only for the occasional lazy open; not required
+  - tabulate >=0.9           # DataFrame.to_markdown, used by the summary tables
+  - cdsapi >=0.7             # ERA5 download for the simulation periods
+  - ffmpeg                   # mp4 animations; GIF fallback if absent
+  - openpyxl >=3.1           # only if an observation spreadsheet is reprocessed

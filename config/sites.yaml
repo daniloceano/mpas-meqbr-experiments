@@ -1,0 +1,103 @@
+# Validation sites.
+#
+# Two tiers, deliberately kept separate because they carry very different
+# evidential weight (see docs/validation_protocol.md):
+#
+#   primary   — in-situ LiDAR profilers at hub height. These decide the
+#               experiment ranking.
+#   secondary — public land surface stations (10 m). They cannot validate
+#               offshore hub-height wind, but they do test the coastal
+#               diurnal cycle over a wider area, which is exactly where the
+#               sea breeze lives. Supporting evidence only.
+
+primary:
+  P0:
+    label: "P0 (floating LiDAR)"
+    lat: -2.694107
+    lon: -42.554807
+    instrument: "floating LiDAR"
+    environment: offshore
+    period: "2021"                 # only overlaps the 2021 simulation window
+    coverage: {start: "2021-11-09", end: "2021-12-13"}
+    source_file: "data/obs/P0_LIDAR_matrix.mat"
+    source_format: "matlab-v5 struct 'L'"
+    native_resolution: "10min"
+    heights_m: [40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170,
+                180, 190, 200, 220, 240, 260]
+    # Model height -> LiDAR channel(s) averaged to represent it. 250 m has no
+    # exact channel; 240/260 m bracket it symmetrically.
+    height_map:
+      50:  [50]
+      100: [100]
+      150: [150]
+      200: [200]
+      250: [240, 260]
+    qc:
+      avail_min_percent: 80        # per-height data completeness of the 10-min bin
+      speed_range_ms: [0.0, 40.0]
+    notes: >
+      The met sensor (temp/press/humid) dies after ~140 records and reports
+      exact zeros afterwards; the wind channels are unaffected. Only wind is
+      used here.
+
+  LPI:
+    label: "LPI (Porto-Ilha, fixed LiDAR)"
+    lat: -4.8789425
+    lon: -37.1478801
+    instrument: "fixed LiDAR"
+    environment: "offshore platform (Porto-Ilha terminal)"
+    period: "2022"
+    coverage: {start: "2022-06-23", end: "2025-06-06"}
+    source_file: "data/obs/LPI_processed.csv.gz"
+    source_format: "csv (preprocessed; time already UTC)"
+    native_resolution: "10min"
+    heights_m: [10, 26, 50, 100, 150, 200]
+    height_map:
+      50:  [50]
+      100: [100]
+      150: [150]
+      200: [200]
+      # no 250 m channel — the 250 m model level has no LPI counterpart
+    qc:
+      speed_range_ms: [0.0, 40.0]
+    notes: >
+      No per-record availability flag equivalent to P0's `avail`. October 2022
+      coverage is >99 % non-null at every height.
+
+# Aggregation of the 10-min LiDAR record onto the model's hourly stamps.
+# Applies to both primary sites.
+pairing:
+  method: "hourly_mean_centered"
+  window_minutes: 60          # [t - 30 min, t + 30 min)
+  min_samples: 4              # of the 6 possible 10-min bins
+  direction: "vector_mean"    # speeds are scalar-averaged, directions vector-averaged
+
+# Public land stations, pulled from NOAA NCEI Integrated Surface Database
+# (which is where the Brazilian INMET automatic stations and airport METARs
+# reach an internationally accessible archive — INMET's own API is not
+# reachable from this host). Fetched by scripts/01_extract/fetch_isd_stations.py.
+secondary:
+  source: "NOAA NCEI Integrated Surface Database (ISD), global-hourly access"
+  url: "https://www.ncei.noaa.gov/data/global-hourly/access/{year}/{station}.csv"
+  inventory_url: "https://www.ncei.noaa.gov/pub/data/noaa/isd-history.csv"
+  anemometer_height_m: 10
+  qc:
+    speed_range_ms: [0.0, 40.0]
+    exclude_quality_codes: ["2", "3", "6", "7"]   # ISD: erroneous / erroneous-corrected
+    min_records_per_period: 200
+  # Curated list: near-coastal, inside the mesh, data present for BOTH 2021 and
+  # 2022 (verified 2026-09-02). `kind` distinguishes the hourly INMET automatic
+  # stations (81xxxx, on the GTS since 2016) from the older synoptic/airport
+  # series, which report fewer hours per day.
+  stations:
+    - {id: "81752099999", name: "PARNAIBA (INMET A)",        lat: -3.067, lon: -41.783, kind: inmet_auto, near: P0}
+    - {id: "82288099999", name: "PARNAIBA / Joao Silva Filho", lat: -2.894, lon: -41.732, kind: synop_airport, near: P0}
+    - {id: "81715099999", name: "SAO LUIS (INMET A)",        lat: -2.533, lon: -44.217, kind: inmet_auto, near: P0}
+    - {id: "82281099999", name: "SAO LUIS / Cunha Machado",  lat: -2.585, lon: -44.234, kind: synop_airport, near: P0}
+    - {id: "81758099999", name: "FORTALEZA (INMET A)",       lat: -3.800, lon: -38.533, kind: inmet_auto, near: both}
+    - {id: "82398099999", name: "FORTALEZA / Pinto Martins", lat: -3.776, lon: -38.533, kind: synop_airport, near: both}
+    - {id: "81798099999", name: "JAGUARUANA (INMET A)",      lat: -4.783, lon: -37.783, kind: inmet_auto, near: LPI}
+    - {id: "82591099999", name: "MOSSORO / Dix-Sept Rosado", lat: -5.202, lon: -37.364, kind: synop_airport, near: LPI}
+    - {id: "81835099999", name: "APODI (INMET A)",           lat: -5.627, lon: -37.832, kind: inmet_auto, near: LPI}
+    - {id: "82595099999", name: "CALCANHAR (cape lighthouse)", lat: -5.167, lon: -35.483, kind: synop_airport, near: LPI}
+    - {id: "81754099999", name: "SOBRAL (INMET A)",          lat: -3.750, lon: -40.350, kind: inmet_auto, near: both}

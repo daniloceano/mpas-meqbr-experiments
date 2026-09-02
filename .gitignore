@@ -1,0 +1,53 @@
+# Local machine configuration (paths to external simulation data)
+config/paths.local.yaml
+
+# Large simulation data — read externally in place, never committed
+*.nc
+*.grib
+*.grib2
+*.zarr/
+
+# Observations: symlinks into the sibling repo (machine-specific targets) and
+# raw exports. Recreate with scripts/00_setup/link_observations.py.
+data/obs/*
+!data/obs/.gitkeep
+data/era5/*
+!data/era5/.gitkeep
+data/stations/*.csv
+data/stations/*.csv.gz
+!data/stations/.gitkeep
+
+# Derived products: regenerate with the scripts, do not version
+results/site_timeseries/*
+results/fields/*
+results/logs/*
+!results/*/.gitkeep
+figures/*/*
+!figures/*/.gitkeep
+
+# Metric tables ARE versioned (they are small, and they are the record of what
+# was decided) — the negations above do not cover them, so be explicit:
+!results/tables/
+!results/tables/*.csv
+!results/tables/*.md
+!results/tables/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Notebooks — scratch only, see notebooks/README.md
+.ipynb_checkpoints/
+notebooks/*
+!notebooks/README.md
+
+# OS / editors / logs
+.DS_Store
+*.log
+*.tmp
+*~
+.vscode/
+.idea/

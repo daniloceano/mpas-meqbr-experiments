@@ -1,0 +1,27 @@
+# Machine-specific paths. Copy to paths.local.yaml and edit; paths.local.yaml
+# is gitignored and never committed.
+#
+#   cp config/paths.example.yaml config/paths.local.yaml
+#
+# Raw MPAS output is large and external. It is read in place — never copied
+# into this repository.
+
+# Directory holding CTL/, EXP01/, EXP02/ and the shared mesh assets.
+runs_root: /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km
+
+# ERA5 hourly 10 m / 100 m wind for the *simulation periods*, downloaded by
+# scripts/01_extract/download_era5_periods.py into this repo.
+era5_periods_dir: data/era5
+
+# ERA5 hourly 10 m / 100 m wind archive over Brazil, 1990-2020, monthly files.
+# Used only for climatological context (how typical were the two simulated
+# months) and for the ERA5 baseline resource map.
+era5_climatology_dir: /p1-sto-swell/danilocs/ERA5_surface_wind_data_Brazil
+
+# Optional: the sibling EarthSyms poster repo, source of the two LiDAR files.
+# Only needed once, to populate data/obs/ (scripts/00_setup/link_observations.py).
+obs_source_repo: /p1-swell/danilocs/mpas-earthsyms2026-analysis
+
+# ffmpeg binary for mp4 animations. Leave null to auto-discover; animations
+# fall back to animated GIF if none is found.
+ffmpeg: null

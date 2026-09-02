@@ -1,0 +1,134 @@
+# Experiment registry for the MeqBr ~5 km MPAS runs.
+#
+# This file is the *analysis-side mirror* of the authoritative registry kept
+# with the simulations themselves:
+#     <runs_root>/EXPERIMENTS.md   (what each experiment IS)
+#     <runs_root>/README.md        (what they all SHARE)
+#     <runs_root>/<EXP>/README.md  (that experiment's delta)
+#
+# Nothing here is a scientific decision of its own: it restates the run
+# metadata in a form scripts can read. If the two ever disagree, the run-side
+# documents win — fix this file, not them.
+#
+# Machine paths live in paths.local.yaml (see paths.example.yaml).
+
+runs_root_note: >
+  runs_root is set in paths.local.yaml and points at the directory that holds
+  CTL/, EXP01/, EXP02/ plus the shared mesh assets.
+
+meshes:
+  meqbr_05km:
+    n_cells: 76813
+    mean_cell_spacing_km: 4.6
+    cell_extent: {lat_min: -7.66, lat_max: 6.72, lon_min: -54.95, lon_max: -32.70}
+    n_relaxation_cells: 9093
+    used_by: [CTL, EXP01]
+  meqbr_05km_buf:
+    n_cells: 95138
+    mean_cell_spacing_km: 4.6      # in the refined interior; ramps to ~32 km outward
+    cell_extent: {lat_min: -12.90, lat_max: 11.86, lon_min: -60.16, lon_max: -27.48}
+    n_relaxation_cells: 2188
+    used_by: [EXP02]
+
+vertical:
+  # Interfaces from zeta_wind.txt; centers are the midpoints. Over flat terrain
+  # (ocean) the centers land exactly on 12.5, 50, 100, 150, 200, 250 m ...
+  n_layers: 55
+  n_interfaces: 56
+  model_top_m: 30000
+  # Heights (m AGL) used for model-vs-observation comparison. Each must match a
+  # layer center to within `height_tolerance_m`; scripts assert this rather than
+  # trusting a hardcoded index.
+  comparison_heights_m: [50, 100, 150, 200, 250]
+  height_tolerance_m: 1.0
+
+periods:
+  # Keys used everywhere in this repo. `history_subdir` is the directory name
+  # under <runs_root>/<EXP>/.
+  "2021":
+    label: "Nov 2021"
+    history_subdir: "20211101_20211201"
+    analysis_start: "2021-11-01 00:00"
+    analysis_end:   "2021-12-01 00:00"
+    integration_start: "2021-10-21 00:00"   # spin-up begins; accumulators start here
+    spinup_end: "2021-11-01 00:00"
+    expected_history_records: 721           # hourly, both endpoints inclusive
+    validation_site: P0
+  "2022":
+    label: "Oct 2022"
+    history_subdir: "20221001_20221101"
+    analysis_start: "2022-10-01 00:00"
+    analysis_end:   "2022-11-01 00:00"
+    integration_start: "2022-09-21 00:00"
+    spinup_end: "2022-10-01 00:00"
+    expected_history_records: 745
+    validation_site: LPI
+
+experiments:
+  CTL:
+    label: "CTL"
+    long_label: "CTL — fixed SST, unbuffered mesh"
+    parent: null
+    delta: "baseline"
+    mesh: meqbr_05km
+    sst_update: false
+    periods: ["2021", "2022"]
+    status: complete
+    # Wall-clock cost is part of the selection decision (climatological runs are
+    # long). CTL ran on 80 ranks, EXP01/EXP02 on 60 — so only relative cell
+    # counts are comparable, not raw hours.
+    relative_cost: 1.00
+    caveats:
+      - >
+        The two CTL periods were forced by *different* ERA5 download boxes
+        (2021: 8/-56/-8/-30, clearing the mesh by only 0.34 deg at the south
+        edge; 2022: 12/-60/-12/-28). This is a confounder between CTL's two
+        periods and a candidate explanation for a 2021-only boundary artifact.
+      - >
+        The 2022 leg was run as spin-up + restart; later experiments run it
+        straight through. Operational, not scientific.
+  EXP01:
+    label: "EXP01"
+    long_label: "EXP01 — daily SST update"
+    parent: CTL
+    delta: "config_sst_update = true (NOAA OISST v2.1 daily) instead of SST frozen at the initial ERA5 skin temperature"
+    mesh: meqbr_05km
+    sst_update: true
+    periods: ["2021", "2022"]
+    status: complete
+    relative_cost: 1.00
+    caveats:
+      - >
+        CTL is not "climatological SST": it is the ERA5 skin temperature of the
+        initial instant, frozen. Switching to OISST changes the *mean* SST field
+        as well as introducing time evolution, so EXP01 - CTL mixes both. The
+        t0 difference field OISST(t0) - ERA5skin(t0) separates them.
+  EXP02:
+    label: "EXP02"
+    long_label: "EXP02 — buffered mesh + wider ERA5 box"
+    parent: EXP01
+    delta: "boundary treatment: mesh meqbr_05km_buf (5 -> 32 km ramp) plus ERA5 re-downloaded over a wider box; sst_update stays on"
+    mesh: meqbr_05km_buf
+    sst_update: true
+    periods: ["2021", "2022"]
+    status: running          # started 2026-08-31; see docs/run_status.md
+    relative_cost: 1.24      # +23.9 % cells; observed ~1.12 s/step vs ~1.0 s
+    caveats:
+      - >
+        EXP02 changes mesh AND forcing box together — one inseparable
+        intervention, because the buffered mesh cannot be forced by the
+        narrower box. Report it as "boundary treatment", not "buffered mesh".
+      - >
+        EXP02 - EXP01 is the *incremental* effect of the boundary treatment
+        given the SST update is already on (the design is cumulative, not
+        factorial). It is not the effect of the buffer in isolation.
+      - >
+        History for EXP02 is written from the integration start (spin-up
+        included) and has not been trimmed. Always filter on the analysis
+        window rather than assuming file list == analysis window.
+
+# Distance from each site to the nearest lateral-boundary/relaxation cell, per
+# mesh (from EXPERIMENTS.md). This is the quantity EXP02 was designed to change.
+boundary_distance_km:
+  meqbr_05km:     {P0: 227, LPI: 189}
+  meqbr_05km_buf: {P0: 632, LPI: 596}

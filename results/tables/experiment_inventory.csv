@@ -1,0 +1,7 @@
+experiment,period,mesh,declared_status,dir_exists,history_dir,n_files,first_time,last_time,n_in_window,complete_pct,n_gaps,max_gap_h,has_untrimmed_spinup,missing_variables,n_cells,n_cells_expected,mesh_ok,level_indices,vertical_ok
+CTL,2021,meqbr_05km,complete,True,/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/CTL/20211101_20211201,721,2021-11-01,2021-12-01 00:00:00,721.0,100.0,0.0,1.0,False,,76813.0,76813.0,True,"50m:k1,100m:k2,150m:k3,200m:k4,250m:k5",True
+CTL,2022,meqbr_05km,complete,True,/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/CTL/20221001_20221101,745,2022-10-01,2022-11-01 00:00:00,745.0,100.0,0.0,1.0,False,,76813.0,76813.0,True,"50m:k1,100m:k2,150m:k3,200m:k4,250m:k5",True
+EXP01,2021,meqbr_05km,complete,True,/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP01/20211101_20211201,721,2021-11-01,2021-12-01 00:00:00,721.0,100.0,0.0,1.0,False,,76813.0,76813.0,True,"50m:k1,100m:k2,150m:k3,200m:k4,250m:k5",True
+EXP01,2022,meqbr_05km,complete,True,/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP01/20221001_20221101,745,2022-10-01,2022-11-01 00:00:00,745.0,100.0,0.0,1.0,False,,76813.0,76813.0,True,"50m:k1,100m:k2,150m:k3,200m:k4,250m:k5",True
+EXP02,2021,meqbr_05km_buf,running,True,/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP02/20211101_20211201,655,2021-10-21,2021-11-17 06:00:00,391.0,54.2,0.0,1.0,True,,95138.0,95138.0,True,"50m:k1,100m:k2,150m:k3,200m:k4,250m:k5",True
+EXP02,2022,meqbr_05km_buf,running,True,/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP02/20221001_20221101,0,,,,0.0,,,,,,,,,

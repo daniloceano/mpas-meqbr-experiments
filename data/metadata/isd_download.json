@@ -1,0 +1,223 @@
+{
+  "dataset": "NOAA NCEI Integrated Surface Database (ISD), global-hourly",
+  "source_url": "https://www.ncei.noaa.gov/data/global-hourly/access/{year}/{station}.csv",
+  "inventory_url": "https://www.ncei.noaa.gov/pub/data/noaa/isd-history.csv",
+  "why_not_inmet": "INMET's own API/portal is not reachable from this host (connection reset); ISD is where the same stations are internationally archived.",
+  "variables": [
+    "WND (direction, speed) at 10 m"
+  ],
+  "qc": {
+    "speed_range_ms": [
+      0.0,
+      40.0
+    ],
+    "exclude_quality_codes": [
+      "2",
+      "3",
+      "6",
+      "7"
+    ],
+    "min_records_per_period": 200
+  },
+  "periods": {
+    "2021": [
+      "2021-10-21 00:00:00",
+      "2021-12-01 00:00:00"
+    ],
+    "2022": [
+      "2022-09-21 00:00:00",
+      "2022-11-01 00:00:00"
+    ]
+  },
+  "download_date": "2026-09-02T02:37:54.041557+00:00",
+  "downloaded_by": "Danilo Couto de Souza",
+  "tool": "urllib (plain HTTP)",
+  "files": [
+    "data/stations/isd_hourly.csv.gz"
+  ],
+  "stations": [
+    {
+      "station": "82288099999",
+      "name": "PARNAIBA / Joao Silva Filho",
+      "period": "2021",
+      "lat": -2.894,
+      "lon": -41.732,
+      "kind": "synop_airport",
+      "n_hours": 298,
+      "n_days": 41,
+      "hours_per_day": 7.3,
+      "start": "2021-10-21 14:00:00",
+      "end": "2021-11-30 20:00:00"
+    },
+    {
+      "station": "82288099999",
+      "name": "PARNAIBA / Joao Silva Filho",
+      "period": "2022",
+      "lat": -2.894,
+      "lon": -41.732,
+      "kind": "synop_airport",
+      "n_hours": 525,
+      "n_days": 41,
+      "hours_per_day": 12.8,
+      "start": "2022-09-21 10:00:00",
+      "end": "2022-10-31 22:00:00"
+    },
+    {
+      "station": "81715099999",
+      "name": "SAO LUIS (INMET A)",
+      "period": "2021",
+      "lat": -2.533,
+      "lon": -44.217,
+      "kind": "inmet_auto",
+      "n_hours": 918,
+      "n_days": 42,
+      "hours_per_day": 21.9,
+      "start": "2021-10-21 00:00:00",
+      "end": "2021-12-01 00:00:00"
+    },
+    {
+      "station": "81715099999",
+      "name": "SAO LUIS (INMET A)",
+      "period": "2022",
+      "lat": -2.533,
+      "lon": -44.217,
+      "kind": "inmet_auto",
+      "n_hours": 863,
+      "n_days": 42,
+      "hours_per_day": 20.5,
+      "start": "2022-09-21 00:00:00",
+      "end": "2022-11-01 00:00:00"
+    },
+    {
+      "station": "82281099999",
+      "name": "SAO LUIS / Cunha Machado",
+      "period": "2021",
+      "lat": -2.585,
+      "lon": -44.234,
+      "kind": "synop_airport",
+      "n_hours": 985,
+      "n_days": 42,
+      "hours_per_day": 23.5,
+      "start": "2021-10-21 00:00:00",
+      "end": "2021-12-01 00:00:00"
+    },
+    {
+      "station": "82281099999",
+      "name": "SAO LUIS / Cunha Machado",
+      "period": "2022",
+      "lat": -2.585,
+      "lon": -44.234,
+      "kind": "synop_airport",
+      "n_hours": 969,
+      "n_days": 42,
+      "hours_per_day": 23.1,
+      "start": "2022-09-21 00:00:00",
+      "end": "2022-11-01 00:00:00"
+    },
+    {
+      "station": "81758099999",
+      "name": "FORTALEZA (INMET A)",
+      "period": "2021",
+      "lat": -3.8,
+      "lon": -38.533,
+      "kind": "inmet_auto",
+      "n_hours": 441,
+      "n_days": 41,
+      "hours_per_day": 10.8,
+      "start": "2021-10-21 10:00:00",
+      "end": "2021-12-01 00:00:00"
+    },
+    {
+      "station": "81758099999",
+      "name": "FORTALEZA (INMET A)",
+      "period": "2022",
+      "lat": -3.8,
+      "lon": -38.533,
+      "kind": "inmet_auto",
+      "n_hours": 903,
+      "n_days": 42,
+      "hours_per_day": 21.5,
+      "start": "2022-09-21 00:00:00",
+      "end": "2022-11-01 00:00:00"
+    },
+    {
+      "station": "82398099999",
+      "name": "FORTALEZA / Pinto Martins",
+      "period": "2021",
+      "lat": -3.776,
+      "lon": -38.533,
+      "kind": "synop_airport",
+      "n_hours": 985,
+      "n_days": 42,
+      "hours_per_day": 23.5,
+      "start": "2021-10-21 00:00:00",
+      "end": "2021-12-01 00:00:00"
+    },
+    {
+      "station": "82398099999",
+      "name": "FORTALEZA / Pinto Martins",
+      "period": "2022",
+      "lat": -3.776,
+      "lon": -38.533,
+      "kind": "synop_airport",
+      "n_hours": 969,
+      "n_days": 42,
+      "hours_per_day": 23.1,
+      "start": "2022-09-21 00:00:00",
+      "end": "2022-11-01 00:00:00"
+    },
+    {
+      "station": "81798099999",
+      "name": "JAGUARUANA (INMET A)",
+      "period": "2021",
+      "lat": -4.783,
+      "lon": -37.783,
+      "kind": "inmet_auto",
+      "n_hours": 984,
+      "n_days": 42,
+      "hours_per_day": 23.4,
+      "start": "2021-10-21 00:00:00",
+      "end": "2021-12-01 00:00:00"
+    },
+    {
+      "station": "82591099999",
+      "name": "MOSSORO / Dix-Sept Rosado",
+      "period": "2021",
+      "lat": -5.202,
+      "lon": -37.364,
+      "kind": "synop_airport",
+      "n_hours": 413,
+      "n_days": 41,
+      "hours_per_day": 10.1,
+      "start": "2021-10-21 14:00:00",
+      "end": "2021-11-30 23:00:00"
+    },
+    {
+      "station": "82591099999",
+      "name": "MOSSORO / Dix-Sept Rosado",
+      "period": "2022",
+      "lat": -5.202,
+      "lon": -37.364,
+      "kind": "synop_airport",
+      "n_hours": 309,
+      "n_days": 31,
+      "hours_per_day": 10.0,
+      "start": "2022-09-21 12:00:00",
+      "end": "2022-10-31 21:00:00"
+    },
+    {
+      "station": "81835099999",
+      "name": "APODI (INMET A)",
+      "period": "2022",
+      "lat": -5.627,
+      "lon": -37.832,
+      "kind": "inmet_auto",
+      "n_hours": 901,
+      "n_days": 42,
+      "hours_per_day": 21.5,
+      "start": "2022-09-21 00:00:00",
+      "end": "2022-11-01 00:00:00"
+    }
+  ],
+  "caveat": "10 m land stations. Secondary evidence for the coastal diurnal cycle and horizontal structure only \u2014 they cannot validate offshore hub-height wind."
+}

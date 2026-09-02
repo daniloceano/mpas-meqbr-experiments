@@ -1,0 +1,3 @@
+period,site,month,sim_year,n_climatology_years,sim_mean_speed_100,clim_mean_speed_100,clim_sd_speed_100,percentile_speed,percentile_wpd,z_score_speed
+2021,P0,Nov,2021,31,7.31,8.662,0.549,0.0,0.0,-2.46
+2022,LPI,Oct,2022,30,9.743,9.688,0.43,46.7,46.7,0.13
