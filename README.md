@@ -45,6 +45,7 @@ SST update is already on.
 | Which experiment wins, with uncertainty | `results/tables/pairwise_tests*.csv`, `selection_summary*.md` | `figures/selection/ranking*.png` |
 | Is the SST forcing sound | `results/tables/sst_forcing_check.csv` | `figures/selection/sst_forcing_*.png` |
 | Why the experiments differ | `results/tables/attribution_summary.csv` | `figures/selection/attribution_*.png` |
+| Does the buffered mesh act where it should | `results/tables/boundary_influence.csv` | `figures/selection/boundary_influence_*.png` |
 | Every score, every site and height | `results/tables/site_metrics*.csv` | `figures/validation/` |
 | Does MPAS beat ERA5 | `results/tables/era5_added_value*.csv` | `figures/era5/added_value*.png` |
 | Were the simulated months typical | `results/tables/era5_month_representativeness.csv` | `figures/era5/climatological_context.png` |

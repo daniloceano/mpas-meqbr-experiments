@@ -84,6 +84,8 @@ if stage 03; then
     run 03_ranking_full     $PY scripts/03_selection/rank_experiments.py \
                                --experiments CTL EXP01 --tag fullwindow
     run 03_attribution      $PY scripts/03_selection/attribution_diagnostics.py
+    run 03_boundary         $PY scripts/03_selection/boundary_influence.py \
+                               --period 2021 --tag common
 fi
 
 # --- 04 ERA5 --------------------------------------------------------------

@@ -293,6 +293,41 @@ contamination; it should not be treated as a verdict on the boundary treatment.
 **Cost.** `EXP02` costs +24 % in cells and wall time. Nothing observed so far
 earns that, but nothing observed so far tests it fairly either.
 
+##### The one `EXP02` result that *is* informative
+
+`scripts/03_selection/boundary_influence.py`,
+`results/tables/boundary_influence.csv`,
+`figures/selection/boundary_influence_2021.png`.
+
+`EXP02`'s claim is spatial, not site-specific: moving the lateral relaxation zone
+from ~190-230 km to ~600 km from the area of interest should produce a difference
+that is **organised by distance from `EXP01`'s relaxation zone**. It is. Mean
+|`EXP02` − `EXP01`| in the 100 m wind, binned by that distance over the whole
+`meqbr_05km` footprint (379 common hours):
+
+| Distance from `EXP01`'s relaxation cells | mean \|difference\| |
+|---|---|
+| 0-50 km | 0.28 m s⁻¹ |
+| 50-100 km | 0.26 |
+| 100-200 km | 0.22 |
+| 200-300 km | 0.18 |
+| 300-500 km | 0.16 |
+
+A clean monotonic decay, with a sharp band along the southern and western
+relaxation zones visible in the map. This is the predicted signature and it is
+**not** contaminated by the SST problem: both runs carry the same corrupted
+coastal SST, and the `EXP02` − `EXP01` SST difference is near zero offshore, so
+this comparison does isolate the boundary treatment.
+
+What it does *not* show is a benefit at the instruments. Both LiDAR sites sit
+200-300 km from `EXP01`'s relaxation zone, where the difference has already
+decayed to ~0.18 m s⁻¹ — real, but small compared with the model's ~1 m s⁻¹ bias
+there, and in the direction that made the site scores slightly worse. **The
+buffered mesh does what it was designed to do; the sites were not where it
+mattered.** That is a useful negative result for the climatological runs: it
+argues for keeping the cheaper mesh unless the near-boundary region itself is
+part of the product.
+
 #### 3. The runs add real skill over ERA5 at P0, and none that is detectable at LPI
 
 `results/tables/era5_added_value_fullwindow.csv`, `figures/era5/added_value_fullwindow.png`.
@@ -486,11 +521,14 @@ a property of this comparison, not of the site.
 2. **Re-run `EXP01` (both periods) with the corrected forcing.** The SST-update
    hypothesis is currently untested. Until then `EXP01 − CTL` measures an
    interpolation error.
-3. **Decide `EXP02`'s fate after that.** Its boundary treatment inherits the same
-   contaminated SST, so completing it as configured produces another
-   uninterpretable comparison. Either restart it on corrected forcing, or accept
-   that `EXP02 − EXP01` will be interpretable only as a difference between two
-   equally contaminated runs.
+3. **Decide `EXP02`'s fate after that.** The boundary treatment demonstrably
+   works — the difference decays with distance from the relaxation zone, exactly
+   as designed (Result 2) — but it is worth ~0.18 m s⁻¹ at the sites, against a
+   ~1 m s⁻¹ model bias there, for +24 % compute. Unless the near-boundary region
+   is itself part of the product, the cheaper mesh is the better buy for
+   climatological runs. Completing `EXP02` as currently configured adds only
+   another contaminated-SST comparison; restarting it on corrected forcing is
+   the only version worth the machine time.
 
 **Scientifically valuable next:**
 

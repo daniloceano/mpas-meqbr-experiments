@@ -44,6 +44,7 @@ a simulation finishes reads only the new hours.
 | `check_sst_forcing.py` | **data-integrity gate.** Audits the SST field each run actually saw; exits non-zero on OISST land-fill contamination. Run this before believing any ranking. |
 | `rank_experiments.py` | paired block-bootstrap tests between every experiment pair, plus cost; `results/tables/selection_summary*.md` |
 | `attribution_diagnostics.py` | the mechanism: SST → surface fluxes → PBL depth → wind, at the site |
+| `boundary_influence.py` | is the `EXP02` − `EXP01` difference organised by distance from the relaxation zone, as the boundary-treatment hypothesis predicts? |
 
 ## 04_era5 — is this better than the reanalysis it came from
 
