@@ -36,11 +36,52 @@ MODEL_YEAR_HOURS = 365.0 * 24.0
 REFERENCE_CORES = 100
 
 
-def wrapper_record(wrapper: Path, period: str) -> dict | None:
+def wrapper_logs(runs_root: Path, experiment: str) -> list[Path]:
+    """Candidate wrapper logs for an experiment, most specific first.
+
+    Some runs follow ``run_<exp>.log`` inside the experiment directory. Others do
+    not: EXP01 was launched from a shared sequence driver at the runs root, and
+    EXP02 was resumed twice into dated logs. Collect all of them and let the
+    caller take the first that actually carries the period being scored.
+    """
+    exp_dir = runs_root / experiment
+    candidates = [exp_dir / f"run_{experiment.lower()}.log"]
+    candidates += sorted(exp_dir.glob("run_*.log"))
+    candidates += sorted(runs_root.glob("run_*sequence*.log"))
+    seen, ordered = set(), []
+    for path in candidates:
+        if path not in seen:
+            seen.add(path)
+            ordered.append(path)
+    return ordered
+
+
+def _experiment_section(text: str, names: tuple[str, ...]) -> str:
+    """The part of a wrapper log that belongs to one experiment.
+
+    EXP01 and EXP02 share one sequence log that drove them in turn, and both use
+    the same period directory names. Without this slice, EXP02 would read EXP01's
+    DONE line and be credited with the wrong wall time. *names* carries the
+    experiment plus any historical directory names it was logged under.
+    """
+    starts = [(m.start(), m.group(1))
+              for m in re.finditer(r"^\[[^]]+\] >>> ([^/\s]+)/", text, re.M)]
+    if not starts:
+        return text
+    for i, (pos, name) in enumerate(starts):
+        if name in names:
+            end = starts[i + 1][0] if i + 1 < len(starts) else len(text)
+            return text[pos:end]
+    return ""
+
+
+def wrapper_record(wrapper: Path, period: str, names: tuple[str, ...]) -> dict | None:
     if not wrapper.exists():
         return None
-    text = wrapper.read_text(errors="replace")
-    rank_match = re.search(r"start \| ranks=(\d+)", text)
+    text = _experiment_section(wrapper.read_text(errors="replace"), names)
+    if not text:
+        return None
+    rank_match = re.search(r"start \| (?:MPI )?ranks=(\d+)", text)
     start_match = re.search(
         rf"\[([^]]+)\] ===== START {re.escape(period)} =====", text)
     done_match = re.search(
@@ -80,8 +121,13 @@ def available_simulated_hours(leg) -> float:
     return max(0.0, (times.max() - leg.integration_start).total_seconds() / 3600)
 
 
-def ctl_estimate(leg) -> dict | None:
-    """Best recoverable timing for CTL; both methods are estimates."""
+def reconstructed_estimate(leg) -> dict | None:
+    """Best recoverable timing when no wrapper log covers the leg.
+
+    CTL predates the run wrappers entirely. EXP02_CORRECTED's 2022 leg was
+    restarted and its final wrapper never wrote a DONE line, so it lands here
+    too. Both methods are estimates and are labelled as such.
+    """
     analysis_hours = (
         leg.analysis_end - leg.analysis_start).total_seconds() / 3600
     log = leg.history_dir / "log.atmosphere.0000.out"
@@ -94,7 +140,7 @@ def ctl_estimate(leg) -> dict | None:
             "method": "log_birth_to_close",
             "quality": "estimated",
             "source": str(log.relative_to(leg.history_dir.parent.parent)),
-            "note": "CTL wrapper absent; reconstructed for retained/restart leg",
+            "note": "no wrapper DONE record; reconstructed from the model log lifetime",
         }
 
     index = io.select_window(
@@ -113,7 +159,7 @@ def ctl_estimate(leg) -> dict | None:
         "method": "history_mtime_span",
         "quality": "estimated",
         "source": str(leg.history_dir.relative_to(leg.history_dir.parent.parent)),
-        "note": "CTL wrapper/log absent; reconstructed from retained hourly files",
+        "note": "no wrapper DONE record; reconstructed from retained hourly files",
     }
 
 
@@ -123,12 +169,21 @@ def build_rows(cfg) -> list[dict]:
     for experiment in cfg.experiment_keys:
         exp = cfg.experiments[experiment]
         ranks_declared = int(exp["mpi_ranks"])
-        wrapper = cfg.runs_root / experiment / f"run_{experiment.lower()}.log"
+        candidates = wrapper_logs(cfg.runs_root, experiment)
+        # The directory was renamed after the run; the log keeps the old name.
+        names = (experiment, *exp.get("wrapper_aliases", []))
         for period in exp["periods"]:
             leg = cfg.leg(experiment, str(period))
             if not leg.exists():
                 continue
-            rec = wrapper_record(wrapper, leg.history_dir.name)
+            # First wrapper that actually carries this period wins; a resumed
+            # leg is recorded in a later dated log than the original launch.
+            rec, wrapper = None, candidates[0]
+            for candidate in candidates:
+                found = wrapper_record(candidate, leg.history_dir.name, names)
+                if found and (found["wall_seconds"] or found["started"]):
+                    rec, wrapper = found, candidate
+                    break
             full_hours = (
                 leg.analysis_end - leg.integration_start).total_seconds() / 3600
 
@@ -143,7 +198,7 @@ def build_rows(cfg) -> list[dict]:
                     "source": str(wrapper.relative_to(cfg.runs_root)),
                     "note": f"wrapper rc={rec['rc']}",
                 }
-            elif rec and rec["started"]:
+            elif rec and rec["started"] and available_simulated_hours(leg) < full_hours:
                 timing = {
                     "status": "running_provisional",
                     "wall_seconds": (now - rec["started"]).total_seconds(),
@@ -153,8 +208,12 @@ def build_rows(cfg) -> list[dict]:
                     "source": str(wrapper.relative_to(cfg.runs_root)),
                     "note": "updates while the leg is running",
                 }
-            elif experiment == "CTL":
-                timing = ctl_estimate(leg)
+            else:
+                # A START with no DONE on a leg whose history already reaches the
+                # end of the window is a wrapper that died after the model
+                # finished, not a running integration. Reconstruct it instead of
+                # charging it the wall time since the wrapper was last alive.
+                timing = reconstructed_estimate(leg)
             if not timing or timing["simulated_hours"] <= 0:
                 continue
 

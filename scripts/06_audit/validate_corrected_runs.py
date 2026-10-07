@@ -38,7 +38,9 @@ PERIODS = {
         "scientific_count": 745,
     },
 }
-EXPERIMENTS = ("EXP01_CORRECTED", "EXP02_CORRECTED")
+# The corrected runs now carry the plain names; the superseded pair is
+# EXP01_BADSST / EXP02_BADSST and is not revalidated here.
+EXPERIMENTS = ("EXP01", "EXP02")
 STAMP_RE = re.compile(r"history\.(\d{4}-\d{2}-\d{2}_\d{2}\.\d{2}\.\d{2})\.nc$")
 
 

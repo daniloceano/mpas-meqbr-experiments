@@ -22,8 +22,11 @@ What this script checks, per experiment and period:
   the number that decides whether the site-level comparison between CTL and
   EXP01 is testing the SST hypothesis or an interpolation error.
 
-Exits non-zero if contamination is detected: this is a data-integrity gate, not
-a figure.
+Exits non-zero if contamination is detected in a run that is not already
+registered as a known-bad one (``sst_forcing_known_bad: true``). The superseded
+EXP01_BADSST/EXP02_BADSST pair is contaminated by definition — that is why it is
+kept — so reporting it must not fail the pipeline, while any new occurrence
+must. This is a data-integrity gate, not a figure.
 
     python scripts/03_selection/check_sst_forcing.py
 
@@ -81,7 +84,8 @@ def main() -> int:
     plotting.use_style()
     experiments = args.experiments or cfg.experiment_keys
     rows, made = [], []
-    contaminated = False
+    unexpected = []
+    expected = []
 
     for period in (args.period or sorted(cfg.periods)):
         panels = {}
@@ -149,7 +153,11 @@ def main() -> int:
             rows.append(row)
             panels[exp] = (lat, lon, field, landmask, dist, row["n_at_land_fill"])
             if n_fill > 0:
-                contaminated = True
+                # A run registered with sst_forcing_known_bad is the documented
+                # evidence for this very finding, so its contamination is a fact
+                # to report, not a reason to fail the pipeline. Anything else is.
+                known_bad = bool(cfg.experiments[exp].get("sst_forcing_known_bad"))
+                (expected if known_bad else unexpected).append(f"{exp} {period}")
 
             flag = "  <-- CONTAMINATED" if n_fill else ""
             print(f"[{exp} {period}] ocean SST: mean {row['ocean_mean_K']:.2f} K, "
@@ -208,9 +216,18 @@ def main() -> int:
     for p in made + [out]:
         print(f"-> {p.relative_to(REPO_ROOT)}")
 
-    if contaminated:
+    if expected:
+        print("\n" + "-" * 72)
+        print("Contamination present, and expected, in: " + ", ".join(expected))
+        print("These runs are registered with sst_forcing_known_bad: they are the")
+        print("evidence for the OISST coastal land-fill finding and are superseded.")
+        print("The gate does not fail on them. See config/experiments.yaml.")
+        print("-" * 72)
+
+    if unexpected:
         print("\n" + "=" * 72, file=sys.stderr)
-        print("SST FORCING IS CONTAMINATED in at least one experiment.", file=sys.stderr)
+        print("SST FORCING IS CONTAMINATED, UNEXPECTEDLY, in: "
+              + ", ".join(unexpected), file=sys.stderr)
         print("Cold cells hug the coastline, which is the signature of the OISST",
               file=sys.stderr)
         print("land mask being blended into coastal ocean cells rather than an",
@@ -220,6 +237,10 @@ def main() -> int:
         print("testing the interpolation, not the SST-update hypothesis.",
               file=sys.stderr)
         print("See SCIENTIFIC_NOTES.md, 'Caveats and Limitations'.", file=sys.stderr)
+        print("If this run is a deliberately retained bad one, mark it with",
+              file=sys.stderr)
+        print("sst_forcing_known_bad: true in config/experiments.yaml.",
+              file=sys.stderr)
         print("=" * 72, file=sys.stderr)
         return 1
     return 0

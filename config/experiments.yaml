@@ -14,7 +14,8 @@
 
 runs_root_note: >
   runs_root is set in paths.local.yaml and points at the directory that holds
-  CTL/, EXP01/, EXP02/ plus the shared mesh assets.
+  CTL/, EXP01/, EXP02/, EXP01_BADSST/, EXP02_BADSST/ plus the shared mesh
+  assets. The _BADSST pair is superseded; see the experiments block.
 
 common_configuration:
   integration_duration_days: 41
@@ -35,13 +36,13 @@ meshes:
     mean_cell_spacing_km: 4.6
     cell_extent: {lat_min: -7.66, lat_max: 6.72, lon_min: -54.95, lon_max: -32.70}
     n_relaxation_cells: 9093
-    used_by: [CTL, EXP01]
+    used_by: [CTL, EXP01, EXP01_BADSST]
   meqbr_05km_buf:
     n_cells: 95138
     mean_cell_spacing_km: 4.6      # in the refined interior; ramps to ~32 km outward
     cell_extent: {lat_min: -12.90, lat_max: 11.86, lon_min: -60.16, lon_max: -27.48}
     n_relaxation_cells: 2188
-    used_by: [EXP02]
+    used_by: [EXP02, EXP02_BADSST]
 
 vertical:
   # Interfaces from zeta_wind.txt; centers are the midpoints. Over flat terrain
@@ -109,15 +110,27 @@ experiments:
     mesh: meqbr_05km
     sst_update: true
     periods: ["2021", "2022"]
-    status: complete
-    mpi_ranks: 60
+    status: complete         # finished 2026-09-09 11:57:47 UTC; overall exit=0
+    mpi_ranks: 90
     relative_cost: 1.00
+    supersedes: EXP01_BADSST
+    # This experiment was first run with a contaminated OISST surface file and
+    # was repeated after the converter was fixed. The directory now holding it
+    # was called EXP01_CORRECTED while that rerun was in flight, and the shared
+    # wrapper log still records it under that name.
+    wrapper_aliases: [EXP01_CORRECTED]
     caveats:
       - >
+        Ran on 90 MPI ranks against CTL's 80. The MPI decomposition differs, so
+        wall-clock cost is not comparable across experiments (use cell counts),
+        and bit-level agreement with the superseded run was never expected even
+        where the forcing is identical. 90 ranks measurably over-decompose this
+        mesh: 3.22 machine-hours per simulated hour against 2.54 on 60.
+      - >
         CTL is not "climatological SST": it is the ERA5 skin temperature of the
-        initial instant, frozen. Switching to OISST changes the *mean* SST field
-        as well as introducing time evolution, so EXP01 - CTL mixes both. The
-        t0 difference field OISST(t0) - ERA5skin(t0) separates them.
+        initial instant, frozen. The corrected OISST field is ~1.6 K warmer than
+        CTL at P0, so EXP01 - CTL still mixes a mean-SST change with the
+        introduction of time evolution.
   EXP02:
     label: "EXP02"
     long_label: "EXP02 — buffered mesh + wider ERA5 box"
@@ -126,25 +139,79 @@ experiments:
     mesh: meqbr_05km_buf
     sst_update: true
     periods: ["2021", "2022"]
-    status: complete         # finished 2026-09-05 01:13:57 UTC; overall exit=0
-    mpi_ranks: 60
-    relative_cost: 1.24      # +23.9 % cells; observed ~1.12 s/step vs ~1.0 s
+    status: complete         # 2021 leg 2026-09-26, 2022 leg 2026-10-07; both rc=0
+    mpi_ranks: 90
+    relative_cost: 1.24      # +23.9 % cells
+    supersedes: EXP02_BADSST
+    wrapper_aliases: [EXP02_CORRECTED]
     caveats:
       - >
         EXP02 changes mesh AND forcing box together — one inseparable
-        intervention, because the buffered mesh cannot be forced by the
-        narrower box. Report it as "boundary treatment", not "buffered mesh".
+        intervention, because the buffered mesh cannot be forced by the narrower
+        box. Report it as "boundary treatment", not "buffered mesh".
       - >
         EXP02 - EXP01 is the *incremental* effect of the boundary treatment
         given the SST update is already on (the design is cumulative, not
         factorial). It is not the effect of the buffer in isolation.
       - >
-        History for EXP02 is written from the integration start (spin-up
-        included) and has not been trimmed. Always filter on the analysis
-        window rather than assuming file list == analysis window.
+        The 2021 leg was restarted once. Its history.2021-10-25_00.00.00.nc sits
+        in the preserved directory interrupted_20260909_after_restart/ rather
+        than alongside the rest, so the active directory holds 984 of 985 files.
+        That timestamp is inside the spin-up, so the 721-record analysis window
+        is complete and unaffected. The 2022 leg was also restarted, archived in
+        interrupted_20260926_precheckpoint/, and its wrapper died before writing
+        a DONE line, so its cost is reconstructed rather than measured.
+      - >
+        History is written from the integration start (spin-up included) and has
+        not been trimmed. Always filter on the analysis window.
 
-# Distance from each site to the nearest lateral-boundary/relaxation cell, per
-# mesh (from EXPERIMENTS.md). This is the quantity EXP02 was designed to change.
+  # ---------------------------------------------------------------------------
+  # Superseded runs. They are kept registered, and kept in the analysis, because
+  # they are the evidence for the OISST coastal land-fill finding: the SST audit,
+  # the attribution table and the "size of the artefact" difference map all need
+  # them. They must never be quoted as evidence about SST updating or boundary
+  # treatment. `sst_forcing_known_bad` tells check_sst_forcing.py that their
+  # contamination is expected and documented, so the gate still reports it but
+  # does not fail the pipeline on it.
+  # ---------------------------------------------------------------------------
+  EXP01_BADSST:
+    label: "EXP01 (SST ruim)"
+    long_label: "EXP01_BADSST — superseded: contaminated coastal OISST"
+    parent: CTL
+    delta: "same as EXP01, but forced by the uncorrected sfc_update.nc, which carries the OISST land fill value (273.15 K) into 1226 coastal ocean cells"
+    mesh: meqbr_05km
+    sst_update: true
+    periods: ["2021", "2022"]
+    status: complete
+    mpi_ranks: 60
+    relative_cost: 1.00
+    superseded_by: EXP01
+    sst_forcing_known_bad: true
+    caveats:
+      - >
+        Both LiDAR sites sit inside the contaminated strip (P0: 291.5 K instead
+        of ~300 K), so EXP01_BADSST - CTL measures an interpolation error in the
+        surface forcing, not the SST-update hypothesis. Superseded by EXP01.
+  EXP02_BADSST:
+    label: "EXP02 (SST ruim)"
+    long_label: "EXP02_BADSST — superseded: contaminated coastal OISST"
+    parent: EXP01_BADSST
+    delta: "same as EXP02, but inheriting the uncorrected sfc_update.nc (1384 coastal ocean cells at the land fill)"
+    mesh: meqbr_05km_buf
+    sst_update: true
+    periods: ["2021", "2022"]
+    status: complete
+    mpi_ranks: 60
+    relative_cost: 1.24
+    superseded_by: EXP02
+    sst_forcing_known_bad: true
+    caveats:
+      - >
+        Carries the same contaminated surface forcing as EXP01_BADSST, so its
+        site scores are not a test of the boundary treatment. Superseded by
+        EXP02. The one comparison it still supports is EXP02_BADSST -
+        EXP01_BADSST, where the SST difference is near zero offshore.
+
 boundary_distance_km:
   meqbr_05km:     {P0: 227, LPI: 189}
   meqbr_05km_buf: {P0: 632, LPI: 596}

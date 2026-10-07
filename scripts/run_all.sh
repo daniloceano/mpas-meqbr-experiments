@@ -16,12 +16,17 @@
 #   03  selection: ranking with uncertainty, mechanism and SST-forcing checks
 #   04  ERA5: added value, climatological context, resource maps
 #   05  exploration: maps, difference maps, cross-sections, animations
-#   06  report: portable HTML bundle from consolidated outputs
+#   06  audit + report: corrected-run integrity check, then the HTML bundle
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
 PY=${PYTHON:-python}
 FROM=${1:-00}
+# EXP01/EXP02 are the corrected integrations. The _BADSST pair they replaced is
+# kept only as the evidence for the OISST coastal-fill finding, and is excluded
+# from every table that decides anything. See config/experiments.yaml.
+CURRENT="CTL EXP01 EXP02"
+ALL_EXPERIMENTS="CTL EXP01 EXP01_BADSST EXP02 EXP02_BADSST"
 LOG=results/logs
 mkdir -p "$LOG"
 
@@ -51,7 +56,9 @@ if stage 01; then
     run 01_sites            $PY scripts/01_extract/extract_site_timeseries.py
     run 01_fields           $PY scripts/01_extract/compute_field_statistics.py
     # A second set of field statistics over the window common to all
-    # experiments, for the difference maps while EXP02 is still integrating.
+    # experiments. Every leg is complete, so this now equals each leg's own
+    # window; it is kept because the difference maps and the boundary test read
+    # the `common` tag and must be guaranteed to compare identical hours.
     run 01_fields_common    $PY scripts/01_extract/compute_field_statistics.py \
                                --window common --tag common --force
     run 01_era5_download    $PY scripts/01_extract/download_era5_periods.py
@@ -81,20 +88,22 @@ if stage 03; then
     run 03_sst_check        $PY scripts/03_selection/check_sst_forcing.py
     run 03_runtime          $PY scripts/03_selection/compute_runtime_metrics.py
     run 03_ranking          $PY scripts/03_selection/rank_experiments.py
-    # The completed pair over their full windows: more statistical power than
-    # the window EXP02 currently restricts everyone to.
-    run 03_ranking_full     $PY scripts/03_selection/rank_experiments.py \
-                               --experiments CTL EXP01 --tag fullwindow
+    # The decision-grade subset: the baseline plus the two current runs. The
+    # untagged tables above keep all five experiments so the SST contamination
+    # stays auditable, but the configuration choice is made on this one.
+    run 03_ranking_cur      $PY scripts/03_selection/rank_experiments.py \
+                               --experiments $CURRENT --tag current
     run 03_attribution      $PY scripts/03_selection/attribution_diagnostics.py
     run 03_boundary         $PY scripts/03_selection/boundary_influence.py \
-                               --period 2021 --tag common
+                               --period 2021 --tag common \
+                               --reference EXP01 --other EXP02
 fi
 
 # --- 04 ERA5 --------------------------------------------------------------
 if stage 04; then
     run 04_added_value      $PY scripts/04_era5/added_value.py
-    run 04_added_value_full $PY scripts/04_era5/added_value.py \
-                               --experiments CTL EXP01 --tag fullwindow
+    run 04_added_value_cur  $PY scripts/04_era5/added_value.py \
+                               --experiments $CURRENT --tag current
     run 04_climatology      $PY scripts/04_era5/climatological_context.py --months all
     run 04_resource         $PY scripts/04_era5/resource_comparison.py
 fi
@@ -106,7 +115,10 @@ if stage 05; then
                                --period 2021 --tag common
     run 05_differences_2022 $PY scripts/05_exploration/map_experiment_differences.py \
                                --period 2022
-    for experiment in CTL EXP01 EXP02; do
+    # Cross-sections and animations only for the current set: the superseded
+    # _BADSST pair is documented through the difference maps above, and does not
+    # need its own exploratory media.
+    for experiment in $CURRENT; do
         for site in P0 LPI; do
             for hour in 3 9 15 21; do
                 run "05_xsection_${experiment}_${site}_${hour}" \
@@ -115,7 +127,7 @@ if stage 05; then
             done
         done
     done
-    for experiment in CTL EXP01 EXP02; do
+    for experiment in $CURRENT; do
         for period in 2021 2022; do
             run "05_animation_${experiment}_${period}" \
                 $PY scripts/05_exploration/animate_wind.py \
@@ -130,8 +142,11 @@ if stage 05; then
     done
 fi
 
-# --- 06 report ------------------------------------------------------------
+# --- 06 audit + report ----------------------------------------------------
 if stage 06; then
+    run 06_audit_runs       $PY scripts/06_audit/validate_corrected_runs.py \
+                               --runs-root "$(python -c 'import yaml;print(yaml.safe_load(open("config/paths.local.yaml"))["runs_root"])')" \
+                               --out results/audit/corrected_runs_validation.json
     run 06_context          $PY scripts/06_report/plot_report_context.py
     run 06_report           $PY scripts/06_report/build_technical_report.py
 fi

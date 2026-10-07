@@ -11,7 +11,7 @@ edited by hand). Method detail: `docs/validation_protocol.md`.
 
 ## Research Questions
 
-1. **Which of the three configurations (`CTL`, `EXP01`, `EXP02`) should carry the
+1. **Which configuration (`CTL`, `EXP01`, `EXP02`) should carry the
    climatological runs?** Specifically: does the daily SST update (`EXP01`) or
    the buffered-mesh boundary treatment (`EXP02`) improve near-surface and
    hub-height wind (50-250 m) at the two offshore LiDAR sites, by enough to
@@ -91,9 +91,9 @@ removes.
 
 ### Model
 
-Three MPAS-Atmosphere regional experiments, hourly history output, over two
-41-day integrations each (10-day spin-up discarded). Full configuration is in
-the simulation repository (`runs/meqbr_05km/README.md` and `EXPERIMENTS.md`);
+MPAS-Atmosphere regional experiments, hourly history output, over two 41-day
+integrations each (10-day spin-up discarded). Full configuration is in the
+simulation repository (`runs/meqbr_05km/README.md` and `EXPERIMENTS.md`);
 `config/experiments.yaml` mirrors what the analysis needs.
 
 | | `CTL` | `EXP01` | `EXP02` |
@@ -102,7 +102,14 @@ the simulation repository (`runs/meqbr_05km/README.md` and `EXPERIMENTS.md`);
 | SST | ERA5 skin temperature of the initial instant, **frozen** for 41 days | NOAA OISST v2.1, **daily update** | daily update (inherited) |
 | Lateral boundary | relaxation zone 189-227 km from the sites | same | 596-632 km from the sites; ERA5 re-downloaded over a wider box |
 | Relative cost | 1.00 | 1.00 | 1.24 |
-| Status | complete | complete | **2021 leg ~51 % of the analysis window; 2022 leg not started** |
+| MPI ranks | 80 | 90 | 90 |
+| Status | complete | complete | complete |
+
+`EXP01` and `EXP02` were first run with a contaminated OISST surface file and
+repeated once the converter was fixed. Those first attempts are retained,
+registered and analysed as **`EXP01_BADSST`** and **`EXP02_BADSST`** (60 ranks),
+because they are the evidence for the finding in Result 1. They must never be
+quoted as evidence about SST updating or boundary treatment.
 
 The design is **cumulative, not factorial**: `EXP02 = EXP01 + boundary
 treatment`. `EXP02 − EXP01` is therefore the *incremental* effect of the boundary
@@ -162,9 +169,12 @@ In brief:
    each model timestamp (≥ 4 of 6 samples). Layer centres are matched to LiDAR
    channels within 1 m, asserted rather than assumed.
 3. **Common window.** Every inter-experiment comparison uses the hours all the
-   compared experiments have. Because `EXP02` is still integrating, the pipeline
-   also produces a `_fullwindow` set restricted to `CTL` and `EXP01`, which has
-   far more statistical power.
+   compared experiments have. All five legs are now complete, so the common
+   window equals each leg's own window and is limited only by LiDAR coverage
+   (N = 507 h at P0, 740 h at LPI). The pipeline also produces a `current` set
+   restricted to `CTL`, `EXP01` and `EXP02`: that is the
+   decision-grade comparison, while the untagged tables keep all five so the SST
+   contamination stays auditable.
 4. **Scoring.** Point verification + wind-resource + diurnal groups, per
    experiment, site and height.
 5. **Ranking.** Paired block-bootstrap tests between every experiment pair, at
@@ -205,9 +215,81 @@ In brief:
 
 ## Results and Interpretation
 
-### 2026-09-02 — First full pass over `CTL`, `EXP01` and the partial `EXP02`
+### 2026-10-07 — Corrected OISST forcing: the ranking reverses — **[current conclusion]**
 
-#### 1. The SST forcing in `EXP01` and `EXP02` is contaminated at the coast — **[the decisive finding]**
+`EXP01_BADSST` and `EXP02_BADSST` were repeated as `EXP01` and `EXP02`
+after the coastal land-fill bug in the OISST→WPS converter was fixed (land
+values extended from the nearest valid ocean point; `LANDSEA` and ocean values
+untouched). All four corrected legs are complete and verified. Everything in the
+2026-09-02 entry below that rests on `EXP01_BADSST` or `EXP02_BADSST` is **superseded**; it is
+kept because it is the evidence for the bug.
+
+**The forcing is clean.** `results/tables/sst_forcing_check.csv`: zero ocean
+cells at the land fill and zero below 296 K in both corrected experiments and
+both periods, against 1226/1384 and ~2900-3200 before. Minimum ocean SST is
+299.5-300.7 K; SST at P0 is 301.5 K against 291.5 K. The physical chain is
+restored at P0 (daily means over the analysis window):
+
+| At P0, 2021 | `CTL` | `EXP01_BADSST` | `EXP01` |
+|---|---|---|---|
+| mean SST | 300.2 K | 291.7 K | **301.8 K** |
+| sensible heat flux | −1.8 W m⁻² | −17.8 | **+9.2** |
+| latent heat flux | +75.1 W m⁻² | −33.4 | **+141.7** |
+| PBL height | 526 m | 79 m | **624 m** |
+| friction velocity | 0.25 m s⁻¹ | 0.11 | **0.28** |
+
+**The SST-update hypothesis is confirmed.** `results/tables/pairwise_tests_current.csv`:
+`EXP01` has lower paired MSE than `CTL` in **8 of 8**
+site-period-height comparisons. At 100 m the bias improves from −1.24 to
+−0.95 m s⁻¹ at P0 and from −0.96 to −0.55 m s⁻¹ at LPI; WPD bias from −36.9 %
+to −30.0 % and from −21.4 % to −13.5 %. This is the opposite of the
+pre-correction reading, and the mechanism is the one predicted there: the
+spurious cold sea stabilised the surface layer and weakened the wind at exactly
+the heights being scored.
+
+**The boundary treatment still does not pay at the sites.**
+`EXP02` − `EXP01` is *no difference* in **8 of 8**
+comparisons, for +23.9 % cells. The spatial signature persists and is still
+organised by distance from `EXP01`'s relaxation zone (mean |difference|
+in the 100 m wind: 0.26 m s⁻¹ at 0-50 km, 0.27 at 50-100, 0.24 at 100-200, 0.15
+at 200-300, 0.11 at 300-500 km). The treatment works; the instruments are not
+where it matters.
+
+**Added value over ERA5 is now significant at both sites.** Murphy skill at
+100 m, 95 % block bootstrap (`results/tables/era5_added_value_current.csv`):
+
+| | `CTL` | `EXP01` | `EXP02` |
+|---|---|---|---|
+| P0 / Nov 2021 | +0.24 [+0.11, +0.39] | **+0.34 [+0.22, +0.50]** | **+0.40 [+0.26, +0.61]** |
+| LPI / Oct 2022 | +0.12 [−0.02, +0.27] (ns) | **+0.30 [+0.16, +0.44]** | **+0.33 [+0.21, +0.47]** |
+
+Research Question 2 is therefore answered affirmatively for the first time: the
+5 km integration removes 30-40 % of ERA5's mean-square error at hub height at
+both sites. Before the correction only P0 cleared zero.
+
+**Decision.** `EXP01` — daily OISST update on the unbuffered mesh — is
+the configuration for the climatological runs. It wins everywhere against `CTL`,
+is indistinguishable from the buffered mesh, and is the cheaper of the two.
+
+**Still unexplained and unchanged by the correction:** the low wind bias at every
+well-exposed site (−0.5 to −1.1 m s⁻¹ at the LiDARs after correction) is not an
+SST artefact and remains the single most consequential error for resource work.
+
+Two smaller findings from this pass:
+
+- On the INMET surface axis the corrected runs score slightly *worse* than the
+  contaminated ones (bias +2.06 against +1.86 m s⁻¹). That axis is dominated by
+  exposure representativeness — sheltered masts against a ~5 km cell — and the
+  spurious cold sea was reducing the onshore wind for the wrong reason. It does
+  not contradict the LiDAR axis.
+- The corrected runs used 90 MPI ranks against 60, and came out **less** efficient
+  per core (3.22 against 2.54 machine-hours per simulated hour for `EXP01_BADSST`):
+  90 ranks over-decompose this mesh. Wall-clock cost is not comparable across
+  experiments; cell count is.
+
+### 2026-09-02 — First full pass over `CTL`, `EXP01_BADSST` and the partial `EXP02_BADSST` — **[superseded by the entry above]**
+
+#### 1. The SST forcing in `EXP01_BADSST` and `EXP02_BADSST` is contaminated at the coast — **[the decisive finding]**
 
 `scripts/03_selection/check_sst_forcing.py`, `results/tables/sst_forcing_check.csv`,
 `figures/selection/sst_forcing_2021.png`.
@@ -215,7 +297,7 @@ In brief:
 The `sfc_update.nc` produced by `init_atmosphere` case 8 from NOAA OISST carries
 the OISST **land fill value, 273.15 K, into coastal ocean cells**:
 
-| | `CTL` (ERA5 skin, frozen) | `EXP01` | `EXP02` |
+| | `CTL` (ERA5 skin, frozen) | `EXP01_BADSST` | `EXP02_BADSST` |
 |---|---|---|---|
 | Ocean cells at exactly 273.15 K | 0 | **1 226** | **1 384** |
 | Ocean cells below 296 K | 0 (2021) | 2 894 (2021), 2 965 (2022) | 3 120 (2021) |
@@ -230,7 +312,7 @@ few cells from the coastline and has the geometry of an interpolation artefact,
 not of upwelling — genuine coastal upwelling on this margin has a scale of tens
 to hundreds of kilometres and does not reach 0 °C.
 
-The diagnosis is tighter than "EXP01 has a bad SST field", and the table records
+The diagnosis is tighter than "EXP01_BADSST has a bad SST field", and the table records
 why: **`CTL` carries exactly the same contaminated `sfc_update.nc`** — 1226
 ocean cells at the land fill, the same file, since the preprocessing is shared —
 it simply never reads it, because `config_sst_update = false`. The three
@@ -242,7 +324,7 @@ experiment that uses it.
 are exactly what an 8.7 K cold sea would produce
 (`results/tables/attribution_summary.csv`):
 
-| At P0, 2021 | `CTL` | `EXP01` | `EXP02` |
+| At P0, 2021 | `CTL` | `EXP01_BADSST` | `EXP02_BADSST` |
 |---|---|---|---|
 | mean SST | 300.2 K | 291.6 K | 293.9 K |
 | sensible heat flux | +1.1 W m⁻² | **−12.6** | **−10.5** |
@@ -254,7 +336,7 @@ Negative sensible *and* latent heat flux over a tropical ocean is not a physical
 state; it is the model responding correctly to an unphysical lower boundary. The
 boundary layer collapses to 45-70 m — below the hub heights being evaluated.
 
-**What this means for the ranking.** `EXP01 − CTL` and `EXP02 − EXP01` at these
+**What this means for the ranking.** `EXP01_BADSST − CTL` and `EXP02_BADSST − EXP01_BADSST` at these
 two sites are not tests of the SST-update or boundary-treatment hypotheses. They
 are dominated by an interpolation error in the surface forcing. The hypotheses
 remain untested and the runs must be repeated with a corrected `sfc_update.nc`
@@ -275,9 +357,9 @@ experiments complete, over each site-period's full window (N = 507 h at P0,
 | 50 m | **CTL better** (ΔMSE −2.15 [−3.06, −1.14]) | **CTL better** (−4.15 [−5.02, −3.17]) |
 | 100 m | not distinguishable (−0.34 [−0.94, +0.35]) | **CTL better** (−1.23 [−1.83, −0.60]) |
 | 150 m | not distinguishable (+0.48 [−0.06, +1.15]) | not distinguishable |
-| 200 m | **EXP01 better** (+0.99 [+0.44, +1.67]) | not distinguishable |
+| 200 m | **EXP01_BADSST better** (+0.99 [+0.44, +1.67]) | not distinguishable |
 
-The **height dependence is the mechanism showing through**: `EXP01`'s cold
+The **height dependence is the mechanism showing through**: `EXP01_BADSST`'s cold
 coastal sea stabilises the surface layer, decoupling it and weakening the wind
 at 50 m (bias −1.80 m/s at P0, −1.76 at LPI, against −1.17 and −1.16 in `CTL`),
 while leaving the flow above the shallow inversion unaffected or slightly
@@ -285,27 +367,26 @@ improved. The same sign appears at both sites, in different months, with
 different instruments — the pattern is consistent, which is what makes it
 attributable rather than incidental.
 
-`EXP02` over the 159 hours currently available is worse than `EXP01` at every
-height (ΔMSE −1.0 to −1.2, all significant). This is a preliminary number over a
-short window with a run that is still integrating and carries the same SST
-contamination; it should not be treated as a verdict on the boundary treatment.
+`EXP02_BADSST` over the full window is indistinguishable from `EXP01_BADSST` at 7 of 8
+heights. It carries the same SST contamination, so this was never a verdict on
+the boundary treatment; the corrected pair settles it (2026-10-07 entry).
 
-**Cost.** `EXP02` costs +24 % in cells and wall time. Nothing observed so far
+**Cost.** `EXP02_BADSST` costs +24 % in cells and wall time. Nothing observed so far
 earns that, but nothing observed so far tests it fairly either.
 
-##### The one `EXP02` result that *is* informative
+##### The one `EXP02_BADSST` result that *is* informative
 
 `scripts/03_selection/boundary_influence.py`,
 `results/tables/boundary_influence.csv`,
 `figures/selection/boundary_influence_2021.png`.
 
-`EXP02`'s claim is spatial, not site-specific: moving the lateral relaxation zone
+`EXP02_BADSST`'s claim is spatial, not site-specific: moving the lateral relaxation zone
 from ~190-230 km to ~600 km from the area of interest should produce a difference
-that is **organised by distance from `EXP01`'s relaxation zone**. It is. Mean
-|`EXP02` − `EXP01`| in the 100 m wind, binned by that distance over the whole
+that is **organised by distance from `EXP01_BADSST`'s relaxation zone**. It is. Mean
+|`EXP02_BADSST` − `EXP01_BADSST`| in the 100 m wind, binned by that distance over the whole
 `meqbr_05km` footprint (379 common hours):
 
-| Distance from `EXP01`'s relaxation cells | mean \|difference\| |
+| Distance from `EXP01_BADSST`'s relaxation cells | mean \|difference\| |
 |---|---|
 | 0-50 km | 0.28 m s⁻¹ |
 | 50-100 km | 0.26 |
@@ -316,11 +397,11 @@ that is **organised by distance from `EXP01`'s relaxation zone**. It is. Mean
 A clean monotonic decay, with a sharp band along the southern and western
 relaxation zones visible in the map. This is the predicted signature and it is
 **not** contaminated by the SST problem: both runs carry the same corrupted
-coastal SST, and the `EXP02` − `EXP01` SST difference is near zero offshore, so
+coastal SST, and the `EXP02_BADSST` − `EXP01_BADSST` SST difference is near zero offshore, so
 this comparison does isolate the boundary treatment.
 
 What it does *not* show is a benefit at the instruments. Both LiDAR sites sit
-200-300 km from `EXP01`'s relaxation zone, where the difference has already
+200-300 km from `EXP01_BADSST`'s relaxation zone, where the difference has already
 decayed to ~0.18 m s⁻¹ — real, but small compared with the model's ~1 m s⁻¹ bias
 there, and in the direction that made the site scores slightly worse. **The
 buffered mesh does what it was designed to do; the sites were not where it
@@ -333,7 +414,7 @@ part of the product.
 `results/tables/era5_added_value_fullwindow.csv`, `figures/era5/added_value_fullwindow.png`.
 Murphy skill score at 100 m, 95 % block-bootstrap interval:
 
-| | ERA5 RMSE | `CTL` skill vs ERA5 | `EXP01` skill vs ERA5 |
+| | ERA5 RMSE | `CTL` skill vs ERA5 | `EXP01_BADSST` skill vs ERA5 |
 |---|---|---|---|
 | P0 / Nov 2021 | 2.49 m s⁻¹ | **+0.24 [+0.12, +0.39]** | **+0.18 [+0.06, +0.34]** |
 | LPI / Oct 2022 | 2.47 m s⁻¹ | +0.12 [−0.02, +0.27] | −0.08 [−0.23, +0.08] |
@@ -365,7 +446,7 @@ pooled number is an artefact of exposure, not a physical result
 | INMET automatic (`inmet_auto`) | 15 | 3.18 m s⁻¹ | 5.18 | **+2.00** | 2.32 | 0.72 |
 | airport / synoptic (`synop_airport`) | 20 | 6.49 m s⁻¹ | 5.76 | **−0.74** | 1.59 | 0.67 |
 
-(`CTL`; `EXP01` and `EXP02` differ by less than 0.15 m s⁻¹ in each row.)
+(`CTL`; `EXP01_BADSST` and `EXP02_BADSST` differ by less than 0.15 m s⁻¹ in each row.)
 
 The INMET automatic masts read 3.2 m s⁻¹ on average against 6.5 m s⁻¹ at the
 airports in the same region and the same months. A factor-of-two difference
@@ -402,7 +483,7 @@ Offshore at P0 `CTL` peaks **5 hours late** and reproduces only 1.3 m s⁻¹ of 
 observed 2.6-3.0 m s⁻¹ amplitude at 50-100 m. At LPI the phase is right (0-1 h)
 and the amplitude slightly *too strong* (7.7 against 6.7 m s⁻¹ at 100 m).
 
-`EXP01` improves P0's diurnal amplitude substantially (2.5 vs `CTL`'s 1.3, against
+`EXP01_BADSST` improves P0's diurnal amplitude substantially (2.5 vs `CTL`'s 1.3, against
 2.6 observed) and cuts the phase error from +5 h to +3 h — which is the **right
 answer for the wrong reason**: a spuriously cold coastal sea strengthens the
 land-sea thermal contrast and so strengthens the sea breeze. Any future
@@ -468,7 +549,7 @@ RMSE spread across the five nearest ocean cells (all within 6.5 km):
 | | P0 / 2021 | LPI / 2022 |
 |---|---|---|
 | `CTL` | 0.15 m s⁻¹ | **1.33 m s⁻¹** |
-| `EXP01` | 0.11 m s⁻¹ | **1.00 m s⁻¹** |
+| `EXP01_BADSST` | 0.11 m s⁻¹ | **1.00 m s⁻¹** |
 
 At LPI, moving the comparison cell by a few kilometres changes RMSE by more than
 the entire difference between experiments (~0.25 m s⁻¹ at 100 m). The site sits
@@ -476,7 +557,7 @@ in a strong horizontal gradient — it is an offshore terminal close to a cape.
 
 This does **not** invalidate the paired ranking, which uses the same cell for
 both experiments and therefore differences the gradient away: the sign of
-`EXP01 − CTL` at 100 m is the same at 9 of the 10 site-cells tested (the sole
+`EXP01_BADSST − CTL` at 100 m is the same at 9 of the 10 site-cells tested (the sole
 flip is the most distant LPI cell, 5.4 km away, which also has the worst absolute
 RMSE). But it does mean the *absolute* skill numbers at LPI should be quoted as
 a property of this comparison, not of the site.
@@ -485,13 +566,13 @@ a property of this comparison, not of the site.
 
 ## Caveats and Limitations
 
-1. **The SST-update experiments are compromised at the sites** (Result 1). The
-   `EXP01` and `EXP02` rankings do not test their stated hypotheses. Nothing in
-   the ranking should be reported as evidence about SST updating or boundary
-   treatment until the forcing is regenerated.
-2. **`EXP02` is incomplete.** The 2021 leg reaches ~51 % of the analysis window
-   (159 h overlap with P0); the 2022 leg has not started. Its numbers are
-   preliminary and its intervals correspondingly wide.
+1. **`EXP01_BADSST` and `EXP02_BADSST` are compromised at the sites** (Result 1) and must not
+   be quoted as evidence about SST updating or boundary treatment. They are
+   superseded by `EXP01` and `EXP02` and are retained only as
+   the record of the forcing bug.
+2. **The corrected runs used a different MPI decomposition** (90 ranks against
+   60). Bit-level agreement with the originals was never expected even where the
+   forcing is identical, and wall-clock cost is not comparable across experiments.
 3. **One month per site**, and one of them (P0, Nov 2021) sits at the 0th
    percentile of its 31-year distribution (Result 7).
 4. **Two sites, one coast, both offshore.** Nothing constrains inland behaviour
@@ -514,40 +595,45 @@ a property of this comparison, not of the site.
 
 ## Next Steps
 
-**Blocking, before the experiment set can decide anything:**
+**Done (2026-10-07):**
 
-1. **Regenerate `sfc_update.nc` with the OISST land mask honoured** — mask before
-   interpolating, or fill land with a nearest-ocean-neighbour extrapolation, so
-   coastal ocean cells receive an SST rather than a blend with 273.15 K. Verify
-   with `scripts/03_selection/check_sst_forcing.py`, which must exit 0.
-2. **Re-run `EXP01` (both periods) with the corrected forcing.** The SST-update
-   hypothesis is currently untested. Until then `EXP01 − CTL` measures an
-   interpolation error.
-3. **Decide `EXP02`'s fate after that.** The boundary treatment demonstrably
-   works — the difference decays with distance from the relaxation zone, exactly
-   as designed (Result 2) — but it is worth ~0.18 m s⁻¹ at the sites, against a
-   ~1 m s⁻¹ model bias there, for +24 % compute. Unless the near-boundary region
-   is itself part of the product, the cheaper mesh is the better buy for
-   climatological runs. Completing `EXP02` as currently configured adds only
-   another contaminated-SST comparison; restarting it on corrected forcing is
-   the only version worth the machine time.
+1. ~~Regenerate `sfc_update.nc` with the OISST land mask honoured.~~ Fixed in the
+   converter: land SST is extended from the nearest valid ocean point before the
+   intermediate file is written, leaving `LANDSEA` and every observed ocean value
+   untouched. `check_sst_forcing.py` returns zero land-fill cells on both
+   corrected experiments.
+2. ~~Re-run `EXP01_BADSST` with the corrected forcing.~~ Done, both periods, as
+   `EXP01`. The SST-update hypothesis is confirmed: 8 of 8 against `CTL`.
+3. ~~Decide `EXP02_BADSST`'s fate.~~ Re-run as `EXP02`, both periods. It is
+   indistinguishable from `EXP01` at every site, period and height, for
+   +23.9 % cells. The cheaper mesh is the better buy unless the near-boundary
+   region is itself part of the product.
+
+**Blocking, before the fix stops costing other people time:**
+
+4. **Submit the converter fix upstream.** It lives on the local branch
+   `codex/fix-oisst-coastal-fill-audit` of CGFD-USP/MPAS-Research and has not
+   been pushed; `develop` still writes the constant 273.15 K over land, so every
+   other user of `oisst_to_intermediate.py` and `oisst_clim_to_intermediate.py`
+   still produces contaminated coastal SST. The four commits touch only
+   `usp-utils/pre_proc/real_data/` and cherry-pick cleanly onto `develop`.
 
 **Scientifically valuable next:**
 
-4. **Explain the low offshore / high onshore bias** (Result 4). Candidates worth
+5. **Explain the low offshore / high onshore bias** (Result 4). Candidates worth
    separating: the sea-surface roughness formulation (`znt` over water), the YSU
    mixing depth, and the ERA5 lateral forcing itself, which carries the same sign.
    `ust`, `znt` and `zol` are already extracted at the sites for exactly this.
-5. **Explain the 5-hour offshore diurnal phase error at P0**, which does not
+6. **Explain the 5-hour offshore diurnal phase error at P0**, which does not
    appear at LPI or at the land stations. A site-specific error of that size in a
    sea-breeze regime is a strong lead.
-6. **Add a second, typical month at P0** — the current evaluation there is on the
+7. **Add a second, typical month at P0** — the current evaluation there is on the
    weakest November in three decades.
-7. **Check the pairing-tolerance and bootstrap-block assumptions** with a short
+8. **Check the pairing-tolerance and bootstrap-block assumptions** with a short
    sensitivity sweep, now that the machinery exists.
-8. **Consider `config_sstdiurn_update`.** For the offshore diurnal wind cycle a
-   diurnal SST cycle may matter more than the daily update does — and it should
-   be tested only after the daily-update forcing is fixed.
+9. **Consider `config_sstdiurn_update`.** For the offshore diurnal wind cycle a
+   diurnal SST cycle may matter more than the daily update does — and it is now
+   testable, since the daily-update forcing is fixed.
 
 ---
 

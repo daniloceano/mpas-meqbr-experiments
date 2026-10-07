@@ -1,0 +1,330 @@
+{
+  "generated_utc": "2026-10-07T22:13:02+00:00",
+  "analysis_commit": "f6cfc60",
+  "working_tree_dirty": true,
+  "provisional": false,
+  "tables": [
+    "results/tables/experiment_inventory.csv",
+    "results/tables/runtime_metrics.csv",
+    "results/tables/inmet_summary.csv",
+    "results/tables/experiment_ranking.csv",
+    "results/tables/pairwise_tests_current.csv",
+    "results/tables/era5_added_value.csv",
+    "results/tables/resource_comparison.csv"
+  ],
+  "assets": [
+    {
+      "source": "figures/report/experimental_design_ctl_mesh.png",
+      "bundled_as": "assets/design/experimental_design_ctl_mesh.png",
+      "bytes": 868530,
+      "title": "CTL: malha de referência"
+    },
+    {
+      "source": "figures/report/experimental_design_exp01_sst.png",
+      "bundled_as": "assets/design/experimental_design_exp01_sst.png",
+      "bytes": 505181,
+      "title": "EXP01: mudança da condição de superfície"
+    },
+    {
+      "source": "figures/report/experimental_design_exp02_mesh.png",
+      "bundled_as": "assets/design/experimental_design_exp02_mesh.png",
+      "bytes": 1215809,
+      "title": "EXP02: tratamento da fronteira"
+    },
+    {
+      "source": "figures/exploration/mean_fields_CTL_2021.png",
+      "bundled_as": "assets/spatial_fields/mean_fields_CTL_2021.png",
+      "bytes": 1017046,
+      "title": "Estado médio do controle — novembro de 2021"
+    },
+    {
+      "source": "figures/exploration/mean_fields_CTL_2022.png",
+      "bundled_as": "assets/spatial_fields/mean_fields_CTL_2022.png",
+      "bytes": 1062282,
+      "title": "Estado médio do controle — outubro de 2022"
+    },
+    {
+      "source": "figures/exploration/diff_EXP01_vs_CTL_2021_common.png",
+      "bundled_as": "assets/spatial_fields/diff_EXP01_vs_CTL_2021_common.png",
+      "bytes": 457488,
+      "title": "Resposta espacial à SST diária corrigida"
+    },
+    {
+      "source": "figures/exploration/diff_EXP01_vs_EXP01_BADSST_2021_common.png",
+      "bundled_as": "assets/spatial_fields/diff_EXP01_vs_EXP01_BADSST_2021_common.png",
+      "bytes": 413316,
+      "title": "Tamanho do artefato de SST que foi removido"
+    },
+    {
+      "source": "figures/exploration/diff_EXP02_vs_EXP01_2021_common.png",
+      "bundled_as": "assets/spatial_fields/diff_EXP02_vs_EXP01_2021_common.png",
+      "bytes": 489727,
+      "title": "Resposta espacial ao tratamento de fronteira"
+    },
+    {
+      "source": "figures/exploration/xsection_P0_CTL_2021_composite_15local.png",
+      "bundled_as": "assets/site_structure/xsection_P0_CTL_2021_composite_15local.png",
+      "bytes": 844612,
+      "title": "P0 — CTL, composto às 15 h locais"
+    },
+    {
+      "source": "figures/exploration/xsection_P0_EXP01_2021_composite_15local.png",
+      "bundled_as": "assets/site_structure/xsection_P0_EXP01_2021_composite_15local.png",
+      "bytes": 837913,
+      "title": "P0 — EXP01, composto às 15 h locais"
+    },
+    {
+      "source": "figures/exploration/xsection_P0_EXP02_2021_composite_15local.png",
+      "bundled_as": "assets/site_structure/xsection_P0_EXP02_2021_composite_15local.png",
+      "bytes": 839041,
+      "title": "P0 — EXP02, composto às 15 h locais"
+    },
+    {
+      "source": "figures/exploration/xsection_LPI_CTL_2022_composite_15local.png",
+      "bundled_as": "assets/site_structure/xsection_LPI_CTL_2022_composite_15local.png",
+      "bytes": 879992,
+      "title": "LPI — CTL, composto às 15 h locais"
+    },
+    {
+      "source": "figures/exploration/xsection_LPI_EXP01_2022_composite_15local.png",
+      "bundled_as": "assets/site_structure/xsection_LPI_EXP01_2022_composite_15local.png",
+      "bytes": 875717,
+      "title": "LPI — EXP01, composto às 15 h locais"
+    },
+    {
+      "source": "figures/exploration/xsection_LPI_EXP02_2022_composite_15local.png",
+      "bundled_as": "assets/site_structure/xsection_LPI_EXP02_2022_composite_15local.png",
+      "bytes": 887258,
+      "title": "LPI — EXP02, composto às 15 h locais"
+    },
+    {
+      "source": "figures/animations/wind100_CTL_2021_20211101_5d.mp4",
+      "bundled_as": "assets/animations/wind100_CTL_2021_20211101_5d.mp4",
+      "bytes": 6053388,
+      "title": "Vento a 100 m — CTL, novembro de 2021"
+    },
+    {
+      "source": "figures/animations/wind100_EXP01_2021_20211101_5d.mp4",
+      "bundled_as": "assets/animations/wind100_EXP01_2021_20211101_5d.mp4",
+      "bytes": 6064535,
+      "title": "Vento a 100 m — EXP01, novembro de 2021"
+    },
+    {
+      "source": "figures/animations/wind100_EXP02_2021_20211101_5d.mp4",
+      "bundled_as": "assets/animations/wind100_EXP02_2021_20211101_5d.mp4",
+      "bytes": 6679590,
+      "title": "Vento a 100 m — EXP02, novembro de 2021"
+    },
+    {
+      "source": "figures/animations/wind100_CTL_2022_20221001_5d.mp4",
+      "bundled_as": "assets/animations/wind100_CTL_2022_20221001_5d.mp4",
+      "bytes": 6120431,
+      "title": "Vento a 100 m — CTL, outubro de 2022"
+    },
+    {
+      "source": "figures/animations/wind100_EXP01_2022_20221001_5d.mp4",
+      "bundled_as": "assets/animations/wind100_EXP01_2022_20221001_5d.mp4",
+      "bytes": 6122481,
+      "title": "Vento a 100 m — EXP01, outubro de 2022"
+    },
+    {
+      "source": "figures/animations/wind100_EXP02_2022_20221001_5d.mp4",
+      "bundled_as": "assets/animations/wind100_EXP02_2022_20221001_5d.mp4",
+      "bytes": 6655682,
+      "title": "Vento a 100 m — EXP02, outubro de 2022"
+    },
+    {
+      "source": "figures/animations/xsection_P0_CTL_2021_20211101_3d.mp4",
+      "bundled_as": "assets/animations/xsection_P0_CTL_2021_20211101_3d.mp4",
+      "bytes": 8101912,
+      "title": "Corte vertical em P0 — CTL"
+    },
+    {
+      "source": "figures/animations/xsection_P0_EXP01_2021_20211101_3d.mp4",
+      "bundled_as": "assets/animations/xsection_P0_EXP01_2021_20211101_3d.mp4",
+      "bytes": 8213570,
+      "title": "Corte vertical em P0 — EXP01"
+    },
+    {
+      "source": "figures/animations/xsection_LPI_CTL_2022_20221001_3d.mp4",
+      "bundled_as": "assets/animations/xsection_LPI_CTL_2022_20221001_3d.mp4",
+      "bytes": 8315641,
+      "title": "Corte vertical em LPI — CTL"
+    },
+    {
+      "source": "figures/animations/xsection_LPI_EXP01_2022_20221001_3d.mp4",
+      "bundled_as": "assets/animations/xsection_LPI_EXP01_2022_20221001_3d.mp4",
+      "bytes": 8275114,
+      "title": "Corte vertical em LPI — EXP01"
+    },
+    {
+      "source": "figures/report/validation_network.png",
+      "bundled_as": "assets/validation_network/validation_network.png",
+      "bytes": 479756,
+      "title": "Domínios e pontos de validação"
+    },
+    {
+      "source": "figures/report/validation_cells.png",
+      "bundled_as": "assets/validation_network/validation_cells.png",
+      "bytes": 1188304,
+      "title": "Células usadas na comparação com P0 e LPI"
+    },
+    {
+      "source": "figures/validation/distribution_2021_P0_100m.png",
+      "bundled_as": "assets/observed_data/distribution_2021_P0_100m.png",
+      "bytes": 190708,
+      "title": "Distribuição observada em P0 a 100 m"
+    },
+    {
+      "source": "figures/validation/distribution_2022_LPI_100m.png",
+      "bundled_as": "assets/observed_data/distribution_2022_LPI_100m.png",
+      "bytes": 200139,
+      "title": "Distribuição observada em LPI a 100 m"
+    },
+    {
+      "source": "figures/validation/windrose_2021_P0_100m.png",
+      "bundled_as": "assets/observed_data/windrose_2021_P0_100m.png",
+      "bytes": 451232,
+      "title": "Regime direcional em P0"
+    },
+    {
+      "source": "figures/validation/windrose_2022_LPI_100m.png",
+      "bundled_as": "assets/observed_data/windrose_2022_LPI_100m.png",
+      "bytes": 495080,
+      "title": "Regime direcional em LPI"
+    },
+    {
+      "source": "figures/validation/inmet_map.png",
+      "bundled_as": "assets/inmet_validation/inmet_map.png",
+      "bytes": 177680,
+      "title": "Viés do vento de superfície por estação"
+    },
+    {
+      "source": "figures/validation/inmet_diurnal.png",
+      "bundled_as": "assets/inmet_validation/inmet_diurnal.png",
+      "bytes": 396276,
+      "title": "Ciclo diurno nas estações INMET"
+    },
+    {
+      "source": "figures/validation/profile_2021_P0.png",
+      "bundled_as": "assets/lidar_validation/profile_2021_P0.png",
+      "bytes": 235162,
+      "title": "Perfil vertical médio em P0"
+    },
+    {
+      "source": "figures/validation/profile_2022_LPI.png",
+      "bundled_as": "assets/lidar_validation/profile_2022_LPI.png",
+      "bytes": 243387,
+      "title": "Perfil vertical médio em LPI"
+    },
+    {
+      "source": "figures/validation/diurnal_2021_P0.png",
+      "bundled_as": "assets/lidar_validation/diurnal_2021_P0.png",
+      "bytes": 278956,
+      "title": "Ciclo diurno do vento em P0"
+    },
+    {
+      "source": "figures/validation/diurnal_2022_LPI.png",
+      "bundled_as": "assets/lidar_validation/diurnal_2022_LPI.png",
+      "bytes": 302129,
+      "title": "Ciclo diurno do vento em LPI"
+    },
+    {
+      "source": "figures/validation/timeseries_2021_P0_100m.png",
+      "bundled_as": "assets/lidar_validation/timeseries_2021_P0_100m.png",
+      "bytes": 475789,
+      "title": "Evolução horária em P0 a 100 m"
+    },
+    {
+      "source": "figures/validation/timeseries_2022_LPI_100m.png",
+      "bundled_as": "assets/lidar_validation/timeseries_2022_LPI_100m.png",
+      "bytes": 598118,
+      "title": "Evolução horária em LPI a 100 m"
+    },
+    {
+      "source": "figures/validation/scatter_2021_P0_100m.png",
+      "bundled_as": "assets/lidar_validation/scatter_2021_P0_100m.png",
+      "bytes": 460670,
+      "title": "Dispersão modelo–observação em P0"
+    },
+    {
+      "source": "figures/validation/scatter_2022_LPI_100m.png",
+      "bundled_as": "assets/lidar_validation/scatter_2022_LPI_100m.png",
+      "bytes": 592136,
+      "title": "Dispersão modelo–observação em LPI"
+    },
+    {
+      "source": "figures/validation/taylor_2021_P0.png",
+      "bundled_as": "assets/lidar_validation/taylor_2021_P0.png",
+      "bytes": 189464,
+      "title": "Síntese estatística em P0"
+    },
+    {
+      "source": "figures/validation/taylor_2022_LPI.png",
+      "bundled_as": "assets/lidar_validation/taylor_2022_LPI.png",
+      "bytes": 188481,
+      "title": "Síntese estatística em LPI"
+    },
+    {
+      "source": "figures/validation/cell_sensitivity.png",
+      "bundled_as": "assets/lidar_validation/cell_sensitivity.png",
+      "bytes": 174436,
+      "title": "Sensibilidade à célula escolhida"
+    },
+    {
+      "source": "figures/era5/climatological_context.png",
+      "bundled_as": "assets/added_value/climatological_context.png",
+      "bytes": 259762,
+      "title": "Contexto climatológico dos meses simulados"
+    },
+    {
+      "source": "figures/era5/added_value.png",
+      "bundled_as": "assets/added_value/added_value.png",
+      "bytes": 107954,
+      "title": "Ganho ou perda de habilidade frente ao ERA5"
+    },
+    {
+      "source": "figures/era5/resource_comparison_CTL_2021.png",
+      "bundled_as": "assets/added_value/resource_comparison_CTL_2021.png",
+      "bytes": 163288,
+      "title": "Estrutura espacial MPAS e ERA5 — 2021"
+    },
+    {
+      "source": "figures/era5/resource_comparison_CTL_2022.png",
+      "bundled_as": "assets/added_value/resource_comparison_CTL_2022.png",
+      "bytes": 167466,
+      "title": "Estrutura espacial MPAS e ERA5 — 2022"
+    },
+    {
+      "source": "figures/selection/sst_forcing_2021.png",
+      "bundled_as": "assets/mechanisms/sst_forcing_2021.png",
+      "bytes": 577547,
+      "title": "SST efetivamente vista pelo modelo"
+    },
+    {
+      "source": "figures/selection/attribution_2021_P0.png",
+      "bundled_as": "assets/mechanisms/attribution_2021_P0.png",
+      "bytes": 821752,
+      "title": "Cadeia física da resposta em P0"
+    },
+    {
+      "source": "figures/selection/attribution_2022_LPI.png",
+      "bundled_as": "assets/mechanisms/attribution_2022_LPI.png",
+      "bytes": 912901,
+      "title": "Cadeia física da resposta em LPI"
+    },
+    {
+      "source": "figures/selection/boundary_influence_2021.png",
+      "bundled_as": "assets/mechanisms/boundary_influence_2021.png",
+      "bytes": 354847,
+      "title": "Influência da distância à fronteira"
+    },
+    {
+      "source": "figures/selection/ranking.png",
+      "bundled_as": "assets/mechanisms/ranking.png",
+      "bytes": 138289,
+      "title": "Síntese comparativa dos experimentos"
+    }
+  ],
+  "builder": "scripts/06_report/build_technical_report.py"
+}

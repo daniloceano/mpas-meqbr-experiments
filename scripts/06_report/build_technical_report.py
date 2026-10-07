@@ -171,7 +171,46 @@ TABLE_SPECS = [
             "A densidade de potência eólica é WPD = ½ ρ × média(U³), com ρ = 1,15 kg m⁻³ e U em m s⁻¹; o cubo é calculado antes da média.",
             "ERA5 aparece somente a 100 m, seu nível diagnóstico diretamente comparável ao LiDAR; não é extrapolado para as demais alturas.",
             "Todos os experimentos estão completos e são comparados nas mesmas horas observacionais disponíveis dentro de cada janela científica.",
-            "Em cada altura, o negrito indica o melhor entre CTL, EXP01 e EXP02: menor valor absoluto para os vieses, menor RMSE e maior r. ERA5 permanece como benchmark e não entra nessa seleção.",
+            "Em cada altura, o negrito indica o melhor entre CTL, EXP01 e EXP02: menor valor absoluto para os vieses, menor RMSE e maior r. As rodadas superadas EXP01_BADSST e EXP02_BADSST aparecem como registro da contaminação de SST e não concorrem; ERA5 permanece como benchmark e também não entra nessa seleção.",
+        ],
+    },
+    {
+        "id": "selection",
+        "title": "Seleção da configuração — testes pareados",
+        "path": "results/tables/pairwise_tests_current.csv",
+        "columns": ["period", "site", "height_m", "experiment_a", "experiment_b",
+                    "n", "rmse_a", "rmse_b", "delta_mse", "lo", "hi", "better"],
+        "labels": {
+            "period": "Período",
+            "site": "Sítio",
+            "height_m": "Altura (m)",
+            "experiment_a": "Experimento A",
+            "experiment_b": "Experimento B",
+            "n": "Horas pareadas",
+            "rmse_a": "RMSE de A (m s⁻¹)",
+            "rmse_b": "RMSE de B (m s⁻¹)",
+            "delta_mse": "MSE(A) − MSE(B) (m² s⁻²)",
+            "lo": "IC95% inferior",
+            "hi": "IC95% superior",
+            "better": "Melhor",
+        },
+        "numeric": {
+            "height_m": 0, "n": 0, "rmse_a": 2, "rmse_b": 2,
+            "delta_mse": 2, "lo": 2, "hi": 2,
+        },
+        "value_maps": {"better": {"no difference": "sem diferença detectável"}},
+        "description": (
+            "Cada linha testa se um experimento tem erro quadrático menor que o "
+            "outro nos mesmos horários, com intervalo de confiança de 95 % por "
+            "bootstrap de blocos móveis (blocos de 24 h, 2.000 reamostragens). "
+            "Apenas CTL, EXP01 e EXP02 aparecem aqui: as rodadas superadas "
+            "EXP01_BADSST/EXP02_BADSST não concorrem pela escolha."
+        ),
+        "notes": [
+            "Valor positivo de MSE(A) − MSE(B) significa que B errou menos; negativo, que A errou menos.",
+            "“Sem diferença detectável” significa que o intervalo cruza zero — é um resultado válido, não uma falha do teste.",
+            "O pareamento nos mesmos horários cancela a variabilidade sinótica compartilhada e é muito mais sensível que comparar dois RMSE isolados.",
+            "A comparação EXP01 × EXP02 é o efeito incremental do tratamento de fronteira, com a atualização de SST já ligada nos dois.",
         ],
     },
     {
@@ -274,7 +313,7 @@ MEDIA_SPECS = [
           "Distribuição do espaçamento horizontal da malha quase uniforme usada no controle; no mapa turbo invertido, vermelho indica menor espaçamento. Pontos escuros mostram a relaxação lateral, círculos/quadrados os LiDARs e triângulos as estações INMET."),
     media("design", "figures/report/experimental_design_exp01_sst.png",
           "EXP01: mudança da condição de superfície",
-          "Diferença da SST média EXP01 − CTL em novembro de 2021. Tons azuis indicam SST mais fria no EXP01; a faixa costeira extrema evidencia o problema de preenchimento terrestre da OISST. Círculo/quadrado mostram P0/LPI e triângulos mostram as estações INMET."),
+          "Diagnóstico da anomalia corrigida: diferença da SST média EXP01 − CTL em novembro de 2021. Tons azuis indicam SST mais fria no EXP01, e a faixa costeira extrema é o valor de preenchimento terrestre da OISST entrando em células oceânicas. Em EXP01 essa faixa desaparece: nenhuma célula oceânica fica abaixo de 296 K. Círculo/quadrado mostram P0/LPI e triângulos mostram as estações INMET."),
     media("design", "figures/report/experimental_design_exp02_mesh.png",
           "EXP02: tratamento da fronteira",
           "Malha com aproximadamente 5 km no interior e transição gradual para 32 km junto à fronteira; vermelho indica menor espaçamento. A zona de relaxação escura fica mais distante dos LiDARs e das estações INMET."),
@@ -285,8 +324,11 @@ MEDIA_SPECS = [
           "Estado médio do controle — outubro de 2022",
           "Mesmas grandezas do painel anterior para o segundo período, permitindo separar diferenças de configuração de diferenças meteorológicas entre os meses."),
     media("spatial_fields", "figures/exploration/diff_EXP01_vs_CTL_2021_common.png",
-          "Resposta espacial à SST diária",
-          "Diferenças EXP01 − CTL para vento, potência, amplitude diurna e SST, calculadas sobre a janela completa comum dos dois experimentos."),
+          "Resposta espacial à SST diária corrigida",
+          "Diferenças EXP01 − CTL para vento, potência, amplitude diurna e SST, sobre a janela completa comum. Este é o efeito real da atualização diária de SST, livre da contaminação costeira."),
+    media("spatial_fields", "figures/exploration/diff_EXP01_vs_EXP01_BADSST_2021_common.png",
+          "Tamanho do artefato de SST que foi removido",
+          "Diferenças EXP01 − EXP01 nas mesmas horas. Como as duas integrações só diferem no preenchimento terrestre da OISST, este painel mede diretamente quanto a contaminação costeira deslocava o vento, a potência e a SST."),
     media("spatial_fields", "figures/exploration/diff_EXP02_vs_EXP01_2021_common.png",
           "Resposta espacial ao tratamento de fronteira",
           "Diferenças EXP02 − EXP01 na janela científica completa e comum de 2021. O uso de horas idênticas evita confundir a mudança de configuração com mudança do tempo meteorológico."),
@@ -332,21 +374,15 @@ MEDIA_SPECS = [
     media("animations", "figures/animations/xsection_P0_EXP01_2021_20211101_3d.mp4",
           "Corte vertical em P0 — EXP01",
           "Mesmo corte e janela para EXP01, permitindo acompanhar a resposta horária à configuração com SST diária.", kind="video"),
-    media("animations", "figures/animations/xsection_P0_EXP02_2021_20211101_3d.mp4",
-          "Corte vertical em P0 — EXP02",
-          "Mesmo corte e janela para EXP02, com a zona de relaxação lateral afastada da região de interesse.", kind="video"),
     media("animations", "figures/animations/xsection_LPI_CTL_2022_20221001_3d.mp4",
           "Corte vertical em LPI — CTL",
           "Evolução da estrutura costeira em LPI nos três primeiros dias de outubro de 2022, na configuração de referência.", kind="video"),
     media("animations", "figures/animations/xsection_LPI_EXP01_2022_20221001_3d.mp4",
           "Corte vertical em LPI — EXP01",
           "Mesmo corte e janela para EXP01, mantendo a comparação visual nas mesmas condições meteorológicas.", kind="video"),
-    media("animations", "figures/animations/xsection_LPI_EXP02_2022_20221001_3d.mp4",
-          "Corte vertical em LPI — EXP02",
-          "Mesmo corte e janela para EXP02, completando a comparação entre os três experimentos.", kind="video"),
     media("validation_network", "figures/report/validation_network.png",
           "Domínios e pontos de validação",
-          "À esquerda, os domínios CTL/EXP01 e EXP02; à direita, os LiDARs P0/LPI e as seis estações automáticas INMET usadas como eixo primário de validação de superfície."),
+          "À esquerda, os dois domínios em uso: a malha não bufferizada de CTL/EXP01/EXP01 e a malha com buffer de EXP02/EXP02; à direita, os LiDARs P0/LPI e as estações automáticas INMET usadas como eixo primário de validação de superfície."),
     media("validation_network", "figures/report/validation_cells.png",
           "Células usadas na comparação com P0 e LPI",
           "O mapa localiza os LiDARs e amplia as células Voronoi de cada malha. A estrela marca o instrumento; o contorno preto e o x identificam a célula oceânica mais próxima efetivamente usada na validação, com a distância entre o LiDAR e o centro da célula."),
@@ -461,7 +497,8 @@ def _best_indices(frame: pd.DataFrame, column: str, *, largest: bool = False,
 def prepare_table_rows(spec: dict, frame: pd.DataFrame) -> tuple[pd.DataFrame, dict, dict]:
     """Sort rows and attach semantic CSS classes before display formatting."""
     if spec["id"] == "lidar":
-        order = {"CTL": 0, "EXP01": 1, "EXP02": 2, "ERA5": 3}
+        order = {"CTL": 0, "EXP01": 1, "EXP01_BADSST": 2,
+                 "EXP02": 3, "EXP02_BADSST": 4, "ERA5": 5}
         frame = frame.assign(
             _source_order=frame["experiment"].map(order).fillna(99)
         ).sort_values(
@@ -491,7 +528,10 @@ def prepare_table_rows(spec: dict, frame: pd.DataFrame) -> tuple[pd.DataFrame, d
                 row_classes.setdefault(int(group.index[0]), set()).add(
                     "height-separator")
             first_group = False
-            experiments = group[group["experiment"].isin(["CTL", "EXP01", "EXP02"])]
+            # Only the current set competes for "best": highlighting a
+            # superseded contaminated run would recommend an artefact.
+            experiments = group[group["experiment"].isin(
+                ["CTL", "EXP01", "EXP02"])]
             add_cell(_best_indices(experiments, "bias", absolute=True),
                      "bias", "best-value")
             add_cell(_best_indices(experiments, "rmse"), "rmse", "best-value")
@@ -656,11 +696,23 @@ def report_configuration(cfg) -> tuple[list[dict], list[dict], list[dict]]:
         ),
         "EXP01": (
             "Mantém a malha e toda a física do CTL, mas passa a aplicar SST diária "
-            "NOAA OISST v2.1. É o incremento destinado a testar a condição de superfície."
+            "NOAA OISST v2.1, com o preenchimento costeiro da OISST corrigido. "
+            "É o incremento que testa a condição de superfície."
         ),
         "EXP02": (
-            "Mantém a SST diária do EXP01 e acrescenta o tratamento de fronteira: "
-            "malha com buffer 5→32 km e condições ERA5 em uma caixa mais ampla."
+            "Mantém a SST diária corrigida do EXP01 e acrescenta o tratamento de "
+            "fronteira: malha com buffer 5→32 km e condições ERA5 em uma caixa "
+            "mais ampla."
+        ),
+        "EXP01_BADSST": (
+            "Versão superada do EXP01. Foi forçada pelo arquivo de superfície antes "
+            "da correção, que levava o valor de preenchimento terrestre da OISST "
+            "(273,15 K) para 1.226 células oceânicas costeiras. Mantida apenas como "
+            "evidência do problema; não sustenta conclusão alguma."
+        ),
+        "EXP02_BADSST": (
+            "Versão superada do EXP02, herdando a mesma forçante de superfície "
+            "contaminada (1.384 células). Mantida apenas como evidência."
         ),
     }
     status_map = {"complete": "concluído", "running": "em execução"}
@@ -668,19 +720,25 @@ def report_configuration(cfg) -> tuple[list[dict], list[dict], list[dict]]:
         "CTL": "assets/design/experimental_design_ctl_mesh.png",
         "EXP01": "assets/design/experimental_design_exp01_sst.png",
         "EXP02": "assets/design/experimental_design_exp02_mesh.png",
+        "EXP01_BADSST": "assets/design/experimental_design_exp01_sst.png",
+        "EXP02_BADSST": "assets/design/experimental_design_exp02_mesh.png",
     }
     experiments = []
     for key, value in cfg.experiments.items():
         mesh_cfg = cfg.meshes[value["mesh"]]
         experiments.append({
             "id": key,
-            "description": descriptions[key],
+            "description": descriptions.get(key, value.get("delta", "")),
             "mesh": value["mesh"],
             "n_cells": f"{int(mesh_cfg['n_cells']):,}".replace(",", "."),
             "spacing": mesh_cfg["mean_cell_spacing_km"],
             "status": status_map.get(value["status"], value["status"]),
             "mpi_ranks": value["mpi_ranks"],
-            "figure_url": images[key],
+            "superseded_by": next(
+                (k for k, v in cfg.experiments.items() if v.get("supersedes") == key),
+                None),
+            "supersedes": value.get("supersedes"),
+            "figure_url": images.get(key, images["CTL"]),
         })
     return common, periods, experiments
 

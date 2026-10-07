@@ -10,15 +10,27 @@ from __future__ import annotations
 
 import numpy as np
 
-# Fixed identity per experiment, used in every figure.
+# Fixed identity per experiment, used in every figure. The superseded _BADSST
+# runs keep the hue of the experiment they were replaced by, washed out: the
+# current pair is the scientific result, the _BADSST pair is the audit trail for
+# the OISST coastal land-fill finding and should read as secondary.
 EXPERIMENT_COLORS = {
-    "CTL":   "#4C4C4C",   # grey — the baseline
-    "EXP01": "#1F77B4",   # blue
-    "EXP02": "#D62728",   # red
-    "ERA5":  "#7F7F7F",   # light grey, dashed where lines are drawn
-    "OBS":   "#000000",
+    "CTL":          "#4C4C4C",   # grey — the baseline
+    "EXP01":        "#1F77B4",   # blue
+    "EXP02":        "#D62728",   # red
+    "EXP01_BADSST": "#9ECAE1",   # pale blue — contaminated SST forcing
+    "EXP02_BADSST": "#FCAE91",   # pale red — contaminated SST forcing
+    "ERA5":         "#7F7F7F",   # light grey, dashed where lines are drawn
+    "OBS":          "#000000",
 }
-EXPERIMENT_ORDER = ["CTL", "EXP01", "EXP02"]
+# Each superseded run sits next to the one that replaced it, so a figure reads
+# as pairs rather than as five unrelated lines.
+EXPERIMENT_ORDER = ["CTL", "EXP01", "EXP01_BADSST", "EXP02", "EXP02_BADSST"]
+
+# The decision-grade set: the baseline plus the two current runs. Figures and
+# tables that answer "which configuration wins" should use this, not the full
+# list, which exists to document the contamination.
+EXPERIMENT_ORDER_CURRENT = ["CTL", "EXP01", "EXP02"]
 
 SITE_MARKERS = {"P0": "o", "LPI": "s"}
 

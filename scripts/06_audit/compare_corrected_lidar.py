@@ -39,8 +39,8 @@ from mpas_meqbr.config import load_config  # noqa: E402
 
 
 RUNS = {
-    "EXP01": {"old": "EXP01", "corrected": "EXP01_CORRECTED"},
-    "EXP02": {"old": "EXP02", "corrected": "EXP02_CORRECTED"},
+    "EXP01": {"old": "EXP01_BADSST", "corrected": "EXP01"},
+    "EXP02": {"old": "EXP02_BADSST", "corrected": "EXP02"},
 }
 STATE_LABEL = {"old": "Antigo", "corrected": "Corrigido"}
 STATE_COLOR = {"old": "#D97706", "corrected": "#146B8C"}

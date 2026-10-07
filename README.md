@@ -11,23 +11,34 @@ The simulations live elsewhere and are read in place, never copied:
 `/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km` — see its `EXPERIMENTS.md`
 for what each experiment *is*. This repository holds only the analysis.
 
-> **Read this first.** The SST forcing in `EXP01` and `EXP02` carries the NOAA
-> OISST **land fill value (273.15 K) into coastal ocean cells**, and both LiDAR
-> validation sites sit inside the affected strip (P0: 291.5 K instead of
-> ~300 K). Their comparison against `CTL` therefore measures an interpolation
-> error, not the SST-update or boundary-treatment hypotheses those experiments
-> were designed to test. Details, evidence and what to do about it:
-> [`SCIENTIFIC_NOTES.md`](SCIENTIFIC_NOTES.md), Result 1. The check is automated
-> and fails loudly: `scripts/03_selection/check_sst_forcing.py`.
+> **Read this first.** `EXP01` and `EXP02` were first run with a surface forcing
+> that carried the NOAA OISST **land fill value (273.15 K) into coastal ocean
+> cells**, with both LiDAR sites inside the affected strip (P0: 291.5 K instead
+> of ~300 K). That bug is **fixed** and both experiments were re-run. The names
+> `EXP01` and `EXP02` now mean the corrected integrations, and every conclusion
+> comes from them. The superseded attempts are retained, registered and still
+> analysed as **`EXP01_BADSST`** and **`EXP02_BADSST`**, because they are the
+> evidence for the finding. Details:
+> [`SCIENTIFIC_NOTES.md`](SCIENTIFIC_NOTES.md), entry 2026-10-07.
+>
+> **Current answer:** `EXP01` — daily OISST update on the unbuffered mesh. It
+> beats `CTL` in 8 of 8 site-period-height comparisons; the buffered mesh is
+> indistinguishable from it and costs 24 % more cells.
 
 ## What is being compared
 
-| | `CTL` | `EXP01` | `EXP02` |
-|---|---|---|---|
-| Delta vs parent | baseline | daily NOAA OISST SST update | buffered mesh (5 → 32 km ramp) + wider ERA5 box |
-| Mesh | `meqbr_05km` (76 813 cells) | same | `meqbr_05km_buf` (95 138 cells) |
-| Relative cost | 1.00 | 1.00 | 1.24 |
-| Status | complete | complete | running; see generated `docs/run_status.md` |
+| | `CTL` | `EXP01` | `EXP02` | `EXP01_BADSST` | `EXP02_BADSST` |
+|---|---|---|---|---|---|
+| Delta vs parent | baseline | daily NOAA OISST SST update | buffered mesh (5 → 32 km ramp) + wider ERA5 box | superseded `EXP01` | superseded `EXP02` |
+| Mesh | `meqbr_05km` (76 813) | same | `meqbr_05km_buf` (95 138) | `meqbr_05km` | `meqbr_05km_buf` |
+| Relative cost | 1.00 | 1.00 | 1.24 | 1.00 | 1.24 |
+| MPI ranks | 80 | 90 | 90 | 60 | 60 |
+| SST forcing | frozen ERA5 skin | **clean** | **clean** | contaminated | contaminated |
+
+All five integrations are complete in both periods; see generated
+[`docs/run_status.md`](docs/run_status.md). Use `EXP01`/`EXP02` for every
+scientific statement; the `_BADSST` pair exists so the forcing bug stays
+reproducible, and is excluded from every table that decides anything.
 
 Two 41-day integrations each (10-day spin-up discarded), each carrying a
 different in-situ instrument: **2021 → P0 floating LiDAR**, **2022 → LPI fixed
@@ -42,7 +53,8 @@ SST update is already on.
 
 | Question | Table | Figure |
 |---|---|---|
-| Which experiment wins, with uncertainty | `results/tables/pairwise_tests*.csv`, `selection_summary*.md` | `figures/selection/ranking*.png` |
+| Which experiment wins, with uncertainty | `results/tables/pairwise_tests_current.csv`, `selection_summary_current.md` | `figures/selection/ranking_current.png` |
+| Whether the SST fix worked, leg by leg | `results/audit/corrected_runs_validation.json` | — |
 | Is the SST forcing sound | `results/tables/sst_forcing_check.csv` | `figures/selection/sst_forcing_*.png` |
 | Why the experiments differ | `results/tables/attribution_summary.csv` | `figures/selection/attribution_*.png` |
 | Does the buffered mesh act where it should | `results/tables/boundary_influence.csv` | `figures/selection/boundary_influence_*.png` |
@@ -99,8 +111,8 @@ python scripts/00_setup/link_observations.py           # once
 Every script takes `--help`, and most take `--experiments`, `--period` and
 `--common-period/--no-common-period`.
 
-**When `EXP02` finishes**, re-run from stage 00: the extraction picks up only the
-new hours, and every comparison window widens automatically.
+Stage 06 first revalidates the corrected integrations (file sequence, every
+NetCDF opened, MPAS terminal markers) and then rebuilds the HTML report.
 
 ## Repository layout
 
@@ -127,7 +139,7 @@ record of what was decided and when. Everything else under `results/` and all of
 Full list in [`docs/analysis_conventions.md`](docs/analysis_conventions.md). The
 three that cause the most damage when ignored:
 
-- **Never assume the file list equals the analysis window.** `EXP02`'s history
+- **Never assume the file list equals the analysis window.** `EXP02_BADSST`'s history
   still contains its spin-up. Always go through `io.select_window()`.
 - **Nearest-cell indices are per leg.** The two meshes do not share cell indices.
 - **Compare experiments over the same hours.** `pairing.load_paired(...,
