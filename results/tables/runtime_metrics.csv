@@ -1,0 +1,7 @@
+experiment,period,status,quality,mpi_ranks,n_cells,simulated_hours,wall_seconds,wall_hours,sim_hours_per_wall_hour,core_hours,machine_hours_per_sim_hour_single_core,wall_days_per_model_year_100_cores,core_hours_per_sim_hour,wall_seconds_per_timestep,cell_steps_per_core_second,method,source,note
+CTL,2021,complete_estimated,estimated,80,76813,720.0,103274.284,28.687,25.098,2294.984,3.1875,11.63,3.1875,1.1953,803.279,history_mtime_span,CTL/20211101_20211201,CTL wrapper/log absent; reconstructed from retained hourly files
+CTL,2022,complete_estimated,estimated,80,76813,744.0,93004.0,25.834,28.799,2066.756,2.7779,10.14,2.7779,1.0417,921.716,log_birth_to_close,CTL/20221001_20221101/log.atmosphere.0000.out,CTL wrapper absent; reconstructed for retained/restart leg
+EXP01,2021,complete,measured,60,76813,984.0,149962.0,41.656,23.622,2499.367,2.54,9.27,2.54,1.27,1008.042,wrapper_elapsed,EXP01/run_exp01.log,wrapper rc=0
+EXP01,2022,complete,measured,60,76813,984.0,151352.0,42.042,23.405,2522.533,2.5636,9.36,2.5636,1.2818,998.784,wrapper_elapsed,EXP01/run_exp01.log,wrapper rc=0
+EXP02,2021,complete,measured,60,95138,984.0,192142.0,53.373,18.436,3202.367,3.2544,11.88,3.2544,1.6272,974.444,wrapper_elapsed,EXP02/run_exp02.log,wrapper rc=0
+EXP02,2022,complete,measured,60,95138,984.0,185908.0,51.641,19.055,3098.467,3.1488,11.49,3.1488,1.5744,1007.12,wrapper_elapsed,EXP02/run_exp02.log,wrapper rc=0

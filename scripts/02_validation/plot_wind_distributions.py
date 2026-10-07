@@ -73,6 +73,11 @@ def main() -> int:
         if not frames:
             continue
         ref = next(iter(frames.values()))
+        era5 = pairing.add_era5(frames, cfg, period)
+        era5_pair = None
+        if era5 is not None and args.height == 100:
+            era5_pair = ref[["time", "obs_speed", "obs_dir"]].merge(
+                era5, on="time", how="inner")
 
         # ---- distribution + Weibull --------------------------------------
         from scipy.stats import weibull_min
@@ -85,6 +90,11 @@ def main() -> int:
         A, k = metrics.weibull_fit(ref["obs_speed"])
         ax.plot(grid, weibull_min.pdf(grid, k, 0, A), color="k", lw=2,
                 label=f"LiDAR Weibull (A={A:.2f}, k={k:.2f})")
+        if era5_pair is not None and len(era5_pair) > 48:
+            Ae, ke = metrics.weibull_fit(era5_pair["era5_speed"])
+            ax.plot(grid, weibull_min.pdf(grid, ke, 0, Ae),
+                    color=plotting.EXPERIMENT_COLORS["ERA5"], lw=1.5, ls="--",
+                    label=f"ERA5 (A={Ae:.2f}, k={ke:.2f})")
         for exp in plotting.EXPERIMENT_ORDER:
             if exp not in frames:
                 continue
@@ -106,7 +116,11 @@ def main() -> int:
         made.append(out)
 
         # ---- wind roses ---------------------------------------------------
-        panels = [("LiDAR", ref["obs_dir"].values, ref["obs_speed"].values)] + [
+        panels = [("LiDAR", ref["obs_dir"].values, ref["obs_speed"].values)]
+        if era5_pair is not None and len(era5_pair) > 48:
+            panels.append(("ERA5", era5_pair["era5_dir"].values,
+                           era5_pair["era5_speed"].values))
+        panels += [
             (exp, frames[exp]["mod_dir"].values, frames[exp]["mod_speed"].values)
             for exp in plotting.EXPERIMENT_ORDER if exp in frames]
         speed_bins = [0, 4, 6, 8, 10, 100]
@@ -141,7 +155,8 @@ def main() -> int:
                      y=1.04)
         plotting.provenance_footer(
             fig, "scripts/02_validation/plot_wind_distributions.py | 16 sectors, direction "
-                 "the wind blows FROM | radius = fraction of hours")
+                 "the wind blows FROM | radius = fraction of hours | ERA5 included only "
+                 "for the directly comparable 100 m diagnostic")
         out = cfg.path("figures", "validation",
                        f"windrose_{period}_{site_key}_{args.height}m.png")
         fig.savefig(out)

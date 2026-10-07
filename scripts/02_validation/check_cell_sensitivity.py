@@ -99,6 +99,17 @@ def main() -> int:
                 continue
             ax.plot(e["distance_km"], e["rmse"], "o-", ms=5,
                     color=plotting.EXPERIMENT_COLORS[exp], label=exp)
+        common = pairing.load_paired(cfg, experiments, period, cell=0, common=True)
+        era5 = pairing.add_era5(common, cfg, period)
+        if common and era5 is not None and args.height == 100:
+            ref = next(iter(common.values()))
+            ref = ref[ref["model_height"] == args.height][["time", "obs_speed"]]
+            e = ref.merge(era5, on="time", how="inner")
+            if len(e) > 24:
+                era5_rmse = metrics.basic_scores(
+                    e["obs_speed"], e["era5_speed"])["rmse"]
+                ax.axhline(era5_rmse, color=plotting.EXPERIMENT_COLORS["ERA5"],
+                           ls="--", lw=1.4, label="ERA5 (janela comum)")
         ax.set_xlabel("distance from instrument to cell centre (km)")
         ax.set_title(f"{cfg.periods[period]['label']} — "
                      f"{cfg.periods[period]['validation_site']} — {args.height} m")
@@ -107,7 +118,8 @@ def main() -> int:
     plotting.provenance_footer(
         fig, "scripts/02_validation/check_cell_sensitivity.py | each point is one of the "
              "five nearest ocean cells | the vertical spread within one colour is the "
-             "representativeness floor an experiment difference must exceed")
+             "representativeness floor an experiment difference must exceed | dashed "
+             "ERA5 line uses the hours common to all available MPAS experiments")
     fig_out = cfg.path("figures", "validation", "cell_sensitivity.png")
     fig.savefig(fig_out)
     plt.close(fig)

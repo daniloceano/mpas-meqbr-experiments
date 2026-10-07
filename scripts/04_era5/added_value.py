@@ -89,6 +89,7 @@ def main() -> int:
                      "height_m": args.height, "n": s_era["n"],
                      "rmse": s_era["rmse"], "bias": s_era["bias"], "r": s_era["r"],
                      "wpd_rel_bias_pct": r_era["wpd_rel_bias_pct"],
+                     "rmse_reduction_vs_era5": 0.0,
                      "skill_vs_era5": 0.0, "skill_lo": np.nan, "skill_hi": np.nan,
                      "significant": False})
         print(f"  ERA5   N={s_era['n']:>5d}  bias={s_era['bias']:+.2f}  "
@@ -108,6 +109,7 @@ def main() -> int:
                 "height_m": args.height, "n": s["n"],
                 "rmse": s["rmse"], "bias": s["bias"], "r": s["r"],
                 "wpd_rel_bias_pct": r["wpd_rel_bias_pct"],
+                "rmse_reduction_vs_era5": 1.0 - s["rmse"] / s_era["rmse"],
                 "skill_vs_era5": test["delta_mse"] / mse_era,
                 "skill_lo": test["lo"] / mse_era, "skill_hi": test["hi"] / mse_era,
                 "significant": test["significant"],
@@ -149,13 +151,14 @@ def main() -> int:
         ax.set_xticklabels(order)
         n = int(s["n"].max())
         ax.set_title(f"{site_key} — {cfg.periods[period]['label']} (N={n} h)")
-    axes[0][0].set_ylabel("skill score vs ERA5\n(fraction of ERA5 MSE removed)")
+    axes[0][0].set_ylabel("skill score vs ERA5\n1 - MSE(MPAS) / MSE(ERA5)")
     fig.suptitle(f"Added value of the {args.height} m MPAS wind over its ERA5 forcing",
                  y=1.03)
     plotting.provenance_footer(
         fig, f"scripts/04_era5/added_value.py | ERA5 100 m wind, bilinearly interpolated to "
              f"the site | 95 % moving-block bootstrap ({args.block_hours} h blocks, "
-             f"{args.n_boot} resamples) | above 0 = downscaling removes ERA5 error, "
+             f"{args.n_boot} resamples) | SS = 1 - MSE(MPAS)/MSE(ERA5) = "
+             "1 - [RMSE(MPAS)/RMSE(ERA5)]^2 | above 0 = downscaling removes ERA5 error, "
              "below 0 = it adds error")
     fig_out = cfg.path("figures", "era5", f"added_value{tag}.png")
     fig.savefig(fig_out)

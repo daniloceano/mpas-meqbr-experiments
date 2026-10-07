@@ -60,7 +60,7 @@ def main() -> int:
               f"mean 100 m speed {df['speed_100'].mean():.2f} m/s "
               f"-> {out.relative_to(REPO_ROOT)}")
 
-        for st in cfg.secondary["stations"]:
+        for st in cfg.surface["stations"]:
             sdf = era5.at_point(ds, st["lat"], st["lon"])
             sdf = sdf.assign(station=st["id"], name=st["name"], period=period)
             station_frames.append(sdf)

@@ -129,7 +129,7 @@ Variables used: `uReconstructZonal/Meridional`, `theta`, `pressure`, `relhum`,
 | QC | per-height availability flag, ≥ 80 % | physical range only (no flag exists) |
 | Distance to nearest model ocean cell | 2.5 km (`meqbr_05km`), 1.1 km (`_buf`) | 1.8 km |
 
-### Public surface stations (secondary evidence)
+### INMET automatic stations (primary surface evidence)
 
 Eight stations from the NOAA NCEI Integrated Surface Database, which is where the
 Brazilian INMET automatic network and airport reports are internationally
@@ -371,7 +371,9 @@ The INMET automatic masts read 3.2 m s⁻¹ on average against 6.5 m s⁻¹ at t
 airports in the same region and the same months. A factor-of-two difference
 between two networks measuring the same wind is a siting and exposure
 difference — sheltered masts against open airfields — and a ~5 km cell cannot
-represent the shelter. Those stations therefore say very little about the model.
+represent the shelter. Their absolute bias therefore carries a large
+representativeness component, while timing and along-coast structure remain
+direct evidence for the surface-circulation axis.
 
 The **well-exposed** sites all agree, and they agree with the offshore
 instruments: the airports are slow by 0.74-0.86 m s⁻¹, the LiDARs by 0.4-1.8
@@ -382,7 +384,7 @@ the same sign, −1.9 m s⁻¹ at both LiDARs), rather than at anything specific
 the marine boundary layer — and it is the single most consequential bias for
 resource work, since −20 % in WPD is −20 % in energy.
 
-This is also a caution about how the secondary tier is used: pooling stations of
+This is also a caution about how the surface axis is used: pooling stations of
 different exposure gives a number with the wrong sign.
 
 #### 5. The diurnal cycle: right phase inland, five hours late offshore

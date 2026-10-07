@@ -65,6 +65,28 @@ def main() -> int:
         era5 = pairing.add_era5(frames, cfg, period)
         if era5 is None:
             print("  (no ERA5 series yet — skill scores against ERA5 omitted)")
+        else:
+            ref = next(iter(frames.values()))
+            ref = ref[ref["model_height"] == 100][
+                ["time", "obs_speed", "obs_dir"]]
+            era = ref.merge(era5, on="time", how="inner").sort_values("time")
+            if len(era) > 10:
+                era_scores = metrics.all_scores(
+                    era["time"], era["obs_speed"], era["era5_speed"],
+                    era["obs_dir"], era["era5_dir"])
+                rows.append({
+                    "experiment": "ERA5", "period": period, "site": site_key,
+                    "height_m": 100, "window_start": era["time"].min(),
+                    "window_end": era["time"].max(), **era_scores,
+                    "era5_skill_score": 0.0,
+                    "era5_rmse": era_scores["rmse"],
+                    "era5_bias": era_scores["bias"],
+                })
+                print(f"  {'ERA5':6s} {100:>4d} m  N={era_scores['n']:>5d}  "
+                      f"bias={era_scores['bias']:+.2f}  "
+                      f"RMSE={era_scores['rmse']:.2f}  "
+                      f"R={era_scores['r']:.3f}  "
+                      f"WPD bias={era_scores['wpd_rel_bias_pct']:+.1f} %")
 
         for exp, df in frames.items():
             for height, sub in df.groupby("model_height"):

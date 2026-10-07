@@ -22,6 +22,7 @@ results/site_timeseries/*
 results/fields/*
 results/logs/*
 !results/*/.gitkeep
+results/report/*
 figures/*/*
 !figures/*/.gitkeep
 

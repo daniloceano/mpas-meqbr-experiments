@@ -1,0 +1,5 @@
+experiment,n_stations,n_station_periods,obs_mean,model_mean,bias,rmse,r,diurnal_amp_obs,diurnal_amp_model,diurnal_phase_error_h
+CTL,4,6,3.179,5.181,2.002,2.32,0.724,3.148,3.566,-0.333
+ERA5,4,6,3.179,5.477,2.298,2.57,0.635,3.148,1.833,-2.833
+EXP01,4,6,3.179,5.038,1.859,2.185,0.731,3.148,3.724,-0.333
+EXP02,4,6,3.179,4.737,1.558,1.936,0.675,3.148,3.201,0.0

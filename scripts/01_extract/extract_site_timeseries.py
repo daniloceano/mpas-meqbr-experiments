@@ -157,7 +157,10 @@ def extract_leg(leg, site, cfg, *, n_cells: int, force: bool) -> Path | None:
     if len(have) and not force:
         with xr.open_dataset(out) as old:
             old = old.load()
-        ds = xr.concat([old, ds], dim="time").sortby("time")
+        ds = xr.concat(
+            [old, ds], dim="time", data_vars="minimal", coords="minimal",
+            compat="equals", combine_attrs="override",
+        ).sortby("time")
         ds = ds.isel(time=~pd.Index(ds["time"].values).duplicated())
     tmp = out.with_suffix(".tmp.nc")
     ds.to_netcdf(tmp)

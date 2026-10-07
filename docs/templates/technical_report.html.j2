@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Relatório técnico — Experimentos MPAS MeqBr</title>
+  <style>
+    :root {
+      --ink: #17324d;
+      --muted: #5f7182;
+      --paper: #f3f6f7;
+      --card: #ffffff;
+      --line: #d8e1e7;
+      --ocean: #006d77;
+      --sky: #2a9d8f;
+      --sand: #e9c46a;
+      --warning: #9b4d00;
+      --warning-bg: #fff4dc;
+      --danger: #9f2d2d;
+      --danger-bg: #fff0ed;
+      --info-bg: #edf7f6;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+      line-height: 1.58;
+    }
+    header {
+      color: white;
+      padding: 4.5rem max(5vw, 2rem) 3.5rem;
+      background:
+        radial-gradient(circle at 85% 15%, rgba(233,196,106,.32), transparent 25%),
+        linear-gradient(125deg, #073b4c, #006d77 58%, #2a9d8f);
+    }
+    header p { max-width: 930px; color: #e7f6f5; font-size: 1.08rem; }
+    h1 { font-size: clamp(2rem, 5vw, 4rem); line-height: 1.05; margin: 0 0 1rem; }
+    h2 { margin: 0 0 1rem; font-size: 1.8rem; line-height: 1.2; }
+    h3 { margin: 2rem 0 .55rem; font-size: 1.28rem; }
+    h4 { margin: 1.4rem 0 .45rem; font-size: 1.03rem; }
+    p { margin: .55rem 0 1rem; }
+    section[id] { scroll-margin-top: 1rem; }
+    .meta { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.5rem; }
+    .pill {
+      border: 1px solid rgba(255,255,255,.42);
+      border-radius: 999px;
+      padding: .35rem .75rem;
+      background: rgba(255,255,255,.12);
+      font-size: .85rem;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(205px, 245px) minmax(0, 1160px);
+      gap: 2rem;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    nav {
+      position: sticky;
+      top: 1.2rem;
+      align-self: start;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      max-height: calc(100vh - 2.4rem);
+      overflow-y: auto;
+    }
+    nav a {
+      display: block;
+      color: var(--muted);
+      text-decoration: none;
+      padding: .42rem .55rem;
+      border-radius: 7px;
+      font-size: .9rem;
+    }
+    nav a:hover { color: var(--ocean); background: var(--info-bg); }
+    nav .nav-sub { padding-left: 1.1rem; font-size: .82rem; }
+    main { min-width: 0; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: clamp(1.2rem, 3vw, 2.25rem);
+      margin-bottom: 1.4rem;
+      box-shadow: 0 8px 28px rgba(23,50,77,.05);
+    }
+    .lead { font-size: 1.06rem; color: #29465f; max-width: 960px; }
+    .banner {
+      border-left: 6px solid var(--warning);
+      background: var(--warning-bg);
+      padding: 1rem 1.2rem;
+      border-radius: 9px;
+      color: #643500;
+      margin: 1rem 0 1.4rem;
+    }
+    .critical { border-left-color: var(--danger); background: var(--danger-bg); color: #702020; }
+    .info { border-left-color: var(--ocean); background: var(--info-bg); color: #174c50; }
+    .cards, .method-grid, .period-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+      background: #fbfdfd;
+    }
+    .card strong { display: block; color: var(--ocean); font-size: 1.08rem; }
+    .card small { color: var(--muted); }
+    .period-card b { color: var(--ocean); }
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: .7rem;
+      align-items: center;
+      margin: 1.4rem 0;
+    }
+    .flow .step {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: .8rem;
+      text-align: center;
+      background: #f8fbfb;
+    }
+    .flow .arrow { font-size: 1.5rem; color: var(--sky); }
+    .key-table { margin: 1rem 0; }
+    .key-table td:first-child { width: 31%; font-weight: 700; color: #29465f; }
+    .table-block { margin: 1.1rem 0 2.2rem; }
+    .table-caption {
+      padding: .8rem 1rem;
+      margin: 0;
+      background: #eef6f5;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      border-radius: 10px 10px 0 0;
+      color: #29465f;
+    }
+    .table-caption strong { display: block; color: var(--ocean); font-size: 1.03rem; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th {
+      text-align: left;
+      color: white;
+      background: var(--ocean);
+      padding: .68rem .72rem;
+      vertical-align: bottom;
+      line-height: 1.25;
+    }
+    td { padding: .58rem .72rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tbody tr:nth-child(even) { background: #f4f8f8; }
+    td.best-value { font-weight: 800; background: #fff7d6; color: #17324d; }
+    tr.height-separator td { border-top: 3px solid #8eabb4; }
+    td.metric-improved { color: #087443; background: #e9f8ef; font-weight: 800; }
+    td.metric-worsened { color: #b42318; background: #fff0ed; font-weight: 800; }
+    .table-notes {
+      margin: 0;
+      padding: .75rem 1rem .75rem 2rem;
+      background: #fafcfc;
+      border: 1px solid var(--line);
+      border-top: 0;
+      border-radius: 0 0 10px 10px;
+      color: var(--muted);
+      font-size: .86rem;
+    }
+    .topic {
+      margin: 1.3rem 0 2.3rem;
+      padding-top: .2rem;
+    }
+    .topic-intro { color: var(--muted); max-width: 900px; }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 1.1rem;
+    }
+    .gallery.single { grid-template-columns: minmax(0, 1fr); }
+    figure {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f8fbfb;
+      align-self: start;
+    }
+    figure img, figure video { display: block; width: 100%; height: auto; background: white; }
+    .figure-zoom {
+      display: block;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      background: white;
+      cursor: zoom-in;
+    }
+    .figure-zoom:focus-visible { outline: 4px solid var(--sand); outline-offset: -4px; }
+    figcaption { color: var(--muted); padding: .8rem 1rem 1rem; font-size: .86rem; }
+    figcaption strong { display: block; color: var(--ink); margin-bottom: .28rem; font-size: .93rem; }
+    .experiment {
+      margin: 1.2rem 0 2rem;
+      border-top: 3px solid var(--ocean);
+      padding-top: 1rem;
+    }
+    .experiment-meta { color: var(--muted); font-size: .9rem; margin-bottom: .8rem; }
+    .provisional { color: var(--warning); font-weight: 700; }
+    .method-grid .card p { font-size: .9rem; margin: .45rem 0; }
+    .plain-list li { margin-bottom: .5rem; }
+    footer {
+      max-width: 1160px;
+      margin: 1rem auto 3rem;
+      padding: 0 2rem;
+      color: var(--muted);
+      font-size: .84rem;
+    }
+    code { background: #edf1f3; border-radius: 4px; padding: .1rem .3rem; }
+    body.lightbox-open { overflow: hidden; }
+    .lightbox[hidden] { display: none; }
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+      background: rgba(5, 22, 31, .88);
+    }
+    .lightbox-dialog {
+      position: relative;
+      width: min(96vw, 1500px);
+      max-height: 94vh;
+      overflow: auto;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 24px 70px rgba(0,0,0,.45);
+    }
+    .lightbox img { display: block; width: 100%; height: auto; }
+    .lightbox-caption { margin: 0; padding: .8rem 4.5rem .9rem 1rem; }
+    .lightbox-caption a { color: var(--ocean); font-weight: 700; }
+    .lightbox-close {
+      position: absolute;
+      top: .65rem;
+      right: .65rem;
+      z-index: 2;
+      width: 2.6rem;
+      height: 2.6rem;
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 999px;
+      color: white;
+      background: rgba(5,22,31,.78);
+      font-size: 1.45rem;
+      cursor: pointer;
+    }
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; padding: 1rem; }
+      nav { position: static; max-height: none; }
+      .flow { grid-template-columns: 1fr; }
+      .flow .arrow { transform: rotate(90deg); text-align: center; }
+      .gallery { grid-template-columns: 1fr; }
+      .key-table td:first-child { width: auto; }
+    }
+    @media print {
+      nav { display: none; }
+      .layout { display: block; padding: 0; }
+      section { box-shadow: none; }
+      header { padding: 2rem; }
+      video { display: none; }
+      .lightbox { display: none !important; }
+      figure, .table-block { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+{% macro render_table(table) %}
+  <div class="table-block">
+    <p class="table-caption">
+      <strong>{{ table.title }}</strong>
+      {{ table.description }}
+    </p>
+    <div class="table-wrap">{{ table.html | safe }}</div>
+    {% if table.notes %}
+    <ul class="table-notes">
+      {% for note in table.notes %}<li>{{ note }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_gallery(group, single=false) %}
+  {% if group %}
+  <div class="gallery{% if single %} single{% endif %}">
+    {% for item in group["items"] %}
+    <figure>
+      {% if item.kind == "video" %}
+      <video controls preload="metadata" src="{{ item.url }}"></video>
+      {% else %}
+      <button class="figure-zoom" type="button" data-full="{{ item.url }}"
+              data-title="{{ item.title }}" aria-label="Ampliar figura: {{ item.title }}">
+        <img src="{{ item.url }}" loading="lazy" alt="{{ item.title }}">
+      </button>
+      {% endif %}
+      <figcaption><strong>{{ item.title }}</strong>{{ item.caption }}</figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endmacro %}
+
+<header>
+  <h1>Experimentos MPAS na Margem Equatorial Brasileira</h1>
+  <p>Relatório técnico sobre o andamento da modelagem regional, o efeito das
+     configurações testadas e a capacidade do downscaling de representar o
+     recurso eólico offshore e a circulação costeira.</p>
+  <div class="meta">
+    <span class="pill">Gerado em {{ generated }}</span>
+    <span class="pill">Commit {{ commit }}{% if dirty %} + alterações locais{% endif %}</span>
+    <span class="pill">{% if provisional %}PROTÓTIPO PROVISÓRIO{% else %}SNAPSHOT COMPLETO{% endif %}</span>
+  </div>
+</header>
+
+<div class="layout">
+  <nav aria-label="Sumário">
+    <strong>Conteúdo</strong>
+    <a href="#resumo">1. Visão geral</a>
+    <a href="#desenho">2. Desenho experimental</a>
+    <a class="nav-sub" href="#configuracao-comum">Configuração comum</a>
+    <a class="nav-sub" href="#experimentos">Experimentos</a>
+    <a href="#andamento">3. Andamento e custo</a>
+    <a href="#resultados-modelo">4. Resultados do modelo</a>
+    <a class="nav-sub" href="#campos-espaciais">Campos espaciais</a>
+    <a class="nav-sub" href="#estrutura-local">Estrutura local</a>
+    <a href="#validacao">5. Validação observacional</a>
+    <a class="nav-sub" href="#rede-observacional">Rede e tratamento</a>
+    <a class="nav-sub" href="#inmet">INMET</a>
+    <a class="nav-sub" href="#lidar">LiDAR offshore</a>
+    <a href="#valor-adicionado">6. Valor adicionado</a>
+    <a href="#mecanismos">7. Mecanismos e seleção</a>
+    <a href="#conclusoes">8. Conclusões</a>
+  </nav>
+
+  <main>
+    <div class="banner{% if provisional %} critical{% endif %}">
+      <strong>Status do documento:</strong> {{ status_text }}
+    </div>
+
+    <section id="resumo">
+      <h2>1. Visão geral</h2>
+      <p class="lead">O objetivo é escolher uma configuração do MPAS adequada
+         para futuras simulações climatológicas de recurso eólico na Margem
+         Equatorial Brasileira (MEqBr), preservando ganho físico e estatístico
+         sem custo computacional desnecessário.</p>
+      <div class="cards">
+        <div class="card">
+          <strong>Pergunta 1 — superfície oceânica</strong>
+          <p>A atualização diária da temperatura da superfície do mar melhora a
+             circulação costeira e o vento em altura de rotor?</p>
+        </div>
+        <div class="card">
+          <strong>Pergunta 2 — fronteira lateral</strong>
+          <p>Afastar a zona de relaxação permite que o MPAS desenvolva melhor as
+             estruturas de mesoescala antes que o escoamento alcance a área de interesse?</p>
+        </div>
+        <div class="card">
+          <strong>Pergunta 3 — valor adicionado</strong>
+          <p>O downscaling a aproximadamente 5 km reduz o erro do ERA5 nos
+             LiDARs e acrescenta estrutura espacial relevante ao recurso eólico?</p>
+        </div>
+      </div>
+      <div class="banner critical">
+        <strong>Limitação crítica da interpretação.</strong> EXP01 e EXP02
+        receberam valores de preenchimento terrestre da OISST em células
+        oceânicas costeiras. As diferenças contra CTL não podem ser atribuídas
+        somente à evolução da SST ou ao tratamento de fronteira até que esse
+        problema seja corrigido e os experimentos afetados sejam reavaliados.
+      </div>
+      <p><strong>Como ler o relatório:</strong> primeiro são apresentados o
+         desenho e o estado das integrações; depois, os campos produzidos pelo
+         modelo; em seguida, a validação observacional; por último, o valor
+         adicionado sobre o ERA5 e a interpretação dos mecanismos.</p>
+    </section>
+
+    <section id="desenho">
+      <h2>2. Desenho experimental</h2>
+      <p class="lead">Os três experimentos usam a mesma dinâmica, física,
+         discretização vertical e períodos. Cada novo experimento herda o
+         anterior e acrescenta uma mudança específica.</p>
+
+      <div id="configuracao-comum">
+        <h3>2.1 Configuração comum a todos os experimentos</h3>
+        <p>A tabela abaixo define o que permanece fixo. Assim, diferenças entre
+           os experimentos não devem ser atribuídas a esses parâmetros.</p>
+        <div class="table-wrap key-table">
+          <table>
+            <thead><tr><th>Componente</th><th>Configuração</th></tr></thead>
+            <tbody>
+              {% for row in common_configuration %}
+              <tr><td>{{ row.item }}</td><td>{{ row.value }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Períodos, spin-up e observação associada</h4>
+        <div class="period-grid">
+          {% for period in periods %}
+          <div class="card period-card">
+            <strong>{{ period.id }} — validação em {{ period.site }}</strong>
+            <p><b>Integração:</b> {{ period.integration }} ({{ period.integration_days }} dias)</p>
+            <p><b>Spin-up descartado:</b> {{ period.spinup }} ({{ period.spinup_days }} dias)</p>
+            <p><b>Janela analisada:</b> {{ period.analysis }} ({{ period.analysis_days }} dias)</p>
+          </div>
+          {% endfor %}
+        </div>
+        <p class="topic-intro">Em 2021 o intervalo entre 21/10 e 01/11 corresponde
+           exatamente a 11 dias; em 2022, entre 21/09 e 01/10, a 10 dias. Ambos
+           resultam em integrações completas de 41 dias porque as janelas
+           científicas têm, respectivamente, 30 e 31 dias.</p>
+      </div>
+
+      <div id="experimentos">
+        <h3>2.2 O que muda em cada experimento</h3>
+        <div class="flow" aria-label="Desenho cumulativo">
+          <div class="step"><strong>CTL</strong><br>configuração de referência</div>
+          <div class="arrow">→</div>
+          <div class="step"><strong>EXP01</strong><br>CTL + SST diária</div>
+          <div class="arrow">→</div>
+          <div class="step"><strong>EXP02</strong><br>EXP01 + tratamento de fronteira</div>
+        </div>
+        <div class="banner info">
+          <strong>Desenho cumulativo.</strong> EXP02 − EXP01 mede o efeito
+          incremental do tratamento de fronteira quando a SST diária já está
+          ativa. Não é o efeito isolado da malha com buffer.
+        </div>
+        {% for exp in experiments %}
+        <article class="experiment">
+          <h4>{{ exp.id }}</h4>
+          <div class="experiment-meta">
+            {{ exp.mesh }} · {{ exp.n_cells }} células · {{ exp.mpi_ranks }} ranks MPI · {{ exp.status }}
+          </div>
+          <p>{{ exp.description }}</p>
+          <figure>
+            <img src="{{ exp.figure_url }}" loading="lazy" alt="Figura representativa do experimento {{ exp.id }}">
+            <figcaption><strong>{{ exp.id }} — representação da mudança avaliada</strong>{{ exp.description }}</figcaption>
+          </figure>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="andamento">
+      <h2>3. Andamento das simulações e custo computacional</h2>
+      <p class="lead">Esta seção separa completude científica de desempenho
+         computacional. Uma integração parcial pode informar custo até o momento,
+         mas não deve sustentar uma conclusão final de habilidade.</p>
+      {% if "inventory" in tables %}{{ render_table(tables["inventory"]) }}{% endif %}
+      {% if "runtime" in tables %}{{ render_table(tables["runtime"]) }}{% endif %}
+    </section>
+
+    <section id="resultados-modelo">
+      <h2>4. Descrição dos resultados do modelo</h2>
+      <p class="lead">Antes de comparar o MPAS com observações, é necessário
+         entender os campos que ele produz: onde estão os máximos de recurso,
+         como a circulação varia no espaço e qual estrutura vertical aparece
+         junto à costa.</p>
+
+      <div id="campos-espaciais" class="topic">
+        <h3>4.1 Campos espaciais e resposta às configurações</h3>
+        <p class="topic-intro">Os mapas médios descrevem o recurso eólico,
+           sua persistência direcional e o ciclo diurno. Os mapas de diferença
+           mostram onde cada alteração de configuração atua.</p>
+        <div class="banner info">
+          <strong>Como foi calculado o potencial eólico.</strong>
+          O relatório usa a densidade de potência disponível no vento:
+          <b>WPD = ½ ρ × média(U<sup>3</sup>)</b>, com densidade do ar
+          <b>ρ = 1,15 kg m<sup>−3</sup></b> e velocidade U em m s<sup>−1</sup>.
+          O cubo é calculado em cada horário antes da média; o resultado é dado
+          em W m<sup>−2</sup>. Isso representa o recurso no escoamento, não a
+          produção de uma turbina específica.
+        </div>
+        {{ render_gallery(media_groups.get("spatial_fields")) }}
+      </div>
+
+      <div id="estrutura-local" class="topic">
+        <h3>4.2 Estrutura vertical próxima aos sítios</h3>
+        <p class="topic-intro">As seções costeiras ajudam a interpretar os
+           resultados pontuais dos LiDARs e a identificar circulação de brisa,
+           cisalhamento e profundidade da camada limite. CTL, EXP01 e EXP02 são
+           mostrados no mesmo horário local para cada sítio.</p>
+        {{ render_gallery(media_groups.get("site_structure")) }}
+      </div>
+
+      <div class="topic">
+        <h3>4.3 Evolução temporal</h3>
+        <p class="topic-intro">As animações mostram a organização e a
+           persistência das estruturas que desaparecem quando se observa apenas
+           a média mensal. As mesmas janelas são apresentadas para CTL, EXP01 e
+           EXP02, tanto nos campos a 100 m quanto nos cortes verticais.</p>
+        {{ render_gallery(media_groups.get("animations")) }}
+      </div>
+    </section>
+
+    <section id="validacao">
+      <h2>5. Validação observacional</h2>
+      <p class="lead">A avaliação possui dois eixos primários independentes:
+         LiDARs offshore entre 50 e 250 m para o recurso em altura de rotor, e
+         estações automáticas INMET a 10 m para a circulação costeira de superfície.
+         Os dois eixos não são combinados em um único escore.</p>
+      <div class="banner info">
+        <strong>ERA5 como referência mínima de desempenho.</strong> Toda
+        comparação observacional inclui ERA5 quando existe uma altura
+        diretamente equivalente: 10 m nas estações INMET e 100 m nos LiDARs.
+        ERA5 não é extrapolado para 50, 150, 200 ou 250 m, pois isso exigiria
+        assumir um perfil vertical e contaminaria justamente a comparação que
+        se deseja fazer. O objetivo operacional é claro: o MPAS precisa superar
+        o ERA5 para justificar o downscaling.
+      </div>
+
+      <div id="rede-observacional" class="topic">
+        <h3>5.1 Região, estações e tratamento temporal</h3>
+        {{ render_gallery(media_groups.get("validation_network"), true) }}
+
+        <h4>Auditoria do tratamento de P0 e LPI</h4>
+        <div class="method-grid">
+          {% for method in observation_methods %}
+          <div class="card">
+            <strong>{{ method.site }} — {{ method.instrument }}</strong>
+            <small>{{ method.period }}</small>
+            <p><b>Arquivo nativo:</b> {{ method.native }}.</p>
+            <p><b>Controle de qualidade:</b> {{ method.qc }}.</p>
+            <p><b>Alturas comparadas:</b> {{ method.heights }}.</p>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="banner info">
+          <strong>Homogeneização confirmada no pipeline de análise.</strong>
+          P0 e LPI são ambos agregados para médias horárias centradas no horário
+          do MPAS, usando a janela [t−30 min, t+30 min) e exigindo no mínimo
+          {{ pairing.min_samples }} das 6 amostras possíveis. A velocidade é
+          promediada como escalar e a direção por média vetorial. O
+          pré-processamento do LPI apenas converte UTC−3 para UTC e escolhe as
+          colunas direcionais corrigidas; não realiza média temporal.
+        </div>
+        <p class="topic-intro">A única assimetria restante é documental e de QC:
+           P0 possui a variável de disponibilidade por altura; LPI não possui
+           flag equivalente. Aplicar um limiar apenas a P0 é rastreável.
+           Inventar um limiar para LPI não seria defensável.</p>
+      </div>
+
+      <div id="inmet" class="topic">
+        <h3>5.2 Validação da circulação de superfície — INMET</h3>
+        <p class="topic-intro">As estações automáticas testam se o modelo
+           representa magnitude, variabilidade espacial e fase do ciclo diurno
+           do vento terrestre a 10 m.</p>
+        {% if "inmet" in tables %}{{ render_table(tables["inmet"]) }}{% endif %}
+        {{ render_gallery(media_groups.get("inmet_validation")) }}
+      </div>
+
+      <div id="lidar" class="topic">
+        <h3>5.3 Validação offshore em altura de rotor — LiDAR</h3>
+        <h4>Características dos dados nos sítios</h4>
+        <p class="topic-intro">Distribuições e rosas dos ventos descrevem o
+           regime observado antes de resumir o desempenho do modelo.</p>
+        {{ render_gallery(media_groups.get("observed_data")) }}
+
+        <h4>Comparação quantitativa com o MPAS</h4>
+        <div class="banner info">
+          <strong>O que é o expoente de cisalhamento α.</strong>
+          Ele resume quanto a velocidade aumenta com a altura pela lei de
+          potência <b>U(z) = U(z<sub>0</sub>)(z/z<sub>0</sub>)<sup>α</sup></b>,
+          ou <b>α = ln(U<sub>2</sub>/U<sub>1</sub>) /
+          ln(z<sub>2</sub>/z<sub>1</sub>)</b>. Valores maiores de α indicam
+          aumento mais rápido do vento com a altura; α próximo de zero indica
+          perfil quase uniforme. A figura calcula α hora a hora entre a menor e
+          a maior altura comuns ao MPAS e ao LiDAR.
+        </div>
+        {% if "lidar" in tables %}{{ render_table(tables["lidar"]) }}{% endif %}
+        {{ render_gallery(media_groups.get("lidar_validation")) }}
+      </div>
+    </section>
+
+    <section id="valor-adicionado">
+      <h2>6. Valor adicionado em relação ao ERA5</h2>
+      <p class="lead">Valor adicionado significa reduzir o erro da reanálise nas
+         observações e/ou acrescentar estrutura espacial fisicamente plausível.
+         Maior resolução, sozinha, não garante maior habilidade.</p>
+      <div class="banner info">
+        <strong>Como o ganho frente ao ERA5 é calculado.</strong>
+        Para os mesmos horários e o mesmo LiDAR:
+        <b>redução do RMSE = 100 × [1 − RMSE<sub>MPAS</sub>/RMSE<sub>ERA5</sub>]</b>
+        e <b>redução do MSE = 100 × [1 − MSE<sub>MPAS</sub>/MSE<sub>ERA5</sub>]</b>.
+        Como MSE = RMSE<sup>2</sup>, o segundo valor também é
+        <b>100 × {1 − [RMSE<sub>MPAS</sub>/RMSE<sub>ERA5</sub>]<sup>2</sup>}</b>.
+        Resultado positivo é ganho; zero é empate; resultado negativo significa
+        que o MPAS ficou pior que o ERA5. A figura “Ganho ou perda de habilidade”
+        mostra a redução do MSE, também chamada de Murphy skill score.
+      </div>
+      {% if "added_value" in tables %}{{ render_table(tables["added_value"]) }}{% endif %}
+      {% if "resource" in tables %}{{ render_table(tables["resource"]) }}{% endif %}
+      {{ render_gallery(media_groups.get("added_value")) }}
+    </section>
+
+    <section id="mecanismos">
+      <h2>7. Mecanismos físicos e seleção da configuração</h2>
+      <p class="lead">O ranking estatístico precisa ser consistente com o
+         mecanismo esperado. Uma aparente melhora sem resposta coerente em SST,
+         fluxos, camada limite ou distância da fronteira não é transferível para
+         simulações climatológicas.</p>
+      <div class="banner critical">
+        <strong>Gate de integridade ativo.</strong> As figuras de SST são
+        mostradas para diagnosticar o problema, não para validar a hipótese de
+        SST diária. O ranking está consolidado para as simulações executadas,
+        mas permanece descritivo e não deve fundamentar sozinho a escolha de
+        uma configuração enquanto a contaminação costeira não for corrigida.
+      </div>
+      {{ render_gallery(media_groups.get("mechanisms")) }}
+    </section>
+
+    <section id="conclusoes">
+      <h2>8. Conclusões e próximos passos</h2>
+      <h3>O que os resultados permitem afirmar</h3>
+      <ul class="plain-list">
+        <li>CTL, EXP01 e EXP02 estão completos nos dois períodos, sem lacunas horárias na janela científica pós-spin-up.</li>
+        <li>O tratamento de fronteira produz uma resposta espacial organizada pela distância à zona de relaxação, indicando que a mudança atua como planejado.</li>
+        <li>Na validação INMET, todos os experimentos MPAS reduzem o RMSE médio do ERA5 (2,57 m s⁻¹): CTL atinge 2,32, EXP01 2,19 e EXP02 1,94 m s⁻¹. EXP02 também apresenta o menor viés absoluto (1,56 m s⁻¹) e erro médio de fase nulo; EXP01 tem a maior correlação (r = 0,73).</li>
+        <li>Em P0/2021, CTL, EXP01 e EXP02 reduzem significativamente o MSE a 100 m em relação ao ERA5; em LPI/2022, nenhum experimento se distingue estatisticamente do ERA5.</li>
+        <li>INMET e LiDAR trazem diagnósticos complementares: o primeiro avalia a circulação costeira terrestre a 10 m; o segundo avalia o recurso offshore em alturas de rotor.</li>
+        <li>O custo normalizado e a projeção de um ano com 100 núcleos permitem comparar configurações executadas com números diferentes de ranks, mantendo identificados os tempos medidos e estimados.</li>
+      </ul>
+
+      <h3>O que ainda não é possível concluir</h3>
+      <ul class="plain-list">
+        <li>Não há base para recomendar definitivamente EXP01 ou EXP02 enquanto o problema da OISST permanecer nas células oceânicas costeiras.</li>
+        <li>O efeito científico da SST diária não está isolado enquanto persistir a contaminação costeira da OISST.</li>
+        <li>As diferenças entre EXP02 e EXP01 não podem ser atribuídas somente ao tratamento de fronteira, pois ambos os experimentos compartilham a SST contaminada e EXP02 altera simultaneamente malha e caixa de forçamento.</li>
+      </ul>
+
+      <h3>Próximas ações</h3>
+      <ol class="plain-list">
+        <li>Corrigir o tratamento do preenchimento terrestre da OISST e decidir quais experimentos precisam ser repetidos.</li>
+        <li>Repetir os experimentos afetados e reprocessar campos, validações e valor adicionado nas mesmas janelas.</li>
+        <li>Usar as simulações corrigidas para consolidar a recomendação técnica frente ao ERA5 e ao custo computacional.</li>
+      </ol>
+    </section>
+  </main>
+</div>
+
+<div class="lightbox" id="figure-lightbox" hidden role="dialog" aria-modal="true"
+     aria-label="Figura ampliada">
+  <div class="lightbox-dialog">
+    <button class="lightbox-close" type="button" aria-label="Fechar figura">×</button>
+    <img id="lightbox-image" alt="">
+    <p class="lightbox-caption"><strong id="lightbox-title"></strong> ·
+      <a id="lightbox-new-tab" href="#" target="_blank" rel="noopener">abrir a imagem em nova guia</a>
+    </p>
+  </div>
+</div>
+
+<footer>
+  Relatório gerado por <code>scripts/06_report/build_technical_report.py</code>.
+  Consulte <code>report_manifest.json</code> para a proveniência de tabelas,
+  figuras e animações.
+</footer>
+<script>
+  (() => {
+    const lightbox = document.getElementById('figure-lightbox');
+    const image = document.getElementById('lightbox-image');
+    const title = document.getElementById('lightbox-title');
+    const newTab = document.getElementById('lightbox-new-tab');
+    const closeButton = lightbox.querySelector('.lightbox-close');
+    let lastTrigger = null;
+
+    function closeLightbox() {
+      lightbox.hidden = true;
+      image.removeAttribute('src');
+      document.body.classList.remove('lightbox-open');
+      if (lastTrigger) lastTrigger.focus();
+    }
+
+    document.querySelectorAll('.figure-zoom').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        lastTrigger = trigger;
+        image.src = trigger.dataset.full;
+        image.alt = trigger.dataset.title;
+        title.textContent = trigger.dataset.title;
+        newTab.href = trigger.dataset.full;
+        lightbox.hidden = false;
+        document.body.classList.add('lightbox-open');
+        closeButton.focus();
+      });
+    });
+    closeButton.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (event) => {
+      if (event.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !lightbox.hidden) closeLightbox();
+    });
+  })();
+</script>
+</body>
+</html>

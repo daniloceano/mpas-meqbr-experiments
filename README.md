@@ -27,7 +27,7 @@ for what each experiment *is*. This repository holds only the analysis.
 | Delta vs parent | baseline | daily NOAA OISST SST update | buffered mesh (5 → 32 km ramp) + wider ERA5 box |
 | Mesh | `meqbr_05km` (76 813 cells) | same | `meqbr_05km_buf` (95 138 cells) |
 | Relative cost | 1.00 | 1.00 | 1.24 |
-| Status | complete | complete | 2021 leg partial, 2022 leg not started |
+| Status | complete | complete | running; see generated `docs/run_status.md` |
 
 Two 41-day integrations each (10-day spin-up discarded), each carrying a
 different in-situ instrument: **2021 → P0 floating LiDAR**, **2022 → LPI fixed
@@ -62,7 +62,7 @@ The interpretation of all of these is in
 | MPAS `meqbr_05km` history | the thing being evaluated | hourly, ~4.6 km, 2 × 41 d | read in place, `runs_root` |
 | P0 floating LiDAR | primary validation, 2021 | 10 min, 40-260 m | `data/obs/`, from the sibling poster repo |
 | LPI fixed LiDAR | primary validation, 2022 | 10 min, 10-200 m | `data/obs/`, same |
-| NOAA NCEI ISD, 8 stations | secondary validation (coastal diurnal cycle) | hourly-ish, 10 m | downloaded, `data/stations/` |
+| INMET automatic stations via NOAA ISD | primary surface validation, separate from LiDAR | hourly-ish, 10 m | downloaded, `data/stations/` |
 | ERA5 single levels | forcing, and the reference to beat | hourly, 0.25°, both windows | downloaded, `data/era5/` |
 | ERA5 1990-2020 archive | climatological context and baseline resource | hourly, 0.25°, 31 y | read in place, `/p1-sto-swell/...` |
 
@@ -85,6 +85,7 @@ re-running after a simulation finishes only reads the new hours.
 03_selection/   ranking with uncertainty, mechanism checks, SST audit
 04_era5/        added value, climatological context, resource maps
 05_exploration/ maps, difference maps, cross-sections, animations
+06_report/      portable HTML report from consolidated tables and media
 ```
 
 ```bash
@@ -112,6 +113,7 @@ data/           obs/ (LiDAR symlinks), era5/, stations/, metadata/ (provenance J
 results/        tables/ (versioned - the record of what was decided),
                 site_timeseries/, fields/, logs/ (regenerable, gitignored)
 figures/        validation/, selection/, era5/, exploration/, animations/ (gitignored)
+results/report/ portable generated HTML bundle and provenance manifest
 docs/           data_sources, validation_protocol, analysis_conventions, run_status
 notebooks/      scratch exploration only
 ```

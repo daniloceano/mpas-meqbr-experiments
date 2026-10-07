@@ -61,7 +61,7 @@ expected shape and period.
 
 ---
 
-## 3. Public surface stations — secondary validation
+## 3. INMET automatic stations — primary surface validation
 
 **Why NOAA ISD and not INMET directly.** INMET's own endpoints
 (`apitempo.inmet.gov.br`, `portal.inmet.gov.br`) resolve in DNS but the TCP
@@ -89,8 +89,9 @@ The `WND` field is decoded as `direction, dir-quality, type, speed×10,
 speed-quality`; ISD quality codes 2/3/6/7 (values the archive's own checks
 rejected) are dropped, and multiple reports in one hour are averaged.
 
-**What they cannot do:** these are 10 m land anemometers. They do not validate
-offshore hub-height wind. See `docs/validation_protocol.md`, section 1.
+**Evidence boundary:** these 10 m land anemometers are primary for the coastal
+surface circulation, not offshore hub-height resource. Airport/synoptic records
+are supplementary and are never pooled with INMET.
 
 ---
 

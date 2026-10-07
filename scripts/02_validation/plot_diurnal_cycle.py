@@ -78,10 +78,14 @@ def main() -> int:
                         label=f"{exp} (amp {sc['diurnal_amp_bias']:+.1f}, "
                               f"phase {sc['diurnal_phase_error_h']:+.0f} h)")
             if era5 is not None and height == 100 and ref is not None:
-                e = era5[era5["time"].isin(ref["time"])]
+                e = ref[["time", "obs_speed"]].merge(era5, on="time", how="inner")
                 ce = metrics.diurnal_composite(e["time"], e["era5_speed"])
+                se = metrics.diurnal_scores(
+                    e["time"], e["obs_speed"], e["era5_speed"])
                 ax.plot(ce.index, ce["mean"], color=plotting.EXPERIMENT_COLORS["ERA5"],
-                        ls="--", lw=1.3, label="ERA5 100 m")
+                        ls="--", lw=1.3,
+                        label=f"ERA5 (amp {se['diurnal_amp_bias']:+.1f}, "
+                              f"phase {se['diurnal_phase_error_h']:+.0f} h)")
             ax.set_title(f"{height} m")
             ax.set_xlabel("local hour (UTC-3)")
             ax.set_xticks(np.arange(0, 24, 6))

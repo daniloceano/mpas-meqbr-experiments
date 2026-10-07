@@ -98,13 +98,14 @@ class Config:
     obs_source_repo: Path | None
     ffmpeg: str | None
     experiments: dict
+    common: dict
     periods: dict
     meshes: dict
     vertical: dict
     boundary_distance_km: dict
     sites: dict
     pairing: dict
-    secondary: dict
+    surface: dict
 
     # -- experiment / leg access -------------------------------------------
 
@@ -214,11 +215,12 @@ def load_config(*, runs_root: str | Path | None = None) -> Config:
         obs_source_repo=Path(obs_repo).expanduser() if obs_repo else None,
         ffmpeg=paths.get("ffmpeg"),
         experiments=exps.get("experiments", {}),
+        common=exps.get("common_configuration", {}),
         periods={str(k): v for k, v in (exps.get("periods") or {}).items()},
         meshes=exps.get("meshes", {}),
         vertical=exps.get("vertical", {}),
         boundary_distance_km=exps.get("boundary_distance_km", {}),
         sites=sites,
         pairing=sites_doc.get("pairing", {}),
-        secondary=sites_doc.get("secondary", {}),
+        surface=sites_doc.get("surface", {}),
     )

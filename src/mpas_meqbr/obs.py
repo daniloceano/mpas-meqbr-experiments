@@ -7,8 +7,9 @@ time-averaging are applied identically to every experiment. Two families:
   resolution, offshore.
 * **ISD surface stations** — public 10 m land stations from NOAA NCEI, which is
   where the Brazilian INMET automatic stations and airport reports are
-  internationally archived. Secondary evidence only (see
-  ``docs/validation_protocol.md`` for why).
+  internationally archived. Automatic INMET stations form the primary surface
+  evidence axis; airport/synoptic records are supplementary. This axis remains
+  separate from the offshore LiDAR scores.
 
 **The pairing decision.** The 10-min record is averaged into the hour centred on
 each model timestamp, requiring at least 4 of the 6 possible samples. The

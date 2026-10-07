@@ -16,6 +16,19 @@ runs_root_note: >
   runs_root is set in paths.local.yaml and points at the directory that holds
   CTL/, EXP01/, EXP02/ plus the shared mesh assets.
 
+common_configuration:
+  integration_duration_days: 41
+  time_step_seconds: 30
+  history_interval_hours: 1
+  lateral_forcing_interval_hours: 6
+  dynamics: "RK3 split-explicit, 3 subpassos dinâmicos e 2 subpassos acústicos"
+  horizontal_mixing: "mistura horizontal Smagorinsky 2D"
+  physics_suite: "mesoscale_reference"
+  physics_components: "microfísica WSM6, radiação RRTMG, camada limite YSU, superfície Monin-Obukhov e convecção Tiedtke"
+  land_surface: "Noah-MP"
+  limited_area: true
+  data_assimilation: false
+
 meshes:
   meqbr_05km:
     n_cells: 76813
@@ -74,6 +87,7 @@ experiments:
     sst_update: false
     periods: ["2021", "2022"]
     status: complete
+    mpi_ranks: 80
     # Wall-clock cost is part of the selection decision (climatological runs are
     # long). CTL ran on 80 ranks, EXP01/EXP02 on 60 — so only relative cell
     # counts are comparable, not raw hours.
@@ -96,6 +110,7 @@ experiments:
     sst_update: true
     periods: ["2021", "2022"]
     status: complete
+    mpi_ranks: 60
     relative_cost: 1.00
     caveats:
       - >
@@ -111,7 +126,8 @@ experiments:
     mesh: meqbr_05km_buf
     sst_update: true
     periods: ["2021", "2022"]
-    status: running          # started 2026-08-31; see docs/run_status.md
+    status: complete         # finished 2026-09-05 01:13:57 UTC; overall exit=0
+    mpi_ranks: 60
     relative_cost: 1.24      # +23.9 % cells; observed ~1.12 s/step vs ~1.0 s
     caveats:
       - >

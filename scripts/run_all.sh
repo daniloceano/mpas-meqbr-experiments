@@ -16,6 +16,7 @@
 #   03  selection: ranking with uncertainty, mechanism and SST-forcing checks
 #   04  ERA5: added value, climatological context, resource maps
 #   05  exploration: maps, difference maps, cross-sections, animations
+#   06  report: portable HTML bundle from consolidated outputs
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -78,6 +79,7 @@ fi
 # --- 03 selection ---------------------------------------------------------
 if stage 03; then
     run 03_sst_check        $PY scripts/03_selection/check_sst_forcing.py
+    run 03_runtime          $PY scripts/03_selection/compute_runtime_metrics.py
     run 03_ranking          $PY scripts/03_selection/rank_experiments.py
     # The completed pair over their full windows: more statistical power than
     # the window EXP02 currently restricts everyone to.
@@ -104,16 +106,34 @@ if stage 05; then
                                --period 2021 --tag common
     run 05_differences_2022 $PY scripts/05_exploration/map_experiment_differences.py \
                                --period 2022
-    for site in P0 LPI; do
-        for hour in 3 9 15 21; do
-            run "05_xsection_${site}_${hour}" $PY scripts/05_exploration/plot_cross_section.py \
-                --site "$site" --experiment CTL --time-of-day "$hour"
+    for experiment in CTL EXP01 EXP02; do
+        for site in P0 LPI; do
+            for hour in 3 9 15 21; do
+                run "05_xsection_${experiment}_${site}_${hour}" \
+                    $PY scripts/05_exploration/plot_cross_section.py \
+                    --site "$site" --experiment "$experiment" --time-of-day "$hour"
+            done
         done
     done
-    run 05_animation_2021   $PY scripts/05_exploration/animate_wind.py \
-                               --experiment CTL --period 2021 --days 5
-    run 05_animation_2022   $PY scripts/05_exploration/animate_wind.py \
-                               --experiment CTL --period 2022 --days 5
+    for experiment in CTL EXP01 EXP02; do
+        for period in 2021 2022; do
+            run "05_animation_${experiment}_${period}" \
+                $PY scripts/05_exploration/animate_wind.py \
+                --experiment "$experiment" --period "$period" --days 5
+        done
+        run "05_xsection_animation_${experiment}_P0" \
+            $PY scripts/05_exploration/animate_cross_section.py \
+            --site P0 --experiment "$experiment" --period 2021 --days 3
+        run "05_xsection_animation_${experiment}_LPI" \
+            $PY scripts/05_exploration/animate_cross_section.py \
+            --site LPI --experiment "$experiment" --period 2022 --days 3
+    done
+fi
+
+# --- 06 report ------------------------------------------------------------
+if stage 06; then
+    run 06_context          $PY scripts/06_report/plot_report_context.py
+    run 06_report           $PY scripts/06_report/build_technical_report.py
 fi
 
 echo ""
