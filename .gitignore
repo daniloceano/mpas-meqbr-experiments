@@ -26,7 +26,6 @@ results/logs/*
 # the pipeline, minus the animations: they are 67 of its 91 MB and regenerate
 # from stage 05.
 results/report/**/*.mp4
-results/report/corrected-runs-lidar-audit/
 figures/*/*
 !figures/*/.gitkeep
 

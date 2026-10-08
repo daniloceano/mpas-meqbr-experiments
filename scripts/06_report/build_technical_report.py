@@ -171,7 +171,7 @@ TABLE_SPECS = [
             "A densidade de potência eólica é WPD = ½ ρ × média(U³), com ρ = 1,15 kg m⁻³ e U em m s⁻¹; o cubo é calculado antes da média.",
             "ERA5 aparece somente a 100 m, seu nível diagnóstico diretamente comparável ao LiDAR; não é extrapolado para as demais alturas.",
             "Todos os experimentos estão completos e são comparados nas mesmas horas observacionais disponíveis dentro de cada janela científica.",
-            "Em cada altura, o negrito indica o melhor entre CTL, EXP01 e EXP02: menor valor absoluto para os vieses, menor RMSE e maior r. As rodadas superadas EXP01_BADSST e EXP02_BADSST aparecem como registro da contaminação de SST e não concorrem; ERA5 permanece como benchmark e também não entra nessa seleção.",
+            "Em cada altura, o negrito indica o melhor entre CTL, EXP01 e EXP02: menor valor absoluto para os vieses, menor RMSE e maior r. ERA5 permanece como benchmark e não entra nessa seleção.",
         ],
     },
     {
@@ -203,8 +203,7 @@ TABLE_SPECS = [
             "Cada linha testa se um experimento tem erro quadrático menor que o "
             "outro nos mesmos horários, com intervalo de confiança de 95 % por "
             "bootstrap de blocos móveis (blocos de 24 h, 2.000 reamostragens). "
-            "Apenas CTL, EXP01 e EXP02 aparecem aqui: as rodadas superadas "
-            "EXP01_BADSST/EXP02_BADSST não concorrem pela escolha."
+            "Cada comparação usa as mesmas horas nos dois experimentos."
         ),
         "notes": [
             "Valor positivo de MSE(A) − MSE(B) significa que B errou menos; negativo, que A errou menos.",
@@ -326,9 +325,6 @@ MEDIA_SPECS = [
     media("spatial_fields", "figures/exploration/diff_EXP01_vs_CTL_2021_common.png",
           "Resposta espacial à SST diária corrigida",
           "Diferenças EXP01 − CTL para vento, potência, amplitude diurna e SST, sobre a janela completa comum. Este é o efeito real da atualização diária de SST, livre da contaminação costeira."),
-    media("spatial_fields", "figures/exploration/diff_EXP01_vs_EXP01_BADSST_2021_common.png",
-          "Tamanho do artefato de SST que foi removido",
-          "Diferenças EXP01 − EXP01 nas mesmas horas. Como as duas integrações só diferem no preenchimento terrestre da OISST, este painel mede diretamente quanto a contaminação costeira deslocava o vento, a potência e a SST."),
     media("spatial_fields", "figures/exploration/diff_EXP02_vs_EXP01_2021_common.png",
           "Resposta espacial ao tratamento de fronteira",
           "Diferenças EXP02 − EXP01 na janela científica completa e comum de 2021. O uso de horas idênticas evita confundir a mudança de configuração com mudança do tempo meteorológico."),
@@ -578,11 +574,30 @@ def render_html_table(frame: pd.DataFrame, spec: dict,
     )
 
 
-def read_table(spec: dict) -> dict | None:
+def drop_superseded(df: pd.DataFrame, superseded: set[str]) -> pd.DataFrame:
+    """Remove the superseded runs from a table before it is displayed.
+
+    They were a preprocessing defect, not a result. They stay registered so the
+    analysis and the dedicated before/after comparison can still be regenerated,
+    but a reader of this report should not have to tell them apart from the runs
+    that actually answer the questions.
+    """
+    for column in ("experiment", "source"):
+        if column in df.columns:
+            df = df[~df[column].isin(superseded)]
+    for column in ("experiment_a", "experiment_b", "reference", "other"):
+        if column in df.columns:
+            df = df[~df[column].isin(superseded)]
+    return df.reset_index(drop=True)
+
+
+def read_table(spec: dict, superseded: set[str]) -> dict | None:
     path = REPO_ROOT / spec["path"]
     if not path.exists():
         return None
-    df = pd.read_csv(path)
+    df = drop_superseded(pd.read_csv(path), superseded)
+    if df.empty:
+        return None
     columns = [column for column in spec["columns"] if column in df.columns]
     df = df[columns].copy()
     df, cell_classes, row_classes = prepare_table_rows(spec, df)
@@ -725,6 +740,8 @@ def report_configuration(cfg) -> tuple[list[dict], list[dict], list[dict]]:
     }
     experiments = []
     for key, value in cfg.experiments.items():
+        if value.get("sst_forcing_known_bad"):
+            continue
         mesh_cfg = cfg.meshes[value["mesh"]]
         experiments.append({
             "id": key,
@@ -776,14 +793,21 @@ def main() -> int:
     report_dir = REPO_ROOT / args.output
     report_dir.mkdir(parents=True, exist_ok=True)
 
+    # Runs kept only as the record of the OISST preprocessing defect. They are
+    # excluded from this report entirely: the defect is covered once, in one
+    # sentence, with a pointer to the dedicated before/after comparison.
+    superseded = {key for key, value in cfg.experiments.items()
+                  if value.get("sst_forcing_known_bad")}
+
     inventory_path = REPO_ROOT / "results/tables/experiment_inventory.csv"
     inventory = pd.read_csv(inventory_path) if inventory_path.exists() else pd.DataFrame()
+    inventory = drop_superseded(inventory, superseded)
     provisional, status_text = completeness(inventory)
 
     tables = {
         table["id"]: table
         for spec in TABLE_SPECS
-        if (table := read_table(spec)) is not None
+        if (table := read_table(spec, superseded)) is not None
     }
     media_groups, assets = copy_media(report_dir)
     common, periods, experiments = report_configuration(cfg)

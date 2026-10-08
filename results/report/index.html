@@ -283,8 +283,8 @@
      configurações testadas e a capacidade do downscaling de representar o
      recurso eólico offshore e a circulação costeira.</p>
   <div class="meta">
-    <span class="pill">Gerado em 2026-10-07T22:13:02+00:00</span>
-    <span class="pill">Commit f6cfc60 + alterações locais</span>
+    <span class="pill">Gerado em 2026-10-08T12:24:30+00:00</span>
+    <span class="pill">Commit 5a2956e + alterações locais</span>
     <span class="pill">SNAPSHOT COMPLETO</span>
   </div>
 </header>
@@ -307,6 +307,7 @@
     <a href="#valor-adicionado">6. Valor adicionado</a>
     <a href="#mecanismos">7. Mecanismos e seleção</a>
     <a href="#conclusoes">8. Conclusões</a>
+    <a href="#limitacoes">9. Limitações e defeitos conhecidos</a>
   </nav>
 
   <main>
@@ -337,20 +338,17 @@
              LiDARs e acrescenta estrutura espacial relevante ao recurso eólico?</p>
         </div>
       </div>
-      <div class="banner">
-        <strong>Contaminação de SST corrigida e reavaliada.</strong> EXP01_BADSST e
-        EXP02_BADSST receberam o valor de preenchimento terrestre da OISST
-        (273,15 K) em células oceânicas costeiras, e os dois LiDARes ficam
-        dentro da faixa afetada — suas comparações contra o CTL mediam um erro
-        de interpolação, não a hipótese que pretendiam testar. A rotina de
-        conversão foi corrigida (valores sobre o continente estendidos do ponto
-        oceânico válido mais próximo, preservando <code>LANDSEA</code> e os
-        valores oceânicos) e os dois experimentos foram repetidos como
-        EXP01 e EXP02. A auditoria confirma <strong>zero
-        células oceânicas no valor de preenchimento</strong> e nenhuma célula
-        abaixo de 296 K nas quatro pernas corrigidas. <strong>As conclusões
-        deste relatório vêm das rodadas corrigidas</strong>; EXP01_BADSST e EXP02_BADSST
-        permanecem exibidos apenas como registro da anomalia.
+      <div class="banner info">
+        <strong>Nota de procedência.</strong> Uma primeira versão de EXP01 e
+        EXP02 foi executada com um defeito no pré-processamento: o conversor da
+        SST OISST levava o valor de preenchimento terrestre (273,15 K) para
+        células oceânicas costeiras, e os dois LiDARes ficam dentro da faixa
+        afetada. O conversor foi corrigido e os dois experimentos foram
+        repetidos. <strong>Tudo neste relatório vem das execuções corrigidas</strong>,
+        verificadas célula a célula: nenhuma célula oceânica no valor de
+        preenchimento e nenhuma abaixo de 296 K. O antes e depois está
+        documentado em
+        <a href="sst-fix-comparison/index.html">comparação antigo × corrigido</a>.
       </div>
       <p><strong>Como ler o relatório:</strong> primeiro são apresentados o
          desenho e o estado das integrações; depois, os campos produzidos pelo
@@ -366,13 +364,6 @@
          fatorial, de modo que a diferença EXP02 − EXP01 é o efeito
          <em>incremental</em> do tratamento de fronteira com a atualização de
          SST já ligada.</p>
-      <p>São cinco integrações registradas, em dois conjuntos. O conjunto
-         <strong>atual</strong> — CTL, EXP01 e EXP02 — é o que sustenta todas
-         as conclusões. O par <strong>superado</strong> — EXP01_BADSST e
-         EXP02_BADSST — são as primeiras tentativas de EXP01 e EXP02, mantidas
-         porque são a evidência do problema de SST descrito na seção 1 e porque
-         permitem medir o tamanho do efeito espúrio. Nas figuras, o par superado
-         aparece em tom claro e o conjunto atual em cor saturada.</p>
 
       <div id="configuracao-comum">
         <h3>2.1 Configuração comum a todos os experimentos</h3>
@@ -480,30 +471,6 @@
           </figure>
         </article>
         
-        <article class="experiment">
-          <h4>EXP01_BADSST</h4>
-          <div class="experiment-meta">
-            meqbr_05km · 76.813 células · 60 ranks MPI · concluído
-          </div>
-          <p>Versão superada do EXP01. Foi forçada pelo arquivo de superfície antes da correção, que levava o valor de preenchimento terrestre da OISST (273,15 K) para 1.226 células oceânicas costeiras. Mantida apenas como evidência do problema; não sustenta conclusão alguma.</p>
-          <figure>
-            <img src="assets/design/experimental_design_exp01_sst.png" loading="lazy" alt="Figura representativa do experimento EXP01_BADSST">
-            <figcaption><strong>EXP01_BADSST — representação da mudança avaliada</strong>Versão superada do EXP01. Foi forçada pelo arquivo de superfície antes da correção, que levava o valor de preenchimento terrestre da OISST (273,15 K) para 1.226 células oceânicas costeiras. Mantida apenas como evidência do problema; não sustenta conclusão alguma.</figcaption>
-          </figure>
-        </article>
-        
-        <article class="experiment">
-          <h4>EXP02_BADSST</h4>
-          <div class="experiment-meta">
-            meqbr_05km_buf · 95.138 células · 60 ranks MPI · concluído
-          </div>
-          <p>Versão superada do EXP02, herdando a mesma forçante de superfície contaminada (1.384 células). Mantida apenas como evidência.</p>
-          <figure>
-            <img src="assets/design/experimental_design_exp02_mesh.png" loading="lazy" alt="Figura representativa do experimento EXP02_BADSST">
-            <figcaption><strong>EXP02_BADSST — representação da mudança avaliada</strong>Versão superada do EXP02, herdando a mesma forçante de superfície contaminada (1.384 células). Mantida apenas como evidência.</figcaption>
-          </figure>
-        </article>
-        
       </div>
     </section>
 
@@ -518,7 +485,7 @@
       <strong>Andamento das integrações</strong>
       Inventário do snapshot congelado para este relatório. A contagem considera somente a janela científica, depois do spin-up.
     </p>
-    <div class="table-wrap"><table class="data-table"><thead><tr><th>Experimento</th><th>Período</th><th>Malha</th><th>Saídas horárias na janela</th><th>Janela concluída (%)</th><th>Lacunas temporais</th><th>Último horário disponível</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>meqbr_05km</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>CTL</td><td>2022</td><td>meqbr_05km</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr><tr><td>EXP01</td><td>2021</td><td>meqbr_05km</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>EXP01</td><td>2022</td><td>meqbr_05km</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr><tr><td>EXP02</td><td>2021</td><td>meqbr_05km_buf</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>EXP02</td><td>2022</td><td>meqbr_05km_buf</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr><tr><td>EXP01_BADSST</td><td>2021</td><td>meqbr_05km</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>EXP01_BADSST</td><td>2022</td><td>meqbr_05km</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr><tr><td>EXP02_BADSST</td><td>2021</td><td>meqbr_05km_buf</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>EXP02_BADSST</td><td>2022</td><td>meqbr_05km_buf</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr></tbody></table></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Experimento</th><th>Período</th><th>Malha</th><th>Saídas horárias na janela</th><th>Janela concluída (%)</th><th>Lacunas temporais</th><th>Último horário disponível</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>meqbr_05km</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>CTL</td><td>2022</td><td>meqbr_05km</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr><tr><td>EXP01</td><td>2021</td><td>meqbr_05km</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>EXP01</td><td>2022</td><td>meqbr_05km</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr><tr><td>EXP02</td><td>2021</td><td>meqbr_05km_buf</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>EXP02</td><td>2022</td><td>meqbr_05km_buf</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr></tbody></table></div>
     
     <ul class="table-notes">
       <li>100% significa que todos os horários esperados da janela de análise estão presentes.</li><li>Lacuna temporal é um salto maior que uma hora entre duas saídas consecutivas.</li>
@@ -532,7 +499,7 @@
       <strong>Custo computacional normalizado</strong>
       A métrica principal é (tempo real da execução × número de núcleos) / horas simuladas: ela expressa quantas horas uma máquina de um único núcleo levaria para produzir uma hora de modelo. Menor é melhor.
     </p>
-    <div class="table-wrap"><table class="data-table"><thead><tr><th>Experimento</th><th>Período</th><th>Situação da execução</th><th>Origem do tempo</th><th>Tempo de máquina equivalente (h por hora simulada, 1 núcleo)</th><th>Tempo estimado para simular 1 ano com 100 núcleos (dias)</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>concluída; tempo reconstruído</td><td>estimado</td><td>3,19</td><td>11,63</td></tr><tr><td>CTL</td><td>2022</td><td>concluída; tempo reconstruído</td><td>estimado</td><td>2,78</td><td>10,14</td></tr><tr><td>EXP01</td><td>2021</td><td>concluída</td><td>medido</td><td>3,22</td><td>11,77</td></tr><tr><td>EXP01</td><td>2022</td><td>concluída</td><td>medido</td><td>3,10</td><td>11,32</td></tr><tr><td>EXP02</td><td>2021</td><td>concluída</td><td>medido</td><td>3,79</td><td>13,83</td></tr><tr><td>EXP02</td><td>2022</td><td>concluída; tempo reconstruído</td><td>estimado</td><td>5,29</td><td>19,31</td></tr><tr><td>EXP01_BADSST</td><td>2021</td><td>concluída</td><td>medido</td><td>2,54</td><td>9,27</td></tr><tr><td>EXP01_BADSST</td><td>2022</td><td>concluída</td><td>medido</td><td>2,56</td><td>9,36</td></tr><tr><td>EXP02_BADSST</td><td>2021</td><td>concluída</td><td>medido</td><td>3,25</td><td>11,88</td></tr><tr><td>EXP02_BADSST</td><td>2022</td><td>concluída</td><td>medido</td><td>3,15</td><td>11,49</td></tr></tbody></table></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Experimento</th><th>Período</th><th>Situação da execução</th><th>Origem do tempo</th><th>Tempo de máquina equivalente (h por hora simulada, 1 núcleo)</th><th>Tempo estimado para simular 1 ano com 100 núcleos (dias)</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>concluída; tempo reconstruído</td><td>estimado</td><td>3,19</td><td>11,63</td></tr><tr><td>CTL</td><td>2022</td><td>concluída; tempo reconstruído</td><td>estimado</td><td>2,78</td><td>10,14</td></tr><tr><td>EXP01</td><td>2021</td><td>concluída</td><td>medido</td><td>3,22</td><td>11,77</td></tr><tr><td>EXP01</td><td>2022</td><td>concluída</td><td>medido</td><td>3,10</td><td>11,32</td></tr><tr><td>EXP02</td><td>2021</td><td>concluída</td><td>medido</td><td>3,79</td><td>13,83</td></tr><tr><td>EXP02</td><td>2022</td><td>concluída; tempo reconstruído</td><td>estimado</td><td>5,29</td><td>19,31</td></tr></tbody></table></div>
     
     <ul class="table-notes">
       <li>Situação “concluída” indica que a integração terminou; “em execução” usa somente o trecho produzido até o snapshot.</li><li>Tempo “medido” vem do wrapper da execução; “estimado” foi reconstruído de logs/arquivos porque o wrapper do CTL não foi preservado.</li><li>“Provisório” é uma medição parcial que pode mudar quando a execução terminar.</li><li>A estimativa anual é: tempo por hora simulada × 8.760 h / 100 núcleos, convertido para dias.</li><li>A projeção para 100 núcleos supõe escalabilidade linear ideal; comunicação MPI, filas e I/O podem aumentar o tempo real.</li>
@@ -595,16 +562,6 @@
       </button>
       
       <figcaption><strong>Resposta espacial à SST diária corrigida</strong>Diferenças EXP01 − CTL para vento, potência, amplitude diurna e SST, sobre a janela completa comum. Este é o efeito real da atualização diária de SST, livre da contaminação costeira.</figcaption>
-    </figure>
-    
-    <figure>
-      
-      <button class="figure-zoom" type="button" data-full="assets/spatial_fields/diff_EXP01_vs_EXP01_BADSST_2021_common.png"
-              data-title="Tamanho do artefato de SST que foi removido" aria-label="Ampliar figura: Tamanho do artefato de SST que foi removido">
-        <img src="assets/spatial_fields/diff_EXP01_vs_EXP01_BADSST_2021_common.png" loading="lazy" alt="Tamanho do artefato de SST que foi removido">
-      </button>
-      
-      <figcaption><strong>Tamanho do artefato de SST que foi removido</strong>Diferenças EXP01 − EXP01 nas mesmas horas. Como as duas integrações só diferem no preenchimento terrestre da OISST, este painel mede diretamente quanto a contaminação costeira deslocava o vento, a potência e a SST.</figcaption>
     </figure>
     
     <figure>
@@ -881,7 +838,7 @@
       <strong>Validação de superfície — estações automáticas INMET</strong>
       Média das métricas calculadas separadamente para cada estação e período, incluindo ERA5 a 10 m como referência; as estações têm o mesmo peso, independentemente do número de registros.
     </p>
-    <div class="table-wrap"><table class="data-table"><thead><tr><th>Fonte</th><th>Estações</th><th>Pares estação–período</th><th>Vento observado médio (m s⁻¹)</th><th>Vento modelado médio (m s⁻¹)</th><th>Viés modelo − observação (m s⁻¹)</th><th>RMSE (m s⁻¹)</th><th>r</th><th>Erro de fase do máximo diário (h)</th></tr></thead><tbody><tr><td>CTL</td><td>4</td><td>6</td><td>3,18</td><td>5,18</td><td>2,00</td><td>2,32</td><td>0,72</td><td>-0,33</td></tr><tr><td>ERA5</td><td>4</td><td>6</td><td>3,18</td><td>5,48</td><td>2,30</td><td>2,57</td><td>0,64</td><td>-2,83</td></tr><tr><td>EXP01</td><td>4</td><td>6</td><td>3,18</td><td>5,24</td><td>2,06</td><td>2,36</td><td>0,72</td><td>-0,33</td></tr><tr><td>EXP01_BADSST</td><td>4</td><td>6</td><td>3,18</td><td>5,04</td><td>1,86</td><td>2,19</td><td class="best-value">0,73</td><td>-0,33</td></tr><tr><td>EXP02</td><td>4</td><td>6</td><td>3,18</td><td>5,03</td><td>1,85</td><td>2,20</td><td>0,64</td><td class="best-value">0,00</td></tr><tr><td>EXP02_BADSST</td><td>4</td><td>6</td><td>3,18</td><td>4,74</td><td class="best-value">1,56</td><td class="best-value">1,94</td><td>0,68</td><td class="best-value">0,00</td></tr></tbody></table></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Fonte</th><th>Estações</th><th>Pares estação–período</th><th>Vento observado médio (m s⁻¹)</th><th>Vento modelado médio (m s⁻¹)</th><th>Viés modelo − observação (m s⁻¹)</th><th>RMSE (m s⁻¹)</th><th>r</th><th>Erro de fase do máximo diário (h)</th></tr></thead><tbody><tr><td>CTL</td><td>4</td><td>6</td><td>3,18</td><td>5,18</td><td>2,00</td><td>2,32</td><td class="best-value">0,72</td><td>-0,33</td></tr><tr><td>ERA5</td><td>4</td><td>6</td><td>3,18</td><td>5,48</td><td>2,30</td><td>2,57</td><td>0,64</td><td>-2,83</td></tr><tr><td>EXP01</td><td>4</td><td>6</td><td>3,18</td><td>5,24</td><td>2,06</td><td>2,36</td><td>0,72</td><td>-0,33</td></tr><tr><td>EXP02</td><td>4</td><td>6</td><td>3,18</td><td>5,03</td><td class="best-value">1,85</td><td class="best-value">2,20</td><td>0,64</td><td class="best-value">0,00</td></tr></tbody></table></div>
     
     <ul class="table-notes">
       <li>Viés positivo significa que o MPAS superestima a velocidade observada.</li><li>RMSE mede o erro típico; r mede a associação temporal linear.</li><li>Erro de fase = hora local do máximo do ciclo diurno médio modelado − hora local do máximo observado, envolvido no intervalo de −12 a +12 h. Valor negativo/positivo indica máximo antes/depois do observado; menor valor absoluto é melhor.</li><li>ERA5 e MPAS são avaliados contra as mesmas observações e nos mesmos horários disponíveis em cada estação.</li><li>Negrito indica o melhor valor da coluna: menor valor absoluto para viés e erro de fase, menor RMSE e maior r. Empates são mantidos em negrito.</li>
@@ -988,10 +945,10 @@
       <strong>Validação offshore em alturas de rotor — LiDAR</strong>
       Comparação horária entre o vento do MPAS e os LiDARs P0/LPI, na célula oceânica mais próxima e em níveis verticais coincidentes.
     </p>
-    <div class="table-wrap"><table class="data-table"><thead><tr><th>Fonte</th><th>Período</th><th>Sítio</th><th>Altura (m)</th><th>Horas pareadas</th><th>RMSE (m s⁻¹)</th><th>RMSE — IC95% inferior</th><th>RMSE — IC95% superior</th><th>Viés modelo − observação (m s⁻¹)</th><th>r</th><th>Viés relativo da densidade de potência eólica (%)</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td>2,18</td><td>1,97</td><td>2,43</td><td>-1,17</td><td>0,40</td><td>-37,1</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td>2,03</td><td>1,83</td><td>2,26</td><td>-0,85</td><td>0,41</td><td class="best-value">-29,1</td></tr><tr><td>EXP01_BADSST</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td>2,63</td><td>2,40</td><td>2,89</td><td>-1,80</td><td>0,42</td><td>-47,9</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td class="best-value">1,95</td><td>1,74</td><td>2,15</td><td class="best-value">-0,84</td><td class="best-value">0,45</td><td>-29,7</td></tr><tr><td>EXP02_BADSST</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td>2,58</td><td>2,36</td><td>2,79</td><td>-1,81</td><td>0,44</td><td>-49,5</td></tr><tr class="height-separator"><td>CTL</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,18</td><td>1,95</td><td>2,44</td><td>-1,24</td><td>0,42</td><td>-36,9</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,02</td><td>1,82</td><td>2,26</td><td>-0,95</td><td>0,43</td><td>-30,0</td></tr><tr><td>EXP01_BADSST</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,26</td><td>2,09</td><td>2,46</td><td>-1,28</td><td>0,46</td><td>-35,2</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td class="best-value">1,92</td><td>1,71</td><td>2,12</td><td class="best-value">-0,89</td><td class="best-value">0,47</td><td class="best-value">-29,4</td></tr><tr><td>EXP02_BADSST</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,23</td><td>2,03</td><td>2,40</td><td>-1,34</td><td>0,48</td><td>-37,0</td></tr><tr><td>ERA5</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,49</td><td>2,27</td><td>2,78</td><td>-1,90</td><td>0,53</td><td>-51,4</td></tr><tr class="height-separator"><td>CTL</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td>2,14</td><td>1,92</td><td>2,40</td><td>-1,27</td><td>0,44</td><td>-36,3</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td>1,98</td><td>1,78</td><td>2,21</td><td>-1,01</td><td>0,45</td><td>-30,4</td></tr><tr><td>EXP01_BADSST</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td>2,02</td><td>1,87</td><td>2,20</td><td>-1,04</td><td>0,50</td><td>-28,8</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td class="best-value">1,88</td><td>1,65</td><td>2,10</td><td class="best-value">-0,94</td><td class="best-value">0,49</td><td class="best-value">-29,5</td></tr><tr><td>EXP02_BADSST</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td>2,05</td><td>1,84</td><td>2,22</td><td>-1,17</td><td>0,51</td><td>-32,3</td></tr><tr class="height-separator"><td>CTL</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td>2,12</td><td>1,92</td><td>2,37</td><td>-1,28</td><td>0,43</td><td>-35,4</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td>1,97</td><td>1,76</td><td>2,20</td><td>-1,08</td><td>0,46</td><td>-31,2</td></tr><tr><td>EXP01_BADSST</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td>1,88</td><td>1,73</td><td>2,03</td><td>-0,92</td><td>0,53</td><td>-25,3</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td class="best-value">1,86</td><td>1,61</td><td>2,09</td><td class="best-value">-1,01</td><td class="best-value">0,50</td><td class="best-value">-30,2</td></tr><tr><td>EXP02_BADSST</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td>1,97</td><td>1,76</td><td>2,15</td><td>-1,13</td><td>0,53</td><td>-30,5</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td>2,42</td><td>2,12</td><td>2,68</td><td>-1,16</td><td>0,68</td><td>-25,9</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td>2,13</td><td>1,87</td><td>2,37</td><td>-0,63</td><td>0,70</td><td>-15,0</td></tr><tr><td>EXP01_BADSST</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td>3,16</td><td>2,80</td><td>3,46</td><td>-1,76</td><td>0,56</td><td>-33,7</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td class="best-value">2,04</td><td>1,79</td><td>2,24</td><td class="best-value">-0,55</td><td class="best-value">0,70</td><td class="best-value">-14,9</td></tr><tr><td>EXP02_BADSST</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td>3,03</td><td>2,69</td><td>3,30</td><td>-1,78</td><td>0,58</td><td>-36,6</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,31</td><td>2,04</td><td>2,55</td><td>-0,96</td><td>0,71</td><td>-21,4</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,07</td><td>1,82</td><td>2,28</td><td>-0,55</td><td class="best-value">0,74</td><td class="best-value">-13,5</td></tr><tr><td>EXP01_BADSST</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,56</td><td>2,25</td><td>2,83</td><td>-1,00</td><td>0,65</td><td>-21,1</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td class="best-value">2,02</td><td>1,78</td><td>2,22</td><td class="best-value">-0,49</td><td>0,73</td><td>-13,7</td></tr><tr><td>EXP02_BADSST</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,47</td><td>2,20</td><td>2,71</td><td>-1,12</td><td>0,66</td><td>-26,0</td></tr><tr><td>ERA5</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,47</td><td>2,24</td><td>2,66</td><td>-1,90</td><td>0,85</td><td>-44,4</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td>2,12</td><td>1,88</td><td>2,33</td><td>-0,70</td><td>0,75</td><td>-16,1</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td class="best-value">1,95</td><td>1,73</td><td>2,14</td><td>-0,52</td><td class="best-value">0,77</td><td class="best-value">-13,2</td></tr><tr><td>EXP01_BADSST</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td>2,05</td><td>1,84</td><td>2,24</td><td>-0,40</td><td>0,74</td><td>-10,2</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td>1,96</td><td>1,73</td><td>2,16</td><td class="best-value">-0,50</td><td>0,76</td><td>-14,1</td></tr><tr><td>EXP02_BADSST</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td>2,15</td><td>1,92</td><td>2,35</td><td>-0,66</td><td>0,72</td><td>-17,4</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td>1,92</td><td>1,72</td><td>2,12</td><td class="best-value">-0,45</td><td>0,79</td><td class="best-value">-10,9</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td class="best-value">1,81</td><td>1,62</td><td>1,99</td><td>-0,47</td><td class="best-value">0,81</td><td>-12,7</td></tr><tr><td>EXP01_BADSST</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td>1,85</td><td>1,70</td><td>2,00</td><td>-0,04</td><td>0,79</td><td>-1,9</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td>1,91</td><td>1,70</td><td>2,11</td><td>-0,52</td><td>0,78</td><td>-14,8</td></tr><tr><td>EXP02_BADSST</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td>2,00</td><td>1,85</td><td>2,17</td><td>-0,28</td><td>0,75</td><td>-8,7</td></tr></tbody></table></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Fonte</th><th>Período</th><th>Sítio</th><th>Altura (m)</th><th>Horas pareadas</th><th>RMSE (m s⁻¹)</th><th>RMSE — IC95% inferior</th><th>RMSE — IC95% superior</th><th>Viés modelo − observação (m s⁻¹)</th><th>r</th><th>Viés relativo da densidade de potência eólica (%)</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td>2,18</td><td>1,97</td><td>2,43</td><td>-1,17</td><td>0,40</td><td>-37,1</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td>2,03</td><td>1,83</td><td>2,26</td><td>-0,85</td><td>0,41</td><td class="best-value">-29,1</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td class="best-value">1,95</td><td>1,74</td><td>2,15</td><td class="best-value">-0,84</td><td class="best-value">0,45</td><td>-29,7</td></tr><tr class="height-separator"><td>CTL</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,18</td><td>1,95</td><td>2,44</td><td>-1,24</td><td>0,42</td><td>-36,9</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,02</td><td>1,82</td><td>2,26</td><td>-0,95</td><td>0,43</td><td>-30,0</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td class="best-value">1,92</td><td>1,71</td><td>2,12</td><td class="best-value">-0,89</td><td class="best-value">0,47</td><td class="best-value">-29,4</td></tr><tr><td>ERA5</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,49</td><td>2,27</td><td>2,78</td><td>-1,90</td><td>0,53</td><td>-51,4</td></tr><tr class="height-separator"><td>CTL</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td>2,14</td><td>1,92</td><td>2,40</td><td>-1,27</td><td>0,44</td><td>-36,3</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td>1,98</td><td>1,78</td><td>2,21</td><td>-1,01</td><td>0,45</td><td>-30,4</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td class="best-value">1,88</td><td>1,65</td><td>2,10</td><td class="best-value">-0,94</td><td class="best-value">0,49</td><td class="best-value">-29,5</td></tr><tr class="height-separator"><td>CTL</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td>2,12</td><td>1,92</td><td>2,37</td><td>-1,28</td><td>0,43</td><td>-35,4</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td>1,97</td><td>1,76</td><td>2,20</td><td>-1,08</td><td>0,46</td><td>-31,2</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td class="best-value">1,86</td><td>1,61</td><td>2,09</td><td class="best-value">-1,01</td><td class="best-value">0,50</td><td class="best-value">-30,2</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td>2,42</td><td>2,12</td><td>2,68</td><td>-1,16</td><td>0,68</td><td>-25,9</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td>2,13</td><td>1,87</td><td>2,37</td><td>-0,63</td><td>0,70</td><td>-15,0</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td class="best-value">2,04</td><td>1,79</td><td>2,24</td><td class="best-value">-0,55</td><td class="best-value">0,70</td><td class="best-value">-14,9</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,31</td><td>2,04</td><td>2,55</td><td>-0,96</td><td>0,71</td><td>-21,4</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,07</td><td>1,82</td><td>2,28</td><td>-0,55</td><td class="best-value">0,74</td><td class="best-value">-13,5</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td class="best-value">2,02</td><td>1,78</td><td>2,22</td><td class="best-value">-0,49</td><td>0,73</td><td>-13,7</td></tr><tr><td>ERA5</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,47</td><td>2,24</td><td>2,66</td><td>-1,90</td><td>0,85</td><td>-44,4</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td>2,12</td><td>1,88</td><td>2,33</td><td>-0,70</td><td>0,75</td><td>-16,1</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td class="best-value">1,95</td><td>1,73</td><td>2,14</td><td>-0,52</td><td class="best-value">0,77</td><td class="best-value">-13,2</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td>1,96</td><td>1,73</td><td>2,16</td><td class="best-value">-0,50</td><td>0,76</td><td>-14,1</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td>1,92</td><td>1,72</td><td>2,12</td><td class="best-value">-0,45</td><td>0,79</td><td class="best-value">-10,9</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td class="best-value">1,81</td><td>1,62</td><td>1,99</td><td>-0,47</td><td class="best-value">0,81</td><td>-12,7</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td>1,91</td><td>1,70</td><td>2,11</td><td>-0,52</td><td>0,78</td><td>-14,8</td></tr></tbody></table></div>
     
     <ul class="table-notes">
-      <li>IC95% é o intervalo de confiança de 95% obtido por bootstrap em blocos de 24 h.</li><li>O viés relativo da densidade de potência eólica compara grandezas proporcionais a U³; valor negativo indica subestimativa do recurso.</li><li>A densidade de potência eólica é WPD = ½ ρ × média(U³), com ρ = 1,15 kg m⁻³ e U em m s⁻¹; o cubo é calculado antes da média.</li><li>ERA5 aparece somente a 100 m, seu nível diagnóstico diretamente comparável ao LiDAR; não é extrapolado para as demais alturas.</li><li>Todos os experimentos estão completos e são comparados nas mesmas horas observacionais disponíveis dentro de cada janela científica.</li><li>Em cada altura, o negrito indica o melhor entre CTL, EXP01 e EXP02: menor valor absoluto para os vieses, menor RMSE e maior r. As rodadas superadas EXP01_BADSST e EXP02_BADSST aparecem como registro da contaminação de SST e não concorrem; ERA5 permanece como benchmark e também não entra nessa seleção.</li>
+      <li>IC95% é o intervalo de confiança de 95% obtido por bootstrap em blocos de 24 h.</li><li>O viés relativo da densidade de potência eólica compara grandezas proporcionais a U³; valor negativo indica subestimativa do recurso.</li><li>A densidade de potência eólica é WPD = ½ ρ × média(U³), com ρ = 1,15 kg m⁻³ e U em m s⁻¹; o cubo é calculado antes da média.</li><li>ERA5 aparece somente a 100 m, seu nível diagnóstico diretamente comparável ao LiDAR; não é extrapolado para as demais alturas.</li><li>Todos os experimentos estão completos e são comparados nas mesmas horas observacionais disponíveis dentro de cada janela científica.</li><li>Em cada altura, o negrito indica o melhor entre CTL, EXP01 e EXP02: menor valor absoluto para os vieses, menor RMSE e maior r. ERA5 permanece como benchmark e não entra nessa seleção.</li>
     </ul>
     
   </div>
@@ -1138,7 +1095,7 @@
       <strong>Valor adicionado em relação ao ERA5</strong>
       MPAS e ERA5 são comparados com o mesmo LiDAR nos mesmos horários. Redução de RMSE = 100 × [1 − RMSE(MPAS)/RMSE(ERA5)]; redução de MSE = 100 × [1 − MSE(MPAS)/MSE(ERA5)].
     </p>
-    <div class="table-wrap"><table class="data-table"><thead><tr><th>Fonte</th><th>Período</th><th>Sítio</th><th>Altura (m)</th><th>Horas pareadas</th><th>RMSE (m s⁻¹)</th><th>Viés (m s⁻¹)</th><th>r</th><th>Redução do RMSE frente ao ERA5 (%)</th><th>Redução do MSE frente ao ERA5 (%)</th><th>Redução do MSE — IC95% inferior (%)</th><th>Redução do MSE — IC95% superior (%)</th><th>Diferença estatisticamente detectável</th></tr></thead><tbody><tr><td>ERA5</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,49</td><td>-1,90</td><td>0,53</td><td>0,0</td><td>0,0</td><td>—</td><td>—</td><td>não</td></tr><tr><td>CTL</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,18</td><td>-1,24</td><td>0,42</td><td class="metric-improved">12,6</td><td class="metric-improved">23,6</td><td>11,2</td><td>38,6</td><td>sim</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,02</td><td>-0,95</td><td>0,43</td><td class="metric-improved">18,8</td><td class="metric-improved">34,0</td><td>21,6</td><td>49,7</td><td>sim</td></tr><tr><td>EXP01_BADSST</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,26</td><td>-1,28</td><td>0,46</td><td class="metric-improved">9,5</td><td class="metric-improved">18,1</td><td>6,4</td><td>33,5</td><td>sim</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>1,92</td><td>-0,89</td><td>0,47</td><td class="metric-improved">22,8</td><td class="metric-improved">40,4</td><td>25,8</td><td>61,1</td><td>sim</td></tr><tr><td>EXP02_BADSST</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,23</td><td>-1,34</td><td>0,48</td><td class="metric-improved">10,7</td><td class="metric-improved">20,2</td><td>5,1</td><td>41,3</td><td>sim</td></tr><tr><td>ERA5</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,47</td><td>-1,90</td><td>0,85</td><td>0,0</td><td>0,0</td><td>—</td><td>—</td><td>não</td></tr><tr><td>CTL</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,31</td><td>-0,96</td><td>0,71</td><td class="metric-improved">6,3</td><td class="metric-improved">12,2</td><td>-1,8</td><td>27,4</td><td>não</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,07</td><td>-0,55</td><td>0,74</td><td class="metric-improved">16,2</td><td class="metric-improved">29,8</td><td>15,8</td><td>44,1</td><td>sim</td></tr><tr><td>EXP01_BADSST</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,56</td><td>-1,00</td><td>0,65</td><td class="metric-worsened">-3,9</td><td class="metric-worsened">-8,0</td><td>-23,4</td><td>8,8</td><td>não</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,02</td><td>-0,49</td><td>0,73</td><td class="metric-improved">18,2</td><td class="metric-improved">33,0</td><td>21,4</td><td>46,6</td><td>sim</td></tr><tr><td>EXP02_BADSST</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,47</td><td>-1,12</td><td>0,66</td><td class="metric-worsened">-0,4</td><td class="metric-worsened">-0,7</td><td>-14,4</td><td>13,9</td><td>não</td></tr></tbody></table></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Fonte</th><th>Período</th><th>Sítio</th><th>Altura (m)</th><th>Horas pareadas</th><th>RMSE (m s⁻¹)</th><th>Viés (m s⁻¹)</th><th>r</th><th>Redução do RMSE frente ao ERA5 (%)</th><th>Redução do MSE frente ao ERA5 (%)</th><th>Redução do MSE — IC95% inferior (%)</th><th>Redução do MSE — IC95% superior (%)</th><th>Diferença estatisticamente detectável</th></tr></thead><tbody><tr><td>ERA5</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,49</td><td>-1,90</td><td>0,53</td><td>0,0</td><td>0,0</td><td>—</td><td>—</td><td>não</td></tr><tr><td>CTL</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,18</td><td>-1,24</td><td>0,42</td><td class="metric-improved">12,6</td><td class="metric-improved">23,6</td><td>11,2</td><td>38,6</td><td>sim</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,02</td><td>-0,95</td><td>0,43</td><td class="metric-improved">18,8</td><td class="metric-improved">34,0</td><td>21,6</td><td>49,7</td><td>sim</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>1,92</td><td>-0,89</td><td>0,47</td><td class="metric-improved">22,8</td><td class="metric-improved">40,4</td><td>25,8</td><td>61,1</td><td>sim</td></tr><tr><td>ERA5</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,47</td><td>-1,90</td><td>0,85</td><td>0,0</td><td>0,0</td><td>—</td><td>—</td><td>não</td></tr><tr><td>CTL</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,31</td><td>-0,96</td><td>0,71</td><td class="metric-improved">6,3</td><td class="metric-improved">12,2</td><td>-1,8</td><td>27,4</td><td>não</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,07</td><td>-0,55</td><td>0,74</td><td class="metric-improved">16,2</td><td class="metric-improved">29,8</td><td>15,8</td><td>44,1</td><td>sim</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,02</td><td>-0,49</td><td>0,73</td><td class="metric-improved">18,2</td><td class="metric-improved">33,0</td><td>21,4</td><td>46,6</td><td>sim</td></tr></tbody></table></div>
     
     <ul class="table-notes">
       <li>Valor positivo significa que o downscaling reduz o MSE do ERA5; valor negativo significa perda de habilidade.</li><li>Como MSE = RMSE², a redução do MSE também é 100 × {1 − [RMSE(MPAS)/RMSE(ERA5)]²}.</li><li>A diferença só é considerada detectável quando o IC95% não cruza zero.</li><li>Nas duas colunas de redução, verde indica melhora frente ao ERA5 e vermelho indica piora; zero é a referência.</li>
@@ -1152,7 +1109,7 @@
       <strong>Recurso eólico médio no domínio</strong>
       Médias espaciais do vento a 100 m e da densidade de potência eólica sobre a área comum entre o MPAS e o ERA5.
     </p>
-    <div class="table-wrap"><table class="data-table"><thead><tr><th>Experimento</th><th>Período</th><th>Saídas horárias</th><th>Vento médio MPAS (m s⁻¹)</th><th>Vento médio ERA5 (m s⁻¹)</th><th>Diferença MPAS − ERA5 (m s⁻¹)</th><th>Diferença relativa da potência eólica (%)</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>721</td><td>6,83</td><td>6,63</td><td>0,20</td><td>9,4</td></tr><tr><td>CTL</td><td>2022</td><td>745</td><td>8,88</td><td>8,21</td><td>0,66</td><td>23,2</td></tr><tr><td>EXP01</td><td>2021</td><td>721</td><td>6,95</td><td>6,63</td><td>0,32</td><td>14,8</td></tr><tr><td>EXP01</td><td>2022</td><td>745</td><td>8,97</td><td>8,21</td><td>0,76</td><td>27,1</td></tr><tr><td>EXP02</td><td>2021</td><td>721</td><td>6,61</td><td>6,16</td><td>0,44</td><td>16,8</td></tr><tr><td>EXP02</td><td>2022</td><td>745</td><td>8,58</td><td>7,73</td><td>0,85</td><td>28,6</td></tr><tr><td>EXP01_BADSST</td><td>2021</td><td>721</td><td>6,90</td><td>6,63</td><td>0,27</td><td>13,4</td></tr><tr><td>EXP01_BADSST</td><td>2022</td><td>745</td><td>8,95</td><td>8,21</td><td>0,74</td><td>26,9</td></tr><tr><td>EXP02_BADSST</td><td>2021</td><td>721</td><td>6,50</td><td>6,16</td><td>0,34</td><td>12,6</td></tr><tr><td>EXP02_BADSST</td><td>2022</td><td>745</td><td>8,50</td><td>7,73</td><td>0,77</td><td>26,4</td></tr></tbody></table></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Experimento</th><th>Período</th><th>Saídas horárias</th><th>Vento médio MPAS (m s⁻¹)</th><th>Vento médio ERA5 (m s⁻¹)</th><th>Diferença MPAS − ERA5 (m s⁻¹)</th><th>Diferença relativa da potência eólica (%)</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>721</td><td>6,83</td><td>6,63</td><td>0,20</td><td>9,4</td></tr><tr><td>CTL</td><td>2022</td><td>745</td><td>8,88</td><td>8,21</td><td>0,66</td><td>23,2</td></tr><tr><td>EXP01</td><td>2021</td><td>721</td><td>6,95</td><td>6,63</td><td>0,32</td><td>14,8</td></tr><tr><td>EXP01</td><td>2022</td><td>745</td><td>8,97</td><td>8,21</td><td>0,76</td><td>27,1</td></tr><tr><td>EXP02</td><td>2021</td><td>721</td><td>6,61</td><td>6,16</td><td>0,44</td><td>16,8</td></tr><tr><td>EXP02</td><td>2022</td><td>745</td><td>8,58</td><td>7,73</td><td>0,85</td><td>28,6</td></tr></tbody></table></div>
     
     <ul class="table-notes">
       <li>A densidade de potência é WPD = ½ ρ × média(U³), usando ρ = 1,15 kg m⁻³; pequenas diferenças de vento produzem diferenças percentuais maiores de recurso.</li><li>Esta comparação descreve os campos. A validação observacional acima determina se a diferença representa ganho de qualidade.</li>
@@ -1215,24 +1172,19 @@
          mecanismo esperado. Uma aparente melhora sem resposta coerente em SST,
          fluxos, camada limite ou distância da fronteira não é transferível para
          simulações climatológicas.</p>
-      <div class="banner">
-        <strong>Gate de integridade: aprovado no conjunto corrigido.</strong>
+      <div class="banner info">
+        <strong>Gate de integridade: aprovado.</strong>
         <code>check_sst_forcing.py</code> encontra zero células oceânicas no
-        valor de preenchimento em EXP01 e EXP02, com SST
-        mínima de 299,5–300,7 K sobre o oceano e 301,5 K em P0 — contra
-        273,15 K e 291,5 K nas versões superadas. A cadeia física acompanha:
-        em P0 os fluxos de calor sensível e latente voltam a ser positivos
-        (+9,2 e +141,7 W m⁻², contra −17,8 e −33,4) e a camada limite deixa de
-        colapsar (624 m, contra 79 m). O gate continua auditando EXP01_BADSST
-        e EXP02_BADSST e relatando a contaminação deles, mas não falha por isso:
-        estão registrados com <code>sst_forcing_known_bad</code>, de modo que
-        apenas uma contaminação <em>nova</em> interrompe o pipeline.
+        valor de preenchimento da OISST em EXP01 e EXP02, com SST mínima de
+        299,5–300,7 K sobre o oceano e 301,5 K em P0. A cadeia física acompanha:
+        em P0 os fluxos de calor sensível e latente são positivos (+9,2 e
+        +141,7 W m⁻²) e a camada limite tem 624 m.
       </div>
       
   <div class="table-block">
     <p class="table-caption">
       <strong>Seleção da configuração — testes pareados</strong>
-      Cada linha testa se um experimento tem erro quadrático menor que o outro nos mesmos horários, com intervalo de confiança de 95 % por bootstrap de blocos móveis (blocos de 24 h, 2.000 reamostragens). Apenas CTL, EXP01 e EXP02 aparecem aqui: as rodadas superadas EXP01_BADSST/EXP02_BADSST não concorrem pela escolha.
+      Cada linha testa se um experimento tem erro quadrático menor que o outro nos mesmos horários, com intervalo de confiança de 95 % por bootstrap de blocos móveis (blocos de 24 h, 2.000 reamostragens). Cada comparação usa as mesmas horas nos dois experimentos.
     </p>
     <div class="table-wrap"><table class="data-table"><thead><tr><th>Período</th><th>Sítio</th><th>Altura (m)</th><th>Experimento A</th><th>Experimento B</th><th>Horas pareadas</th><th>RMSE de A (m s⁻¹)</th><th>RMSE de B (m s⁻¹)</th><th>MSE(A) − MSE(B) (m² s⁻²)</th><th>IC95% inferior</th><th>IC95% superior</th><th>Melhor</th></tr></thead><tbody><tr><td>2021</td><td>P0</td><td>50</td><td>CTL</td><td>EXP01</td><td>507</td><td>2,18</td><td>2,03</td><td>0,66</td><td>0,20</td><td>1,15</td><td>EXP01</td></tr><tr><td>2021</td><td>P0</td><td>50</td><td>CTL</td><td>EXP02</td><td>507</td><td>2,18</td><td>1,95</td><td>0,96</td><td>0,33</td><td>1,77</td><td>EXP02</td></tr><tr><td>2021</td><td>P0</td><td>50</td><td>EXP01</td><td>EXP02</td><td>507</td><td>2,03</td><td>1,95</td><td>0,30</td><td>-0,26</td><td>1,05</td><td>sem diferença detectável</td></tr><tr><td>2021</td><td>P0</td><td>100</td><td>CTL</td><td>EXP01</td><td>507</td><td>2,18</td><td>2,02</td><td>0,64</td><td>0,18</td><td>1,13</td><td>EXP01</td></tr><tr><td>2021</td><td>P0</td><td>100</td><td>CTL</td><td>EXP02</td><td>507</td><td>2,18</td><td>1,92</td><td>1,04</td><td>0,37</td><td>1,91</td><td>EXP02</td></tr><tr><td>2021</td><td>P0</td><td>100</td><td>EXP01</td><td>EXP02</td><td>507</td><td>2,02</td><td>1,92</td><td>0,40</td><td>-0,20</td><td>1,20</td><td>sem diferença detectável</td></tr><tr><td>2021</td><td>P0</td><td>150</td><td>CTL</td><td>EXP01</td><td>507</td><td>2,14</td><td>1,98</td><td>0,65</td><td>0,21</td><td>1,13</td><td>EXP01</td></tr><tr><td>2021</td><td>P0</td><td>150</td><td>CTL</td><td>EXP02</td><td>507</td><td>2,14</td><td>1,88</td><td>1,05</td><td>0,36</td><td>1,94</td><td>EXP02</td></tr><tr><td>2021</td><td>P0</td><td>150</td><td>EXP01</td><td>EXP02</td><td>507</td><td>1,98</td><td>1,88</td><td>0,40</td><td>-0,24</td><td>1,23</td><td>sem diferença detectável</td></tr><tr><td>2021</td><td>P0</td><td>200</td><td>CTL</td><td>EXP01</td><td>503</td><td>2,12</td><td>1,97</td><td>0,64</td><td>0,22</td><td>1,05</td><td>EXP01</td></tr><tr><td>2021</td><td>P0</td><td>200</td><td>CTL</td><td>EXP02</td><td>503</td><td>2,12</td><td>1,86</td><td>1,04</td><td>0,36</td><td>1,88</td><td>EXP02</td></tr><tr><td>2021</td><td>P0</td><td>200</td><td>EXP01</td><td>EXP02</td><td>503</td><td>1,97</td><td>1,86</td><td>0,41</td><td>-0,25</td><td>1,24</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>50</td><td>CTL</td><td>EXP01</td><td>740</td><td>2,42</td><td>2,13</td><td>1,30</td><td>0,88</td><td>1,74</td><td>EXP01</td></tr><tr><td>2022</td><td>LPI</td><td>50</td><td>CTL</td><td>EXP02</td><td>740</td><td>2,42</td><td>2,04</td><td>1,66</td><td>0,67</td><td>2,83</td><td>EXP02</td></tr><tr><td>2022</td><td>LPI</td><td>50</td><td>EXP01</td><td>EXP02</td><td>740</td><td>2,13</td><td>2,04</td><td>0,36</td><td>-0,44</td><td>1,39</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>100</td><td>CTL</td><td>EXP01</td><td>740</td><td>2,31</td><td>2,07</td><td>1,07</td><td>0,70</td><td>1,41</td><td>EXP01</td></tr><tr><td>2022</td><td>LPI</td><td>100</td><td>CTL</td><td>EXP02</td><td>740</td><td>2,31</td><td>2,02</td><td>1,26</td><td>0,36</td><td>2,28</td><td>EXP02</td></tr><tr><td>2022</td><td>LPI</td><td>100</td><td>EXP01</td><td>EXP02</td><td>740</td><td>2,07</td><td>2,02</td><td>0,20</td><td>-0,56</td><td>1,13</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>150</td><td>CTL</td><td>EXP01</td><td>740</td><td>2,12</td><td>1,95</td><td>0,71</td><td>0,39</td><td>0,98</td><td>EXP01</td></tr><tr><td>2022</td><td>LPI</td><td>150</td><td>CTL</td><td>EXP02</td><td>740</td><td>2,12</td><td>1,96</td><td>0,65</td><td>-0,02</td><td>1,35</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>150</td><td>EXP01</td><td>EXP02</td><td>740</td><td>1,95</td><td>1,96</td><td>-0,05</td><td>-0,67</td><td>0,68</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>200</td><td>CTL</td><td>EXP01</td><td>740</td><td>1,92</td><td>1,81</td><td>0,43</td><td>0,20</td><td>0,65</td><td>EXP01</td></tr><tr><td>2022</td><td>LPI</td><td>200</td><td>CTL</td><td>EXP02</td><td>740</td><td>1,92</td><td>1,91</td><td>0,03</td><td>-0,47</td><td>0,51</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>200</td><td>EXP01</td><td>EXP02</td><td>740</td><td>1,81</td><td>1,91</td><td>-0,39</td><td>-0,83</td><td>0,04</td><td>sem diferença detectável</td></tr></tbody></table></div>
     
@@ -1314,21 +1266,21 @@
 
       <h3>O que os resultados permitem afirmar</h3>
       <ul class="plain-list">
-        <li>As cinco integrações estão completas nos dois períodos, sem lacunas horárias na janela científica pós-spin-up. A correção da SST foi verificada de forma independente: zero células oceânicas no valor de preenchimento e nenhuma abaixo de 296 K nas quatro pernas corrigidas.</li>
+        <li>As três integrações estão completas nos dois períodos, sem lacunas horárias na janela científica pós-spin-up, e cada arquivo foi aberto e lido na auditoria de integridade.</li>
         <li><strong>A atualização diária de SST melhora o vento em altura de rotor, uma vez que a forçante é sadia.</strong> EXP01 tem erro quadrático médio pareado menor que o CTL em 8 de 8 comparações — todas as alturas, nos dois sítios e nos dois períodos. O viés a 100 m cai de −1,24 para −0,95 m s⁻¹ em P0 e de −0,96 para −0,55 m s⁻¹ em LPI; o viés de densidade de potência eólica melhora de −36,9 % para −30,0 % e de −21,4 % para −13,5 %.</li>
-        <li>Essa conclusão <strong>inverte</strong> a leitura anterior à correção, em que o CTL aparecia como a única escolha defensável. A contaminação costeira resfriava artificialmente o mar, estabilizava a camada superficial e enfraquecia o vento justamente nas alturas avaliadas — o efeito espúrio mascarava o ganho real da atualização de SST.</li>
+        <li>Essa conclusão <strong>inverte</strong> a leitura obtida antes da correção da SST, quando o CTL aparecia como a única escolha defensável: o defeito de pré-processamento resfriava artificialmente o mar costeiro, estabilizava a camada superficial e enfraquecia o vento justamente nas alturas avaliadas, mascarando o ganho real. Ver <a href="sst-fix-comparison/index.html">comparação antigo × corrigido</a>.</li>
         <li><strong>O tratamento de fronteira não se paga nos sítios.</strong> EXP02 não se distingue estatisticamente do EXP01 em nenhuma das 8 comparações, apesar de custar 24 % mais células e cerca de 18 % mais tempo de parede com o mesmo número de ranks.</li>
         <li>Ainda assim, o tratamento de fronteira <strong>atua como projetado</strong>: a diferença média absoluta no vento de 100 m decai monotonicamente com a distância à zona de relaxação do EXP01, de 0,26 m s⁻¹ a menos de 50 km para 0,11 m s⁻¹ entre 300 e 500 km. O efeito é real; os instrumentos é que não estão onde ele importa.</li>
         <li><strong>O downscaling passa a adicionar skill sobre o ERA5 nos dois sítios.</strong> Escore de Murphy a 100 m, com intervalo de bootstrap em blocos de 95 %: em P0, CTL +0,24 [0,11; 0,39], EXP01 +0,34 [0,22; 0,50], EXP02 +0,40 [0,26; 0,61]; em LPI, CTL +0,12 [−0,02; 0,27] (não significativo), EXP01 +0,30 [0,16; 0,44], EXP02 +0,33 [0,21; 0,47]. Antes da correção, apenas P0 apresentava ganho significativo.</li>
         <li>INMET e LiDAR trazem diagnósticos complementares e não são agrupados: o primeiro avalia a circulação costeira terrestre a 10 m; o segundo avalia o recurso offshore em alturas de rotor.</li>
-        <li>O custo normalizado permite comparar execuções com números diferentes de ranks. EXP01 e EXP02 rodaram em 90 ranks contra os 60 das versões que substituíram, e ficaram <em>menos</em> eficientes por núcleo — 3,22 horas-máquina por hora simulada no EXP01 contra 2,54 no EXP01_BADSST: 90 ranks sobre-decompõem esta malha.</li>
+        <li>O custo normalizado permite comparar execuções com números diferentes de ranks. EXP01 e EXP02 rodaram em 90 ranks; execuções anteriores da mesma malha em 60 ranks custaram 2,54 horas-máquina por hora simulada contra 3,22 em 90. <strong>90 ranks sobre-decompõem esta malha</strong> — as rodadas climatológicas devem usar 60.</li>
       </ul>
 
       <h3>O que ainda não é possível concluir</h3>
       <ul class="plain-list">
         <li>A avaliação cobre <strong>um mês por sítio</strong>, e novembro de 2021 foi o novembro mais fraco dos 31 anos da série ERA5 em P0 (percentil 0, z = −2,46). O ranking vale para essas condições; outubro de 2022 em LPI, por outro lado, foi quase exatamente típico.</li>
         <li>Persiste um <strong>viés baixo de vento</strong> em todos os sítios bem expostos (−0,5 a −1,1 m s⁻¹ nos LiDARes após a correção). Ele não é artefato da SST e segue sem explicação: os candidatos são a rugosidade sobre o mar, a profundidade de mistura da camada limite e o próprio forçamento ERA5, que carrega o mesmo sinal.</li>
-        <li>Na validação INMET, as rodadas corrigidas aparecem ligeiramente piores que as contaminadas (viés +2,06 contra +1,86 m s⁻¹). Esse eixo é dominado por representatividade — mastros abrigados contra uma célula de 5 km — e o mar frio espúrio reduzia o vento continental pela razão errada. Não contradiz o eixo LiDAR, que é o decisivo para recurso offshore.</li>
+        <li>O eixo INMET é dominado por representatividade — mastros abrigados contra uma célula de ~5 km — e por isso seu viés absoluto não discrimina configurações. Vale pela fase e pela estrutura ao longo da costa, não pela magnitude.</li>
         <li>O erro de fase diurna em P0 não é interpretável célula a célula: o ciclo observado é <strong>duplo-pico</strong> (08 e 22 h local), de modo que a métrica baseada no máximo salta entre +4 h e −10 h entre alturas vizinhas. A amplitude é o indicador confiável nesse sítio.</li>
         <li>O valor do tratamento de fronteira <strong>perto da própria fronteira</strong> não foi medido contra observações, apenas contra o outro experimento. Se a região próxima ao contorno fizer parte do produto, a decisão muda.</li>
       </ul>
@@ -1336,11 +1288,93 @@
       <h3>Próximas ações</h3>
       <ol class="plain-list">
         <li>Adotar EXP01 como configuração das rodadas climatológicas e registrar a decisão com os números desta seção.</li>
-        <li>Submeter a correção do preenchimento terrestre da OISST ao repositório de origem (<code>usp-utils</code>, em CGFD-USP/MPAS-Research), para que o erro deixe de atingir outros usuários. A correção já está implementada e testada, mas ainda não foi enviada: o ramo <code>develop</code> segue com o valor constante de 273,15 K sobre o continente.</li>
+        <li>Submeter a correção do conversor da OISST ao repositório de origem (<code>usp-utils</code>, em CGFD-USP/MPAS-Research), para que o defeito deixe de atingir outros usuários. A correção está implementada e testada no ramo <code>fix/oisst-coastal-land-fill</code>, mas ainda não foi enviada: o <code>develop</code> segue escrevendo a constante de 273,15 K sobre o continente.</li>
         <li>Investigar o viés baixo residual com os diagnósticos já extraídos nos sítios (<code>ust</code>, <code>znt</code>, <code>zol</code>), separando rugosidade, mistura e forçamento lateral.</li>
         <li>Acrescentar um segundo mês, de condições típicas, em P0 — a avaliação atual nesse sítio repousa sobre um extremo climatológico.</li>
         <li>Avaliar se o próximo experimento de fronteira deve usar uma malha de contorno suave (elíptica), eliminando as quinas do polígono atual, antes de decidir se o tratamento de fronteira volta à pauta.</li>
       </ol>
+    </section>
+
+    <section id="limitacoes">
+      <h2>9. Limitações e defeitos conhecidos</h2>
+      <p class="lead">Registro honesto do que, nesta análise, não deve ser lido
+         literalmente. Está no fim de propósito: nada aqui invalida as
+         conclusões da seção 8, mas cada item muda como um número específico
+         pode ser citado.</p>
+
+      <h3>9.1 Números que não devem ser comparados diretamente</h3>
+      <ul class="plain-list">
+        <li><strong>Custo com origem “estimado”.</strong> Quando o wrapper de
+          execução não registrou o tempo, ele é reconstruído de carimbos de
+          arquivo — e a reconstrução divide o tempo de parede da integração
+          inteira pelas horas da <em>janela de análise</em> (744 ou 720 h em vez
+          de 984 h), inflando o resultado em cerca de 32 %. Isso afeta a perna de
+          2022 do EXP02 e as duas do CTL. Compare linhas “medido” com “medido”;
+          as “estimadas” servem para ordem de grandeza.</li>
+        <li><strong>Erro de fase diurna em P0.</strong> O ciclo observado ali tem
+          <em>dois</em> máximos (cerca de 08 h e 22 h locais), então a métrica
+          baseada no horário do máximo é instável: ela salta entre +4 h e −10 h
+          entre alturas vizinhas sem que o escoamento mude de forma
+          correspondente. Em P0, use a amplitude diurna, não a fase. Em LPI e nas
+          estações de superfície a fase é bem definida.</li>
+        <li><strong>Viés absoluto nas estações INMET.</strong> Os mastros
+          automáticos medem 3,2 m s⁻¹ médios contra 6,5 m s⁻¹ nos aeroportos da
+          mesma região e dos mesmos meses. Uma diferença de fator dois entre duas
+          redes que medem o mesmo vento é abrigo e exposição, que uma célula de
+          ~5 km não representa. Esse eixo vale pela fase e pela estrutura ao
+          longo da costa, não pela magnitude do viés.</li>
+      </ul>
+
+      <h3>9.2 Resultados sem explicação</h3>
+      <ul class="plain-list">
+        <li><strong>Viés baixo de vento em todo sítio bem exposto</strong>, de
+          −0,5 a −1,1 m s⁻¹ nos LiDARes mesmo após a correção da SST, e com o
+          mesmo sinal no próprio ERA5 que fornece as fronteiras. Não é artefato
+          de superfície do mar. É o erro mais consequente para avaliação de
+          recurso, porque −20 % em densidade de potência é −20 % em energia, e
+          continua em aberto.</li>
+        <li><strong>Duas células oceânicas do CTL em 2022 a 293,5 K.</strong>
+          Não é o defeito da OISST — o CTL nem lê o arquivo de atualização de
+          SST —, e sim um artefato costeiro da temperatura de superfície do ERA5
+          congelada no instante inicial. São 2 células entre 41.025 e não afetam
+          os sítios, mas o verificador as sinaliza e a causa é outra.</li>
+      </ul>
+
+      <h3>9.3 Pontos de atenção operacionais</h3>
+      <ul class="plain-list">
+        <li><strong>90 ranks sobre-decompõem esta malha.</strong> Medido lado a
+          lado na mesma malha e mesmos períodos: 3,22 horas-máquina por hora
+          simulada em 90 ranks contra 2,54 em 60. Aumentar 1,5× os ranks rendeu
+          1,18× de velocidade. As rodadas climatológicas devem usar 60.</li>
+        <li><strong>As animações não acompanham a versão em repositório</strong>
+          (67 dos 91 MB do pacote). São regeneradas pelo estágio 05.</li>
+        <li><strong>O verificador de SST continua auditando as execuções
+          superadas</strong> e relatando a contaminação delas, mas não falha por
+          isso: estão marcadas com <code>sst_forcing_known_bad</code>. Só uma
+          contaminação nova interrompe o pipeline.</li>
+      </ul>
+
+      <h3>9.4 Defeitos encontrados e corrigidos nesta revisão</h3>
+      <p class="topic-intro">Registrados porque eram silenciosos — nenhum deles
+         produzia erro, todos produziam resultado errado ou incompleto.</p>
+      <ul class="plain-list">
+        <li>A lista fixa de experimentos usada pelas figuras não incluía as
+          execuções corrigidas, que eram <strong>silenciosamente omitidas de
+          todos os gráficos</strong>, sem aviso.</li>
+        <li>O destaque de “melhor valor” nas tabelas disputava apenas entre as
+          execuções antigas, de modo que o relatório teria recomendado em negrito
+          um resultado produzido pelo defeito.</li>
+        <li>As duas execuções corrigidas foram lançadas por um mesmo log de
+          sequência, e ambas usam os mesmos nomes de período. Sem delimitar a
+          seção de cada experimento, o EXP02 recebia o tempo de parede do EXP01
+          (126.874 s em vez de 149.116 s).</li>
+        <li>Uma perna concluída cujo wrapper morreu antes de registrar o
+          encerramento era classificada como “em execução”, acumulando como custo
+          todo o tempo desde o último sinal de vida.</li>
+        <li>As tabelas <code>_fullwindow</code> continuavam versionadas com
+          resultados anteriores à correção, sob os mesmos nomes de experimento,
+          e já não eram regeradas pelo pipeline. Foram removidas.</li>
+      </ul>
     </section>
   </main>
 </div>

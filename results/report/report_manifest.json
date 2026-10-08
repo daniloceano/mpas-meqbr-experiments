@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-07T22:13:02+00:00",
-  "analysis_commit": "f6cfc60",
+  "generated_utc": "2026-10-08T12:24:30+00:00",
+  "analysis_commit": "5a2956e",
   "working_tree_dirty": true,
   "provisional": false,
   "tables": [
@@ -48,12 +48,6 @@
       "bundled_as": "assets/spatial_fields/diff_EXP01_vs_CTL_2021_common.png",
       "bytes": 457488,
       "title": "Resposta espacial à SST diária corrigida"
-    },
-    {
-      "source": "figures/exploration/diff_EXP01_vs_EXP01_BADSST_2021_common.png",
-      "bundled_as": "assets/spatial_fields/diff_EXP01_vs_EXP01_BADSST_2021_common.png",
-      "bytes": 413316,
-      "title": "Tamanho do artefato de SST que foi removido"
     },
     {
       "source": "figures/exploration/diff_EXP02_vs_EXP01_2021_common.png",

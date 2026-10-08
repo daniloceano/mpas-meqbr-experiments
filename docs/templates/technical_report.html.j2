@@ -338,6 +338,7 @@
     <a href="#valor-adicionado">6. Valor adicionado</a>
     <a href="#mecanismos">7. Mecanismos e seleção</a>
     <a href="#conclusoes">8. Conclusões</a>
+    <a href="#limitacoes">9. Limitações e defeitos conhecidos</a>
   </nav>
 
   <main>
@@ -368,20 +369,17 @@
              LiDARs e acrescenta estrutura espacial relevante ao recurso eólico?</p>
         </div>
       </div>
-      <div class="banner">
-        <strong>Contaminação de SST corrigida e reavaliada.</strong> EXP01_BADSST e
-        EXP02_BADSST receberam o valor de preenchimento terrestre da OISST
-        (273,15 K) em células oceânicas costeiras, e os dois LiDARes ficam
-        dentro da faixa afetada — suas comparações contra o CTL mediam um erro
-        de interpolação, não a hipótese que pretendiam testar. A rotina de
-        conversão foi corrigida (valores sobre o continente estendidos do ponto
-        oceânico válido mais próximo, preservando <code>LANDSEA</code> e os
-        valores oceânicos) e os dois experimentos foram repetidos como
-        EXP01 e EXP02. A auditoria confirma <strong>zero
-        células oceânicas no valor de preenchimento</strong> e nenhuma célula
-        abaixo de 296 K nas quatro pernas corrigidas. <strong>As conclusões
-        deste relatório vêm das rodadas corrigidas</strong>; EXP01_BADSST e EXP02_BADSST
-        permanecem exibidos apenas como registro da anomalia.
+      <div class="banner info">
+        <strong>Nota de procedência.</strong> Uma primeira versão de EXP01 e
+        EXP02 foi executada com um defeito no pré-processamento: o conversor da
+        SST OISST levava o valor de preenchimento terrestre (273,15 K) para
+        células oceânicas costeiras, e os dois LiDARes ficam dentro da faixa
+        afetada. O conversor foi corrigido e os dois experimentos foram
+        repetidos. <strong>Tudo neste relatório vem das execuções corrigidas</strong>,
+        verificadas célula a célula: nenhuma célula oceânica no valor de
+        preenchimento e nenhuma abaixo de 296 K. O antes e depois está
+        documentado em
+        <a href="sst-fix-comparison/index.html">comparação antigo × corrigido</a>.
       </div>
       <p><strong>Como ler o relatório:</strong> primeiro são apresentados o
          desenho e o estado das integrações; depois, os campos produzidos pelo
@@ -397,13 +395,6 @@
          fatorial, de modo que a diferença EXP02 − EXP01 é o efeito
          <em>incremental</em> do tratamento de fronteira com a atualização de
          SST já ligada.</p>
-      <p>São cinco integrações registradas, em dois conjuntos. O conjunto
-         <strong>atual</strong> — CTL, EXP01 e EXP02 — é o que sustenta todas
-         as conclusões. O par <strong>superado</strong> — EXP01_BADSST e
-         EXP02_BADSST — são as primeiras tentativas de EXP01 e EXP02, mantidas
-         porque são a evidência do problema de SST descrito na seção 1 e porque
-         permitem medir o tamanho do efeito espúrio. Nas figuras, o par superado
-         aparece em tom claro e o conjunto atual em cor saturada.</p>
 
       <div id="configuracao-comum">
         <h3>2.1 Configuração comum a todos os experimentos</h3>
@@ -631,18 +622,13 @@
          mecanismo esperado. Uma aparente melhora sem resposta coerente em SST,
          fluxos, camada limite ou distância da fronteira não é transferível para
          simulações climatológicas.</p>
-      <div class="banner">
-        <strong>Gate de integridade: aprovado no conjunto corrigido.</strong>
+      <div class="banner info">
+        <strong>Gate de integridade: aprovado.</strong>
         <code>check_sst_forcing.py</code> encontra zero células oceânicas no
-        valor de preenchimento em EXP01 e EXP02, com SST
-        mínima de 299,5–300,7 K sobre o oceano e 301,5 K em P0 — contra
-        273,15 K e 291,5 K nas versões superadas. A cadeia física acompanha:
-        em P0 os fluxos de calor sensível e latente voltam a ser positivos
-        (+9,2 e +141,7 W m⁻², contra −17,8 e −33,4) e a camada limite deixa de
-        colapsar (624 m, contra 79 m). O gate continua auditando EXP01_BADSST
-        e EXP02_BADSST e relatando a contaminação deles, mas não falha por isso:
-        estão registrados com <code>sst_forcing_known_bad</code>, de modo que
-        apenas uma contaminação <em>nova</em> interrompe o pipeline.
+        valor de preenchimento da OISST em EXP01 e EXP02, com SST mínima de
+        299,5–300,7 K sobre o oceano e 301,5 K em P0. A cadeia física acompanha:
+        em P0 os fluxos de calor sensível e latente são positivos (+9,2 e
+        +141,7 W m⁻²) e a camada limite tem 624 m.
       </div>
       {% if "selection" in tables %}{{ render_table(tables["selection"]) }}{% endif %}
       {{ render_gallery(media_groups.get("mechanisms")) }}
@@ -661,21 +647,21 @@
 
       <h3>O que os resultados permitem afirmar</h3>
       <ul class="plain-list">
-        <li>As cinco integrações estão completas nos dois períodos, sem lacunas horárias na janela científica pós-spin-up. A correção da SST foi verificada de forma independente: zero células oceânicas no valor de preenchimento e nenhuma abaixo de 296 K nas quatro pernas corrigidas.</li>
+        <li>As três integrações estão completas nos dois períodos, sem lacunas horárias na janela científica pós-spin-up, e cada arquivo foi aberto e lido na auditoria de integridade.</li>
         <li><strong>A atualização diária de SST melhora o vento em altura de rotor, uma vez que a forçante é sadia.</strong> EXP01 tem erro quadrático médio pareado menor que o CTL em 8 de 8 comparações — todas as alturas, nos dois sítios e nos dois períodos. O viés a 100 m cai de −1,24 para −0,95 m s⁻¹ em P0 e de −0,96 para −0,55 m s⁻¹ em LPI; o viés de densidade de potência eólica melhora de −36,9 % para −30,0 % e de −21,4 % para −13,5 %.</li>
-        <li>Essa conclusão <strong>inverte</strong> a leitura anterior à correção, em que o CTL aparecia como a única escolha defensável. A contaminação costeira resfriava artificialmente o mar, estabilizava a camada superficial e enfraquecia o vento justamente nas alturas avaliadas — o efeito espúrio mascarava o ganho real da atualização de SST.</li>
+        <li>Essa conclusão <strong>inverte</strong> a leitura obtida antes da correção da SST, quando o CTL aparecia como a única escolha defensável: o defeito de pré-processamento resfriava artificialmente o mar costeiro, estabilizava a camada superficial e enfraquecia o vento justamente nas alturas avaliadas, mascarando o ganho real. Ver <a href="sst-fix-comparison/index.html">comparação antigo × corrigido</a>.</li>
         <li><strong>O tratamento de fronteira não se paga nos sítios.</strong> EXP02 não se distingue estatisticamente do EXP01 em nenhuma das 8 comparações, apesar de custar 24 % mais células e cerca de 18 % mais tempo de parede com o mesmo número de ranks.</li>
         <li>Ainda assim, o tratamento de fronteira <strong>atua como projetado</strong>: a diferença média absoluta no vento de 100 m decai monotonicamente com a distância à zona de relaxação do EXP01, de 0,26 m s⁻¹ a menos de 50 km para 0,11 m s⁻¹ entre 300 e 500 km. O efeito é real; os instrumentos é que não estão onde ele importa.</li>
         <li><strong>O downscaling passa a adicionar skill sobre o ERA5 nos dois sítios.</strong> Escore de Murphy a 100 m, com intervalo de bootstrap em blocos de 95 %: em P0, CTL +0,24 [0,11; 0,39], EXP01 +0,34 [0,22; 0,50], EXP02 +0,40 [0,26; 0,61]; em LPI, CTL +0,12 [−0,02; 0,27] (não significativo), EXP01 +0,30 [0,16; 0,44], EXP02 +0,33 [0,21; 0,47]. Antes da correção, apenas P0 apresentava ganho significativo.</li>
         <li>INMET e LiDAR trazem diagnósticos complementares e não são agrupados: o primeiro avalia a circulação costeira terrestre a 10 m; o segundo avalia o recurso offshore em alturas de rotor.</li>
-        <li>O custo normalizado permite comparar execuções com números diferentes de ranks. EXP01 e EXP02 rodaram em 90 ranks contra os 60 das versões que substituíram, e ficaram <em>menos</em> eficientes por núcleo — 3,22 horas-máquina por hora simulada no EXP01 contra 2,54 no EXP01_BADSST: 90 ranks sobre-decompõem esta malha.</li>
+        <li>O custo normalizado permite comparar execuções com números diferentes de ranks. EXP01 e EXP02 rodaram em 90 ranks; execuções anteriores da mesma malha em 60 ranks custaram 2,54 horas-máquina por hora simulada contra 3,22 em 90. <strong>90 ranks sobre-decompõem esta malha</strong> — as rodadas climatológicas devem usar 60.</li>
       </ul>
 
       <h3>O que ainda não é possível concluir</h3>
       <ul class="plain-list">
         <li>A avaliação cobre <strong>um mês por sítio</strong>, e novembro de 2021 foi o novembro mais fraco dos 31 anos da série ERA5 em P0 (percentil 0, z = −2,46). O ranking vale para essas condições; outubro de 2022 em LPI, por outro lado, foi quase exatamente típico.</li>
         <li>Persiste um <strong>viés baixo de vento</strong> em todos os sítios bem expostos (−0,5 a −1,1 m s⁻¹ nos LiDARes após a correção). Ele não é artefato da SST e segue sem explicação: os candidatos são a rugosidade sobre o mar, a profundidade de mistura da camada limite e o próprio forçamento ERA5, que carrega o mesmo sinal.</li>
-        <li>Na validação INMET, as rodadas corrigidas aparecem ligeiramente piores que as contaminadas (viés +2,06 contra +1,86 m s⁻¹). Esse eixo é dominado por representatividade — mastros abrigados contra uma célula de 5 km — e o mar frio espúrio reduzia o vento continental pela razão errada. Não contradiz o eixo LiDAR, que é o decisivo para recurso offshore.</li>
+        <li>O eixo INMET é dominado por representatividade — mastros abrigados contra uma célula de ~5 km — e por isso seu viés absoluto não discrimina configurações. Vale pela fase e pela estrutura ao longo da costa, não pela magnitude.</li>
         <li>O erro de fase diurna em P0 não é interpretável célula a célula: o ciclo observado é <strong>duplo-pico</strong> (08 e 22 h local), de modo que a métrica baseada no máximo salta entre +4 h e −10 h entre alturas vizinhas. A amplitude é o indicador confiável nesse sítio.</li>
         <li>O valor do tratamento de fronteira <strong>perto da própria fronteira</strong> não foi medido contra observações, apenas contra o outro experimento. Se a região próxima ao contorno fizer parte do produto, a decisão muda.</li>
       </ul>
@@ -683,11 +669,93 @@
       <h3>Próximas ações</h3>
       <ol class="plain-list">
         <li>Adotar EXP01 como configuração das rodadas climatológicas e registrar a decisão com os números desta seção.</li>
-        <li>Submeter a correção do preenchimento terrestre da OISST ao repositório de origem (<code>usp-utils</code>, em CGFD-USP/MPAS-Research), para que o erro deixe de atingir outros usuários. A correção já está implementada e testada, mas ainda não foi enviada: o ramo <code>develop</code> segue com o valor constante de 273,15 K sobre o continente.</li>
+        <li>Submeter a correção do conversor da OISST ao repositório de origem (<code>usp-utils</code>, em CGFD-USP/MPAS-Research), para que o defeito deixe de atingir outros usuários. A correção está implementada e testada no ramo <code>fix/oisst-coastal-land-fill</code>, mas ainda não foi enviada: o <code>develop</code> segue escrevendo a constante de 273,15 K sobre o continente.</li>
         <li>Investigar o viés baixo residual com os diagnósticos já extraídos nos sítios (<code>ust</code>, <code>znt</code>, <code>zol</code>), separando rugosidade, mistura e forçamento lateral.</li>
         <li>Acrescentar um segundo mês, de condições típicas, em P0 — a avaliação atual nesse sítio repousa sobre um extremo climatológico.</li>
         <li>Avaliar se o próximo experimento de fronteira deve usar uma malha de contorno suave (elíptica), eliminando as quinas do polígono atual, antes de decidir se o tratamento de fronteira volta à pauta.</li>
       </ol>
+    </section>
+
+    <section id="limitacoes">
+      <h2>9. Limitações e defeitos conhecidos</h2>
+      <p class="lead">Registro honesto do que, nesta análise, não deve ser lido
+         literalmente. Está no fim de propósito: nada aqui invalida as
+         conclusões da seção 8, mas cada item muda como um número específico
+         pode ser citado.</p>
+
+      <h3>9.1 Números que não devem ser comparados diretamente</h3>
+      <ul class="plain-list">
+        <li><strong>Custo com origem “estimado”.</strong> Quando o wrapper de
+          execução não registrou o tempo, ele é reconstruído de carimbos de
+          arquivo — e a reconstrução divide o tempo de parede da integração
+          inteira pelas horas da <em>janela de análise</em> (744 ou 720 h em vez
+          de 984 h), inflando o resultado em cerca de 32 %. Isso afeta a perna de
+          2022 do EXP02 e as duas do CTL. Compare linhas “medido” com “medido”;
+          as “estimadas” servem para ordem de grandeza.</li>
+        <li><strong>Erro de fase diurna em P0.</strong> O ciclo observado ali tem
+          <em>dois</em> máximos (cerca de 08 h e 22 h locais), então a métrica
+          baseada no horário do máximo é instável: ela salta entre +4 h e −10 h
+          entre alturas vizinhas sem que o escoamento mude de forma
+          correspondente. Em P0, use a amplitude diurna, não a fase. Em LPI e nas
+          estações de superfície a fase é bem definida.</li>
+        <li><strong>Viés absoluto nas estações INMET.</strong> Os mastros
+          automáticos medem 3,2 m s⁻¹ médios contra 6,5 m s⁻¹ nos aeroportos da
+          mesma região e dos mesmos meses. Uma diferença de fator dois entre duas
+          redes que medem o mesmo vento é abrigo e exposição, que uma célula de
+          ~5 km não representa. Esse eixo vale pela fase e pela estrutura ao
+          longo da costa, não pela magnitude do viés.</li>
+      </ul>
+
+      <h3>9.2 Resultados sem explicação</h3>
+      <ul class="plain-list">
+        <li><strong>Viés baixo de vento em todo sítio bem exposto</strong>, de
+          −0,5 a −1,1 m s⁻¹ nos LiDARes mesmo após a correção da SST, e com o
+          mesmo sinal no próprio ERA5 que fornece as fronteiras. Não é artefato
+          de superfície do mar. É o erro mais consequente para avaliação de
+          recurso, porque −20 % em densidade de potência é −20 % em energia, e
+          continua em aberto.</li>
+        <li><strong>Duas células oceânicas do CTL em 2022 a 293,5 K.</strong>
+          Não é o defeito da OISST — o CTL nem lê o arquivo de atualização de
+          SST —, e sim um artefato costeiro da temperatura de superfície do ERA5
+          congelada no instante inicial. São 2 células entre 41.025 e não afetam
+          os sítios, mas o verificador as sinaliza e a causa é outra.</li>
+      </ul>
+
+      <h3>9.3 Pontos de atenção operacionais</h3>
+      <ul class="plain-list">
+        <li><strong>90 ranks sobre-decompõem esta malha.</strong> Medido lado a
+          lado na mesma malha e mesmos períodos: 3,22 horas-máquina por hora
+          simulada em 90 ranks contra 2,54 em 60. Aumentar 1,5× os ranks rendeu
+          1,18× de velocidade. As rodadas climatológicas devem usar 60.</li>
+        <li><strong>As animações não acompanham a versão em repositório</strong>
+          (67 dos 91 MB do pacote). São regeneradas pelo estágio 05.</li>
+        <li><strong>O verificador de SST continua auditando as execuções
+          superadas</strong> e relatando a contaminação delas, mas não falha por
+          isso: estão marcadas com <code>sst_forcing_known_bad</code>. Só uma
+          contaminação nova interrompe o pipeline.</li>
+      </ul>
+
+      <h3>9.4 Defeitos encontrados e corrigidos nesta revisão</h3>
+      <p class="topic-intro">Registrados porque eram silenciosos — nenhum deles
+         produzia erro, todos produziam resultado errado ou incompleto.</p>
+      <ul class="plain-list">
+        <li>A lista fixa de experimentos usada pelas figuras não incluía as
+          execuções corrigidas, que eram <strong>silenciosamente omitidas de
+          todos os gráficos</strong>, sem aviso.</li>
+        <li>O destaque de “melhor valor” nas tabelas disputava apenas entre as
+          execuções antigas, de modo que o relatório teria recomendado em negrito
+          um resultado produzido pelo defeito.</li>
+        <li>As duas execuções corrigidas foram lançadas por um mesmo log de
+          sequência, e ambas usam os mesmos nomes de período. Sem delimitar a
+          seção de cada experimento, o EXP02 recebia o tempo de parede do EXP01
+          (126.874 s em vez de 149.116 s).</li>
+        <li>Uma perna concluída cujo wrapper morreu antes de registrar o
+          encerramento era classificada como “em execução”, acumulando como custo
+          todo o tempo desde o último sinal de vida.</li>
+        <li>As tabelas <code>_fullwindow</code> continuavam versionadas com
+          resultados anteriores à correção, sob os mesmos nomes de experimento,
+          e já não eram regeradas pelo pipeline. Foram removidas.</li>
+      </ul>
     </section>
   </main>
 </div>
