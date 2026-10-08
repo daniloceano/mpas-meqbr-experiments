@@ -95,13 +95,26 @@ def main() -> int:
         made.append(out)
 
         # ---- scatter -----------------------------------------------------
-        n = len(frames)
+        # ERA5 is a like-for-like benchmark only at 100 m.  Put it beside the
+        # MPAS panels so every point-validation view answers the practical
+        # question "does downscaling improve on the driving reanalysis?".
+        scatter_frames = {}
+        if era5 is not None and args.height == 100:
+            e = ref[["time", "obs_speed", "obs_dir"]].merge(
+                era5, on="time", how="inner")
+            if len(e) > 24:
+                scatter_frames["ERA5"] = e.rename(columns={
+                    "era5_speed": "mod_speed", "era5_dir": "mod_dir"})
+        scatter_frames.update({
+            exp: frames[exp] for exp in plotting.EXPERIMENT_ORDER if exp in frames
+        })
+        n = len(scatter_frames)
         fig, axes = plt.subplots(1, n, figsize=(3.4 * n, 3.6), sharex=True, sharey=True,
                                  squeeze=False)
         lim = float(np.nanpercentile(
             np.concatenate([ref["obs_speed"].values] +
-                           [d["mod_speed"].values for d in frames.values()]), 99.8)) * 1.1
-        for ax, (exp, d) in zip(axes[0], frames.items()):
+                           [d["mod_speed"].values for d in scatter_frames.values()]), 99.8)) * 1.1
+        for ax, (exp, d) in zip(axes[0], scatter_frames.items()):
             x, y = d["obs_speed"].values, d["mod_speed"].values
             ax.scatter(x, y, c=density_colors(x, y), s=6, cmap="viridis", lw=0)
             ax.plot([0, lim], [0, lim], color="0.4", lw=0.8)
@@ -117,12 +130,13 @@ def main() -> int:
             ax.set_ylim(0, lim)
             ax.set_aspect("equal")
             ax.set_xlabel("observed (m s$^{-1}$)")
-        axes[0][0].set_ylabel("model (m s$^{-1}$)")
+        axes[0][0].set_ylabel("source estimate (m s$^{-1}$)")
         fig.suptitle(f"{site.label} — {args.height} m — {cfg.periods[period]['label']}",
                      y=1.02)
         plotting.provenance_footer(
             fig, "scripts/02_validation/plot_timeseries_scatter.py | colour = point density "
-                 "(Gaussian KDE) | WPD = relative bias in wind power density")
+                 "(Gaussian KDE) | WPD = relative bias in wind power density | "
+                 "ERA5 shown only at its native diagnostic height of 100 m")
         out = cfg.path("figures", "validation",
                        f"scatter_{period}_{site_key}_{args.height}m.png")
         fig.savefig(out)

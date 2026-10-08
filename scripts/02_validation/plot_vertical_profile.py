@@ -56,6 +56,7 @@ def main() -> int:
         frames = pairing.load_paired(cfg, experiments, period, common=True)
         if not frames:
             continue
+        era5 = pairing.add_era5(frames, cfg, period)
 
         fig, axes = plt.subplots(1, 3, figsize=(11, 4),
                                  gridspec_kw={"width_ratios": [1, 1, 1.2]})
@@ -71,6 +72,15 @@ def main() -> int:
             prof = frames[exp].groupby("model_height")["mod_speed"].mean()
             ax.plot(prof.values, prof.index, "o-", ms=4,
                     color=plotting.EXPERIMENT_COLORS[exp], label=exp)
+        era5_pair = None
+        if era5 is not None:
+            at_100 = ref[ref["model_height"] == 100][
+                ["time", "obs_speed", "obs_dir"]]
+            era5_pair = at_100.merge(era5, on="time", how="inner")
+            if len(era5_pair) > 24:
+                ax.plot([era5_pair["era5_speed"].mean()], [100], marker="P", ms=8,
+                        ls="", color=plotting.EXPERIMENT_COLORS["ERA5"],
+                        mec="k", mew=0.5, label="ERA5 (100 m)")
         ax.set_xlabel("mean wind speed (m s$^{-1}$)")
         ax.set_ylabel("height above sea level (m)")
         ax.set_title("mean profile")
@@ -88,6 +98,10 @@ def main() -> int:
                 include_groups=False)
             ax.plot(bias.values, bias.index, "o-", ms=4,
                     color=plotting.EXPERIMENT_COLORS[exp], label=exp)
+        if era5_pair is not None and len(era5_pair) > 24:
+            ax.plot([(era5_pair["era5_speed"] - era5_pair["obs_speed"]).mean()],
+                    [100], marker="P", ms=8, ls="",
+                    color=plotting.EXPERIMENT_COLORS["ERA5"], mec="k", mew=0.5)
         ax.set_xlabel("model - observed (m s$^{-1}$)")
         ax.set_title("bias by height")
 
@@ -123,7 +137,9 @@ def main() -> int:
         plotting.provenance_footer(
             fig, "scripts/02_validation/plot_vertical_profile.py | heights are the model "
                  "layer centres matched to LiDAR channels | shear from the lowest and "
-                 "highest common levels, calm hours (<0.05 m/s) excluded")
+                 "highest common levels, alpha = ln(U_high/U_low) / ln(z_high/z_low); "
+                 "calm hours (<0.05 m/s) excluded | ERA5 has one directly comparable "
+                 "hub-height diagnostic (100 m), so no ERA5 alpha is inferred")
         out = cfg.path("figures", "validation", f"profile_{period}_{site_key}.png")
         fig.savefig(out)
         plt.close(fig)

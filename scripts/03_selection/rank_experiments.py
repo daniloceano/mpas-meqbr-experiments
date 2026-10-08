@@ -83,6 +83,7 @@ def main() -> int:
         if len(frames) < 1:
             continue
         present = [e for e in plotting.EXPERIMENT_ORDER if e in frames]
+        era5 = pairing.add_era5(frames, cfg, period)
         print(f"\n=== {period} / {site_key} — {', '.join(present)} ===")
 
         for height in args.heights:
@@ -109,6 +110,33 @@ def main() -> int:
                     "diurnal_amp_bias": dc["diurnal_amp_bias"],
                     "window_start": d["time"].min(), "window_end": d["time"].max(),
                 })
+
+            # ERA5 is a benchmark, not an experiment in the pairwise selection.
+            # Add it to the 100 m ranking table/figure on exactly the same hours,
+            # while keeping experiment-vs-experiment hypothesis tests unchanged.
+            if height == 100 and era5 is not None:
+                ref = next(iter(subs.values()))
+                e = ref[["time", "obs_speed", "obs_dir"]].merge(
+                    era5, on="time", how="inner").sort_values("time")
+                if len(e) >= 3 * args.block_hours:
+                    ci = metrics.block_bootstrap_ci(
+                        e["obs_speed"].values, e["era5_speed"].values, rmse_stat,
+                        block_hours=args.block_hours, n_boot=args.n_boot)
+                    s = metrics.basic_scores(e["obs_speed"], e["era5_speed"])
+                    r = metrics.resource_scores(e["obs_speed"], e["era5_speed"])
+                    dc = metrics.diurnal_scores(
+                        e["time"], e["obs_speed"], e["era5_speed"])
+                    ranking.append({
+                        "experiment": "ERA5", "period": period, "site": site_key,
+                        "height_m": height, "n": s["n"], "rmse": s["rmse"],
+                        "rmse_lo": ci["lo"], "rmse_hi": ci["hi"],
+                        "bias": s["bias"], "r": s["r"],
+                        "wpd_rel_bias_pct": r["wpd_rel_bias_pct"],
+                        "diurnal_phase_error_h": dc["diurnal_phase_error_h"],
+                        "diurnal_amp_bias": dc["diurnal_amp_bias"],
+                        "window_start": e["time"].min(),
+                        "window_end": e["time"].max(),
+                    })
 
             # Pairwise: is B better than A on the same hours?
             for a, b in itertools.combinations(subs, 2):
@@ -153,9 +181,10 @@ def main() -> int:
     for ax, (period, site_key) in zip(axes[0], site_periods):
         s = sub[(sub["period"] == period) & (sub["site"] == site_key)]
         heights = sorted(s["height_m"].unique())
-        offsets = np.linspace(-0.22, 0.22, max(len(s["experiment"].unique()), 1))
-        for off, exp in zip(offsets, [e for e in plotting.EXPERIMENT_ORDER
-                                      if e in set(s["experiment"])]):
+        source_order = [e for e in ["ERA5", *plotting.EXPERIMENT_ORDER]
+                        if e in set(s["experiment"])]
+        offsets = np.linspace(-0.22, 0.22, max(len(source_order), 1))
+        for off, exp in zip(offsets, source_order):
             e = s[s["experiment"] == exp].set_index("height_m").reindex(heights)
             x = np.arange(len(heights)) + off
             ax.errorbar(x, e["rmse"],
@@ -173,6 +202,7 @@ def main() -> int:
     plotting.provenance_footer(
         fig, f"scripts/03_selection/rank_experiments.py | {args.block_hours} h blocks, "
              f"{args.n_boot} resamples | all experiments scored over the same hours | "
+             "ERA5 is shown at 100 m as a benchmark and is not treated as an MPAS experiment | "
              "overlapping intervals do NOT settle a comparison — see pairwise_tests.csv, "
              "which tests the paired difference directly and is far more sensitive")
     fig_out = cfg.path("figures", "selection", f"ranking{tag}.png")

@@ -29,19 +29,20 @@ a simulation finishes reads only the new hours.
 | Script | Produces |
 |---|---|
 | `compute_site_metrics.py` | `results/tables/site_metrics*.csv` — every score, every experiment, site and height. The quantitative backbone. |
-| `plot_timeseries_scatter.py` | time series + density scatter |
+| `plot_timeseries_scatter.py` | time series + density scatter, with ERA5 at the directly comparable 100 m level |
 | `plot_diurnal_cycle.py` | mean diurnal cycle in local time, with amplitude and phase errors |
-| `plot_vertical_profile.py` | mean profile, bias by height, shear exponent |
+| `plot_vertical_profile.py` | mean profile, bias by height, shear exponent; ERA5 shown at 100 m without vertical extrapolation |
 | `plot_taylor_diagram.py` | correlation / variance / centred RMSE on one plot |
-| `plot_wind_distributions.py` | histogram + fitted Weibull, and wind roses |
-| `check_cell_sensitivity.py` | the same scores on all five nearest cells — the representativeness floor |
-| `validate_surface_stations.py` | 10 m land stations: coastal diurnal cycle and along-coast structure |
+| `plot_wind_distributions.py` | histogram + fitted Weibull, and wind roses; ERA5 included at 100 m |
+| `check_cell_sensitivity.py` | the same scores on all five nearest MPAS cells, with an ERA5 common-window benchmark — the representativeness floor |
+| `validate_surface_stations.py` | 10 m land stations: coastal diurnal cycle and along-coast structure, with ERA5 as the benchmark to beat |
 
 ## 03_selection — the decision
 
 | Script | Produces |
 |---|---|
 | `check_sst_forcing.py` | **data-integrity gate.** Audits the SST field each run actually saw; exits non-zero on OISST land-fill contamination. Run this before believing any ranking. |
+| `compute_runtime_metrics.py` | wall time, throughput and core-hours per simulated hour, with measured/estimated/provisional flags |
 | `rank_experiments.py` | paired block-bootstrap tests between every experiment pair, plus cost; `results/tables/selection_summary*.md` |
 | `attribution_diagnostics.py` | the mechanism: SST → surface fluxes → PBL depth → wind, at the site |
 | `boundary_influence.py` | is the `EXP02` − `EXP01` difference organised by distance from the relaxation zone, as the boundary-treatment hypothesis predicts? |
@@ -62,3 +63,13 @@ a simulation finishes reads only the new hours.
 | `map_experiment_differences.py` | experiment differences on a common lattice; refuses to difference unequal windows |
 | `plot_cross_section.py` | coast-normal vertical section — the sea-breeze cell |
 | `animate_wind.py` | mp4 (or GIF) of the 100 m wind field |
+| `animate_cross_section.py` | mp4 (or GIF) of temperature and three-dimensional wind through a coast-normal vertical section |
+
+## 06_report — portable technical report
+
+| Script | Produces |
+|---|---|
+| `plot_report_context.py` | mapas de resolução das malhas, diferença média de SST, rede observacional e células MPAS pareadas aos LiDARs |
+| `build_technical_report.py` | `results/report/index.html`, mídias selecionadas, legendas e manifesto de proveniência |
+
+The report reads consolidated outputs only, so it is safe to rebuild while MPAS runs.

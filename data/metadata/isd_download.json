@@ -29,7 +29,7 @@
       "2022-11-01 00:00:00"
     ]
   },
-  "download_date": "2026-09-02T02:37:54.041557+00:00",
+  "download_date": "2026-09-05T18:08:23.923870+00:00",
   "downloaded_by": "Danilo Couto de Souza",
   "tool": "urllib (plain HTTP)",
   "files": [
@@ -219,5 +219,5 @@
       "end": "2022-11-01 00:00:00"
     }
   ],
-  "caveat": "10 m land stations. Secondary evidence for the coastal diurnal cycle and horizontal structure only \u2014 they cannot validate offshore hub-height wind."
+  "caveat": "Primary surface-validation data at 10 m over land; kept separate from the offshore hub-height LiDAR axis. Airport/synoptic records are supplementary and are never pooled with INMET."
 }

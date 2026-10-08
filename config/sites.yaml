@@ -1,14 +1,12 @@
 # Validation sites.
 #
-# Two tiers, deliberately kept separate because they carry very different
-# evidential weight (see docs/validation_protocol.md):
+# Two primary axes answer different questions (see validation_protocol.md):
 #
-#   primary   — in-situ LiDAR profilers at hub height. These decide the
-#               experiment ranking.
-#   secondary — public land surface stations (10 m). They cannot validate
-#               offshore hub-height wind, but they do test the coastal
-#               diurnal cycle over a wider area, which is exactly where the
-#               sea breeze lives. Supporting evidence only.
+#   primary - LiDAR profilers at hub height: offshore resource skill.
+#   surface - automatic INMET stations at 10 m: coastal surface circulation.
+#             Airport/synoptic stations are supplementary only.
+#
+# The axes remain separate; no combined score exists without explicit weights.
 
 primary:
   P0:
@@ -76,7 +74,10 @@ pairing:
 # (which is where the Brazilian INMET automatic stations and airport METARs
 # reach an internationally accessible archive — INMET's own API is not
 # reachable from this host). Fetched by scripts/01_extract/fetch_isd_stations.py.
-secondary:
+surface:
+  evidence_role: primary_surface
+  primary_kinds: [inmet_auto]
+  supplementary_kinds: [synop_airport]
   source: "NOAA NCEI Integrated Surface Database (ISD), global-hourly access"
   url: "https://www.ncei.noaa.gov/data/global-hourly/access/{year}/{station}.csv"
   inventory_url: "https://www.ncei.noaa.gov/pub/data/noaa/isd-history.csv"

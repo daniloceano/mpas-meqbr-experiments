@@ -51,7 +51,20 @@ def model_at_heights(path: Path, heights, tolerance_m: float = 1.0,
     """
     with xr.open_dataset(path) as ds:
         ds = ds.load()
-    profile = ds["height_agl"].isel(cell=cell).values
+    height_agl = ds["height_agl"].isel(cell=cell)
+    if "time" in height_agl.dims:
+        # Older incrementally appended caches may carry a redundant time
+        # dimension on this static coordinate.  Accept it only when every
+        # stored profile is identical; a genuinely time-varying vertical grid
+        # would require explicit handling rather than silently taking t=0.
+        reference = height_agl.isel(time=0, drop=True)
+        if not np.allclose(height_agl.values, reference.values,
+                           equal_nan=True):
+            raise ValueError(
+                f"height_agl varies with time in {path}; expected a static "
+                "vertical grid for each extracted cell")
+        height_agl = reference
+    profile = height_agl.values
     matched = vertical.match_heights(profile, heights, tolerance_m)
     speed, direction = model_speed_direction(ds, cell)
     times = pd.DatetimeIndex(ds["time"].values)

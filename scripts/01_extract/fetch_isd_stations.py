@@ -10,12 +10,11 @@ reachable, so that is the access route used here. The station list in
 `config/sites.yaml` distinguishes the hourly INMET automatic stations from the
 older synoptic/airport series, which report fewer hours per day.
 
-These are **secondary** evidence. They are land stations at 10 m, and the
-question the project asks is about offshore wind at 50-250 m. What they *can*
-do is test the coastal diurnal cycle and the horizontal structure of the
-near-surface wind over a much wider area than two LiDARs cover — which is
-exactly the thing a 5 km mesh claims to add over a 31 km reanalysis. Read
-`docs/validation_protocol.md` before giving them weight in a conclusion.
+Automatic INMET stations are the primary surface-validation axis. They are
+kept separate from the primary offshore LiDAR axis because 10 m land wind and
+50-250 m offshore wind answer different questions. Airport/synoptic series are
+downloaded only as a supplementary exposure check and are never pooled with
+INMET. Read `docs/validation_protocol.md` before interpreting either axis.
 
     python scripts/01_extract/fetch_isd_stations.py [--force]
 
@@ -61,7 +60,7 @@ def main() -> int:
     args = ap.parse_args()
 
     cfg = load_config()
-    sec = cfg.secondary
+    sec = cfg.surface
     raw_dir = REPO_ROOT / "data" / "stations"
     raw_dir.mkdir(parents=True, exist_ok=True)
 
@@ -143,9 +142,9 @@ def main() -> int:
         "files": [str(out.relative_to(REPO_ROOT))],
         "stations": records,
         "caveat": (
-            "10 m land stations. Secondary evidence for the coastal diurnal "
-            "cycle and horizontal structure only — they cannot validate "
-            "offshore hub-height wind."
+            "Primary surface-validation data at 10 m over land; kept separate "
+            "from the offshore hub-height LiDAR axis. Airport/synoptic records "
+            "are supplementary and are never pooled with INMET."
         ),
     }, indent=2))
 

@@ -8,8 +8,9 @@ decision and see exactly which numbers it would change.
 
 | Tier | Source | Height | What it can decide |
 |---|---|---|---|
-| **Primary** | P0 and LPI LiDAR profilers | 50-250 m | The experiment ranking. Offshore, at hub height, which is the quantity the project is about. |
-| **Secondary** | 8 public surface stations (NOAA NCEI ISD, incl. the INMET automatic network) | 10 m | The coastal diurnal cycle and the along-coast structure — over ~700 km of coast rather than two points. |
+| **Primary: hub height** | P0 and LPI LiDAR profilers | 50-250 m | Offshore resource skill and hub-height ranking. |
+| **Primary: surface** | automatic INMET stations mirrored by NOAA NCEI ISD | 10 m | Coastal surface structure and diurnal timing over ~700 km. |
+| **Supplementary** | airport/synoptic stations from NOAA NCEI ISD | 10 m | Exposure check; never pooled with INMET. |
 | **Reference** | ERA5 | 10 m and 100 m | Not a competitor: it is the runs' own forcing, so "MPAS beats ERA5" is a statement about what the downscaling added. |
 
 The tiers are kept apart on purpose. A 10 m land anemometer sits in a roughness
@@ -18,7 +19,7 @@ carried across into a claim about offshore hub-height wind. What the stations
 *can* do is test whether the sea breeze arrives at the right hour over a wide
 area — which the two LiDARs cannot.
 
-**Within the secondary tier, the two networks must be kept apart too.** The
+**Within the surface observations, the two networks must be kept apart.** The
 INMET automatic masts record a mean wind about half that of the airport
 synoptic stations in the same region and the same months (3.2 against
 6.5 m s⁻¹). That is a siting and exposure difference — sheltered masts against
@@ -50,6 +51,16 @@ in averaging scale appears as scatter and is charged to the model. Hourly
 averaging removes the part of it that can be removed; the spatial part is
 irreducible and is stated as a caveat rather than hidden.
 
+**P0/LPI temporal audit (2026-09-03).** Both source files are on a 10-minute
+time grid and both pass through the same `to_hourly` function described above.
+The LPI preprocessing script only converts UTC-3 to UTC and selects the
+operator's corrected direction columns; it performs no temporal resampling.
+P0's operator export identifies each record as a 10-minute averaging bin. The
+LPI workbook has 10-minute cadence and includes turbulence intensity and wind
+speed standard deviation, but does not explicitly document the internal speed
+statistic. This remaining metadata uncertainty is reported; it is not silently
+resolved by assuming a different aggregation.
+
 **Heights.** Model layer centres are matched to LiDAR channels within 1 m, and
 the match is asserted, not assumed. The one exception is P0's 250 m model level,
 which has no channel; it is compared against the mean of the 240 m and 260 m
@@ -80,16 +91,37 @@ matters because it says *how* a run is wrong — damping the variability and
 mistiming it call for different fixes.
 
 **Wind resource** — mean speed, Weibull scale A and shape k (maximum likelihood,
-location fixed at zero as resource practice requires), and wind power density.
-WPD is the number that becomes energy and it goes as U³, so a −10 % speed bias
-is roughly a −27 % energy bias. A model can have a respectable RMSE and still be
-unusable for resource work; this group is what catches that.
+location fixed at zero as resource practice requires), and wind power density,
+calculated as `WPD = 0.5 rho mean(U³)` with `rho = 1.15 kg m⁻³`. The cube is
+taken before averaging. WPD is the resource available in the flow, not the
+output of a particular turbine. It goes as U³, so a −10 % speed bias is roughly
+a −27 % energy bias. A model can have a respectable RMSE and still be unusable
+for resource work; this group is what catches that.
+
+**Vertical shear** — the power-law exponent `alpha` is calculated from the
+lowest and highest common LiDAR/model levels as
+`alpha = ln(U_high/U_low) / ln(z_high/z_low)`, hour by hour. Larger `alpha`
+means wind speed increases more rapidly with height; values close to zero mean
+a nearly uniform profile. ERA5 is not assigned an `alpha`, because only its
+100 m diagnostic is directly matched to the LiDAR profile in this analysis.
 
 **Diurnal cycle** — amplitude and phase of the mean daily cycle in local time.
 On a sea-breeze coast this is where a 5 km mesh should beat a 31 km reanalysis,
 and it is what determines *when* the resource is available.
 
 Direction is scored with circular statistics, masked below 2 m/s.
+
+**ERA5 benchmark.** Every observational validation includes ERA5 at a directly
+equivalent height: 10 m at the INMET stations and 100 m at P0/LPI. ERA5 is not
+extrapolated to the other LiDAR heights. Added value is reported in two related
+forms on the same paired hours:
+
+- `RMSE reduction = 1 - RMSE_MPAS / RMSE_ERA5`;
+- `MSE reduction = 1 - MSE_MPAS / MSE_ERA5`
+  `= 1 - (RMSE_MPAS / RMSE_ERA5)²`.
+
+Both are multiplied by 100 in percentage tables. Positive values mean MPAS
+improves on ERA5; negative values mean the downscaling adds error.
 
 ## 4. Uncertainty, and why it is not optional here
 

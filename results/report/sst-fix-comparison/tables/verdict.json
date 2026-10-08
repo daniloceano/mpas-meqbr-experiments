@@ -1,0 +1,17 @@
+{
+  "better": 12,
+  "worse": 1,
+  "neutral": 5,
+  "total": 18,
+  "by_experiment": {
+    "EXP01": {
+      "corrigido melhor": 5,
+      "sem diferen\u00e7a conclusiva": 3,
+      "corrigido pior": 1
+    },
+    "EXP02": {
+      "corrigido melhor": 7,
+      "sem diferen\u00e7a conclusiva": 2
+    }
+  }
+}

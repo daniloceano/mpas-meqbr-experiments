@@ -1,0 +1,1436 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Relatório técnico — Experimentos MPAS MeqBr</title>
+  <style>
+    :root {
+      --ink: #17324d;
+      --muted: #5f7182;
+      --paper: #f3f6f7;
+      --card: #ffffff;
+      --line: #d8e1e7;
+      --ocean: #006d77;
+      --sky: #2a9d8f;
+      --sand: #e9c46a;
+      --warning: #9b4d00;
+      --warning-bg: #fff4dc;
+      --danger: #9f2d2d;
+      --danger-bg: #fff0ed;
+      --info-bg: #edf7f6;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+      line-height: 1.58;
+    }
+    header {
+      color: white;
+      padding: 4.5rem max(5vw, 2rem) 3.5rem;
+      background:
+        radial-gradient(circle at 85% 15%, rgba(233,196,106,.32), transparent 25%),
+        linear-gradient(125deg, #073b4c, #006d77 58%, #2a9d8f);
+    }
+    header p { max-width: 930px; color: #e7f6f5; font-size: 1.08rem; }
+    h1 { font-size: clamp(2rem, 5vw, 4rem); line-height: 1.05; margin: 0 0 1rem; }
+    h2 { margin: 0 0 1rem; font-size: 1.8rem; line-height: 1.2; }
+    h3 { margin: 2rem 0 .55rem; font-size: 1.28rem; }
+    h4 { margin: 1.4rem 0 .45rem; font-size: 1.03rem; }
+    p { margin: .55rem 0 1rem; }
+    section[id] { scroll-margin-top: 1rem; }
+    .meta { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.5rem; }
+    .pill {
+      border: 1px solid rgba(255,255,255,.42);
+      border-radius: 999px;
+      padding: .35rem .75rem;
+      background: rgba(255,255,255,.12);
+      font-size: .85rem;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(205px, 245px) minmax(0, 1160px);
+      gap: 2rem;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    nav {
+      position: sticky;
+      top: 1.2rem;
+      align-self: start;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      max-height: calc(100vh - 2.4rem);
+      overflow-y: auto;
+    }
+    nav a {
+      display: block;
+      color: var(--muted);
+      text-decoration: none;
+      padding: .42rem .55rem;
+      border-radius: 7px;
+      font-size: .9rem;
+    }
+    nav a:hover { color: var(--ocean); background: var(--info-bg); }
+    nav .nav-sub { padding-left: 1.1rem; font-size: .82rem; }
+    main { min-width: 0; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: clamp(1.2rem, 3vw, 2.25rem);
+      margin-bottom: 1.4rem;
+      box-shadow: 0 8px 28px rgba(23,50,77,.05);
+    }
+    .lead { font-size: 1.06rem; color: #29465f; max-width: 960px; }
+    .banner {
+      border-left: 6px solid var(--warning);
+      background: var(--warning-bg);
+      padding: 1rem 1.2rem;
+      border-radius: 9px;
+      color: #643500;
+      margin: 1rem 0 1.4rem;
+    }
+    .critical { border-left-color: var(--danger); background: var(--danger-bg); color: #702020; }
+    .info { border-left-color: var(--ocean); background: var(--info-bg); color: #174c50; }
+    .cards, .method-grid, .period-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+      background: #fbfdfd;
+    }
+    .card strong { display: block; color: var(--ocean); font-size: 1.08rem; }
+    .card small { color: var(--muted); }
+    .period-card b { color: var(--ocean); }
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: .7rem;
+      align-items: center;
+      margin: 1.4rem 0;
+    }
+    .flow .step {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: .8rem;
+      text-align: center;
+      background: #f8fbfb;
+    }
+    .flow .arrow { font-size: 1.5rem; color: var(--sky); }
+    .key-table { margin: 1rem 0; }
+    .key-table td:first-child { width: 31%; font-weight: 700; color: #29465f; }
+    .table-block { margin: 1.1rem 0 2.2rem; }
+    .table-caption {
+      padding: .8rem 1rem;
+      margin: 0;
+      background: #eef6f5;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      border-radius: 10px 10px 0 0;
+      color: #29465f;
+    }
+    .table-caption strong { display: block; color: var(--ocean); font-size: 1.03rem; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th {
+      text-align: left;
+      color: white;
+      background: var(--ocean);
+      padding: .68rem .72rem;
+      vertical-align: bottom;
+      line-height: 1.25;
+    }
+    td { padding: .58rem .72rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tbody tr:nth-child(even) { background: #f4f8f8; }
+    td.best-value { font-weight: 800; background: #fff7d6; color: #17324d; }
+    tr.height-separator td { border-top: 3px solid #8eabb4; }
+    td.metric-improved { color: #087443; background: #e9f8ef; font-weight: 800; }
+    td.metric-worsened { color: #b42318; background: #fff0ed; font-weight: 800; }
+    .table-notes {
+      margin: 0;
+      padding: .75rem 1rem .75rem 2rem;
+      background: #fafcfc;
+      border: 1px solid var(--line);
+      border-top: 0;
+      border-radius: 0 0 10px 10px;
+      color: var(--muted);
+      font-size: .86rem;
+    }
+    .topic {
+      margin: 1.3rem 0 2.3rem;
+      padding-top: .2rem;
+    }
+    .topic-intro { color: var(--muted); max-width: 900px; }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 1.1rem;
+    }
+    .gallery.single { grid-template-columns: minmax(0, 1fr); }
+    figure {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f8fbfb;
+      align-self: start;
+    }
+    figure img, figure video { display: block; width: 100%; height: auto; background: white; }
+    .figure-zoom {
+      display: block;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      background: white;
+      cursor: zoom-in;
+    }
+    .figure-zoom:focus-visible { outline: 4px solid var(--sand); outline-offset: -4px; }
+    figcaption { color: var(--muted); padding: .8rem 1rem 1rem; font-size: .86rem; }
+    figcaption strong { display: block; color: var(--ink); margin-bottom: .28rem; font-size: .93rem; }
+    .experiment {
+      margin: 1.2rem 0 2rem;
+      border-top: 3px solid var(--ocean);
+      padding-top: 1rem;
+    }
+    .experiment-meta { color: var(--muted); font-size: .9rem; margin-bottom: .8rem; }
+    .provisional { color: var(--warning); font-weight: 700; }
+    .method-grid .card p { font-size: .9rem; margin: .45rem 0; }
+    .plain-list li { margin-bottom: .5rem; }
+    footer {
+      max-width: 1160px;
+      margin: 1rem auto 3rem;
+      padding: 0 2rem;
+      color: var(--muted);
+      font-size: .84rem;
+    }
+    code { background: #edf1f3; border-radius: 4px; padding: .1rem .3rem; }
+    body.lightbox-open { overflow: hidden; }
+    .lightbox[hidden] { display: none; }
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+      background: rgba(5, 22, 31, .88);
+    }
+    .lightbox-dialog {
+      position: relative;
+      width: min(96vw, 1500px);
+      max-height: 94vh;
+      overflow: auto;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 24px 70px rgba(0,0,0,.45);
+    }
+    .lightbox img { display: block; width: 100%; height: auto; }
+    .lightbox-caption { margin: 0; padding: .8rem 4.5rem .9rem 1rem; }
+    .lightbox-caption a { color: var(--ocean); font-weight: 700; }
+    .lightbox-close {
+      position: absolute;
+      top: .65rem;
+      right: .65rem;
+      z-index: 2;
+      width: 2.6rem;
+      height: 2.6rem;
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 999px;
+      color: white;
+      background: rgba(5,22,31,.78);
+      font-size: 1.45rem;
+      cursor: pointer;
+    }
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; padding: 1rem; }
+      nav { position: static; max-height: none; }
+      .flow { grid-template-columns: 1fr; }
+      .flow .arrow { transform: rotate(90deg); text-align: center; }
+      .gallery { grid-template-columns: 1fr; }
+      .key-table td:first-child { width: auto; }
+    }
+    @media print {
+      nav { display: none; }
+      .layout { display: block; padding: 0; }
+      section { box-shadow: none; }
+      header { padding: 2rem; }
+      video { display: none; }
+      .lightbox { display: none !important; }
+      figure, .table-block { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+
+
+
+<header>
+  <h1>Experimentos MPAS na Margem Equatorial Brasileira</h1>
+  <p>Relatório técnico sobre o andamento da modelagem regional, o efeito das
+     configurações testadas e a capacidade do downscaling de representar o
+     recurso eólico offshore e a circulação costeira.</p>
+  <div class="meta">
+    <span class="pill">Gerado em 2026-10-08T12:52:53+00:00</span>
+    <span class="pill">Commit 6e3fd08 + alterações locais</span>
+    <span class="pill">SNAPSHOT COMPLETO</span>
+  </div>
+</header>
+
+<div class="layout">
+  <nav aria-label="Sumário">
+    <strong>Conteúdo</strong>
+    <a href="#resumo">1. Visão geral</a>
+    <a href="#desenho">2. Desenho experimental</a>
+    <a class="nav-sub" href="#configuracao-comum">Configuração comum</a>
+    <a class="nav-sub" href="#experimentos">Experimentos</a>
+    <a href="#andamento">3. Andamento e custo</a>
+    <a href="#resultados-modelo">4. Resultados do modelo</a>
+    <a class="nav-sub" href="#campos-espaciais">Campos espaciais</a>
+    <a class="nav-sub" href="#estrutura-local">Estrutura local</a>
+    <a href="#validacao">5. Validação observacional</a>
+    <a class="nav-sub" href="#rede-observacional">Rede e tratamento</a>
+    <a class="nav-sub" href="#inmet">INMET</a>
+    <a class="nav-sub" href="#lidar">LiDAR offshore</a>
+    <a href="#valor-adicionado">6. Valor adicionado</a>
+    <a href="#mecanismos">7. Mecanismos e seleção</a>
+    <a href="#conclusoes">8. Conclusões</a>
+    <a href="#limitacoes">9. Limitações e defeitos conhecidos</a>
+  </nav>
+
+  <main>
+    <div class="banner">
+      <strong>Status do documento:</strong> Todas as janelas de análise estão completas.
+    </div>
+
+    <section id="resumo">
+      <h2>1. Visão geral</h2>
+      <p class="lead">O objetivo é escolher uma configuração do MPAS adequada
+         para futuras simulações climatológicas de recurso eólico na Margem
+         Equatorial Brasileira (MEqBr), preservando ganho físico e estatístico
+         sem custo computacional desnecessário.</p>
+      <div class="cards">
+        <div class="card">
+          <strong>Pergunta 1 — superfície oceânica</strong>
+          <p>A atualização diária da temperatura da superfície do mar melhora a
+             circulação costeira e o vento em altura de rotor?</p>
+        </div>
+        <div class="card">
+          <strong>Pergunta 2 — fronteira lateral</strong>
+          <p>Afastar a zona de relaxação permite que o MPAS desenvolva melhor as
+             estruturas de mesoescala antes que o escoamento alcance a área de interesse?</p>
+        </div>
+        <div class="card">
+          <strong>Pergunta 3 — valor adicionado</strong>
+          <p>O downscaling a aproximadamente 5 km reduz o erro do ERA5 nos
+             LiDARs e acrescenta estrutura espacial relevante ao recurso eólico?</p>
+        </div>
+      </div>
+      <div class="banner info">
+        <strong>Nota de procedência.</strong> Uma primeira versão de EXP01 e
+        EXP02 foi executada com um defeito no pré-processamento: o conversor da
+        SST OISST levava o valor de preenchimento terrestre (273,15 K) para
+        células oceânicas costeiras, e os dois LiDARes ficam dentro da faixa
+        afetada. O conversor foi corrigido e os dois experimentos foram
+        repetidos. <strong>Tudo neste relatório vem das execuções corrigidas</strong>,
+        verificadas célula a célula: nenhuma célula oceânica no valor de
+        preenchimento e nenhuma abaixo de 296 K. O antes e depois está
+        documentado em
+        <a href="sst-fix-comparison/index.html">comparação antigo × corrigido</a>.
+      </div>
+      <p><strong>Como ler o relatório:</strong> primeiro são apresentados o
+         desenho e o estado das integrações; depois, os campos produzidos pelo
+         modelo; em seguida, a validação observacional; por último, o valor
+         adicionado sobre o ERA5 e a interpretação dos mecanismos.</p>
+    </section>
+
+    <section id="desenho">
+      <h2>2. Desenho experimental</h2>
+      <p class="lead">Todos os experimentos usam a mesma dinâmica, física,
+         discretização vertical e períodos. Cada experimento herda o anterior e
+         acrescenta uma mudança específica: o desenho é cumulativo, não
+         fatorial, de modo que a diferença EXP02 − EXP01 é o efeito
+         <em>incremental</em> do tratamento de fronteira com a atualização de
+         SST já ligada.</p>
+
+      <div id="configuracao-comum">
+        <h3>2.1 Configuração comum a todos os experimentos</h3>
+        <p>A tabela abaixo define o que permanece fixo. Assim, diferenças entre
+           os experimentos não devem ser atribuídas a esses parâmetros.</p>
+        <div class="table-wrap key-table">
+          <table>
+            <thead><tr><th>Componente</th><th>Configuração</th></tr></thead>
+            <tbody>
+              
+              <tr><td>Duração de cada integração</td><td>41 dias, incluindo spin-up</td></tr>
+              
+              <tr><td>Passo de tempo dinâmico</td><td>30 s</td></tr>
+              
+              <tr><td>Saída para análise</td><td>horária (1 h)</td></tr>
+              
+              <tr><td>Condições iniciais e laterais</td><td>ERA5; fronteiras atualizadas a cada 6 h</td></tr>
+              
+              <tr><td>Grade vertical</td><td>55 camadas / 56 interfaces; topo em 30 km; centros em 12,5, 50, 100, 150, 200 e 250 m próximos à superfície</td></tr>
+              
+              <tr><td>Dinâmica e mistura</td><td>RK3 split-explicit, 3 subpassos dinâmicos e 2 subpassos acústicos; mistura horizontal Smagorinsky 2D</td></tr>
+              
+              <tr><td>Física atmosférica</td><td>mesoscale_reference: microfísica WSM6, radiação RRTMG, camada limite YSU, superfície Monin-Obukhov e convecção Tiedtke</td></tr>
+              
+              <tr><td>Superfície terrestre</td><td>Noah-MP</td></tr>
+              
+              <tr><td>Tipo de domínio</td><td>área limitada, sem assimilação de dados</td></tr>
+              
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Períodos, spin-up e observação associada</h4>
+        <div class="period-grid">
+          
+          <div class="card period-card">
+            <strong>2021 — validação em P0</strong>
+            <p><b>Integração:</b> 21/10/2021 – 01/12/2021 (41 dias)</p>
+            <p><b>Spin-up descartado:</b> 21/10 – 01/11 (11 dias)</p>
+            <p><b>Janela analisada:</b> 01/11 – 01/12/2021 (30 dias)</p>
+          </div>
+          
+          <div class="card period-card">
+            <strong>2022 — validação em LPI</strong>
+            <p><b>Integração:</b> 21/09/2022 – 01/11/2022 (41 dias)</p>
+            <p><b>Spin-up descartado:</b> 21/09 – 01/10 (10 dias)</p>
+            <p><b>Janela analisada:</b> 01/10 – 01/11/2022 (31 dias)</p>
+          </div>
+          
+        </div>
+        <p class="topic-intro">Em 2021 o intervalo entre 21/10 e 01/11 corresponde
+           exatamente a 11 dias; em 2022, entre 21/09 e 01/10, a 10 dias. Ambos
+           resultam em integrações completas de 41 dias porque as janelas
+           científicas têm, respectivamente, 30 e 31 dias.</p>
+      </div>
+
+      <div id="experimentos">
+        <h3>2.2 O que muda em cada experimento</h3>
+        <div class="flow" aria-label="Desenho cumulativo">
+          <div class="step"><strong>CTL</strong><br>configuração de referência</div>
+          <div class="arrow">→</div>
+          <div class="step"><strong>EXP01</strong><br>CTL + SST diária</div>
+          <div class="arrow">→</div>
+          <div class="step"><strong>EXP02</strong><br>EXP01 + tratamento de fronteira</div>
+        </div>
+        <div class="banner info">
+          <strong>Desenho cumulativo.</strong> EXP02 − EXP01 mede o efeito
+          incremental do tratamento de fronteira quando a SST diária já está
+          ativa. Não é o efeito isolado da malha com buffer.
+        </div>
+        
+        <article class="experiment">
+          <h4>CTL</h4>
+          <div class="experiment-meta">
+            meqbr_05km · 76.813 células · 80 ranks MPI · concluído
+          </div>
+          <p>Referência do estudo: malha quase uniforme de 4,6 km e SST do ERA5 no instante inicial mantida fixa durante toda a integração.</p>
+          <figure>
+            <img src="assets/design/experimental_design_ctl_mesh.png" loading="lazy" alt="Figura representativa do experimento CTL">
+            <figcaption><strong>CTL — representação da mudança avaliada</strong>Referência do estudo: malha quase uniforme de 4,6 km e SST do ERA5 no instante inicial mantida fixa durante toda a integração.</figcaption>
+          </figure>
+        </article>
+        
+        <article class="experiment">
+          <h4>EXP01</h4>
+          <div class="experiment-meta">
+            meqbr_05km · 76.813 células · 90 ranks MPI · concluído
+          </div>
+          <p>Mantém a malha e toda a física do CTL, mas passa a aplicar SST diária NOAA OISST v2.1, com o preenchimento costeiro da OISST corrigido. É o incremento que testa a condição de superfície.</p>
+          <figure>
+            <img src="assets/design/experimental_design_exp01_sst.png" loading="lazy" alt="Figura representativa do experimento EXP01">
+            <figcaption><strong>EXP01 — representação da mudança avaliada</strong>Mantém a malha e toda a física do CTL, mas passa a aplicar SST diária NOAA OISST v2.1, com o preenchimento costeiro da OISST corrigido. É o incremento que testa a condição de superfície.</figcaption>
+          </figure>
+        </article>
+        
+        <article class="experiment">
+          <h4>EXP02</h4>
+          <div class="experiment-meta">
+            meqbr_05km_buf · 95.138 células · 90 ranks MPI · concluído
+          </div>
+          <p>Mantém a SST diária corrigida do EXP01 e acrescenta o tratamento de fronteira: malha com buffer 5→32 km e condições ERA5 em uma caixa mais ampla.</p>
+          <figure>
+            <img src="assets/design/experimental_design_exp02_mesh.png" loading="lazy" alt="Figura representativa do experimento EXP02">
+            <figcaption><strong>EXP02 — representação da mudança avaliada</strong>Mantém a SST diária corrigida do EXP01 e acrescenta o tratamento de fronteira: malha com buffer 5→32 km e condições ERA5 em uma caixa mais ampla.</figcaption>
+          </figure>
+        </article>
+        
+      </div>
+    </section>
+
+    <section id="andamento">
+      <h2>3. Andamento das simulações e custo computacional</h2>
+      <p class="lead">Esta seção separa completude científica de desempenho
+         computacional. Uma integração parcial pode informar custo até o momento,
+         mas não deve sustentar uma conclusão final de habilidade.</p>
+      
+  <div class="table-block">
+    <p class="table-caption">
+      <strong>Andamento das integrações</strong>
+      Inventário do snapshot congelado para este relatório. A contagem considera somente a janela científica, depois do spin-up.
+    </p>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Experimento</th><th>Período</th><th>Malha</th><th>Saídas horárias na janela</th><th>Janela concluída (%)</th><th>Lacunas temporais</th><th>Último horário disponível</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>meqbr_05km</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>CTL</td><td>2022</td><td>meqbr_05km</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr><tr><td>EXP01</td><td>2021</td><td>meqbr_05km</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>EXP01</td><td>2022</td><td>meqbr_05km</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr><tr><td>EXP02</td><td>2021</td><td>meqbr_05km_buf</td><td>721</td><td>100,0</td><td>0</td><td>2021-12-01</td></tr><tr><td>EXP02</td><td>2022</td><td>meqbr_05km_buf</td><td>745</td><td>100,0</td><td>0</td><td>2022-11-01</td></tr></tbody></table></div>
+    
+    <ul class="table-notes">
+      <li>100% significa que todos os horários esperados da janela de análise estão presentes.</li><li>Lacuna temporal é um salto maior que uma hora entre duas saídas consecutivas.</li>
+    </ul>
+    
+  </div>
+
+      
+  <div class="table-block">
+    <p class="table-caption">
+      <strong>Custo computacional normalizado</strong>
+      A métrica principal é (tempo real da execução × número de núcleos) / horas simuladas: ela expressa quantas horas uma máquina de um único núcleo levaria para produzir uma hora de modelo. Menor é melhor.
+    </p>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Experimento</th><th>Período</th><th>Situação da execução</th><th>Origem do tempo</th><th>Tempo de máquina equivalente (h por hora simulada, 1 núcleo)</th><th>Tempo estimado para simular 1 ano com 100 núcleos (dias)</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>concluída; tempo reconstruído</td><td>estimado</td><td>3,19</td><td>11,63</td></tr><tr><td>CTL</td><td>2022</td><td>concluída; tempo reconstruído</td><td>estimado</td><td>2,78</td><td>10,14</td></tr><tr><td>EXP01</td><td>2021</td><td>concluída</td><td>medido</td><td>3,22</td><td>11,77</td></tr><tr><td>EXP01</td><td>2022</td><td>concluída</td><td>medido</td><td>3,10</td><td>11,32</td></tr><tr><td>EXP02</td><td>2021</td><td>concluída</td><td>medido</td><td>3,79</td><td>13,83</td></tr><tr><td>EXP02</td><td>2022</td><td>concluída; tempo reconstruído</td><td>estimado</td><td>5,29</td><td>19,31</td></tr></tbody></table></div>
+    
+    <ul class="table-notes">
+      <li>Situação “concluída” indica que a integração terminou; “em execução” usa somente o trecho produzido até o snapshot.</li><li>Tempo “medido” vem do wrapper da execução; “estimado” foi reconstruído de logs/arquivos porque o wrapper do CTL não foi preservado.</li><li>“Provisório” é uma medição parcial que pode mudar quando a execução terminar.</li><li>A estimativa anual é: tempo por hora simulada × 8.760 h / 100 núcleos, convertido para dias.</li><li>A projeção para 100 núcleos supõe escalabilidade linear ideal; comunicação MPI, filas e I/O podem aumentar o tempo real.</li>
+    </ul>
+    
+  </div>
+
+    </section>
+
+    <section id="resultados-modelo">
+      <h2>4. Descrição dos resultados do modelo</h2>
+      <p class="lead">Antes de comparar o MPAS com observações, é necessário
+         entender os campos que ele produz: onde estão os máximos de recurso,
+         como a circulação varia no espaço e qual estrutura vertical aparece
+         junto à costa.</p>
+
+      <div id="campos-espaciais" class="topic">
+        <h3>4.1 Campos espaciais e resposta às configurações</h3>
+        <p class="topic-intro">Os mapas médios descrevem o recurso eólico,
+           sua persistência direcional e o ciclo diurno. Os mapas de diferença
+           mostram onde cada alteração de configuração atua.</p>
+        <div class="banner info">
+          <strong>Como foi calculado o potencial eólico.</strong>
+          O relatório usa a densidade de potência disponível no vento:
+          <b>WPD = ½ ρ × média(U<sup>3</sup>)</b>, com densidade do ar
+          <b>ρ = 1,15 kg m<sup>−3</sup></b> e velocidade U em m s<sup>−1</sup>.
+          O cubo é calculado em cada horário antes da média; o resultado é dado
+          em W m<sup>−2</sup>. Isso representa o recurso no escoamento, não a
+          produção de uma turbina específica.
+        </div>
+        
+  
+  <div class="gallery">
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/spatial_fields/mean_fields_CTL_2021.png"
+              data-title="Estado médio do controle — novembro de 2021" aria-label="Ampliar figura: Estado médio do controle — novembro de 2021">
+        <img src="assets/spatial_fields/mean_fields_CTL_2021.png" loading="lazy" alt="Estado médio do controle — novembro de 2021">
+      </button>
+      
+      <figcaption><strong>Estado médio do controle — novembro de 2021</strong>Vento médio e densidade de potência a 100 m, constância direcional e amplitude do ciclo diurno. Estes quatro campos descrevem o recurso e a variabilidade resolvidos pelo CTL.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/spatial_fields/mean_fields_CTL_2022.png"
+              data-title="Estado médio do controle — outubro de 2022" aria-label="Ampliar figura: Estado médio do controle — outubro de 2022">
+        <img src="assets/spatial_fields/mean_fields_CTL_2022.png" loading="lazy" alt="Estado médio do controle — outubro de 2022">
+      </button>
+      
+      <figcaption><strong>Estado médio do controle — outubro de 2022</strong>Mesmas grandezas do painel anterior para o segundo período, permitindo separar diferenças de configuração de diferenças meteorológicas entre os meses.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/spatial_fields/diff_EXP01_vs_CTL_2021_common.png"
+              data-title="Resposta espacial à SST diária corrigida" aria-label="Ampliar figura: Resposta espacial à SST diária corrigida">
+        <img src="assets/spatial_fields/diff_EXP01_vs_CTL_2021_common.png" loading="lazy" alt="Resposta espacial à SST diária corrigida">
+      </button>
+      
+      <figcaption><strong>Resposta espacial à SST diária corrigida</strong>Diferenças EXP01 − CTL para vento, potência, amplitude diurna e SST, sobre a janela completa comum. Este é o efeito real da atualização diária de SST, livre da contaminação costeira.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/spatial_fields/diff_EXP02_vs_EXP01_2021_common.png"
+              data-title="Resposta espacial ao tratamento de fronteira" aria-label="Ampliar figura: Resposta espacial ao tratamento de fronteira">
+        <img src="assets/spatial_fields/diff_EXP02_vs_EXP01_2021_common.png" loading="lazy" alt="Resposta espacial ao tratamento de fronteira">
+      </button>
+      
+      <figcaption><strong>Resposta espacial ao tratamento de fronteira</strong>Diferenças EXP02 − EXP01 na janela científica completa e comum de 2021. O uso de horas idênticas evita confundir a mudança de configuração com mudança do tempo meteorológico.</figcaption>
+    </figure>
+    
+  </div>
+  
+
+      </div>
+
+      <div id="estrutura-local" class="topic">
+        <h3>4.2 Estrutura vertical próxima aos sítios</h3>
+        <p class="topic-intro">As seções costeiras ajudam a interpretar os
+           resultados pontuais dos LiDARs e a identificar circulação de brisa,
+           cisalhamento e profundidade da camada limite. CTL, EXP01 e EXP02 são
+           mostrados no mesmo horário local para cada sítio.</p>
+        
+  
+  <div class="gallery">
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/site_structure/xsection_P0_CTL_2021_composite_15local.png"
+              data-title="P0 — CTL, composto às 15 h locais" aria-label="Ampliar figura: P0 — CTL, composto às 15 h locais">
+        <img src="assets/site_structure/xsection_P0_CTL_2021_composite_15local.png" loading="lazy" alt="P0 — CTL, composto às 15 h locais">
+      </button>
+      
+      <figcaption><strong>P0 — CTL, composto às 15 h locais</strong>Seção aproximadamente normal à costa em P0 no experimento de referência, mostrando a estrutura térmica e a circulação média às 15 h locais.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/site_structure/xsection_P0_EXP01_2021_composite_15local.png"
+              data-title="P0 — EXP01, composto às 15 h locais" aria-label="Ampliar figura: P0 — EXP01, composto às 15 h locais">
+        <img src="assets/site_structure/xsection_P0_EXP01_2021_composite_15local.png" loading="lazy" alt="P0 — EXP01, composto às 15 h locais">
+      </button>
+      
+      <figcaption><strong>P0 — EXP01, composto às 15 h locais</strong>A mesma seção e horário para o experimento com SST diária, permitindo comparação direta com CTL e EXP02.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/site_structure/xsection_P0_EXP02_2021_composite_15local.png"
+              data-title="P0 — EXP02, composto às 15 h locais" aria-label="Ampliar figura: P0 — EXP02, composto às 15 h locais">
+        <img src="assets/site_structure/xsection_P0_EXP02_2021_composite_15local.png" loading="lazy" alt="P0 — EXP02, composto às 15 h locais">
+      </button>
+      
+      <figcaption><strong>P0 — EXP02, composto às 15 h locais</strong>A mesma seção e horário para o experimento com malha expandida e zona de relaxação afastada.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/site_structure/xsection_LPI_CTL_2022_composite_15local.png"
+              data-title="LPI — CTL, composto às 15 h locais" aria-label="Ampliar figura: LPI — CTL, composto às 15 h locais">
+        <img src="assets/site_structure/xsection_LPI_CTL_2022_composite_15local.png" loading="lazy" alt="LPI — CTL, composto às 15 h locais">
+      </button>
+      
+      <figcaption><strong>LPI — CTL, composto às 15 h locais</strong>Seção aproximadamente normal à costa em LPI no experimento de referência, para outubro de 2022.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/site_structure/xsection_LPI_EXP01_2022_composite_15local.png"
+              data-title="LPI — EXP01, composto às 15 h locais" aria-label="Ampliar figura: LPI — EXP01, composto às 15 h locais">
+        <img src="assets/site_structure/xsection_LPI_EXP01_2022_composite_15local.png" loading="lazy" alt="LPI — EXP01, composto às 15 h locais">
+      </button>
+      
+      <figcaption><strong>LPI — EXP01, composto às 15 h locais</strong>A mesma seção e horário em LPI para o experimento com SST diária.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/site_structure/xsection_LPI_EXP02_2022_composite_15local.png"
+              data-title="LPI — EXP02, composto às 15 h locais" aria-label="Ampliar figura: LPI — EXP02, composto às 15 h locais">
+        <img src="assets/site_structure/xsection_LPI_EXP02_2022_composite_15local.png" loading="lazy" alt="LPI — EXP02, composto às 15 h locais">
+      </button>
+      
+      <figcaption><strong>LPI — EXP02, composto às 15 h locais</strong>A mesma seção e horário em LPI para o experimento com malha expandida e fronteira afastada.</figcaption>
+    </figure>
+    
+  </div>
+  
+
+      </div>
+
+      <div class="topic">
+        <h3>4.3 Evolução temporal</h3>
+        <p class="topic-intro">As animações mostram a organização e a
+           persistência das estruturas que desaparecem quando se observa apenas
+           a média mensal. As mesmas janelas são apresentadas para CTL, EXP01 e
+           EXP02, tanto nos campos a 100 m quanto nos cortes verticais.</p>
+        <p class="topic-intro"><em>As animações não são versionadas junto com o
+         relatório: somam 67 MB e são regeneradas pelo estágio 05 do pipeline
+         (<code>scripts/05_exploration/animate_wind.py</code> e
+         <code>animate_cross_section.py</code>). Na cópia do repositório os
+         reprodutores abaixo aparecem vazios; no pacote completo gerado na
+         máquina de análise eles funcionam.</em></p>
+      
+  
+  <div class="gallery">
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/wind100_CTL_2021_20211101_5d.mp4"></video>
+      
+      <figcaption><strong>Vento a 100 m — CTL, novembro de 2021</strong>Evolução horária do vento a 100 m nos cinco primeiros dias do período, na configuração de referência.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/wind100_EXP01_2021_20211101_5d.mp4"></video>
+      
+      <figcaption><strong>Vento a 100 m — EXP01, novembro de 2021</strong>Mesma janela do CTL no experimento com SST diária, com escala gráfica idêntica para comparação.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/wind100_EXP02_2021_20211101_5d.mp4"></video>
+      
+      <figcaption><strong>Vento a 100 m — EXP02, novembro de 2021</strong>Mesma janela do CTL no experimento com malha expandida e fronteira afastada.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/wind100_CTL_2022_20221001_5d.mp4"></video>
+      
+      <figcaption><strong>Vento a 100 m — CTL, outubro de 2022</strong>Evolução horária do vento a 100 m nos cinco primeiros dias do segundo período, na configuração de referência.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/wind100_EXP01_2022_20221001_5d.mp4"></video>
+      
+      <figcaption><strong>Vento a 100 m — EXP01, outubro de 2022</strong>Mesma janela de outubro de 2022 no experimento com SST diária.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/wind100_EXP02_2022_20221001_5d.mp4"></video>
+      
+      <figcaption><strong>Vento a 100 m — EXP02, outubro de 2022</strong>Mesma janela de outubro de 2022 no experimento com malha expandida e fronteira afastada.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/xsection_P0_CTL_2021_20211101_3d.mp4"></video>
+      
+      <figcaption><strong>Corte vertical em P0 — CTL</strong>Evolução da temperatura e da circulação nos três primeiros dias; setas combinam o vento ao longo da seção e o movimento vertical, e círculos/cruzes indicam o vento perpendicular.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/xsection_P0_EXP01_2021_20211101_3d.mp4"></video>
+      
+      <figcaption><strong>Corte vertical em P0 — EXP01</strong>Mesmo corte e janela para EXP01, permitindo acompanhar a resposta horária à configuração com SST diária.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/xsection_LPI_CTL_2022_20221001_3d.mp4"></video>
+      
+      <figcaption><strong>Corte vertical em LPI — CTL</strong>Evolução da estrutura costeira em LPI nos três primeiros dias de outubro de 2022, na configuração de referência.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <video controls preload="metadata" src="assets/animations/xsection_LPI_EXP01_2022_20221001_3d.mp4"></video>
+      
+      <figcaption><strong>Corte vertical em LPI — EXP01</strong>Mesmo corte e janela para EXP01, mantendo a comparação visual nas mesmas condições meteorológicas.</figcaption>
+    </figure>
+    
+  </div>
+  
+
+      </div>
+    </section>
+
+    <section id="validacao">
+      <h2>5. Validação observacional</h2>
+      <p class="lead">A avaliação possui dois eixos primários independentes:
+         LiDARs offshore entre 50 e 250 m para o recurso em altura de rotor, e
+         estações automáticas INMET a 10 m para a circulação costeira de superfície.
+         Os dois eixos não são combinados em um único escore.</p>
+      <div class="banner info">
+        <strong>ERA5 como referência mínima de desempenho.</strong> Toda
+        comparação observacional inclui ERA5 quando existe uma altura
+        diretamente equivalente: 10 m nas estações INMET e 100 m nos LiDARs.
+        ERA5 não é extrapolado para 50, 150, 200 ou 250 m, pois isso exigiria
+        assumir um perfil vertical e contaminaria justamente a comparação que
+        se deseja fazer. O objetivo operacional é claro: o MPAS precisa superar
+        o ERA5 para justificar o downscaling.
+      </div>
+
+      <div id="rede-observacional" class="topic">
+        <h3>5.1 Região, estações e tratamento temporal</h3>
+        
+  
+  <div class="gallery single">
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/validation_network/validation_network.png"
+              data-title="Domínios e pontos de validação" aria-label="Ampliar figura: Domínios e pontos de validação">
+        <img src="assets/validation_network/validation_network.png" loading="lazy" alt="Domínios e pontos de validação">
+      </button>
+      
+      <figcaption><strong>Domínios e pontos de validação</strong>À esquerda, os dois domínios em uso: a malha não bufferizada de CTL/EXP01/EXP01 e a malha com buffer de EXP02/EXP02; à direita, os LiDARs P0/LPI e as estações automáticas INMET usadas como eixo primário de validação de superfície.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/validation_network/validation_cells.png"
+              data-title="Células usadas na comparação com P0 e LPI" aria-label="Ampliar figura: Células usadas na comparação com P0 e LPI">
+        <img src="assets/validation_network/validation_cells.png" loading="lazy" alt="Células usadas na comparação com P0 e LPI">
+      </button>
+      
+      <figcaption><strong>Células usadas na comparação com P0 e LPI</strong>O mapa localiza os LiDARs e amplia as células Voronoi de cada malha. A estrela marca o instrumento; o contorno preto e o x identificam a célula oceânica mais próxima efetivamente usada na validação, com a distância entre o LiDAR e o centro da célula.</figcaption>
+    </figure>
+    
+  </div>
+  
+
+
+        <h4>Auditoria do tratamento de P0 e LPI</h4>
+        <div class="method-grid">
+          
+          <div class="card">
+            <strong>P0 — LiDAR flutuante</strong>
+            <small>novembro de 2021</small>
+            <p><b>Arquivo nativo:</b> registros em intervalos de 10 min; cada bin traz disponibilidade por altura.</p>
+            <p><b>Controle de qualidade:</b> disponibilidade ≥80% e velocidade entre 0–40 m s⁻¹.</p>
+            <p><b>Alturas comparadas:</b> 50, 100, 150, 200 e 250 m (250 m = média dos canais 240/260 m).</p>
+          </div>
+          
+          <div class="card">
+            <strong>LPI — LiDAR fixo em Porto-Ilha</strong>
+            <small>outubro de 2022</small>
+            <p><b>Arquivo nativo:</b> registros em intervalos de 10 min; o arquivo não traz indicador de disponibilidade nem explicita a estatística interna do instrumento.</p>
+            <p><b>Controle de qualidade:</b> velocidade entre 0–40 m s⁻¹; não foi inventado um limiar ausente.</p>
+            <p><b>Alturas comparadas:</b> 50, 100, 150 e 200 m.</p>
+          </div>
+          
+        </div>
+        <div class="banner info">
+          <strong>Homogeneização confirmada no pipeline de análise.</strong>
+          P0 e LPI são ambos agregados para médias horárias centradas no horário
+          do MPAS, usando a janela [t−30 min, t+30 min) e exigindo no mínimo
+          4 das 6 amostras possíveis. A velocidade é
+          promediada como escalar e a direção por média vetorial. O
+          pré-processamento do LPI apenas converte UTC−3 para UTC e escolhe as
+          colunas direcionais corrigidas; não realiza média temporal.
+        </div>
+        <p class="topic-intro">A única assimetria restante é documental e de QC:
+           P0 possui a variável de disponibilidade por altura; LPI não possui
+           flag equivalente. Aplicar um limiar apenas a P0 é rastreável.
+           Inventar um limiar para LPI não seria defensável.</p>
+      </div>
+
+      <div id="inmet" class="topic">
+        <h3>5.2 Validação da circulação de superfície — INMET</h3>
+        <p class="topic-intro">As estações automáticas testam se o modelo
+           representa magnitude, variabilidade espacial e fase do ciclo diurno
+           do vento terrestre a 10 m.</p>
+        
+  <div class="table-block">
+    <p class="table-caption">
+      <strong>Validação de superfície — estações automáticas INMET</strong>
+      Média das métricas calculadas separadamente para cada estação e período, incluindo ERA5 a 10 m como referência; as estações têm o mesmo peso, independentemente do número de registros.
+    </p>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Fonte</th><th>Estações</th><th>Pares estação–período</th><th>Vento observado médio (m s⁻¹)</th><th>Vento modelado médio (m s⁻¹)</th><th>Viés modelo − observação (m s⁻¹)</th><th>RMSE (m s⁻¹)</th><th>r</th><th>Erro de fase do máximo diário (h)</th></tr></thead><tbody><tr><td>CTL</td><td>4</td><td>6</td><td>3,18</td><td>5,18</td><td>2,00</td><td>2,32</td><td class="best-value">0,72</td><td>-0,33</td></tr><tr><td>ERA5</td><td>4</td><td>6</td><td>3,18</td><td>5,48</td><td>2,30</td><td>2,57</td><td>0,64</td><td>-2,83</td></tr><tr><td>EXP01</td><td>4</td><td>6</td><td>3,18</td><td>5,24</td><td>2,06</td><td>2,36</td><td>0,72</td><td>-0,33</td></tr><tr><td>EXP02</td><td>4</td><td>6</td><td>3,18</td><td>5,03</td><td class="best-value">1,85</td><td class="best-value">2,20</td><td>0,64</td><td class="best-value">0,00</td></tr></tbody></table></div>
+    
+    <ul class="table-notes">
+      <li>Viés positivo significa que o MPAS superestima a velocidade observada.</li><li>RMSE mede o erro típico; r mede a associação temporal linear.</li><li>Erro de fase = hora local do máximo do ciclo diurno médio modelado − hora local do máximo observado, envolvido no intervalo de −12 a +12 h. Valor negativo/positivo indica máximo antes/depois do observado; menor valor absoluto é melhor.</li><li>ERA5 e MPAS são avaliados contra as mesmas observações e nos mesmos horários disponíveis em cada estação.</li><li>Negrito indica o melhor valor da coluna: menor valor absoluto para viés e erro de fase, menor RMSE e maior r. Empates são mantidos em negrito.</li>
+    </ul>
+    
+  </div>
+
+        
+  
+  <div class="gallery">
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/inmet_validation/inmet_map.png"
+              data-title="Viés do vento de superfície por estação" aria-label="Ampliar figura: Viés do vento de superfície por estação">
+        <img src="assets/inmet_validation/inmet_map.png" loading="lazy" alt="Viés do vento de superfície por estação">
+      </button>
+      
+      <figcaption><strong>Viés do vento de superfície por estação</strong>Cada triângulo representa uma estação automática INMET; a cor mostra o viés médio da fonte − observação. ERA5 a 10 m aparece ao lado dos experimentos MPAS, e P0/LPI são apenas referências geográficas.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/inmet_validation/inmet_diurnal.png"
+              data-title="Ciclo diurno nas estações INMET" aria-label="Ampliar figura: Ciclo diurno nas estações INMET">
+        <img src="assets/inmet_validation/inmet_diurnal.png" loading="lazy" alt="Ciclo diurno nas estações INMET">
+      </button>
+      
+      <figcaption><strong>Ciclo diurno nas estações INMET</strong>Ciclo médio horário em tempo local para observações, ERA5 e MPAS. A comparação avalia amplitude e horário do máximo da circulação costeira de superfície.</figcaption>
+    </figure>
+    
+  </div>
+  
+
+      </div>
+
+      <div id="lidar" class="topic">
+        <h3>5.3 Validação offshore em altura de rotor — LiDAR</h3>
+        <h4>Características dos dados nos sítios</h4>
+        <p class="topic-intro">Distribuições e rosas dos ventos descrevem o
+           regime observado antes de resumir o desempenho do modelo.</p>
+        
+  
+  <div class="gallery">
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/observed_data/distribution_2021_P0_100m.png"
+              data-title="Distribuição observada em P0 a 100 m" aria-label="Ampliar figura: Distribuição observada em P0 a 100 m">
+        <img src="assets/observed_data/distribution_2021_P0_100m.png" loading="lazy" alt="Distribuição observada em P0 a 100 m">
+      </button>
+      
+      <figcaption><strong>Distribuição observada em P0 a 100 m</strong>Histograma e ajuste de Weibull do LiDAR comparados ao ERA5 e aos experimentos MPAS. A forma da distribuição complementa RMSE e viés ao mostrar quais faixas de vento são mais frequentes.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/observed_data/distribution_2022_LPI_100m.png"
+              data-title="Distribuição observada em LPI a 100 m" aria-label="Ampliar figura: Distribuição observada em LPI a 100 m">
+        <img src="assets/observed_data/distribution_2022_LPI_100m.png" loading="lazy" alt="Distribuição observada em LPI a 100 m">
+      </button>
+      
+      <figcaption><strong>Distribuição observada em LPI a 100 m</strong>Distribuição de velocidade no LPI, no ERA5 e nos experimentos MPAS durante outubro de 2022; diferenças na posição e largura indicam erros de média e variabilidade.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/observed_data/windrose_2021_P0_100m.png"
+              data-title="Regime direcional em P0" aria-label="Ampliar figura: Regime direcional em P0">
+        <img src="assets/observed_data/windrose_2021_P0_100m.png" loading="lazy" alt="Regime direcional em P0">
+      </button>
+      
+      <figcaption><strong>Regime direcional em P0</strong>Rosas dos ventos observada, ERA5 e MPAS a 100 m. Os setores mostram de onde o vento sopra e com que frequência/intensidade.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/observed_data/windrose_2022_LPI_100m.png"
+              data-title="Regime direcional em LPI" aria-label="Ampliar figura: Regime direcional em LPI">
+        <img src="assets/observed_data/windrose_2022_LPI_100m.png" loading="lazy" alt="Regime direcional em LPI">
+      </button>
+      
+      <figcaption><strong>Regime direcional em LPI</strong>Rosas dos ventos observada, ERA5 e MPAS a 100 m em LPI, permitindo avaliar a direção dominante e a dispersão direcional.</figcaption>
+    </figure>
+    
+  </div>
+  
+
+
+        <h4>Comparação quantitativa com o MPAS</h4>
+        <div class="banner info">
+          <strong>O que é o expoente de cisalhamento α.</strong>
+          Ele resume quanto a velocidade aumenta com a altura pela lei de
+          potência <b>U(z) = U(z<sub>0</sub>)(z/z<sub>0</sub>)<sup>α</sup></b>,
+          ou <b>α = ln(U<sub>2</sub>/U<sub>1</sub>) /
+          ln(z<sub>2</sub>/z<sub>1</sub>)</b>. Valores maiores de α indicam
+          aumento mais rápido do vento com a altura; α próximo de zero indica
+          perfil quase uniforme. A figura calcula α hora a hora entre a menor e
+          a maior altura comuns ao MPAS e ao LiDAR.
+        </div>
+        
+  <div class="table-block">
+    <p class="table-caption">
+      <strong>Validação offshore em alturas de rotor — LiDAR</strong>
+      Comparação horária entre o vento do MPAS e os LiDARs P0/LPI, na célula oceânica mais próxima e em níveis verticais coincidentes.
+    </p>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Fonte</th><th>Período</th><th>Sítio</th><th>Altura (m)</th><th>Horas pareadas</th><th>RMSE (m s⁻¹)</th><th>RMSE — IC95% inferior</th><th>RMSE — IC95% superior</th><th>Viés modelo − observação (m s⁻¹)</th><th>r</th><th>Viés relativo da densidade de potência eólica (%)</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td>2,18</td><td>1,97</td><td>2,43</td><td>-1,17</td><td>0,40</td><td>-37,1</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td>2,03</td><td>1,83</td><td>2,26</td><td>-0,85</td><td>0,41</td><td class="best-value">-29,1</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>50</td><td>507</td><td class="best-value">1,95</td><td>1,74</td><td>2,15</td><td class="best-value">-0,84</td><td class="best-value">0,45</td><td>-29,7</td></tr><tr class="height-separator"><td>CTL</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,18</td><td>1,95</td><td>2,44</td><td>-1,24</td><td>0,42</td><td>-36,9</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,02</td><td>1,82</td><td>2,26</td><td>-0,95</td><td>0,43</td><td>-30,0</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td class="best-value">1,92</td><td>1,71</td><td>2,12</td><td class="best-value">-0,89</td><td class="best-value">0,47</td><td class="best-value">-29,4</td></tr><tr><td>ERA5</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,49</td><td>2,27</td><td>2,78</td><td>-1,90</td><td>0,53</td><td>-51,4</td></tr><tr class="height-separator"><td>CTL</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td>2,14</td><td>1,92</td><td>2,40</td><td>-1,27</td><td>0,44</td><td>-36,3</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td>1,98</td><td>1,78</td><td>2,21</td><td>-1,01</td><td>0,45</td><td>-30,4</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>150</td><td>507</td><td class="best-value">1,88</td><td>1,65</td><td>2,10</td><td class="best-value">-0,94</td><td class="best-value">0,49</td><td class="best-value">-29,5</td></tr><tr class="height-separator"><td>CTL</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td>2,12</td><td>1,92</td><td>2,37</td><td>-1,28</td><td>0,43</td><td>-35,4</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td>1,97</td><td>1,76</td><td>2,20</td><td>-1,08</td><td>0,46</td><td>-31,2</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>200</td><td>503</td><td class="best-value">1,86</td><td>1,61</td><td>2,09</td><td class="best-value">-1,01</td><td class="best-value">0,50</td><td class="best-value">-30,2</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td>2,42</td><td>2,12</td><td>2,68</td><td>-1,16</td><td>0,68</td><td>-25,9</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td>2,13</td><td>1,87</td><td>2,37</td><td>-0,63</td><td>0,70</td><td>-15,0</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>50</td><td>740</td><td class="best-value">2,04</td><td>1,79</td><td>2,24</td><td class="best-value">-0,55</td><td class="best-value">0,70</td><td class="best-value">-14,9</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,31</td><td>2,04</td><td>2,55</td><td>-0,96</td><td>0,71</td><td>-21,4</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,07</td><td>1,82</td><td>2,28</td><td>-0,55</td><td class="best-value">0,74</td><td class="best-value">-13,5</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td class="best-value">2,02</td><td>1,78</td><td>2,22</td><td class="best-value">-0,49</td><td>0,73</td><td>-13,7</td></tr><tr><td>ERA5</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,47</td><td>2,24</td><td>2,66</td><td>-1,90</td><td>0,85</td><td>-44,4</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td>2,12</td><td>1,88</td><td>2,33</td><td>-0,70</td><td>0,75</td><td>-16,1</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td class="best-value">1,95</td><td>1,73</td><td>2,14</td><td>-0,52</td><td class="best-value">0,77</td><td class="best-value">-13,2</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>150</td><td>740</td><td>1,96</td><td>1,73</td><td>2,16</td><td class="best-value">-0,50</td><td>0,76</td><td>-14,1</td></tr><tr class="height-separator"><td>CTL</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td>1,92</td><td>1,72</td><td>2,12</td><td class="best-value">-0,45</td><td>0,79</td><td class="best-value">-10,9</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td class="best-value">1,81</td><td>1,62</td><td>1,99</td><td>-0,47</td><td class="best-value">0,81</td><td>-12,7</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>200</td><td>740</td><td>1,91</td><td>1,70</td><td>2,11</td><td>-0,52</td><td>0,78</td><td>-14,8</td></tr></tbody></table></div>
+    
+    <ul class="table-notes">
+      <li>IC95% é o intervalo de confiança de 95% obtido por bootstrap em blocos de 24 h.</li><li>O viés relativo da densidade de potência eólica compara grandezas proporcionais a U³; valor negativo indica subestimativa do recurso.</li><li>A densidade de potência eólica é WPD = ½ ρ × média(U³), com ρ = 1,15 kg m⁻³ e U em m s⁻¹; o cubo é calculado antes da média.</li><li>ERA5 aparece somente a 100 m, seu nível diagnóstico diretamente comparável ao LiDAR; não é extrapolado para as demais alturas.</li><li>Todos os experimentos estão completos e são comparados nas mesmas horas observacionais disponíveis dentro de cada janela científica.</li><li>Em cada altura, o negrito indica o melhor entre CTL, EXP01 e EXP02: menor valor absoluto para os vieses, menor RMSE e maior r. ERA5 permanece como benchmark e não entra nessa seleção.</li>
+    </ul>
+    
+  </div>
+
+        
+  
+  <div class="gallery">
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/profile_2021_P0.png"
+              data-title="Perfil vertical médio em P0" aria-label="Ampliar figura: Perfil vertical médio em P0">
+        <img src="assets/lidar_validation/profile_2021_P0.png" loading="lazy" alt="Perfil vertical médio em P0">
+      </button>
+      
+      <figcaption><strong>Perfil vertical médio em P0</strong>Velocidade média observada e simulada entre 50 e 250 m, com ERA5 no nível diretamente comparável de 100 m. O painel de α mostra o expoente de cisalhamento da lei de potência U(z)=U(z₀)(z/z₀)^α: α maior significa aumento mais rápido do vento com a altura.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/profile_2022_LPI.png"
+              data-title="Perfil vertical médio em LPI" aria-label="Ampliar figura: Perfil vertical médio em LPI">
+        <img src="assets/lidar_validation/profile_2022_LPI.png" loading="lazy" alt="Perfil vertical médio em LPI">
+      </button>
+      
+      <figcaption><strong>Perfil vertical médio em LPI</strong>Velocidade média observada e simulada entre 50 e 200 m, com ERA5 em 100 m. O expoente α resume a intensidade do cisalhamento vertical entre os níveis LiDAR inferior e superior.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/diurnal_2021_P0.png"
+              data-title="Ciclo diurno do vento em P0" aria-label="Ampliar figura: Ciclo diurno do vento em P0">
+        <img src="assets/lidar_validation/diurnal_2021_P0.png" loading="lazy" alt="Ciclo diurno do vento em P0">
+      </button>
+      
+      <figcaption><strong>Ciclo diurno do vento em P0</strong>Ciclo médio horário em tempo local, por altura, para LiDAR e MPAS; em 100 m o ERA5 também é mostrado nas mesmas horas. Os valores de amplitude e fase resumem quanto cada fonte reproduz a intensidade e o horário do máximo diário observado.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/diurnal_2022_LPI.png"
+              data-title="Ciclo diurno do vento em LPI" aria-label="Ampliar figura: Ciclo diurno do vento em LPI">
+        <img src="assets/lidar_validation/diurnal_2022_LPI.png" loading="lazy" alt="Ciclo diurno do vento em LPI">
+      </button>
+      
+      <figcaption><strong>Ciclo diurno do vento em LPI</strong>Ciclo médio horário equivalente para LPI. A comparação direta com ERA5 é restrita a 100 m, seu nível diagnóstico compatível, evitando impor uma extrapolação vertical artificial ao benchmark.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/timeseries_2021_P0_100m.png"
+              data-title="Evolução horária em P0 a 100 m" aria-label="Ampliar figura: Evolução horária em P0 a 100 m">
+        <img src="assets/lidar_validation/timeseries_2021_P0_100m.png" loading="lazy" alt="Evolução horária em P0 a 100 m">
+      </button>
+      
+      <figcaption><strong>Evolução horária em P0 a 100 m</strong>Série temporal do LiDAR, ERA5 e experimentos MPAS nas mesmas horas, usada para identificar episódios de maior erro e diferenças de fase.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/timeseries_2022_LPI_100m.png"
+              data-title="Evolução horária em LPI a 100 m" aria-label="Ampliar figura: Evolução horária em LPI a 100 m">
+        <img src="assets/lidar_validation/timeseries_2022_LPI_100m.png" loading="lazy" alt="Evolução horária em LPI a 100 m">
+      </button>
+      
+      <figcaption><strong>Evolução horária em LPI a 100 m</strong>Série temporal equivalente para LPI, incluindo ERA5; mostra simultaneamente viés, variabilidade e sincronismo.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/scatter_2021_P0_100m.png"
+              data-title="Dispersão modelo–observação em P0" aria-label="Ampliar figura: Dispersão modelo–observação em P0">
+        <img src="assets/lidar_validation/scatter_2021_P0_100m.png" loading="lazy" alt="Dispersão modelo–observação em P0">
+      </button>
+      
+      <figcaption><strong>Dispersão modelo–observação em P0</strong>Cada painel compara LiDAR com ERA5 ou MPAS, e cada ponto é uma hora pareada. A linha 1:1 representa concordância perfeita; afastamentos sistemáticos revelam viés e dispersão.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/scatter_2022_LPI_100m.png"
+              data-title="Dispersão modelo–observação em LPI" aria-label="Ampliar figura: Dispersão modelo–observação em LPI">
+        <img src="assets/lidar_validation/scatter_2022_LPI_100m.png" loading="lazy" alt="Dispersão modelo–observação em LPI">
+      </button>
+      
+      <figcaption><strong>Dispersão modelo–observação em LPI</strong>Comparação horária a 100 m em LPI para ERA5 e MPAS, com a mesma escala e interpretação da figura de P0.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/taylor_2021_P0.png"
+              data-title="Síntese estatística em P0" aria-label="Ampliar figura: Síntese estatística em P0">
+        <img src="assets/lidar_validation/taylor_2021_P0.png" loading="lazy" alt="Síntese estatística em P0">
+      </button>
+      
+      <figcaption><strong>Síntese estatística em P0</strong>Diagrama de Taylor combinando correlação, desvio-padrão e erro quadrático centrado; pontos mais próximos da referência observada representam melhor desempenho conjunto.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/taylor_2022_LPI.png"
+              data-title="Síntese estatística em LPI" aria-label="Ampliar figura: Síntese estatística em LPI">
+        <img src="assets/lidar_validation/taylor_2022_LPI.png" loading="lazy" alt="Síntese estatística em LPI">
+      </button>
+      
+      <figcaption><strong>Síntese estatística em LPI</strong>Diagrama de Taylor do segundo sítio/período, permitindo comparar experimentos e alturas sem reduzir tudo a uma única métrica.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/lidar_validation/cell_sensitivity.png"
+              data-title="Sensibilidade à célula escolhida" aria-label="Ampliar figura: Sensibilidade à célula escolhida">
+        <img src="assets/lidar_validation/cell_sensitivity.png" loading="lazy" alt="Sensibilidade à célula escolhida">
+      </button>
+      
+      <figcaption><strong>Sensibilidade à célula escolhida</strong>RMSE nas cinco células oceânicas MPAS mais próximas aos LiDARs; a linha tracejada mostra o ERA5 nas horas comuns. A variação entre células quantifica a incerteza de representatividade de comparar um instrumento pontual com uma célula de aproximadamente 5 km.</figcaption>
+    </figure>
+    
+  </div>
+  
+
+      </div>
+    </section>
+
+    <section id="valor-adicionado">
+      <h2>6. Valor adicionado em relação ao ERA5</h2>
+      <p class="lead">Valor adicionado significa reduzir o erro da reanálise nas
+         observações e/ou acrescentar estrutura espacial fisicamente plausível.
+         Maior resolução, sozinha, não garante maior habilidade.</p>
+      <div class="banner info">
+        <strong>Como o ganho frente ao ERA5 é calculado.</strong>
+        Para os mesmos horários e o mesmo LiDAR:
+        <b>redução do RMSE = 100 × [1 − RMSE<sub>MPAS</sub>/RMSE<sub>ERA5</sub>]</b>
+        e <b>redução do MSE = 100 × [1 − MSE<sub>MPAS</sub>/MSE<sub>ERA5</sub>]</b>.
+        Como MSE = RMSE<sup>2</sup>, o segundo valor também é
+        <b>100 × {1 − [RMSE<sub>MPAS</sub>/RMSE<sub>ERA5</sub>]<sup>2</sup>}</b>.
+        Resultado positivo é ganho; zero é empate; resultado negativo significa
+        que o MPAS ficou pior que o ERA5. A figura “Ganho ou perda de habilidade”
+        mostra a redução do MSE, também chamada de Murphy skill score.
+      </div>
+      
+  <div class="table-block">
+    <p class="table-caption">
+      <strong>Valor adicionado em relação ao ERA5</strong>
+      MPAS e ERA5 são comparados com o mesmo LiDAR nos mesmos horários. Redução de RMSE = 100 × [1 − RMSE(MPAS)/RMSE(ERA5)]; redução de MSE = 100 × [1 − MSE(MPAS)/MSE(ERA5)].
+    </p>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Fonte</th><th>Período</th><th>Sítio</th><th>Altura (m)</th><th>Horas pareadas</th><th>RMSE (m s⁻¹)</th><th>Viés (m s⁻¹)</th><th>r</th><th>Redução do RMSE frente ao ERA5 (%)</th><th>Redução do MSE frente ao ERA5 (%)</th><th>Redução do MSE — IC95% inferior (%)</th><th>Redução do MSE — IC95% superior (%)</th><th>Diferença estatisticamente detectável</th></tr></thead><tbody><tr><td>ERA5</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,49</td><td>-1,90</td><td>0,53</td><td>0,0</td><td>0,0</td><td>—</td><td>—</td><td>não</td></tr><tr><td>CTL</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,18</td><td>-1,24</td><td>0,42</td><td class="metric-improved">12,6</td><td class="metric-improved">23,6</td><td>11,2</td><td>38,6</td><td>sim</td></tr><tr><td>EXP01</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>2,02</td><td>-0,95</td><td>0,43</td><td class="metric-improved">18,8</td><td class="metric-improved">34,0</td><td>21,6</td><td>49,7</td><td>sim</td></tr><tr><td>EXP02</td><td>2021</td><td>P0</td><td>100</td><td>507</td><td>1,92</td><td>-0,89</td><td>0,47</td><td class="metric-improved">22,8</td><td class="metric-improved">40,4</td><td>25,8</td><td>61,1</td><td>sim</td></tr><tr><td>ERA5</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,47</td><td>-1,90</td><td>0,85</td><td>0,0</td><td>0,0</td><td>—</td><td>—</td><td>não</td></tr><tr><td>CTL</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,31</td><td>-0,96</td><td>0,71</td><td class="metric-improved">6,3</td><td class="metric-improved">12,2</td><td>-1,8</td><td>27,4</td><td>não</td></tr><tr><td>EXP01</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,07</td><td>-0,55</td><td>0,74</td><td class="metric-improved">16,2</td><td class="metric-improved">29,8</td><td>15,8</td><td>44,1</td><td>sim</td></tr><tr><td>EXP02</td><td>2022</td><td>LPI</td><td>100</td><td>740</td><td>2,02</td><td>-0,49</td><td>0,73</td><td class="metric-improved">18,2</td><td class="metric-improved">33,0</td><td>21,4</td><td>46,6</td><td>sim</td></tr></tbody></table></div>
+    
+    <ul class="table-notes">
+      <li>Valor positivo significa que o downscaling reduz o MSE do ERA5; valor negativo significa perda de habilidade.</li><li>Como MSE = RMSE², a redução do MSE também é 100 × {1 − [RMSE(MPAS)/RMSE(ERA5)]²}.</li><li>A diferença só é considerada detectável quando o IC95% não cruza zero.</li><li>Nas duas colunas de redução, verde indica melhora frente ao ERA5 e vermelho indica piora; zero é a referência.</li>
+    </ul>
+    
+  </div>
+
+      
+  <div class="table-block">
+    <p class="table-caption">
+      <strong>Recurso eólico médio no domínio</strong>
+      Médias espaciais do vento a 100 m e da densidade de potência eólica sobre a área comum entre o MPAS e o ERA5.
+    </p>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Experimento</th><th>Período</th><th>Saídas horárias</th><th>Vento médio MPAS (m s⁻¹)</th><th>Vento médio ERA5 (m s⁻¹)</th><th>Diferença MPAS − ERA5 (m s⁻¹)</th><th>Diferença relativa da potência eólica (%)</th></tr></thead><tbody><tr><td>CTL</td><td>2021</td><td>721</td><td>6,83</td><td>6,63</td><td>0,20</td><td>9,4</td></tr><tr><td>CTL</td><td>2022</td><td>745</td><td>8,88</td><td>8,21</td><td>0,66</td><td>23,2</td></tr><tr><td>EXP01</td><td>2021</td><td>721</td><td>6,95</td><td>6,63</td><td>0,32</td><td>14,8</td></tr><tr><td>EXP01</td><td>2022</td><td>745</td><td>8,97</td><td>8,21</td><td>0,76</td><td>27,1</td></tr><tr><td>EXP02</td><td>2021</td><td>721</td><td>6,61</td><td>6,16</td><td>0,44</td><td>16,8</td></tr><tr><td>EXP02</td><td>2022</td><td>745</td><td>8,58</td><td>7,73</td><td>0,85</td><td>28,6</td></tr></tbody></table></div>
+    
+    <ul class="table-notes">
+      <li>A densidade de potência é WPD = ½ ρ × média(U³), usando ρ = 1,15 kg m⁻³; pequenas diferenças de vento produzem diferenças percentuais maiores de recurso.</li><li>Esta comparação descreve os campos. A validação observacional acima determina se a diferença representa ganho de qualidade.</li>
+    </ul>
+    
+  </div>
+
+      
+  
+  <div class="gallery">
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/added_value/climatological_context.png"
+              data-title="Contexto climatológico dos meses simulados" aria-label="Ampliar figura: Contexto climatológico dos meses simulados">
+        <img src="assets/added_value/climatological_context.png" loading="lazy" alt="Contexto climatológico dos meses simulados">
+      </button>
+      
+      <figcaption><strong>Contexto climatológico dos meses simulados</strong>Posição de novembro de 2021 e outubro de 2022 dentro da distribuição climatológica do ERA5. Isso indica se os períodos avaliados são típicos ou extremos.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/added_value/added_value.png"
+              data-title="Ganho ou perda de habilidade frente ao ERA5" aria-label="Ampliar figura: Ganho ou perda de habilidade frente ao ERA5">
+        <img src="assets/added_value/added_value.png" loading="lazy" alt="Ganho ou perda de habilidade frente ao ERA5">
+      </button>
+      
+      <figcaption><strong>Ganho ou perda de habilidade frente ao ERA5</strong>Calculado como 100 × [1 − MSE(MPAS)/MSE(ERA5)] usando o mesmo LiDAR e exatamente os mesmos horários. Barras acima de zero indicam que o MPAS remove parte do erro do ERA5; valores negativos indicam perda. As hastes são IC95% por bootstrap em blocos de 24 h; intervalos que cruzam zero não sustentam diferença detectável.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/added_value/resource_comparison_CTL_2021.png"
+              data-title="Estrutura espacial MPAS e ERA5 — 2021" aria-label="Ampliar figura: Estrutura espacial MPAS e ERA5 — 2021">
+        <img src="assets/added_value/resource_comparison_CTL_2021.png" loading="lazy" alt="Estrutura espacial MPAS e ERA5 — 2021">
+      </button>
+      
+      <figcaption><strong>Estrutura espacial MPAS e ERA5 — 2021</strong>Mapas do recurso eólico a 100 m no CTL e no ERA5, colocados na mesma grade para evidenciar estruturas costeiras adicionadas pelo downscaling.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/added_value/resource_comparison_CTL_2022.png"
+              data-title="Estrutura espacial MPAS e ERA5 — 2022" aria-label="Ampliar figura: Estrutura espacial MPAS e ERA5 — 2022">
+        <img src="assets/added_value/resource_comparison_CTL_2022.png" loading="lazy" alt="Estrutura espacial MPAS e ERA5 — 2022">
+      </button>
+      
+      <figcaption><strong>Estrutura espacial MPAS e ERA5 — 2022</strong>Comparação equivalente para outubro de 2022; descreve onde o MPAS intensifica ou reduz o recurso em relação à reanálise.</figcaption>
+    </figure>
+    
+  </div>
+  
+
+    </section>
+
+    <section id="mecanismos">
+      <h2>7. Mecanismos físicos e seleção da configuração</h2>
+      <p class="lead">O ranking estatístico precisa ser consistente com o
+         mecanismo esperado. Uma aparente melhora sem resposta coerente em SST,
+         fluxos, camada limite ou distância da fronteira não é transferível para
+         simulações climatológicas.</p>
+      <div class="banner info">
+        <strong>Gate de integridade: aprovado.</strong>
+        <code>check_sst_forcing.py</code> encontra zero células oceânicas no
+        valor de preenchimento da OISST em EXP01 e EXP02, com SST mínima de
+        299,5–300,7 K sobre o oceano e 301,5 K em P0. A cadeia física acompanha:
+        em P0 os fluxos de calor sensível e latente são positivos (+9,2 e
+        +141,7 W m⁻²) e a camada limite tem 624 m.
+      </div>
+      
+  <div class="table-block">
+    <p class="table-caption">
+      <strong>Seleção da configuração — testes pareados</strong>
+      Cada linha testa se um experimento tem erro quadrático menor que o outro nos mesmos horários, com intervalo de confiança de 95 % por bootstrap de blocos móveis (blocos de 24 h, 2.000 reamostragens). Cada comparação usa as mesmas horas nos dois experimentos.
+    </p>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Período</th><th>Sítio</th><th>Altura (m)</th><th>Experimento A</th><th>Experimento B</th><th>Horas pareadas</th><th>RMSE de A (m s⁻¹)</th><th>RMSE de B (m s⁻¹)</th><th>MSE(A) − MSE(B) (m² s⁻²)</th><th>IC95% inferior</th><th>IC95% superior</th><th>Melhor</th></tr></thead><tbody><tr><td>2021</td><td>P0</td><td>50</td><td>CTL</td><td>EXP01</td><td>507</td><td>2,18</td><td>2,03</td><td>0,66</td><td>0,20</td><td>1,15</td><td>EXP01</td></tr><tr><td>2021</td><td>P0</td><td>50</td><td>CTL</td><td>EXP02</td><td>507</td><td>2,18</td><td>1,95</td><td>0,96</td><td>0,33</td><td>1,77</td><td>EXP02</td></tr><tr><td>2021</td><td>P0</td><td>50</td><td>EXP01</td><td>EXP02</td><td>507</td><td>2,03</td><td>1,95</td><td>0,30</td><td>-0,26</td><td>1,05</td><td>sem diferença detectável</td></tr><tr><td>2021</td><td>P0</td><td>100</td><td>CTL</td><td>EXP01</td><td>507</td><td>2,18</td><td>2,02</td><td>0,64</td><td>0,18</td><td>1,13</td><td>EXP01</td></tr><tr><td>2021</td><td>P0</td><td>100</td><td>CTL</td><td>EXP02</td><td>507</td><td>2,18</td><td>1,92</td><td>1,04</td><td>0,37</td><td>1,91</td><td>EXP02</td></tr><tr><td>2021</td><td>P0</td><td>100</td><td>EXP01</td><td>EXP02</td><td>507</td><td>2,02</td><td>1,92</td><td>0,40</td><td>-0,20</td><td>1,20</td><td>sem diferença detectável</td></tr><tr><td>2021</td><td>P0</td><td>150</td><td>CTL</td><td>EXP01</td><td>507</td><td>2,14</td><td>1,98</td><td>0,65</td><td>0,21</td><td>1,13</td><td>EXP01</td></tr><tr><td>2021</td><td>P0</td><td>150</td><td>CTL</td><td>EXP02</td><td>507</td><td>2,14</td><td>1,88</td><td>1,05</td><td>0,36</td><td>1,94</td><td>EXP02</td></tr><tr><td>2021</td><td>P0</td><td>150</td><td>EXP01</td><td>EXP02</td><td>507</td><td>1,98</td><td>1,88</td><td>0,40</td><td>-0,24</td><td>1,23</td><td>sem diferença detectável</td></tr><tr><td>2021</td><td>P0</td><td>200</td><td>CTL</td><td>EXP01</td><td>503</td><td>2,12</td><td>1,97</td><td>0,64</td><td>0,22</td><td>1,05</td><td>EXP01</td></tr><tr><td>2021</td><td>P0</td><td>200</td><td>CTL</td><td>EXP02</td><td>503</td><td>2,12</td><td>1,86</td><td>1,04</td><td>0,36</td><td>1,88</td><td>EXP02</td></tr><tr><td>2021</td><td>P0</td><td>200</td><td>EXP01</td><td>EXP02</td><td>503</td><td>1,97</td><td>1,86</td><td>0,41</td><td>-0,25</td><td>1,24</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>50</td><td>CTL</td><td>EXP01</td><td>740</td><td>2,42</td><td>2,13</td><td>1,30</td><td>0,88</td><td>1,74</td><td>EXP01</td></tr><tr><td>2022</td><td>LPI</td><td>50</td><td>CTL</td><td>EXP02</td><td>740</td><td>2,42</td><td>2,04</td><td>1,66</td><td>0,67</td><td>2,83</td><td>EXP02</td></tr><tr><td>2022</td><td>LPI</td><td>50</td><td>EXP01</td><td>EXP02</td><td>740</td><td>2,13</td><td>2,04</td><td>0,36</td><td>-0,44</td><td>1,39</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>100</td><td>CTL</td><td>EXP01</td><td>740</td><td>2,31</td><td>2,07</td><td>1,07</td><td>0,70</td><td>1,41</td><td>EXP01</td></tr><tr><td>2022</td><td>LPI</td><td>100</td><td>CTL</td><td>EXP02</td><td>740</td><td>2,31</td><td>2,02</td><td>1,26</td><td>0,36</td><td>2,28</td><td>EXP02</td></tr><tr><td>2022</td><td>LPI</td><td>100</td><td>EXP01</td><td>EXP02</td><td>740</td><td>2,07</td><td>2,02</td><td>0,20</td><td>-0,56</td><td>1,13</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>150</td><td>CTL</td><td>EXP01</td><td>740</td><td>2,12</td><td>1,95</td><td>0,71</td><td>0,39</td><td>0,98</td><td>EXP01</td></tr><tr><td>2022</td><td>LPI</td><td>150</td><td>CTL</td><td>EXP02</td><td>740</td><td>2,12</td><td>1,96</td><td>0,65</td><td>-0,02</td><td>1,35</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>150</td><td>EXP01</td><td>EXP02</td><td>740</td><td>1,95</td><td>1,96</td><td>-0,05</td><td>-0,67</td><td>0,68</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>200</td><td>CTL</td><td>EXP01</td><td>740</td><td>1,92</td><td>1,81</td><td>0,43</td><td>0,20</td><td>0,65</td><td>EXP01</td></tr><tr><td>2022</td><td>LPI</td><td>200</td><td>CTL</td><td>EXP02</td><td>740</td><td>1,92</td><td>1,91</td><td>0,03</td><td>-0,47</td><td>0,51</td><td>sem diferença detectável</td></tr><tr><td>2022</td><td>LPI</td><td>200</td><td>EXP01</td><td>EXP02</td><td>740</td><td>1,81</td><td>1,91</td><td>-0,39</td><td>-0,83</td><td>0,04</td><td>sem diferença detectável</td></tr></tbody></table></div>
+    
+    <ul class="table-notes">
+      <li>Valor positivo de MSE(A) − MSE(B) significa que B errou menos; negativo, que A errou menos.</li><li>“Sem diferença detectável” significa que o intervalo cruza zero — é um resultado válido, não uma falha do teste.</li><li>O pareamento nos mesmos horários cancela a variabilidade sinótica compartilhada e é muito mais sensível que comparar dois RMSE isolados.</li><li>A comparação EXP01 × EXP02 é o efeito incremental do tratamento de fronteira, com a atualização de SST já ligada nos dois.</li>
+    </ul>
+    
+  </div>
+
+      
+  
+  <div class="gallery">
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/mechanisms/sst_forcing_2021.png"
+              data-title="SST efetivamente vista pelo modelo" aria-label="Ampliar figura: SST efetivamente vista pelo modelo">
+        <img src="assets/mechanisms/sst_forcing_2021.png" loading="lazy" alt="SST efetivamente vista pelo modelo">
+      </button>
+      
+      <figcaption><strong>SST efetivamente vista pelo modelo</strong>SST no primeiro horário da janela de 2021. As células oceânicas muito frias junto à costa são valores de preenchimento terrestre da OISST e constituem um problema de integridade.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/mechanisms/attribution_2021_P0.png"
+              data-title="Cadeia física da resposta em P0" aria-label="Ampliar figura: Cadeia física da resposta em P0">
+        <img src="assets/mechanisms/attribution_2021_P0.png" loading="lazy" alt="Cadeia física da resposta em P0">
+      </button>
+      
+      <figcaption><strong>Cadeia física da resposta em P0</strong>Diagnóstico conjunto de SST, fluxos de superfície, camada limite e vento para verificar se a mudança de desempenho segue o mecanismo físico esperado.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/mechanisms/attribution_2022_LPI.png"
+              data-title="Cadeia física da resposta em LPI" aria-label="Ampliar figura: Cadeia física da resposta em LPI">
+        <img src="assets/mechanisms/attribution_2022_LPI.png" loading="lazy" alt="Cadeia física da resposta em LPI">
+      </button>
+      
+      <figcaption><strong>Cadeia física da resposta em LPI</strong>Mesmo diagnóstico para o segundo sítio/período; permite distinguir uma melhora estatística de uma resposta fisicamente coerente.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/mechanisms/boundary_influence_2021.png"
+              data-title="Influência da distância à fronteira" aria-label="Ampliar figura: Influência da distância à fronteira">
+        <img src="assets/mechanisms/boundary_influence_2021.png" loading="lazy" alt="Influência da distância à fronteira">
+      </button>
+      
+      <figcaption><strong>Influência da distância à fronteira</strong>Magnitude da diferença EXP02 − EXP01 em função da distância da zona de relaxação do EXP01. Organização espacial reforça que o tratamento de fronteira está atuando.</figcaption>
+    </figure>
+    
+    <figure>
+      
+      <button class="figure-zoom" type="button" data-full="assets/mechanisms/ranking.png"
+              data-title="Síntese comparativa dos experimentos" aria-label="Ampliar figura: Síntese comparativa dos experimentos">
+        <img src="assets/mechanisms/ranking.png" loading="lazy" alt="Síntese comparativa dos experimentos">
+      </button>
+      
+      <figcaption><strong>Síntese comparativa dos experimentos</strong>Ranking multicritério nas horas comuns das janelas completas. A comparação numérica está consolidada para estas simulações, mas o problema da OISST impede atribuir as diferenças somente à SST ou ao tratamento de fronteira e bloqueia uma recomendação definitiva.</figcaption>
+    </figure>
+    
+  </div>
+  
+
+    </section>
+
+    <section id="conclusoes">
+      <h2>8. Conclusões e próximos passos</h2>
+      <div class="banner">
+        <strong>Recomendação.</strong> Para as rodadas climatológicas, adotar a
+        configuração <strong>EXP01</strong>: atualização diária de SST
+        NOAA OISST v2.1 com o preenchimento costeiro corrigido, sobre a malha
+        não bufferizada de 76.813 células. Ela supera o CTL em todas as 8
+        comparações sítio–período–altura e não é distinguível do
+        EXP02 em nenhuma delas, custando 24 % menos células.
+      </div>
+
+      <h3>O que os resultados permitem afirmar</h3>
+      <ul class="plain-list">
+        <li>As três integrações estão completas nos dois períodos, sem lacunas horárias na janela científica pós-spin-up, e cada arquivo foi aberto e lido na auditoria de integridade.</li>
+        <li><strong>A atualização diária de SST melhora o vento em altura de rotor, uma vez que a forçante é sadia.</strong> EXP01 tem erro quadrático médio pareado menor que o CTL em 8 de 8 comparações — todas as alturas, nos dois sítios e nos dois períodos. O viés a 100 m cai de −1,24 para −0,95 m s⁻¹ em P0 e de −0,96 para −0,55 m s⁻¹ em LPI; o viés de densidade de potência eólica melhora de −36,9 % para −30,0 % e de −21,4 % para −13,5 %.</li>
+        <li>Essa conclusão <strong>inverte</strong> a leitura obtida antes da correção da SST, quando o CTL aparecia como a única escolha defensável: o defeito de pré-processamento resfriava artificialmente o mar costeiro, estabilizava a camada superficial e enfraquecia o vento justamente nas alturas avaliadas, mascarando o ganho real. Ver <a href="sst-fix-comparison/index.html">comparação antigo × corrigido</a>.</li>
+        <li><strong>O tratamento de fronteira não se paga nos sítios.</strong> EXP02 não se distingue estatisticamente do EXP01 em nenhuma das 8 comparações, apesar de custar 24 % mais células e cerca de 18 % mais tempo de parede com o mesmo número de ranks.</li>
+        <li>Ainda assim, o tratamento de fronteira <strong>atua como projetado</strong>: a diferença média absoluta no vento de 100 m decai monotonicamente com a distância à zona de relaxação do EXP01, de 0,26 m s⁻¹ a menos de 50 km para 0,11 m s⁻¹ entre 300 e 500 km. O efeito é real; os instrumentos é que não estão onde ele importa.</li>
+        <li><strong>O downscaling passa a adicionar skill sobre o ERA5 nos dois sítios.</strong> Escore de Murphy a 100 m, com intervalo de bootstrap em blocos de 95 %: em P0, CTL +0,24 [0,11; 0,39], EXP01 +0,34 [0,22; 0,50], EXP02 +0,40 [0,26; 0,61]; em LPI, CTL +0,12 [−0,02; 0,27] (não significativo), EXP01 +0,30 [0,16; 0,44], EXP02 +0,33 [0,21; 0,47]. Antes da correção, apenas P0 apresentava ganho significativo.</li>
+        <li>INMET e LiDAR trazem diagnósticos complementares e não são agrupados: o primeiro avalia a circulação costeira terrestre a 10 m; o segundo avalia o recurso offshore em alturas de rotor.</li>
+        <li>O custo normalizado permite comparar execuções com números diferentes de ranks. EXP01 e EXP02 rodaram em 90 ranks; execuções anteriores da mesma malha em 60 ranks custaram 2,54 horas-máquina por hora simulada contra 3,22 em 90. <strong>90 ranks sobre-decompõem esta malha</strong> — as rodadas climatológicas devem usar 60.</li>
+      </ul>
+
+      <h3>O que ainda não é possível concluir</h3>
+      <ul class="plain-list">
+        <li>A avaliação cobre <strong>um mês por sítio</strong>, e novembro de 2021 foi o novembro mais fraco dos 31 anos da série ERA5 em P0 (percentil 0, z = −2,46). O ranking vale para essas condições; outubro de 2022 em LPI, por outro lado, foi quase exatamente típico.</li>
+        <li>Persiste um <strong>viés baixo de vento</strong> em todos os sítios bem expostos (−0,5 a −1,1 m s⁻¹ nos LiDARes após a correção). Ele não é artefato da SST e segue sem explicação: os candidatos são a rugosidade sobre o mar, a profundidade de mistura da camada limite e o próprio forçamento ERA5, que carrega o mesmo sinal.</li>
+        <li>O eixo INMET é dominado por representatividade — mastros abrigados contra uma célula de ~5 km — e por isso seu viés absoluto não discrimina configurações. Vale pela fase e pela estrutura ao longo da costa, não pela magnitude.</li>
+        <li>O erro de fase diurna em P0 não é interpretável célula a célula: o ciclo observado é <strong>duplo-pico</strong> (08 e 22 h local), de modo que a métrica baseada no máximo salta entre +4 h e −10 h entre alturas vizinhas. A amplitude é o indicador confiável nesse sítio.</li>
+        <li>O valor do tratamento de fronteira <strong>perto da própria fronteira</strong> não foi medido contra observações, apenas contra o outro experimento. Se a região próxima ao contorno fizer parte do produto, a decisão muda.</li>
+      </ul>
+
+      <h3>Próximas ações</h3>
+      <ol class="plain-list">
+        <li>Adotar EXP01 como configuração das rodadas climatológicas e registrar a decisão com os números desta seção.</li>
+        <li>Submeter a correção do conversor da OISST ao repositório de origem (<code>usp-utils</code>, em CGFD-USP/MPAS-Research), para que o defeito deixe de atingir outros usuários. A correção está implementada e testada no ramo <code>fix/oisst-coastal-land-fill</code>, mas ainda não foi enviada: o <code>develop</code> segue escrevendo a constante de 273,15 K sobre o continente.</li>
+        <li>Investigar o viés baixo residual com os diagnósticos já extraídos nos sítios (<code>ust</code>, <code>znt</code>, <code>zol</code>), separando rugosidade, mistura e forçamento lateral.</li>
+        <li>Acrescentar um segundo mês, de condições típicas, em P0 — a avaliação atual nesse sítio repousa sobre um extremo climatológico.</li>
+        <li>Avaliar se o próximo experimento de fronteira deve usar uma malha de contorno suave (elíptica), eliminando as quinas do polígono atual, antes de decidir se o tratamento de fronteira volta à pauta.</li>
+      </ol>
+    </section>
+
+    <section id="limitacoes">
+      <h2>9. Limitações e defeitos conhecidos</h2>
+      <p class="lead">Registro honesto do que, nesta análise, não deve ser lido
+         literalmente. Está no fim de propósito: nada aqui invalida as
+         conclusões da seção 8, mas cada item muda como um número específico
+         pode ser citado.</p>
+
+      <h3>9.1 Números que não devem ser comparados diretamente</h3>
+      <ul class="plain-list">
+        <li><strong>Custo com origem “estimado”.</strong> Quando o wrapper de
+          execução não registrou o tempo, ele é reconstruído de carimbos de
+          arquivo — e a reconstrução divide o tempo de parede da integração
+          inteira pelas horas da <em>janela de análise</em> (744 ou 720 h em vez
+          de 984 h), inflando o resultado em cerca de 32 %. Isso afeta a perna de
+          2022 do EXP02 e as duas do CTL. Compare linhas “medido” com “medido”;
+          as “estimadas” servem para ordem de grandeza.</li>
+        <li><strong>Erro de fase diurna em P0.</strong> O ciclo observado ali tem
+          <em>dois</em> máximos (cerca de 08 h e 22 h locais), então a métrica
+          baseada no horário do máximo é instável: ela salta entre +4 h e −10 h
+          entre alturas vizinhas sem que o escoamento mude de forma
+          correspondente. Em P0, use a amplitude diurna, não a fase. Em LPI e nas
+          estações de superfície a fase é bem definida.</li>
+        <li><strong>Viés absoluto nas estações INMET.</strong> Os mastros
+          automáticos medem 3,2 m s⁻¹ médios contra 6,5 m s⁻¹ nos aeroportos da
+          mesma região e dos mesmos meses. Uma diferença de fator dois entre duas
+          redes que medem o mesmo vento é abrigo e exposição, que uma célula de
+          ~5 km não representa. Esse eixo vale pela fase e pela estrutura ao
+          longo da costa, não pela magnitude do viés.</li>
+      </ul>
+
+      <h3>9.2 Resultados sem explicação</h3>
+      <ul class="plain-list">
+        <li><strong>Viés baixo de vento em todo sítio bem exposto</strong>, de
+          −0,5 a −1,1 m s⁻¹ nos LiDARes mesmo após a correção da SST, e com o
+          mesmo sinal no próprio ERA5 que fornece as fronteiras. Não é artefato
+          de superfície do mar. É o erro mais consequente para avaliação de
+          recurso, porque −20 % em densidade de potência é −20 % em energia, e
+          continua em aberto.</li>
+        <li><strong>Duas células oceânicas do CTL em 2022 a 293,5 K.</strong>
+          Não é o defeito da OISST — o CTL nem lê o arquivo de atualização de
+          SST —, e sim um artefato costeiro da temperatura de superfície do ERA5
+          congelada no instante inicial. São 2 células entre 41.025 e não afetam
+          os sítios, mas o verificador as sinaliza e a causa é outra.</li>
+      </ul>
+
+      <h3>9.3 Pontos de atenção operacionais</h3>
+      <ul class="plain-list">
+        <li><strong>90 ranks sobre-decompõem esta malha.</strong> Medido lado a
+          lado na mesma malha e mesmos períodos: 3,22 horas-máquina por hora
+          simulada em 90 ranks contra 2,54 em 60. Aumentar 1,5× os ranks rendeu
+          1,18× de velocidade. As rodadas climatológicas devem usar 60.</li>
+        <li><strong>As animações não acompanham a versão em repositório</strong>
+          (67 dos 91 MB do pacote). São regeneradas pelo estágio 05.</li>
+        <li><strong>O verificador de SST continua auditando as execuções
+          superadas</strong> e relatando a contaminação delas, mas não falha por
+          isso: estão marcadas com <code>sst_forcing_known_bad</code>. Só uma
+          contaminação nova interrompe o pipeline.</li>
+      </ul>
+
+      <h3>9.4 Defeitos encontrados e corrigidos nesta revisão</h3>
+      <p class="topic-intro">Registrados porque eram silenciosos — nenhum deles
+         produzia erro, todos produziam resultado errado ou incompleto.</p>
+      <ul class="plain-list">
+        <li>A lista fixa de experimentos usada pelas figuras não incluía as
+          execuções corrigidas, que eram <strong>silenciosamente omitidas de
+          todos os gráficos</strong>, sem aviso.</li>
+        <li>O destaque de “melhor valor” nas tabelas disputava apenas entre as
+          execuções antigas, de modo que o relatório teria recomendado em negrito
+          um resultado produzido pelo defeito.</li>
+        <li>As duas execuções corrigidas foram lançadas por um mesmo log de
+          sequência, e ambas usam os mesmos nomes de período. Sem delimitar a
+          seção de cada experimento, o EXP02 recebia o tempo de parede do EXP01
+          (126.874 s em vez de 149.116 s).</li>
+        <li>Uma perna concluída cujo wrapper morreu antes de registrar o
+          encerramento era classificada como “em execução”, acumulando como custo
+          todo o tempo desde o último sinal de vida.</li>
+        <li>As tabelas <code>_fullwindow</code> continuavam versionadas com
+          resultados anteriores à correção, sob os mesmos nomes de experimento,
+          e já não eram regeradas pelo pipeline. Foram removidas.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<div class="lightbox" id="figure-lightbox" hidden role="dialog" aria-modal="true"
+     aria-label="Figura ampliada">
+  <div class="lightbox-dialog">
+    <button class="lightbox-close" type="button" aria-label="Fechar figura">×</button>
+    <img id="lightbox-image" alt="">
+    <p class="lightbox-caption"><strong id="lightbox-title"></strong> ·
+      <a id="lightbox-new-tab" href="#" target="_blank" rel="noopener">abrir a imagem em nova guia</a>
+    </p>
+  </div>
+</div>
+
+<footer>
+  Relatório gerado por <code>scripts/06_report/build_technical_report.py</code>.
+  Consulte <code>report_manifest.json</code> para a proveniência de tabelas,
+  figuras e animações.
+</footer>
+<script>
+  (() => {
+    const lightbox = document.getElementById('figure-lightbox');
+    const image = document.getElementById('lightbox-image');
+    const title = document.getElementById('lightbox-title');
+    const newTab = document.getElementById('lightbox-new-tab');
+    const closeButton = lightbox.querySelector('.lightbox-close');
+    let lastTrigger = null;
+
+    function closeLightbox() {
+      lightbox.hidden = true;
+      image.removeAttribute('src');
+      document.body.classList.remove('lightbox-open');
+      if (lastTrigger) lastTrigger.focus();
+    }
+
+    document.querySelectorAll('.figure-zoom').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        lastTrigger = trigger;
+        image.src = trigger.dataset.full;
+        image.alt = trigger.dataset.title;
+        title.textContent = trigger.dataset.title;
+        newTab.href = trigger.dataset.full;
+        lightbox.hidden = false;
+        document.body.classList.add('lightbox-open');
+        closeButton.focus();
+      });
+    });
+    closeButton.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (event) => {
+      if (event.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !lightbox.hidden) closeLightbox();
+    });
+  })();
+</script>
+</body>
+</html>

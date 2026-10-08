@@ -1,0 +1,204 @@
+{
+  "created_utc": "2026-10-07T22:12:55.329323+00:00",
+  "runs_root": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km",
+  "method": "Hourly filename sequence; complete netCDF4 open plus SST value read; scientific-window count; MPAS terminal/error markers. Preserved restart outputs are used only to reconstruct the logical sequence and are not moved.",
+  "all_valid": true,
+  "legs": [
+    {
+      "experiment": "EXP01",
+      "period": "2021",
+      "run_dir": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP01/20211101_20211201",
+      "active_history_count": 985,
+      "expected_full_count": 985,
+      "active_missing_timestamps": [],
+      "recovered_from_preserved_archive": {},
+      "logical_full_count": 985,
+      "logical_missing_timestamps": [],
+      "extra_timestamps": [],
+      "scientific_window_count": 721,
+      "expected_scientific_count": 721,
+      "first_timestamp": "2021-10-21T00:00:00",
+      "last_timestamp": "2021-12-01T00:00:00",
+      "netcdf": {
+        "files_checked": 985,
+        "all_opened": true,
+        "failures": [],
+        "reference_dimensions": {
+          "nCells": 76813,
+          "nVertLevels": 55
+        }
+      },
+      "logs": {
+        "files": [
+          {
+            "file": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP01/20211101_20211201/log.atmosphere.0000.out",
+            "finished_marker": true,
+            "error_messages_zero": true,
+            "critical_error_messages_zero": true,
+            "critical_lines": [],
+            "size_bytes": 67565829
+          },
+          {
+            "file": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP01/20211101_20211201/mpas.out",
+            "finished_marker": false,
+            "error_messages_zero": false,
+            "critical_error_messages_zero": false,
+            "critical_lines": [],
+            "size_bytes": 8640
+          }
+        ],
+        "authoritative_log": "log.atmosphere.0000.out",
+        "all_clean": true
+      },
+      "valid": true
+    },
+    {
+      "experiment": "EXP01",
+      "period": "2022",
+      "run_dir": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP01/20221001_20221101",
+      "active_history_count": 985,
+      "expected_full_count": 985,
+      "active_missing_timestamps": [],
+      "recovered_from_preserved_archive": {},
+      "logical_full_count": 985,
+      "logical_missing_timestamps": [],
+      "extra_timestamps": [],
+      "scientific_window_count": 745,
+      "expected_scientific_count": 745,
+      "first_timestamp": "2022-09-21T00:00:00",
+      "last_timestamp": "2022-11-01T00:00:00",
+      "netcdf": {
+        "files_checked": 985,
+        "all_opened": true,
+        "failures": [],
+        "reference_dimensions": {
+          "nCells": 76813,
+          "nVertLevels": 55
+        }
+      },
+      "logs": {
+        "files": [
+          {
+            "file": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP01/20221001_20221101/log.atmosphere.0000.out",
+            "finished_marker": true,
+            "error_messages_zero": true,
+            "critical_error_messages_zero": true,
+            "critical_lines": [],
+            "size_bytes": 67631321
+          },
+          {
+            "file": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP01/20221001_20221101/mpas.out",
+            "finished_marker": false,
+            "error_messages_zero": false,
+            "critical_error_messages_zero": false,
+            "critical_lines": [],
+            "size_bytes": 8640
+          }
+        ],
+        "authoritative_log": "log.atmosphere.0000.out",
+        "all_clean": true
+      },
+      "valid": true
+    },
+    {
+      "experiment": "EXP02",
+      "period": "2021",
+      "run_dir": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP02/20211101_20211201",
+      "active_history_count": 984,
+      "expected_full_count": 985,
+      "active_missing_timestamps": [
+        "2021-10-25T00:00:00"
+      ],
+      "recovered_from_preserved_archive": {
+        "2021-10-25T00:00:00": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP02/20211101_20211201/interrupted_20260909_after_restart/history.2021-10-25_00.00.00.nc"
+      },
+      "logical_full_count": 985,
+      "logical_missing_timestamps": [],
+      "extra_timestamps": [],
+      "scientific_window_count": 721,
+      "expected_scientific_count": 721,
+      "first_timestamp": "2021-10-21T00:00:00",
+      "last_timestamp": "2021-12-01T00:00:00",
+      "netcdf": {
+        "files_checked": 985,
+        "all_opened": true,
+        "failures": [],
+        "reference_dimensions": {
+          "nCells": 95138,
+          "nVertLevels": 55
+        }
+      },
+      "logs": {
+        "files": [
+          {
+            "file": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP02/20211101_20211201/log.atmosphere.0000.out",
+            "finished_marker": true,
+            "error_messages_zero": true,
+            "critical_error_messages_zero": true,
+            "critical_lines": [],
+            "size_bytes": 60947826
+          },
+          {
+            "file": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP02/20211101_20211201/mpas.out",
+            "finished_marker": false,
+            "error_messages_zero": false,
+            "critical_error_messages_zero": false,
+            "critical_lines": [],
+            "size_bytes": 8640
+          }
+        ],
+        "authoritative_log": "log.atmosphere.0000.out",
+        "all_clean": true
+      },
+      "valid": true
+    },
+    {
+      "experiment": "EXP02",
+      "period": "2022",
+      "run_dir": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP02/20221001_20221101",
+      "active_history_count": 985,
+      "expected_full_count": 985,
+      "active_missing_timestamps": [],
+      "recovered_from_preserved_archive": {},
+      "logical_full_count": 985,
+      "logical_missing_timestamps": [],
+      "extra_timestamps": [],
+      "scientific_window_count": 745,
+      "expected_scientific_count": 745,
+      "first_timestamp": "2022-09-21T00:00:00",
+      "last_timestamp": "2022-11-01T00:00:00",
+      "netcdf": {
+        "files_checked": 985,
+        "all_opened": true,
+        "failures": [],
+        "reference_dimensions": {
+          "nCells": 95138,
+          "nVertLevels": 55
+        }
+      },
+      "logs": {
+        "files": [
+          {
+            "file": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP02/20221001_20221101/log.atmosphere.0000.out",
+            "finished_marker": true,
+            "error_messages_zero": true,
+            "critical_error_messages_zero": true,
+            "critical_lines": [],
+            "size_bytes": 67545523
+          },
+          {
+            "file": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/EXP02/20221001_20221101/mpas.out",
+            "finished_marker": false,
+            "error_messages_zero": false,
+            "critical_error_messages_zero": false,
+            "critical_lines": [],
+            "size_bytes": 8640
+          }
+        ],
+        "authoritative_log": "log.atmosphere.0000.out",
+        "all_clean": true
+      },
+      "valid": true
+    }
+  ]
+}
