@@ -23,14 +23,16 @@ EXPERIMENT_COLORS = {
     "ERA5":         "#7F7F7F",   # light grey, dashed where lines are drawn
     "OBS":          "#000000",
 }
-# Each superseded run sits next to the one that replaced it, so a figure reads
-# as pairs rather than as five unrelated lines.
-EXPERIMENT_ORDER = ["CTL", "EXP01", "EXP01_BADSST", "EXP02", "EXP02_BADSST"]
+# Every figure script iterates this list, so it decides what appears in a plot.
+# It holds the current runs only: the superseded _BADSST pair was a
+# preprocessing defect that propagated, not a result, and it belongs in the
+# dedicated before/after comparison (results/report/sst-fix-comparison/) rather
+# than in any figure a reader might mistake for a finding.
+EXPERIMENT_ORDER = ["CTL", "EXP01", "EXP02"]
 
-# The decision-grade set: the baseline plus the two current runs. Figures and
-# tables that answer "which configuration wins" should use this, not the full
-# list, which exists to document the contamination.
-EXPERIMENT_ORDER_CURRENT = ["CTL", "EXP01", "EXP02"]
+# The full registry, for the few places that must still reach the superseded
+# runs: the SST integrity gate and the before/after audit.
+EXPERIMENT_ORDER_ALL = ["CTL", "EXP01", "EXP01_BADSST", "EXP02", "EXP02_BADSST"]
 
 SITE_MARKERS = {"P0": "o", "LPI": "s"}
 

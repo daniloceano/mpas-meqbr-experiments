@@ -151,7 +151,12 @@ def main() -> int:
                 row[f"sst_at_{key}_K"] = float(field[m.index])
                 row[f"dist_to_land_at_{key}_km"] = float(dist[m.index])
             rows.append(row)
-            panels[exp] = (lat, lon, field, landmask, dist, row["n_at_land_fill"])
+            # The superseded runs are audited into the table and the exit code,
+            # but never drawn: their contamination is documented once, in the
+            # dedicated before/after comparison, not in this report's figures.
+            if not cfg.experiments[exp].get("sst_forcing_known_bad"):
+                panels[exp] = (lat, lon, field, landmask, dist,
+                               row["n_at_land_fill"])
             if n_fill > 0:
                 # A run registered with sst_forcing_known_bad is the documented
                 # evidence for this very finding, so its contamination is a fact

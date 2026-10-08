@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-08T12:24:30+00:00",
-  "analysis_commit": "5a2956e",
+  "generated_utc": "2026-10-08T12:52:53+00:00",
+  "analysis_commit": "6e3fd08",
   "working_tree_dirty": true,
   "provisional": false,
   "tables": [
@@ -166,103 +166,103 @@
     {
       "source": "figures/validation/distribution_2021_P0_100m.png",
       "bundled_as": "assets/observed_data/distribution_2021_P0_100m.png",
-      "bytes": 190708,
+      "bytes": 158204,
       "title": "Distribuição observada em P0 a 100 m"
     },
     {
       "source": "figures/validation/distribution_2022_LPI_100m.png",
       "bundled_as": "assets/observed_data/distribution_2022_LPI_100m.png",
-      "bytes": 200139,
+      "bytes": 170566,
       "title": "Distribuição observada em LPI a 100 m"
     },
     {
       "source": "figures/validation/windrose_2021_P0_100m.png",
       "bundled_as": "assets/observed_data/windrose_2021_P0_100m.png",
-      "bytes": 451232,
+      "bytes": 303448,
       "title": "Regime direcional em P0"
     },
     {
       "source": "figures/validation/windrose_2022_LPI_100m.png",
       "bundled_as": "assets/observed_data/windrose_2022_LPI_100m.png",
-      "bytes": 495080,
+      "bytes": 355444,
       "title": "Regime direcional em LPI"
     },
     {
       "source": "figures/validation/inmet_map.png",
       "bundled_as": "assets/inmet_validation/inmet_map.png",
-      "bytes": 177680,
+      "bytes": 80402,
       "title": "Viés do vento de superfície por estação"
     },
     {
       "source": "figures/validation/inmet_diurnal.png",
       "bundled_as": "assets/inmet_validation/inmet_diurnal.png",
-      "bytes": 396276,
+      "bytes": 333767,
       "title": "Ciclo diurno nas estações INMET"
     },
     {
       "source": "figures/validation/profile_2021_P0.png",
       "bundled_as": "assets/lidar_validation/profile_2021_P0.png",
-      "bytes": 235162,
+      "bytes": 187198,
       "title": "Perfil vertical médio em P0"
     },
     {
       "source": "figures/validation/profile_2022_LPI.png",
       "bundled_as": "assets/lidar_validation/profile_2022_LPI.png",
-      "bytes": 243387,
+      "bytes": 192383,
       "title": "Perfil vertical médio em LPI"
     },
     {
       "source": "figures/validation/diurnal_2021_P0.png",
       "bundled_as": "assets/lidar_validation/diurnal_2021_P0.png",
-      "bytes": 278956,
+      "bytes": 213186,
       "title": "Ciclo diurno do vento em P0"
     },
     {
       "source": "figures/validation/diurnal_2022_LPI.png",
       "bundled_as": "assets/lidar_validation/diurnal_2022_LPI.png",
-      "bytes": 302129,
+      "bytes": 255840,
       "title": "Ciclo diurno do vento em LPI"
     },
     {
       "source": "figures/validation/timeseries_2021_P0_100m.png",
       "bundled_as": "assets/lidar_validation/timeseries_2021_P0_100m.png",
-      "bytes": 475789,
+      "bytes": 378740,
       "title": "Evolução horária em P0 a 100 m"
     },
     {
       "source": "figures/validation/timeseries_2022_LPI_100m.png",
       "bundled_as": "assets/lidar_validation/timeseries_2022_LPI_100m.png",
-      "bytes": 598118,
+      "bytes": 524129,
       "title": "Evolução horária em LPI a 100 m"
     },
     {
       "source": "figures/validation/scatter_2021_P0_100m.png",
       "bundled_as": "assets/lidar_validation/scatter_2021_P0_100m.png",
-      "bytes": 460670,
+      "bytes": 312476,
       "title": "Dispersão modelo–observação em P0"
     },
     {
       "source": "figures/validation/scatter_2022_LPI_100m.png",
       "bundled_as": "assets/lidar_validation/scatter_2022_LPI_100m.png",
-      "bytes": 592136,
+      "bytes": 398526,
       "title": "Dispersão modelo–observação em LPI"
     },
     {
       "source": "figures/validation/taylor_2021_P0.png",
       "bundled_as": "assets/lidar_validation/taylor_2021_P0.png",
-      "bytes": 189464,
+      "bytes": 180681,
       "title": "Síntese estatística em P0"
     },
     {
       "source": "figures/validation/taylor_2022_LPI.png",
       "bundled_as": "assets/lidar_validation/taylor_2022_LPI.png",
-      "bytes": 188481,
+      "bytes": 180678,
       "title": "Síntese estatística em LPI"
     },
     {
       "source": "figures/validation/cell_sensitivity.png",
       "bundled_as": "assets/lidar_validation/cell_sensitivity.png",
-      "bytes": 174436,
+      "bytes": 128441,
       "title": "Sensibilidade à célula escolhida"
     },
     {
@@ -274,7 +274,7 @@
     {
       "source": "figures/era5/added_value.png",
       "bundled_as": "assets/added_value/added_value.png",
-      "bytes": 107954,
+      "bytes": 100357,
       "title": "Ganho ou perda de habilidade frente ao ERA5"
     },
     {
@@ -292,19 +292,19 @@
     {
       "source": "figures/selection/sst_forcing_2021.png",
       "bundled_as": "assets/mechanisms/sst_forcing_2021.png",
-      "bytes": 577547,
+      "bytes": 360241,
       "title": "SST efetivamente vista pelo modelo"
     },
     {
       "source": "figures/selection/attribution_2021_P0.png",
       "bundled_as": "assets/mechanisms/attribution_2021_P0.png",
-      "bytes": 821752,
+      "bytes": 556417,
       "title": "Cadeia física da resposta em P0"
     },
     {
       "source": "figures/selection/attribution_2022_LPI.png",
       "bundled_as": "assets/mechanisms/attribution_2022_LPI.png",
-      "bytes": 912901,
+      "bytes": 590280,
       "title": "Cadeia física da resposta em LPI"
     },
     {
@@ -316,7 +316,7 @@
     {
       "source": "figures/selection/ranking.png",
       "bundled_as": "assets/mechanisms/ranking.png",
-      "bytes": 138289,
+      "bytes": 111046,
       "title": "Síntese comparativa dos experimentos"
     }
   ],

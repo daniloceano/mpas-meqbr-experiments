@@ -312,7 +312,7 @@ MEDIA_SPECS = [
           "Distribuição do espaçamento horizontal da malha quase uniforme usada no controle; no mapa turbo invertido, vermelho indica menor espaçamento. Pontos escuros mostram a relaxação lateral, círculos/quadrados os LiDARs e triângulos as estações INMET."),
     media("design", "figures/report/experimental_design_exp01_sst.png",
           "EXP01: mudança da condição de superfície",
-          "Diagnóstico da anomalia corrigida: diferença da SST média EXP01 − CTL em novembro de 2021. Tons azuis indicam SST mais fria no EXP01, e a faixa costeira extrema é o valor de preenchimento terrestre da OISST entrando em células oceânicas. Em EXP01 essa faixa desaparece: nenhuma célula oceânica fica abaixo de 296 K. Círculo/quadrado mostram P0/LPI e triângulos mostram as estações INMET."),
+          "Diferença da SST média EXP01 − CTL em novembro de 2021, ou seja, o efeito da troca da temperatura de superfície congelada do ERA5 pela atualização diária da OISST. Tons quentes indicam mar mais quente no EXP01. Nenhuma célula oceânica fica abaixo de 296 K. Círculo/quadrado mostram P0/LPI e triângulos mostram as estações INMET."),
     media("design", "figures/report/experimental_design_exp02_mesh.png",
           "EXP02: tratamento da fronteira",
           "Malha com aproximadamente 5 km no interior e transição gradual para 32 km junto à fronteira; vermelho indica menor espaçamento. A zona de relaxação escura fica mais distante dos LiDARs e das estações INMET."),
