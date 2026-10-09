@@ -1,0 +1,56 @@
+{
+  "generated_utc": "2026-10-09T17:55:43+00:00",
+  "analysis_branch": "codex/meq-02a-oval-atlas",
+  "analysis_commit_base": "6fef1bbf230bc372928380e39a2ecbef04be5f81",
+  "working_tree_dirty": true,
+  "builder": "scripts/06_report/build_mesh_comparison.py",
+  "data_preparer": "scripts/06_report/prepare_mesh_comparison_data.py",
+  "context_enricher": "scripts/06_report/enrich_mesh_comparison_context.py",
+  "data_asset": "results/report/mesh-comparison/assets/mesh_data.json",
+  "data_sha256": "b1083442be209acc53cacdb6c246a39bf94d7a10eefcba89a9b95263b973ceb5",
+  "html_sha256": "48f51b365462950556ae402629eb8cc0148755138f349227ba801c17eb1a2cb1",
+  "preview": "results/report/mesh-comparison/preview.png",
+  "preview_sha256": "2079cc570e49d09ea81dc75c75b155eb8932e11fb48228c6415ce8ceda795292",
+  "mesh_hashes": {
+    "ctl": "0d2242b369c5361c9c9319fdc5d3a366910c4e8307e096396853799c56e0ccfa",
+    "exp02": "e618a45e058936c14e0b5058d61afe8a1bb4708d5e116c265d0ee8020e85aa74",
+    "oval": "ac3e6988dbd7b1d7fff30689393cc7e06e0652ce8e8aea5edd6099222338e271"
+  },
+  "generator_commit": "1acf96d9830916f6d18fd67d4e27aec24f741ab7",
+  "cartographic_context": {
+    "dataset": "Natural Earth",
+    "scale": "1:10m",
+    "license": "public domain",
+    "coastline_source": "/home/danilocs/.local/share/cartopy/shapefiles/natural_earth/physical/ne_10m_coastline.shp",
+    "country_boundaries_source": "/home/danilocs/.local/share/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_boundary_lines_land.shp",
+    "state_boundaries_source": "/home/danilocs/.local/share/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_1_states_provinces_lines.shp",
+    "browser_simplification": "recorte ao enquadramento original e simplificação de aproximadamente 1–2 km em coordenadas geográficas",
+    "source_hashes": {
+      "coastline": {
+        "ne_10m_coastline.shp": "459a4a97c09db19aadf5244026612de9d43748be27f83a360242b99f7fabb3c1",
+        "ne_10m_coastline.shx": "f873afee7f56779ce52253f740ec251c2f12244aea911dc40f0a85d75de8d5f2",
+        "ne_10m_coastline.dbf": "9ccc214342fe400bf8c7d91d7a5b276b0457b0ada03e8d4be16ac5ba13037f3b",
+        "ne_10m_coastline.prj": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+        "ne_10m_coastline.cpg": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"
+      },
+      "country_boundaries": {
+        "ne_10m_admin_0_boundary_lines_land.shp": "b6811b9e2f6ed40b31622e6d261210c5e6afded9b7ad71977d3658293f56373f",
+        "ne_10m_admin_0_boundary_lines_land.shx": "e4128caba567cd9e0b11f3a2a0f0b18dfc8f0bb3cd03f2535f750887d6b86fe5",
+        "ne_10m_admin_0_boundary_lines_land.dbf": "103d9b00b684b0380d8ded830d24a1406ed28cbb6c1f4dc3df21c50cac615403",
+        "ne_10m_admin_0_boundary_lines_land.prj": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+        "ne_10m_admin_0_boundary_lines_land.cpg": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"
+      },
+      "state_boundaries": {
+        "ne_10m_admin_1_states_provinces_lines.shp": "c89b8545fdb03a764df9de2efeadf0d6735169d94b48a315b5e233780e073ab5",
+        "ne_10m_admin_1_states_provinces_lines.shx": "ba65a7072e06b5454bca8c0a527978333571f3ce45094f006a60f18f8509db10",
+        "ne_10m_admin_1_states_provinces_lines.dbf": "b524fd1baf59386cd4bca0d6df642ddb02be9cdc4d69f1f1d109885acf21d9ed",
+        "ne_10m_admin_1_states_provinces_lines.prj": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+        "ne_10m_admin_1_states_provinces_lines.cpg": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824"
+      }
+    }
+  },
+  "notes": [
+    "Only CTL/EXP01, EXP02 and the MEQ-02A Oval are displayed.",
+    "All percentages and mesh counts are measured; prior Oval percentages are retained only as validation references."
+  ]
+}
