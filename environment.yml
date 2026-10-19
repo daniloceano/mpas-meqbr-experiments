@@ -23,6 +23,9 @@ dependencies:
   - xarray >=2023.6
   - netcdf4 >=1.6            # the reader used for all MPAS history access
   - scipy >=1.10             # KD-trees, Weibull MLE, .mat reading, KDE
+  - shapely >=2.0            # exact MPAS domain intersections and destination masks
+  - pyproj >=3.6             # equal-area grids and coastal-distance projections
+  - pyogrio >=0.10           # robust polygon reads for geometric diagnostics
   - matplotlib >=3.7
   - cartopy >=0.22           # coastlines on the native-mesh maps
   - pyyaml >=6.0

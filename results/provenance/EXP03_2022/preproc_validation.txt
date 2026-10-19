@@ -1,0 +1,18 @@
+init_dimensions {'nVertLevels': 55, 'nCells': 102968, 'Time': 1, 'StrLen': 64, 'nEdges': 309246, 'nVertices': 206279, 'TWO': 2, 'maxEdges': 8, 'maxEdges2': 16, 'vertexDegree': 3, 'R3': 3, 'nMonths': 12, 'nSoilComps': 8, 'FIFTEEN': 15, 'nVertLevelsP1': 56, 'nSoilLevels': 4}
+init_xtime 2022-09-21_00:00:00
+init_variable_ranges {'theta': (295.220458984375, 766.7838134765625), 'rho': (0.02163836732506752, 1.1637797355651855), 'surface_pressure': (90205.40625, 101556.3359375), 'qv': (4.721466666524066e-06, 0.019936565309762955)}
+lbc_count 165 opened 165
+lbc_first lbc.2022-09-21_00.00.00.nc
+lbc_last lbc.2022-11-01_00.00.00.nc
+sfc_shape (42, 102968)
+sfc_first 2022-09-21_00:00:00
+sfc_last 2022-11-01_00:00:00
+ocean_cells 60634 coastal_cells 2060
+ocean_exact_27315 0 ocean_below_296 0
+ocean_min_K 299.07000732421875 ocean_max_K 303.985107421875
+coastal_exact_27315 0 coastal_below_296 0
+coastal_min_K 299.07000732421875 coastal_p01_K 299.98480224609375
+coastal_max_K 303.47003173828125
+xice_range 0.0 0.0
+errors 0
+status PASS

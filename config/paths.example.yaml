@@ -6,7 +6,8 @@
 # Raw MPAS output is large and external. It is read in place — never copied
 # into this repository.
 
-# Directory holding CTL/, EXP01/, EXP02/ and the shared mesh assets.
+# Directory holding CTL/, EXP01/, EXP02/ and the shared mesh assets. EXP03 is a
+# sibling directory resolved by its portable run_directory in experiments.yaml.
 runs_root: /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km
 
 # ERA5 hourly 10 m / 100 m wind for the *simulation periods*, downloaded by

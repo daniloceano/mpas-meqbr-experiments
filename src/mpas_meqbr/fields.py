@@ -49,6 +49,10 @@ def compute_leg_fields(leg, index: pd.Series, *, height_m: float = 100.0,
     as the model does. Over the ocean, where the resource question lives, the
     centres are the nominal 50/100/150/200 m.
     """
+    index = io.validate_history_index(index, label=f"{leg.key} averaging index")
+    if len(index) == 0:
+        raise ValueError(f"{leg.key}: cannot average an empty time index")
+    time_identity = io.temporal_identity(index.index)
     first = index.iloc[0]
     static = io.read_static(first)
     lon, lat = io.cell_lonlat_degrees(static["latCell"], static["lonCell"])
@@ -122,7 +126,8 @@ def compute_leg_fields(leg, index: pd.Series, *, height_m: float = 100.0,
             for name in FIELDS_2D if count2d[name] > 0
         },
         coords={"lat": ("nCells", lat), "lon": ("nCells", lon),
-                "local_hour": np.arange(24)},
+                "local_hour": np.arange(24),
+                "valid_time": ("sample_time", index.index.values)},
     )
     ds_out["landmask"] = ("nCells", static["landmask"].astype("int8"))
     ds_out["terrain"] = ("nCells", static["zgrid"][:, 0])
@@ -141,6 +146,7 @@ def compute_leg_fields(leg, index: pd.Series, *, height_m: float = 100.0,
         "window_start": str(index.index[0]),
         "window_end": str(index.index[-1]),
         "n_hours": int(n),
+        **time_identity,
         "tz_offset_hours": TZ_OFFSET_HOURS,
         "created": datetime.now(timezone.utc).isoformat(),
         "created_by": "scripts/01_extract/compute_field_statistics.py",
@@ -173,11 +179,41 @@ def load_fields(repo_root: Path, experiment: str, period: str) -> xr.Dataset:
 
 
 def assert_same_window(a: xr.Dataset, b: xr.Dataset) -> None:
-    """Refuse to difference two legs averaged over different windows."""
-    for key in ("window_start", "window_end"):
+    """Refuse to compare caches without identical timestamp samples.
+
+    Start/end equality alone is intentionally insufficient: an interior gap
+    would otherwise turn weather sampling into an apparent experiment effect.
+    """
+    required = (
+        "time_count", "time_start", "time_end", "time_sha256", "time_encoding",
+    )
+    for ds in (a, b):
+        missing = [key for key in required if key not in ds.attrs]
+        if missing:
+            raise ValueError(
+                f"{ds.attrs.get('experiment', 'cache')} lacks exact temporal "
+                f"identity metadata {missing}; recompute it with the current "
+                "compute_field_statistics.py")
+        if "valid_time" not in ds.coords:
+            raise ValueError(
+                f"{ds.attrs.get('experiment', 'cache')} lacks valid_time; "
+                "start/end bounds alone cannot prove sample identity")
+        identity = io.temporal_identity(pd.DatetimeIndex(ds["valid_time"].values))
+        if int(ds.attrs.get("n_hours", -1)) != identity["time_count"]:
+            raise ValueError(
+                f"{ds.attrs.get('experiment', 'cache')} has n_hours inconsistent "
+                "with valid_time")
+        for key in required:
+            if ds.attrs[key] != identity[key]:
+                raise ValueError(
+                    f"{ds.attrs.get('experiment', 'cache')} has inconsistent "
+                    f"{key}: metadata={ds.attrs[key]!r}, times={identity[key]!r}")
+
+    for key in required:
         if a.attrs[key] != b.attrs[key]:
             raise ValueError(
-                f"averaging windows differ ({a.attrs['experiment']} "
-                f"{a.attrs[key]} vs {b.attrs['experiment']} {b.attrs[key]}). "
-                "Recompute both with the same --start/--end: a difference "
-                "between different windows is a difference in weather.")
+                f"averaging samples differ ({a.attrs.get('experiment')} vs "
+                f"{b.attrs.get('experiment')}): {key} is not equal")
+    if not pd.DatetimeIndex(a["valid_time"].values).equals(
+            pd.DatetimeIndex(b["valid_time"].values)):
+        raise ValueError("averaging timestamp sets differ despite their metadata")

@@ -15,7 +15,9 @@
 runs_root_note: >
   runs_root is set in paths.local.yaml and points at the directory that holds
   CTL/, EXP01/, EXP02/, EXP01_BADSST/, EXP02_BADSST/ plus the shared mesh
-  assets. The _BADSST pair is superseded; see the experiments block.
+  assets. Experiments outside that conventional directory may declare a
+  portable run_directory relative to runs_root. The _BADSST pair is
+  superseded; see the experiments block.
 
 common_configuration:
   integration_duration_days: 41
@@ -33,16 +35,31 @@ common_configuration:
 meshes:
   meqbr_05km:
     n_cells: 76813
+    grid_path: "../../grids/meqbr_05km/meqbr_05km.grid.nc"
+    sha256: "0d2242b369c5361c9c9319fdc5d3a366910c4e8307e096396853799c56e0ccfa"
     mean_cell_spacing_km: 4.6
     cell_extent: {lat_min: -7.66, lat_max: 6.72, lon_min: -54.95, lon_max: -32.70}
     n_relaxation_cells: 9093
     used_by: [CTL, EXP01, EXP01_BADSST]
   meqbr_05km_buf:
     n_cells: 95138
+    grid_path: "../../grids/meqbr_05km_buf/meqbr_05km_buf.grid.nc"
+    sha256: "e618a45e058936c14e0b5058d61afe8a1bb4708d5e116c265d0ee8020e85aa74"
     mean_cell_spacing_km: 4.6      # in the refined interior; ramps to ~32 km outward
     cell_extent: {lat_min: -12.90, lat_max: 11.86, lon_min: -60.16, lon_max: -27.48}
     n_relaxation_cells: 2188
     used_by: [EXP02, EXP02_BADSST]
+  meqbr_05km_oval_meq02a:
+    n_cells: 102968
+    grid_path: "../../grids/meqbr_05km_oval_meq02a/meqbr_05km_oval_meq02a.grid.nc"
+    sha256: "ac3e6988dbd7b1d7fff30689393cc7e06e0652ce8e8aea5edd6099222338e271"
+    mean_cell_spacing_km: 5.0     # nominal refined-core spacing, for legacy report fields
+    median_equivalent_spacing_km: 4.9991
+    cell_extent: {lat_min: -12.192679, lat_max: 11.124747, lon_min: -60.360931, lon_max: -28.952545}
+    refined_threshold_km: 5.5     # preliminary MEQ-02C method parameter, not a ratified scientific choice
+    refined_cells: 86109
+    n_relaxation_cells: 2210
+    used_by: [EXP03]
 
 vertical:
   # Interfaces from zeta_wind.txt; centers are the midpoints. Over flat terrain
@@ -164,6 +181,34 @@ experiments:
       - >
         History is written from the integration start (spin-up included) and has
         not been trimmed. Always filter on the analysis window.
+
+  EXP03:
+    label: "EXP03"
+    long_label: "EXP03 — Oval MEQ-02A geometry with corrected daily SST"
+    parent: EXP02
+    delta: "geometry candidate meqbr_05km_oval_meq02a; corrected daily OISST and the wider ERA5 forcing box are retained"
+    mesh: meqbr_05km_oval_meq02a
+    # Relative to runs_root, avoiding a machine-specific absolute path. The
+    # run is a sibling of the conventional meqbr_05km experiment directory.
+    run_directory: "../meqbr_05km_oval_meq02a"
+    sst_update: true
+    sst_forcing: "NOAA OISST v2.1 daily, corrected coastal interpolation"
+    periods: ["2021", "2022"]
+    status: complete
+    mpi_ranks: 60
+    wrapper_aliases: [OVAL]
+    relative_cost: 1.34      # cell-count ratio to CTL; not a performance ranking
+    caveats:
+      - >
+        Oval is a scientific candidate, not a selected or superior
+        configuration. Its closest available geometric contrast is EXP02, but
+        mesh geometry, MPI decomposition and EXP02's restart history remain
+        numerical qualifications.
+      - >
+        The exact scientific comparison windows are 2021-11-01 00:00 through
+        2021-12-01 00:00 inclusive (721 hourly samples) and 2022-10-01 00:00
+        through 2022-11-01 00:00 inclusive (745 hourly samples). Outputs before
+        those dates are spin-up and must not enter comparative statistics.
 
   # ---------------------------------------------------------------------------
   # Superseded runs. They are kept registered, and kept in the analysis, because
