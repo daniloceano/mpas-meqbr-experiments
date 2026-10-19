@@ -14,8 +14,10 @@ Outputs:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -139,6 +141,79 @@ TABLE_SPECS = [
         ],
     },
     {
+        "id": "inmet_added_value",
+        "title": "Valor adicionado nas estações INMET — mesmos horários",
+        "path": "results/tables/inmet_added_value.csv",
+        "columns": ["period", "station", "name", "source", "n", "bias",
+                    "bias_lo", "bias_hi", "rmse", "rmse_lo", "rmse_hi",
+                    "r", "r_lo", "r_hi", "rmse_reduction_vs_era5",
+                    "skill_vs_era5", "skill_lo", "skill_hi",
+                    "significant_vs_era5"],
+        "labels": {
+            "period": "Período", "station": "Estação", "name": "Nome",
+            "source": "Fonte", "n": "Horas pareadas",
+            "bias": "Viés (m s⁻¹)", "bias_lo": "Viés IC95% inf.",
+            "bias_hi": "Viés IC95% sup.", "rmse": "RMSE (m s⁻¹)",
+            "rmse_lo": "RMSE IC95% inf.", "rmse_hi": "RMSE IC95% sup.",
+            "r": "r", "r_lo": "r IC95% inf.", "r_hi": "r IC95% sup.",
+            "rmse_reduction_vs_era5": "Redução RMSE vs ERA5 (%)",
+            "skill_vs_era5": "Murphy skill vs ERA5 (%)",
+            "skill_lo": "Skill IC95% inf. (%)",
+            "skill_hi": "Skill IC95% sup. (%)",
+            "significant_vs_era5": "Diferença detectável",
+        },
+        "numeric": {
+            "n": 0, "bias": 2, "bias_lo": 2, "bias_hi": 2,
+            "rmse": 2, "rmse_lo": 2, "rmse_hi": 2,
+            "r": 2, "r_lo": 2, "r_hi": 2,
+            "rmse_reduction_vs_era5": 1, "skill_vs_era5": 1,
+            "skill_lo": 1, "skill_hi": 1,
+        },
+        "multiply_100": ["rmse_reduction_vs_era5", "skill_vs_era5",
+                         "skill_lo", "skill_hi"],
+        "value_maps": {"significant_vs_era5": {True: "sim", False: "não"}},
+        "description": (
+            "Métricas por estação e período em horas idênticas para ERA5 e os "
+            "quatro experimentos. Os IC95% usam bootstrap móvel em blocos de "
+            "24 h, sem atravessar lacunas observacionais."
+        ),
+        "notes": [
+            "Skill de Murphy = 1 − MSE(MPAS)/MSE(ERA5); positivo indica ganho.",
+            "Ausência de significância não demonstra equivalência; indica que o intervalo de incerteza inclui zero.",
+            "Esta validação terrestre a 10 m permanece separada do LiDAR offshore.",
+        ],
+    },
+    {
+        "id": "network_summary",
+        "title": "Síntese consolidada por rede observacional",
+        "path": "results/tables/validation_network_summary.csv",
+        "columns": ["network", "source", "n_points", "n_point_periods",
+                    "paired_hours", "bias", "rmse", "r",
+                    "rmse_reduction_vs_era5", "skill_vs_era5",
+                    "significant_point_periods"],
+        "labels": {
+            "network": "Rede", "source": "Fonte", "n_points": "Pontos",
+            "n_point_periods": "Pontos–período", "paired_hours": "Horas pareadas (soma)",
+            "bias": "Viés médio (m s⁻¹)", "rmse": "RMSE médio (m s⁻¹)",
+            "r": "r médio", "rmse_reduction_vs_era5": "Redução RMSE vs ERA5 (%)",
+            "skill_vs_era5": "Murphy skill médio (%)",
+            "significant_point_periods": "Pontos–período detectáveis",
+        },
+        "numeric": {"n_points": 0, "n_point_periods": 0, "paired_hours": 0,
+                    "bias": 2, "rmse": 2, "r": 2,
+                    "rmse_reduction_vs_era5": 1, "skill_vs_era5": 1,
+                    "significant_point_periods": 0},
+        "multiply_100": ["rmse_reduction_vs_era5", "skill_vs_era5"],
+        "description": (
+            "Resumo descritivo com peso igual por ponto–período. LiDAR usa 100 m, "
+            "a única altura diretamente comparável ao ERA5; INMET usa 10 m."
+        ),
+        "notes": [
+            "As redes não são agrupadas em um escore único.",
+            "Os intervalos e decisões inferenciais pertencem aos pontos individuais no painel interativo.",
+        ],
+    },
+    {
         "id": "lidar",
         "title": "Validação offshore em alturas de rotor — LiDAR",
         "path": "results/tables/experiment_ranking.csv",
@@ -171,7 +246,7 @@ TABLE_SPECS = [
             "A densidade de potência eólica é WPD = ½ ρ × média(U³), com ρ = 1,15 kg m⁻³ e U em m s⁻¹; o cubo é calculado antes da média.",
             "ERA5 aparece somente a 100 m, seu nível diagnóstico diretamente comparável ao LiDAR; não é extrapolado para as demais alturas.",
             "Todos os experimentos estão completos e são comparados nas mesmas horas observacionais disponíveis dentro de cada janela científica.",
-            "Em cada altura, o negrito indica o melhor entre CTL, EXP01 e EXP02: menor valor absoluto para os vieses, menor RMSE e maior r. ERA5 permanece como benchmark e não entra nessa seleção.",
+            "Em cada altura, o negrito indica o melhor entre CTL, EXP01, EXP02 e EXP03: menor valor absoluto para os vieses, menor RMSE e maior r. ERA5 permanece como benchmark e não entra nessa seleção.",
         ],
     },
     {
@@ -312,10 +387,13 @@ MEDIA_SPECS = [
           "Distribuição do espaçamento horizontal da malha quase uniforme usada no controle; no mapa turbo invertido, vermelho indica menor espaçamento. Pontos escuros mostram a relaxação lateral, círculos/quadrados os LiDARs e triângulos as estações INMET."),
     media("design", "figures/report/experimental_design_exp01_sst.png",
           "EXP01: mudança da condição de superfície",
-          "Diferença da SST média EXP01 − CTL em novembro de 2021, ou seja, o efeito da troca da temperatura de superfície congelada do ERA5 pela atualização diária da OISST. Tons quentes indicam mar mais quente no EXP01. Nenhuma célula oceânica fica abaixo de 296 K. Círculo/quadrado mostram P0/LPI e triângulos mostram as estações INMET."),
+          "Diferença da SST média EXP01 − CTL em novembro de 2021. Ela inclui duas mudanças inseparáveis neste desenho cumulativo: a atualização temporal diária e a diferença entre a média OISST e a SST inicial do ERA5 mantida pelo CTL. Tons quentes indicam mar mais quente no EXP01. Nenhuma célula oceânica fica abaixo de 296 K."),
     media("design", "figures/report/experimental_design_exp02_mesh.png",
           "EXP02: tratamento da fronteira",
           "Malha com aproximadamente 5 km no interior e transição gradual para 32 km junto à fronteira; vermelho indica menor espaçamento. A zona de relaxação escura fica mais distante dos LiDARs e das estações INMET."),
+    media("design", "figures/report/experimental_design_exp03_mesh.png",
+          "EXP03: geometria Oval MEQ-02A",
+          "Malha de 102.968 células com núcleo refinado orientado ao longo da Margem Equatorial. A geometria é uma hipótese experimental; o tamanho do domínio não é usado como evidência de habilidade meteorológica."),
     media("spatial_fields", "figures/exploration/mean_fields_CTL_2021.png",
           "Estado médio do controle — novembro de 2021",
           "Vento médio e densidade de potência a 100 m, constância direcional e amplitude do ciclo diurno. Estes quatro campos descrevem o recurso e a variabilidade resolvidos pelo CTL."),
@@ -324,7 +402,7 @@ MEDIA_SPECS = [
           "Mesmas grandezas do painel anterior para o segundo período, permitindo separar diferenças de configuração de diferenças meteorológicas entre os meses."),
     media("spatial_fields", "figures/exploration/diff_EXP01_vs_CTL_2021_common.png",
           "Resposta espacial à SST diária corrigida",
-          "Diferenças EXP01 − CTL para vento, potência, amplitude diurna e SST, sobre a janela completa comum. Este é o efeito real da atualização diária de SST, livre da contaminação costeira."),
+          "Diferenças EXP01 − CTL para vento, densidade de potência, amplitude diurna e SST, sobre a janela completa comum. A resposta combina atualização diária e mudança do estado médio da SST; não identifica isoladamente o efeito da frequência temporal."),
     media("spatial_fields", "figures/exploration/diff_EXP02_vs_EXP01_2021_common.png",
           "Resposta espacial ao tratamento de fronteira",
           "Diferenças EXP02 − EXP01 na janela científica completa e comum de 2021. O uso de horas idênticas evita confundir a mudança de configuração com mudança do tempo meteorológico."),
@@ -378,7 +456,7 @@ MEDIA_SPECS = [
           "Mesmo corte e janela para EXP01, mantendo a comparação visual nas mesmas condições meteorológicas.", kind="video"),
     media("validation_network", "figures/report/validation_network.png",
           "Domínios e pontos de validação",
-          "À esquerda, os dois domínios em uso: a malha não bufferizada de CTL/EXP01/EXP01 e a malha com buffer de EXP02/EXP02; à direita, os LiDARs P0/LPI e as estações automáticas INMET usadas como eixo primário de validação de superfície."),
+          "À esquerda, os domínios das malhas de CTL/EXP01, EXP02 e EXP03; à direita, os LiDARs P0/LPI e as estações automáticas INMET usadas como eixo primário de validação de superfície."),
     media("validation_network", "figures/report/validation_cells.png",
           "Células usadas na comparação com P0 e LPI",
           "O mapa localiza os LiDARs e amplia as células Voronoi de cada malha. A estrela marca o instrumento; o contorno preto e o x identificam a célula oceânica mais próxima efetivamente usada na validação, com a distância entre o LiDAR e o centro da célula."),
@@ -447,7 +525,7 @@ MEDIA_SPECS = [
           "Comparação equivalente para outubro de 2022; descreve onde o MPAS intensifica ou reduz o recurso em relação à reanálise."),
     media("mechanisms", "figures/selection/sst_forcing_2021.png",
           "SST efetivamente vista pelo modelo",
-          "SST no primeiro horário da janela de 2021. As células oceânicas muito frias junto à costa são valores de preenchimento terrestre da OISST e constituem um problema de integridade."),
+          "Diagnóstico histórico das execuções anteriores à correção, no primeiro horário da janela de 2021. As células oceânicas muito frias são o valor de preenchimento terrestre que contaminava aquelas forçantes; não pertencem às execuções corrigidas usadas nos resultados atuais."),
     media("mechanisms", "figures/selection/attribution_2021_P0.png",
           "Cadeia física da resposta em P0",
           "Diagnóstico conjunto de SST, fluxos de superfície, camada limite e vento para verificar se a mudança de desempenho segue o mecanismo físico esperado."),
@@ -459,7 +537,7 @@ MEDIA_SPECS = [
           "Magnitude da diferença EXP02 − EXP01 em função da distância da zona de relaxação do EXP01. Organização espacial reforça que o tratamento de fronteira está atuando."),
     media("mechanisms", "figures/selection/ranking.png",
           "Síntese comparativa dos experimentos",
-          "Ranking multicritério nas horas comuns das janelas completas. A comparação numérica está consolidada para estas simulações, mas o problema da OISST impede atribuir as diferenças somente à SST ou ao tratamento de fronteira e bloqueia uma recomendação definitiva."),
+          "RMSE com intervalos de bootstrap nas horas observacionais comuns. EXP03 integra a mesma comparação dos demais experimentos; a evidência cobre apenas um mês em cada sítio e não constitui seleção climatológica ratificada."),
 ]
 
 
@@ -490,11 +568,22 @@ def _best_indices(frame: pd.DataFrame, column: str, *, largest: bool = False,
     }
 
 
+def _json_value(value):
+    """Return a JSON-safe scalar without changing its scientific value."""
+    if pd.isna(value):
+        return None
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, (pd.Timestamp, datetime)):
+        return value.isoformat()
+    return value
+
+
 def prepare_table_rows(spec: dict, frame: pd.DataFrame) -> tuple[pd.DataFrame, dict, dict]:
     """Sort rows and attach semantic CSS classes before display formatting."""
     if spec["id"] == "lidar":
-        order = {"CTL": 0, "EXP01": 1, "EXP01_BADSST": 2,
-                 "EXP02": 3, "EXP02_BADSST": 4, "ERA5": 5}
+        order = {"CTL": 0, "EXP01": 1, "EXP02": 2, "EXP03": 3,
+                 "EXP01_BADSST": 4, "EXP02_BADSST": 5, "ERA5": 6}
         frame = frame.assign(
             _source_order=frame["experiment"].map(order).fillna(99)
         ).sort_values(
@@ -527,7 +616,7 @@ def prepare_table_rows(spec: dict, frame: pd.DataFrame) -> tuple[pd.DataFrame, d
             # Only the current set competes for "best": highlighting a
             # superseded contaminated run would recommend an artefact.
             experiments = group[group["experiment"].isin(
-                ["CTL", "EXP01", "EXP02"])]
+                ["CTL", "EXP01", "EXP02", "EXP03"])]
             add_cell(_best_indices(experiments, "bias", absolute=True),
                      "bias", "best-value")
             add_cell(_best_indices(experiments, "rmse"), "rmse", "best-value")
@@ -536,14 +625,47 @@ def prepare_table_rows(spec: dict, frame: pd.DataFrame) -> tuple[pd.DataFrame, d
             add_cell(_best_indices(experiments, "wpd_rel_bias_pct", absolute=True),
                      "wpd_rel_bias_pct", "best-value")
 
-    if spec["id"] == "added_value":
-        for column in ["rmse_reduction_vs_era5", "skill_vs_era5"]:
-            values = pd.to_numeric(frame[column], errors="coerce")
-            for index, value in values.items():
-                if not np.isfinite(value) or np.isclose(value, 0.0):
-                    continue
-                css_class = "metric-improved" if value > 0 else "metric-worsened"
-                add_cell({int(index)}, column, css_class)
+    grouped_best = {
+        "inmet_added_value": (["period", "station", "name"], "source"),
+        "added_value": (["period", "site", "height_m"], "source"),
+        "network_summary": (["network"], "source"),
+    }
+    if spec["id"] in grouped_best:
+        group_columns, source_column = grouped_best[spec["id"]]
+        group_columns = [name for name in group_columns if name in frame]
+        groups = frame.groupby(group_columns, sort=False, dropna=False) if group_columns else [(None, frame)]
+        for _, group in groups:
+            experiments = group[group[source_column].isin(["CTL", "EXP01", "EXP02", "EXP03"])]
+            for column, largest, absolute in (
+                ("bias", False, True),
+                ("rmse", False, False),
+                ("r", True, False),
+                ("rmse_reduction_vs_era5", True, False),
+                ("skill_vs_era5", True, False),
+            ):
+                if column in experiments:
+                    add_cell(_best_indices(experiments, column, largest=largest,
+                                           absolute=absolute), column, "best-value")
+
+    if spec["id"] in {"added_value", "inmet_added_value"}:
+        for index, row in frame.iterrows():
+            source = row.get("source")
+            lo = pd.to_numeric(pd.Series([row.get("skill_lo")]), errors="coerce").iloc[0]
+            hi = pd.to_numeric(pd.Series([row.get("skill_hi")]), errors="coerce").iloc[0]
+            if source == "ERA5":
+                css_class = "metric-reference"
+            elif not (np.isfinite(lo) and np.isfinite(hi)):
+                css_class = "metric-not-evaluated"
+            elif lo > 0:
+                css_class = "metric-gain"
+            elif hi < 0:
+                css_class = "metric-loss"
+            else:
+                css_class = "metric-neutral"
+            for column in ("rmse_reduction_vs_era5", "skill_vs_era5",
+                           "skill_lo", "skill_hi"):
+                if column in frame:
+                    add_cell({int(index)}, column, css_class)
 
     return frame, cell_classes, row_classes
 
@@ -601,6 +723,7 @@ def read_table(spec: dict, superseded: set[str]) -> dict | None:
     columns = [column for column in spec["columns"] if column in df.columns]
     df = df[columns].copy()
     df, cell_classes, row_classes = prepare_table_rows(spec, df)
+    raw_df = df.copy()
     for column in spec.get("multiply_100", []):
         if column in df:
             df[column] = pd.to_numeric(df[column], errors="coerce") * 100.0
@@ -611,10 +734,43 @@ def read_table(spec: dict, superseded: set[str]) -> dict | None:
         if column in df:
             numeric = pd.to_numeric(df[column], errors="coerce")
             df[column] = numeric.map(lambda value, d=decimals: format_number(value, d))
+    client_rows = []
+    for row_index, (_, row) in enumerate(df.iterrows()):
+        client_rows.append({
+            "values": {
+                column: ("—" if pd.isna(row[column]) else str(row[column]))
+                for column in df.columns
+            },
+            "raw": {
+                column: _json_value(raw_df.iloc[row_index][column])
+                for column in raw_df.columns
+            },
+            "cell_classes": {
+                column: " ".join(sorted(cell_classes.get((row_index, column), set())))
+                for column in df.columns
+                if cell_classes.get((row_index, column))
+            },
+            "row_classes": " ".join(sorted(row_classes.get(row_index, set()))),
+        })
+    filter_candidates = [
+        column for column in (
+            "experiment", "source", "period", "network", "site", "station",
+            "name", "height_m", "status", "quality",
+        ) if column in df.columns and raw_df[column].nunique(dropna=True) > 1
+    ]
     return {
         **spec,
         "n_rows": len(df),
         "html": render_html_table(df, spec, cell_classes, row_classes),
+        "client": {
+            "id": spec["id"],
+            "columns": list(df.columns),
+            "labels": {column: spec.get("labels", {}).get(column, column)
+                       for column in df.columns},
+            "numeric": list(spec.get("numeric", {})),
+            "filters": filter_candidates,
+            "rows": client_rows,
+        },
     }
 
 
@@ -624,7 +780,10 @@ def copy_media(report_dir: Path) -> tuple[dict[str, dict], list[dict]]:
         shutil.rmtree(asset_root)
     groups = OrderedDict()
     manifest = []
+    interactive_groups = {"spatial_fields", "site_structure", "animations"}
     for spec in MEDIA_SPECS:
+        if spec["group"] in interactive_groups:
+            continue
         source = REPO_ROOT / spec["path"]
         if not source.exists():
             continue
@@ -646,6 +805,131 @@ def copy_media(report_dir: Path) -> tuple[dict[str, dict], list[dict]]:
             "title": spec["title"],
         })
     return groups, manifest
+
+
+def _validation_media(groups: dict[str, dict]) -> list[dict]:
+    """Describe existing validation PNGs without pretending they are raw charts."""
+    chart_labels = {
+        "distribution": "Distribuição de velocidades",
+        "windrose": "Rosa dos ventos",
+        "profile": "Perfil vertical",
+        "diurnal": "Ciclo diurno",
+        "timeseries": "Série temporal",
+        "scatter": "Dispersão modelo–observação",
+        "taylor": "Diagrama de Taylor",
+        "cell_sensitivity": "Sensibilidade à célula",
+        "station_map": "Mapa de viés por estação",
+    }
+    entries = []
+    for group_name in ("observed_data", "inmet_validation", "lidar_validation"):
+        for item in groups.get(group_name, {}).get("items", []):
+            name = Path(item["url"]).stem
+            if name == "inmet_map":
+                chart = "station_map"
+            elif name == "cell_sensitivity":
+                chart = "cell_sensitivity"
+            else:
+                chart = next((key for key in chart_labels if name.startswith(key)), name)
+            network = "INMET" if group_name == "inmet_validation" else "LiDAR"
+            point = "P0" if "P0" in name else ("LPI" if "LPI" in name else "all")
+            period = "2021" if "2021" in name else ("2022" if "2022" in name else "all")
+            heights = [100] if "100m" in name else []
+            entries.append({
+                "network": network,
+                "point": point,
+                "period": period,
+                "heights": heights,
+                "chart": chart,
+                "chart_label": chart_labels.get(chart, item["title"]),
+                "title": item["title"],
+                "caption": item["caption"],
+                "url": item["url"],
+                "kind": "pre_rendered_image",
+                "sources": ["ERA5", "CTL", "EXP01", "EXP02", "EXP03"],
+            })
+    return entries
+
+
+def _enrich_validation(validation: dict | None, media_groups: dict[str, dict]) -> None:
+    if not validation:
+        return
+    validation["media"] = _validation_media(media_groups)
+    metrics = validation.get("metrics", [])
+    for point in validation.get("points", []):
+        rows = [row for row in metrics if row.get("point") == point.get("point")]
+        periods = sorted({str(row.get("period")) for row in rows})
+        heights = sorted({int(row["height_m"]) for row in rows if row.get("height_m") is not None})
+        point["available_periods"] = periods
+        point["available_heights_m"] = heights
+        point["instrument"] = (
+            "LiDAR flutuante" if point.get("point") == "P0" else
+            "LiDAR fixo em Porto-Ilha" if point.get("point") == "LPI" else
+            "Estação automática INMET, arquivo internacional ISD"
+        )
+        point["quality_control"] = (
+            "Disponibilidade por altura ≥80%; velocidade entre 0 e 40 m s⁻¹."
+            if point.get("point") == "P0" else
+            "Faixa física de 0 a 40 m s⁻¹; o arquivo não possui flag equivalente de disponibilidade."
+            if point.get("point") == "LPI" else
+            "Registros horários válidos da estação automática; pareamento restrito aos mesmos horários das fontes modeladas."
+        )
+        point["model_matching"] = (
+            "Célula oceânica MPAS mais próxima; níveis verticais coincidentes; ERA5 somente a 100 m."
+            if point.get("network") == "LiDAR" else
+            "Célula MPAS mais próxima; vento a 10 m; ERA5 a 10 m nos mesmos horários."
+        )
+
+
+def bundle_interactive_data(report_dir: Path, media_groups: dict[str, dict]) -> tuple[dict | None, dict | None, list[dict]]:
+    """Embed panel data and copy every referenced local media asset."""
+    validation_path = REPO_ROOT / "results" / "interactive" / "validation_panel.json"
+    meteo_path = REPO_ROOT / "results" / "interactive" / "meteorological_viewer.json"
+    validation = (json.loads(validation_path.read_text(encoding="utf-8"))
+                  if validation_path.exists() else None)
+    meteo = (json.loads(meteo_path.read_text(encoding="utf-8"))
+             if meteo_path.exists() else None)
+    copied = []
+    _enrich_validation(validation, media_groups)
+    if meteo:
+        target_root = report_dir / "assets" / "interactive"
+        for entry in meteo.get("entries", []):
+            source_value = entry.get("source")
+            if not source_value:
+                continue
+            source = REPO_ROOT / source_value
+            if not source.exists():
+                entry["available"] = False
+                entry["unavailable_reason"] = "arquivo não produzido"
+                continue
+            target = target_root / source.parent.name / source.name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+            entry["url"] = target.relative_to(report_dir).as_posix()
+            entry["available"] = True
+            copied.append({
+                "source": source_value,
+                "bundled_as": entry["url"],
+                "bytes": source.stat().st_size,
+                "title": entry.get("variable_label", entry.get("variable", "interactive")),
+            })
+        animation_windows: dict[tuple[str, str], list[float]] = {}
+        for entry in meteo.get("entries", []):
+            if entry.get("kind") == "animation" and entry.get("days") is not None:
+                key = (entry["variable"], entry["period"])
+                animation_windows.setdefault(key, []).append(float(entry["days"]))
+        for entry in meteo.get("entries", []):
+            if entry.get("kind") != "animation" or entry.get("days") is None:
+                continue
+            key = (entry["variable"], entry["period"])
+            longest = max(animation_windows[key])
+            if float(entry["days"]) < longest:
+                entry["coverage_note"] = (
+                    f"Cobertura disponível de {float(entry['days']):g} dias; "
+                    f"os demais experimentos comparáveis deste período têm "
+                    f"{longest:g} dias. A animação não foi prolongada nem "
+                    "interpolada."
+                )
+    return validation, meteo, copied
 
 
 def completeness(inventory: pd.DataFrame) -> tuple[bool, str]:
@@ -719,6 +1003,11 @@ def report_configuration(cfg) -> tuple[list[dict], list[dict], list[dict]]:
             "fronteira: malha com buffer 5→32 km e condições ERA5 em uma caixa "
             "mais ampla."
         ),
+        "EXP03": (
+            "Mantém a OISST diária corrigida e a caixa ERA5 ampla, mas usa a "
+            "malha Oval MEQ-02A de 102.968 células, cujo núcleo refinado acompanha "
+            "a Margem Equatorial. É uma candidata em avaliação, não uma escolha final."
+        ),
         "EXP01_BADSST": (
             "Versão superada do EXP01. Foi forçada pelo arquivo de superfície antes "
             "da correção, que levava o valor de preenchimento terrestre da OISST "
@@ -735,6 +1024,7 @@ def report_configuration(cfg) -> tuple[list[dict], list[dict], list[dict]]:
         "CTL": "assets/design/experimental_design_ctl_mesh.png",
         "EXP01": "assets/design/experimental_design_exp01_sst.png",
         "EXP02": "assets/design/experimental_design_exp02_mesh.png",
+        "EXP03": "assets/design/experimental_design_exp03_mesh.png",
         "EXP01_BADSST": "assets/design/experimental_design_exp01_sst.png",
         "EXP02_BADSST": "assets/design/experimental_design_exp02_mesh.png",
     }
@@ -768,7 +1058,7 @@ def observation_methods(cfg) -> list[dict]:
             "period": "novembro de 2021",
             "native": "registros em intervalos de 10 min; cada bin traz disponibilidade por altura",
             "qc": "disponibilidade ≥80% e velocidade entre 0–40 m s⁻¹",
-            "heights": "50, 100, 150, 200 e 250 m (250 m = média dos canais 240/260 m)",
+            "heights": "50, 100, 150 e 200 m na seleção; 250 m apenas descritivo (média dos canais 240/260 m)",
         },
         {
             "site": "LPI",
@@ -787,9 +1077,14 @@ def observation_methods(cfg) -> list[dict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="results/report")
+    parser.add_argument(
+        "--runs-root",
+        help=("override config/paths.local.yaml; only experiment metadata are "
+              "needed when rebuilding the report from existing derivatives"),
+    )
     args = parser.parse_args()
 
-    cfg = load_config()
+    cfg = load_config(runs_root=args.runs_root)
     report_dir = REPO_ROOT / args.output
     report_dir.mkdir(parents=True, exist_ok=True)
 
@@ -810,11 +1105,18 @@ def main() -> int:
         if (table := read_table(spec, superseded)) is not None
     }
     media_groups, assets = copy_media(report_dir)
+    validation_panel, meteo_viewer, interactive_assets = bundle_interactive_data(
+        report_dir, media_groups)
+    assets.extend(interactive_assets)
     common, periods, experiments = report_configuration(cfg)
 
     generated = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    commit = git_value("rev-parse", "--short", "HEAD")
-    dirty = bool(git_value("status", "--porcelain"))
+    commit = os.environ.get("MEQ_ANALYSIS_COMMIT") or git_value(
+        "rev-parse", "--short", "HEAD")
+    dirty_override = os.environ.get("MEQ_ANALYSIS_DIRTY")
+    dirty = (dirty_override.lower() in {"1", "true", "yes"}
+             if dirty_override is not None
+             else bool(git_value("status", "--porcelain")))
     env = Environment(
         loader=FileSystemLoader(REPO_ROOT / "docs/templates"),
         autoescape=select_autoescape(["html", "xml"]),
@@ -833,18 +1135,53 @@ def main() -> int:
         pairing=cfg.pairing,
         tables=tables,
         media_groups=media_groups,
+        validation_panel=validation_panel,
+        meteo_viewer=meteo_viewer,
+        table_data={key: value["client"] for key, value in tables.items()},
     )
+    html = "\n".join(line.rstrip() for line in html.splitlines()) + "\n"
     output = report_dir / "index.html"
     output.write_text(html, encoding="utf-8")
+
+    def file_record(path: Path) -> dict:
+        return {
+            "path": str(path.relative_to(REPO_ROOT)),
+            "bytes": path.stat().st_size,
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }
+
+    table_files = [
+        file_record(REPO_ROOT / table["path"])
+        for table in tables.values()
+    ]
+    for asset in assets:
+        bundled = report_dir / asset["bundled_as"]
+        asset["sha256"] = hashlib.sha256(bundled.read_bytes()).hexdigest()
 
     manifest = {
         "generated_utc": generated,
         "analysis_commit": commit,
+        "analysis_branch": os.environ.get("MEQ_ANALYSIS_BRANCH", "unknown"),
         "working_tree_dirty": dirty,
+        "execution_environment": os.environ.get(
+            "MEQ_EXECUTION_ENVIRONMENT", "local working tree"),
+        "exp03_completion_record": {
+            "path": os.environ.get("MEQ_EXP03_COMPLETION_RECORD", "unknown"),
+            "sha256": os.environ.get("MEQ_EXP03_COMPLETION_SHA256", "unknown"),
+        },
         "provisional": provisional,
         "tables": [table["path"] for table in tables.values()],
+        "table_files": table_files,
         "assets": assets,
+        "interactive_data": [
+            file_record(path) for path in (
+                REPO_ROOT / "results" / "interactive" / "validation_panel.json",
+                REPO_ROOT / "results" / "interactive" / "meteorological_viewer.json",
+            ) if path.exists()
+        ],
+        "index": file_record(output),
         "builder": "scripts/06_report/build_technical_report.py",
+        "editorial_schema_version": 2,
     }
     manifest_path = report_dir / "report_manifest.json"
     manifest_path.write_text(
