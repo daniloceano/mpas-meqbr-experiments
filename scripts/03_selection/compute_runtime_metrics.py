@@ -36,7 +36,7 @@ MODEL_YEAR_HOURS = 365.0 * 24.0
 REFERENCE_CORES = 100
 
 
-def wrapper_logs(runs_root: Path, experiment: str) -> list[Path]:
+def wrapper_logs(cfg, experiment: str) -> list[Path]:
     """Candidate wrapper logs for an experiment, most specific first.
 
     Some runs follow ``run_<exp>.log`` inside the experiment directory. Others do
@@ -44,16 +44,25 @@ def wrapper_logs(runs_root: Path, experiment: str) -> list[Path]:
     EXP02 was resumed twice into dated logs. Collect all of them and let the
     caller take the first that actually carries the period being scored.
     """
-    exp_dir = runs_root / experiment
+    run_directory = Path(cfg.experiments[experiment].get("run_directory", experiment))
+    exp_dir = run_directory if run_directory.is_absolute() else cfg.runs_root / run_directory
     candidates = [exp_dir / f"run_{experiment.lower()}.log"]
     candidates += sorted(exp_dir.glob("run_*.log"))
-    candidates += sorted(runs_root.glob("run_*sequence*.log"))
+    candidates += sorted(cfg.runs_root.glob("run_*sequence*.log"))
     seen, ordered = set(), []
     for path in candidates:
         if path not in seen:
             seen.add(path)
             ordered.append(path)
     return ordered
+
+
+def display_source(path: Path, runs_root: Path) -> str:
+    """Readable provenance path, including sibling experiment directories."""
+    try:
+        return str(path.relative_to(runs_root))
+    except ValueError:
+        return str(path)
 
 
 def _experiment_section(text: str, names: tuple[str, ...]) -> str:
@@ -169,7 +178,7 @@ def build_rows(cfg) -> list[dict]:
     for experiment in cfg.experiment_keys:
         exp = cfg.experiments[experiment]
         ranks_declared = int(exp["mpi_ranks"])
-        candidates = wrapper_logs(cfg.runs_root, experiment)
+        candidates = wrapper_logs(cfg, experiment)
         # The directory was renamed after the run; the log keeps the old name.
         names = (experiment, *exp.get("wrapper_aliases", []))
         for period in exp["periods"]:
@@ -195,7 +204,7 @@ def build_rows(cfg) -> list[dict]:
                     "simulated_hours": full_hours,
                     "method": "wrapper_elapsed",
                     "quality": "measured",
-                    "source": str(wrapper.relative_to(cfg.runs_root)),
+                    "source": display_source(wrapper, cfg.runs_root),
                     "note": f"wrapper rc={rec['rc']}",
                 }
             elif rec and rec["started"] and available_simulated_hours(leg) < full_hours:

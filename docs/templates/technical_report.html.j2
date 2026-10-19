@@ -19,11 +19,21 @@
       --danger: #9f2d2d;
       --danger-bg: #fff0ed;
       --info-bg: #edf7f6;
+      --ctl: #34495e;
+      --exp01: #0077b6;
+      --exp02: #e07a1f;
+      --exp03: #6a4c93;
+      --era5: #6b7280;
+      --gain: #087443;
+      --loss: #b42318;
+      --neutral: #725c15;
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
     body {
       margin: 0;
+      max-width: 100%;
+      overflow-x: hidden;
       color: var(--ink);
       background: var(--paper);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -43,6 +53,29 @@
     h4 { margin: 1.4rem 0 .45rem; font-size: 1.03rem; }
     p { margin: .55rem 0 1rem; }
     section[id] { scroll-margin-top: 1rem; }
+    .section-kicker {
+      margin: 0 0 .35rem;
+      color: var(--ocean);
+      font-size: .76rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+    .section-question {
+      margin: 0 0 1.4rem;
+      padding: .85rem 1rem;
+      border-left: 4px solid var(--sand);
+      background: #fffbec;
+      color: #4c493c;
+      font-size: 1.02rem;
+    }
+    .section-outro {
+      margin: 1.7rem 0 0;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      color: #29465f;
+    }
+    .narrative-divider { margin: 2.5rem 0 0; padding-top: 2rem; border-top: 1px solid var(--line); }
     .meta { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.5rem; }
     .pill {
       border: 1px solid rgba(255,255,255,.42);
@@ -116,7 +149,7 @@
     .period-card b { color: var(--ocean); }
     .flow {
       display: grid;
-      grid-template-columns: 1fr auto 1fr auto 1fr;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
       gap: .7rem;
       align-items: center;
       margin: 1.4rem 0;
@@ -156,8 +189,24 @@
     tbody tr:nth-child(even) { background: #f4f8f8; }
     td.best-value { font-weight: 800; background: #fff7d6; color: #17324d; }
     tr.height-separator td { border-top: 3px solid #8eabb4; }
-    td.metric-improved { color: #087443; background: #e9f8ef; font-weight: 800; }
-    td.metric-worsened { color: #b42318; background: #fff0ed; font-weight: 800; }
+    td.metric-gain { color: var(--gain); background: #e9f8ef; font-weight: 800; }
+    td.metric-loss { color: var(--loss); background: #fff0ed; font-weight: 800; }
+    td.metric-neutral { color: var(--neutral); background: #fff8d9; font-weight: 750; }
+    td.metric-not-evaluated { color: #64748b; background: #f1f5f9; font-style: italic; }
+    td.metric-reference { color: #475569; background: #eef2f6; }
+    .semantic-legend { display: flex; flex-wrap: wrap; gap: .45rem .8rem; margin: .7rem 0; font-size: .78rem; color: var(--muted); }
+    .semantic-legend span::before { content: ''; display: inline-block; width: .72rem; height: .72rem; margin-right: .3rem; border-radius: 3px; vertical-align: -.05rem; background: var(--swatch); }
+    .table-explorer { margin: 1rem 0 1.8rem; border: 1px solid var(--line); border-radius: 12px; background: #fafcfc; overflow: hidden; }
+    .table-explorer > summary, .detail-drawer > summary, .method-details > summary {
+      cursor: pointer; padding: .9rem 1rem; font-weight: 800; color: var(--ocean); background: #eef6f5;
+    }
+    .table-explorer > summary small { display: block; color: var(--muted); font-weight: 500; }
+    .table-explorer-body { padding: 0 1rem 1rem; }
+    .table-toolbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .65rem; margin: 1rem 0; }
+    .table-toolbar label { font-size: .74rem; font-weight: 800; color: #315269; }
+    .table-toolbar select, .table-toolbar button { width: 100%; margin-top: .2rem; padding: .5rem; border: 1px solid #9bb2bc; border-radius: 7px; background: white; color: var(--ink); }
+    .table-toolbar button { margin-top: 1.25rem; cursor: pointer; font-weight: 800; }
+    .table-count { color: var(--muted); font-size: .82rem; }
     .table-notes {
       margin: 0;
       padding: .75rem 1rem .75rem 2rem;
@@ -179,6 +228,11 @@
       gap: 1.1rem;
     }
     .gallery.single { grid-template-columns: minmax(0, 1fr); }
+    .media-explorer { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #f8fbfb; }
+    .media-explorer-control { padding: .85rem 1rem; background: #eef6f5; border-bottom: 1px solid var(--line); }
+    .media-explorer-control label { display: block; color: #315269; font-size: .78rem; font-weight: 800; }
+    .media-explorer-control select { width: 100%; margin-top: .25rem; padding: .55rem; border: 1px solid #9bb2bc; border-radius: 7px; background: white; }
+    .media-explorer figure[hidden] { display: none; }
     figure {
       margin: 0;
       border: 1px solid var(--line);
@@ -208,6 +262,129 @@
     .provisional { color: var(--warning); font-weight: 700; }
     .method-grid .card p { font-size: .9rem; margin: .45rem 0; }
     .plain-list li { margin-bottom: .5rem; }
+    .interactive-panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #f8fbfb;
+      margin: 1.2rem 0 2rem;
+    }
+    .panel-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: .8rem;
+      padding: 1rem;
+      background: #eaf4f3;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-controls label { font-size: .76rem; font-weight: 800; color: #315269; }
+    .panel-controls select, .panel-controls button {
+      display: block;
+      width: 100%;
+      margin-top: .25rem;
+      padding: .55rem .62rem;
+      border: 1px solid #9bb2bc;
+      border-radius: 7px;
+      background: white;
+      color: var(--ink);
+      font: inherit;
+    }
+    .map-and-detail { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(260px, .85fr); }
+    .map-stage { position: relative; min-height: 430px; background: #d8edf3; overflow: hidden; }
+    .map-stage svg { display: block; width: 100%; height: 100%; min-height: 430px; touch-action: none; }
+    .map-stage video, .map-stage .diagnostic-image {
+      display: block; width: 100%; max-height: 620px; object-fit: contain; background: #071923;
+    }
+    .map-point { cursor: pointer; stroke: white; stroke-width: .08; vector-effect: non-scaling-stroke; }
+    .map-point:hover, .map-point.active { stroke: #ffcc4d; stroke-width: .16; }
+    .map-grid { stroke: rgba(23,50,77,.24); stroke-width: .018; vector-effect: non-scaling-stroke; }
+    .map-coast { fill: none; stroke: #18384c; stroke-width: .038; vector-effect: non-scaling-stroke; }
+    .panel-detail { padding: 1rem; background: white; border-left: 1px solid var(--line); }
+    .panel-detail h4 { margin-top: 0; }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+    .metric-card { padding: .62rem; border: 1px solid var(--line); border-radius: 8px; background: #f8fbfb; }
+    .metric-card small { display: block; color: var(--muted); }
+    .metric-card strong { display: block; color: var(--ocean); }
+    .metric-card[data-source="CTL"] { border-top: 4px solid var(--ctl); }
+    .metric-card[data-source="EXP01"] { border-top: 4px solid var(--exp01); }
+    .metric-card[data-source="EXP02"] { border-top: 4px solid var(--exp02); }
+    .metric-card[data-source="EXP03"] { border-top: 4px solid var(--exp03); }
+    .metric-card[data-source="ERA5"] { border-top: 4px solid var(--era5); }
+    .metric-best { display: inline-block; padding: .08rem .35rem; border-radius: 4px; background: #fff1a8; font-weight: 900; }
+    .validation-metrics { align-self: stretch; width: 100%; color: var(--ink); }
+    .metric-reference {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      margin-bottom: .75rem; padding: .65rem .8rem; border: 1px solid #b7c5cc;
+      border-left: 5px solid var(--era5); border-radius: 8px; background: #f4f7f8;
+    }
+    .metric-reference p { margin: .12rem 0; }
+    .metric-grid-mpas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .metric-card .source-name { margin-bottom: .45rem; font-size: .78rem; letter-spacing: .04em; }
+    .metric-card .metric-primary { margin-bottom: .45rem; font-size: 1.02rem; line-height: 1.35; }
+    .metric-card .metric-secondary { display: grid; gap: .3rem; font-size: .82rem; line-height: 1.35; }
+    .metric-unit, .metric-interval { white-space: nowrap; }
+    .metric-interval { color: #486477; font-size: .78rem; }
+    .hidden-winner-note { margin: .75rem 0 0; padding: .55rem .7rem; border-radius: 7px; background: #fff8d8; color: #5f4b00; font-size: .8rem; }
+    .panel-action {
+      display: inline-block; margin-top: .6rem; padding: .52rem .75rem;
+      border: 0; border-radius: 7px; background: var(--ocean); color: white;
+      font: inherit; font-weight: 800; cursor: pointer;
+    }
+    .analysis-flow {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: .35rem;
+      margin: 1rem 0; padding: .7rem; border: 1px solid var(--line);
+      border-radius: 10px; background: #f7fafb; font-size: .78rem; font-weight: 800;
+    }
+    .analysis-flow a { color: var(--ocean); text-align: center; text-decoration: none; }
+    .analysis-flow a:not(:last-child)::after { content: " →"; color: var(--muted); }
+    .filter-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; padding: 1rem; }
+    .filter-box { min-width: 0; margin: 0; padding: .65rem; border: 1px solid var(--line); border-radius: 9px; background: white; }
+    .filter-box legend { padding: 0 .25rem; color: #315269; font-size: .78rem; font-weight: 900; }
+    .filter-options { display: flex; flex-wrap: wrap; gap: .35rem; max-height: 8rem; overflow: auto; }
+    .filter-options label { display: inline-flex; align-items: center; gap: .25rem; padding: .25rem .4rem; border: 1px solid #c5d3d8; border-radius: 6px; font-size: .76rem; }
+    .aggregate-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; padding: 0 1rem 1rem; }
+    .aggregate-card { padding: .75rem; border: 1px solid var(--line); border-top-width: 4px; border-radius: 9px; background: white; }
+    .aggregate-card[data-source="CTL"] { border-top-color: var(--ctl); }
+    .aggregate-card[data-source="EXP01"] { border-top-color: var(--exp01); }
+    .aggregate-card[data-source="EXP02"] { border-top-color: var(--exp02); }
+    .aggregate-card[data-source="EXP03"] { border-top-color: var(--exp03); }
+    .aggregate-card dl { display: grid; grid-template-columns: 1fr auto; gap: .28rem .5rem; margin: .55rem 0 0; font-size: .8rem; }
+    .aggregate-card dt, .aggregate-card dd { margin: 0; }
+    .aggregate-card dd { text-align: right; }
+    .aggregate-meta { padding: .1rem 1rem .8rem; color: var(--muted); font-size: .82rem; }
+    .gain-loss { margin: 0 1rem 1rem; padding: .75rem; border: 1px solid var(--line); border-radius: 9px; background: white; }
+    .gain-loss-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
+    .gain-loss-item { padding: .55rem; border-radius: 7px; background: #f5f8f9; font-size: .78rem; }
+    .gain-loss-item span { display: block; margin-top: .2rem; }
+    .comparison-result { padding: 1rem; }
+    .comparison-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .55rem; }
+    .comparison-cell { padding: .65rem; border: 1px solid var(--line); border-radius: 8px; background: white; }
+    .comparison-cell small, .comparison-cell strong { display: block; }
+    .comparison-cell strong { margin-top: .25rem; color: var(--ocean); }
+    .comparison-conclusion { margin: .8rem 0 0; padding: .7rem; border-radius: 8px; background: #edf6f5; }
+    .skill-badge { display: inline-block; margin-top: .4rem; padding: .18rem .45rem; border-radius: 999px; font-size: .72rem; font-weight: 850; }
+    .skill-gain { color: var(--gain); background: #e1f5e9; }
+    .skill-loss { color: var(--loss); background: #ffe7e2; }
+    .skill-neutral { color: var(--neutral); background: #fff4c5; }
+    .skill-na { color: #64748b; background: #edf1f5; }
+    .source-toggles { display: flex; flex-wrap: wrap; gap: .45rem; padding: .75rem 1rem; background: white; border-bottom: 1px solid var(--line); }
+    .source-toggles label { display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .55rem; border: 1px solid var(--line); border-radius: 999px; font-size: .78rem; font-weight: 800; }
+    .validation-media { display: grid; place-items: center; min-height: 480px; padding: 1rem; background: #071923; }
+    .validation-media img { max-width: 100%; max-height: 650px; object-fit: contain; }
+    .validation-media > .metric-grid {
+      align-self: stretch;
+      width: 100%;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+    }
+    .detail-drawer, .method-details { margin: 1rem 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .detail-drawer > div, .method-details > div { padding: 0 1rem 1rem; }
+    .synthesis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); gap: .8rem; margin: 1rem 0 1.5rem; }
+    .synthesis-grid .card { border-top: 4px solid var(--ocean); }
+    .panel-status { min-height: 2.8rem; padding: .75rem 1rem; color: var(--muted); font-size: .88rem; border-top: 1px solid var(--line); }
+    .colourbar { height: .72rem; border-radius: 999px; margin: .7rem 0 .25rem; border: 1px solid rgba(0,0,0,.18); }
+    .colourbar-labels { display: flex; justify-content: space-between; font-size: .76rem; color: var(--muted); }
+    .unavailable { display: grid; place-items: center; min-height: 430px; padding: 2rem; text-align: center; color: var(--danger); background: var(--danger-bg); }
+    .cursor-readout { position: absolute; right: .6rem; bottom: .5rem; padding: .25rem .45rem; border-radius: 5px; background: rgba(255,255,255,.88); font-size: .74rem; }
     footer {
       max-width: 1160px;
       margin: 1rem auto 3rem;
@@ -260,6 +437,20 @@
       .flow .arrow { transform: rotate(90deg); text-align: center; }
       .gallery { grid-template-columns: 1fr; }
       .key-table td:first-child { width: auto; }
+      .map-and-detail { grid-template-columns: 1fr; }
+      .panel-detail { border-left: 0; border-top: 1px solid var(--line); }
+      .map-stage, .map-stage svg { min-height: 320px; }
+      .metric-grid { grid-template-columns: 1fr; }
+      .validation-media { min-height: 280px; }
+      .validation-media > .metric-grid { grid-template-columns: 1fr; }
+      .metric-grid-mpas, .aggregate-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .analysis-flow, .filter-groups, .comparison-grid { grid-template-columns: 1fr; }
+      .gain-loss-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .table-explorer-body { padding: 0 .5rem .75rem; }
+    }
+    @media (max-width: 560px) {
+      .metric-grid-mpas, .aggregate-grid, .gain-loss-grid { grid-template-columns: 1fr; }
+      .metric-reference { align-items: flex-start; flex-direction: column; }
     }
     @media print {
       nav { display: none; }
@@ -274,25 +465,39 @@
 </head>
 <body>
 {% macro render_table(table) %}
-  <div class="table-block">
-    <p class="table-caption">
-      <strong>{{ table.title }}</strong>
-      {{ table.description }}
-    </p>
+  <details class="table-explorer" data-table-id="{{ table.id }}">
+    <summary>{{ table.title }} <small>{{ table.description }} · {{ table.n_rows }} linhas</small></summary>
+    <div class="table-explorer-body">
+    <div class="table-toolbar" aria-label="Filtros da tabela"></div>
+    <p class="table-count" aria-live="polite"></p>
     <div class="table-wrap">{{ table.html | safe }}</div>
+    {% if table.id in ["added_value", "inmet_added_value"] %}
+    <div class="semantic-legend" aria-label="Situação frente ao ERA5">
+      <span style="--swatch:#bfe8ce">Ganho detectável</span>
+      <span style="--swatch:#ffd0c7">Perda detectável</span>
+      <span style="--swatch:#ffec9a">Diferença não detectável</span>
+      <span style="--swatch:#dce4ea">Não avaliado ou referência</span>
+    </div>
+    {% endif %}
     {% if table.notes %}
     <ul class="table-notes">
       {% for note in table.notes %}<li>{{ note }}</li>{% endfor %}
     </ul>
     {% endif %}
-  </div>
+    </div>
+  </details>
 {% endmacro %}
 
 {% macro render_gallery(group, single=false) %}
   {% if group %}
-  <div class="gallery{% if single %} single{% endif %}">
+  <div class="media-explorer" data-media-explorer>
+    {% if group["items"] | length > 1 %}
+    <div class="media-explorer-control"><label>Evidência visual
+      <select>{% for item in group["items"] %}<option value="{{ loop.index0 }}">{{ item.title }}</option>{% endfor %}</select>
+    </label></div>
+    {% endif %}
     {% for item in group["items"] %}
-    <figure>
+    <figure data-media-index="{{ loop.index0 }}"{% if not loop.first %} hidden{% endif %}>
       {% if item.kind == "video" %}
       <video controls preload="metadata" src="{{ item.url }}"></video>
       {% else %}
@@ -323,22 +528,20 @@
 <div class="layout">
   <nav aria-label="Sumário">
     <strong>Conteúdo</strong>
-    <a href="#resumo">1. Visão geral</a>
-    <a href="#desenho">2. Desenho experimental</a>
+    <a href="#introducao">1. Introdução e desenho</a>
     <a class="nav-sub" href="#configuracao-comum">Configuração comum</a>
     <a class="nav-sub" href="#experimentos">Experimentos</a>
-    <a href="#andamento">3. Andamento e custo</a>
-    <a href="#resultados-modelo">4. Resultados do modelo</a>
-    <a class="nav-sub" href="#campos-espaciais">Campos espaciais</a>
-    <a class="nav-sub" href="#estrutura-local">Estrutura local</a>
-    <a href="#validacao">5. Validação observacional</a>
-    <a class="nav-sub" href="#rede-observacional">Rede e tratamento</a>
+    <a class="nav-sub" href="#andamento">Andamento e custo</a>
+    <a href="#resultados-modelo">2. Resultados simulados</a>
+    <a class="nav-sub" href="#explorador-meteorologico">Explorador meteorológico</a>
+    <a href="#rede-observacional">3. Rede observacional</a>
+    <a href="#validacao">4. Validação observacional</a>
+    <a class="nav-sub" href="#painel-validacao">Explorador de validação</a>
     <a class="nav-sub" href="#inmet">INMET</a>
     <a class="nav-sub" href="#lidar">LiDAR offshore</a>
-    <a href="#valor-adicionado">6. Valor adicionado</a>
-    <a href="#mecanismos">7. Mecanismos e seleção</a>
-    <a href="#conclusoes">8. Conclusões</a>
-    <a href="#limitacoes">9. Limitações e defeitos conhecidos</a>
+    <a href="#valor-adicionado">5. Valor adicionado ao ERA5</a>
+    <a href="#mecanismos">6. Interpretação física</a>
+    <a href="#sintese">7. Síntese e seleção</a>
   </nav>
 
   <main>
@@ -346,8 +549,13 @@
       <strong>Status do documento:</strong> {{ status_text }}
     </div>
 
-    <section id="resumo">
-      <h2>1. Visão geral</h2>
+    <section id="introducao">
+      <p class="section-kicker">1 · Introdução e desenho experimental</p>
+      <h2>Que perguntas os quatro experimentos procuram responder?</h2>
+      <p class="section-question"><strong>Pergunta:</strong> quais mudanças de
+        superfície oceânica, fronteira lateral e geometria de malha oferecem
+        habilidade observacional suficiente para sustentar futuras integrações
+        climatológicas?</p>
       <p class="lead">O objetivo é escolher uma configuração do MPAS adequada
          para futuras simulações climatológicas de recurso eólico na Margem
          Equatorial Brasileira (MEqBr), preservando ganho físico e estatístico
@@ -364,7 +572,12 @@
              estruturas de mesoescala antes que o escoamento alcance a área de interesse?</p>
         </div>
         <div class="card">
-          <strong>Pergunta 3 — valor adicionado</strong>
+          <strong>Pergunta 3 — geometria Oval</strong>
+          <p>A malha Oval mantém ou melhora a habilidade observacional sem que
+             sua maior extensão seja confundida com evidência meteorológica?</p>
+        </div>
+        <div class="card">
+          <strong>Pergunta 4 — valor adicionado</strong>
           <p>O downscaling a aproximadamente 5 km reduz o erro do ERA5 nos
              LiDARs e acrescenta estrutura espacial relevante ao recurso eólico?</p>
         </div>
@@ -381,23 +594,22 @@
         documentado em
         <a href="sst-fix-comparison/index.html">comparação antigo × corrigido</a>.
       </div>
-      <p><strong>Como ler o relatório:</strong> primeiro são apresentados o
-         desenho e o estado das integrações; depois, os campos produzidos pelo
-         modelo; em seguida, a validação observacional; por último, o valor
-         adicionado sobre o ERA5 e a interpretação dos mecanismos.</p>
-    </section>
+      <p><strong>Como ler o relatório:</strong> cada seção parte de uma pergunta,
+         apresenta a evidência disponível, explicita seus limites e encaminha a
+         próxima decisão científica.</p>
 
-    <section id="desenho">
-      <h2>2. Desenho experimental</h2>
+      <div class="narrative-divider" id="desenho">
+      <h3>Desenho experimental</h3>
       <p class="lead">Todos os experimentos usam a mesma dinâmica, física,
          discretização vertical e períodos. Cada experimento herda o anterior e
-         acrescenta uma mudança específica: o desenho é cumulativo, não
-         fatorial, de modo que a diferença EXP02 − EXP01 é o efeito
+         acrescenta uma mudança específica. O desenho é cumulativo, não
+         fatorial: EXP02 − EXP01 representa o efeito
          <em>incremental</em> do tratamento de fronteira com a atualização de
-         SST já ligada.</p>
+         SST já ligada; EXP03 avalia a geometria Oval preservando a OISST
+         corrigida e a caixa ERA5 ampla.</p>
 
       <div id="configuracao-comum">
-        <h3>2.1 Configuração comum a todos os experimentos</h3>
+        <h3>Configuração comum a todos os experimentos</h3>
         <p>A tabela abaixo define o que permanece fixo. Assim, diferenças entre
            os experimentos não devem ser atribuídas a esses parâmetros.</p>
         <div class="table-wrap key-table">
@@ -429,18 +641,22 @@
       </div>
 
       <div id="experimentos">
-        <h3>2.2 O que muda em cada experimento</h3>
+        <h3>O que muda em cada experimento</h3>
         <div class="flow" aria-label="Desenho cumulativo">
           <div class="step"><strong>CTL</strong><br>configuração de referência</div>
           <div class="arrow">→</div>
           <div class="step"><strong>EXP01</strong><br>CTL + SST diária</div>
           <div class="arrow">→</div>
           <div class="step"><strong>EXP02</strong><br>EXP01 + tratamento de fronteira</div>
+          <div class="arrow">→</div>
+          <div class="step"><strong>EXP03</strong><br>OISST corrigida + malha Oval</div>
         </div>
         <div class="banner info">
           <strong>Desenho cumulativo.</strong> EXP02 − EXP01 mede o efeito
           incremental do tratamento de fronteira quando a SST diária já está
-          ativa. Não é o efeito isolado da malha com buffer.
+          ativa. Não é o efeito isolado da malha com buffer. EXP03 acrescenta
+          uma nova geometria de malha ao conjunto comparável, sem alterar a
+          física ou a discretização vertical.
         </div>
         {% for exp in experiments %}
         <article class="experiment">
@@ -456,29 +672,40 @@
         </article>
         {% endfor %}
       </div>
-    </section>
+      </div>
 
-    <section id="andamento">
-      <h2>3. Andamento das simulações e custo computacional</h2>
+      <div class="narrative-divider" id="andamento">
+      <h3>Andamento das simulações e custo computacional</h3>
       <p class="lead">Esta seção separa completude científica de desempenho
          computacional. Uma integração parcial pode informar custo até o momento,
          mas não deve sustentar uma conclusão final de habilidade.</p>
       {% if "inventory" in tables %}{{ render_table(tables["inventory"]) }}{% endif %}
       {% if "runtime" in tables %}{{ render_table(tables["runtime"]) }}{% endif %}
+      </div>
+      <p class="section-outro"><strong>Interpretação:</strong> as oito pernas
+        científicas estão completas; custo e número de células permanecem
+        critérios operacionais, não evidência isolada de habilidade. A próxima
+        seção examina o que cada configuração efetivamente simulou.</p>
     </section>
 
     <section id="resultados-modelo">
-      <h2>4. Descrição dos resultados do modelo</h2>
+      <p class="section-kicker">2 · Exploração dos resultados simulados</p>
+      <h2>Como os campos mudam no espaço e no tempo?</h2>
+      <p class="section-question"><strong>Pergunta:</strong> onde as configurações
+        alteram vento, recurso eólico, SST, ciclo diurno e estrutura vertical,
+        sem confundir uma diferença espacial com superioridade científica?</p>
       <p class="lead">Antes de comparar o MPAS com observações, é necessário
          entender os campos que ele produz: onde estão os máximos de recurso,
          como a circulação varia no espaço e qual estrutura vertical aparece
          junto à costa.</p>
 
-      <div id="campos-espaciais" class="topic">
-        <h3>4.1 Campos espaciais e resposta às configurações</h3>
-        <p class="topic-intro">Os mapas médios descrevem o recurso eólico,
-           sua persistência direcional e o ciclo diurno. Os mapas de diferença
-           mostram onde cada alteração de configuração atua.</p>
+      <div id="explorador-meteorologico" class="topic">
+        <h3>Visualizador exploratório meteorológico</h3>
+        <p class="topic-intro">Use os seletores para comparar as quatro
+           configurações, os dois períodos e os campos disponíveis sem abrir
+           dezenas de figuras. Os rasters médios estão em coordenadas
+           geográficas e aceitam zoom e deslocamento; seções e animações são
+           mídias diagnósticas pré-renderizadas, explicitamente identificadas.</p>
         <div class="banner info">
           <strong>Como foi calculado o potencial eólico.</strong>
           O relatório usa a densidade de potência disponível no vento:
@@ -488,52 +715,71 @@
           em W m<sup>−2</sup>. Isso representa o recurso no escoamento, não a
           produção de uma turbina específica.
         </div>
-        {{ render_gallery(media_groups.get("spatial_fields")) }}
+        {% if meteo_viewer %}
+        <div class="interactive-panel" id="meteo-viewer">
+          <div class="panel-controls">
+            <label>Experimento<select id="meteo-experiment"></select></label>
+            <label>Período<select id="meteo-period"></select></label>
+            <label>Variável/produto<select id="meteo-variable"></select></label>
+            <label>Mapa<button type="button" id="meteo-reset">Redefinir zoom</button></label>
+          </div>
+          <div class="map-and-detail">
+            <div class="map-stage" id="meteo-stage"></div>
+            <aside class="panel-detail" id="meteo-detail">
+              <h4>Produto selecionado</h4>
+              <p>Carregando…</p>
+            </aside>
+          </div>
+          <div class="panel-status" id="meteo-status"></div>
+        </div>
+        {% else %}
+        <div class="banner critical">O pacote interativo não foi produzido; execute
+          <code>scripts/05_exploration/export_interactive_layers.py</code>.</div>
+        {% endif %}
+        <p class="topic-intro"><strong>Escopo:</strong> esta é uma inspeção
+           espacial exploratória dos campos simulados. Ela não substitui a
+           validação observacional quantitativa da seção 4 e não interpola
+           temporalmente nenhum horário.</p>
       </div>
-
-      <div id="estrutura-local" class="topic">
-        <h3>4.2 Estrutura vertical próxima aos sítios</h3>
-        <p class="topic-intro">As seções costeiras ajudam a interpretar os
-           resultados pontuais dos LiDARs e a identificar circulação de brisa,
-           cisalhamento e profundidade da camada limite. CTL, EXP01 e EXP02 são
-           mostrados no mesmo horário local para cada sítio.</p>
-        {{ render_gallery(media_groups.get("site_structure")) }}
-      </div>
-
-      <div class="topic">
-        <h3>4.3 Evolução temporal</h3>
-        <p class="topic-intro">As animações mostram a organização e a
-           persistência das estruturas que desaparecem quando se observa apenas
-           a média mensal. As mesmas janelas são apresentadas para CTL, EXP01 e
-           EXP02, tanto nos campos a 100 m quanto nos cortes verticais.</p>
-        <p class="topic-intro"><em>As animações não são versionadas junto com o
-         relatório: somam 67 MB e são regeneradas pelo estágio 05 do pipeline
-         (<code>scripts/05_exploration/animate_wind.py</code> e
-         <code>animate_cross_section.py</code>). Na cópia do repositório os
-         reprodutores abaixo aparecem vazios; no pacote completo gerado na
-         máquina de análise eles funcionam.</em></p>
-      {{ render_gallery(media_groups.get("animations")) }}
-      </div>
+      <p class="section-outro"><strong>Limite:</strong> padrões espaciais ajudam a
+        formular hipóteses, mas não determinam qual experimento representa melhor
+        a atmosfera. Essa resposta exige a rede observacional apresentada a seguir.</p>
     </section>
 
-    <section id="validacao">
-      <h2>5. Validação observacional</h2>
-      <p class="lead">A avaliação possui dois eixos primários independentes:
-         LiDARs offshore entre 50 e 250 m para o recurso em altura de rotor, e
-         estações automáticas INMET a 10 m para a circulação costeira de superfície.
-         Os dois eixos não são combinados em um único escore.</p>
-      <div class="banner info">
-        <strong>ERA5 como referência mínima de desempenho.</strong> Toda
-        comparação observacional inclui ERA5 quando existe uma altura
-        diretamente equivalente: 10 m nas estações INMET e 100 m nos LiDARs.
-        ERA5 não é extrapolado para 50, 150, 200 ou 250 m, pois isso exigiria
-        assumir um perfil vertical e contaminaria justamente a comparação que
-        se deseja fazer. O objetivo operacional é claro: o MPAS precisa superar
-        o ERA5 para justificar o downscaling.
-      </div>
+    <section id="rede-observacional">
+      <p class="section-kicker">3 · Rede observacional</p>
+      <h2>Onde e como o MPAS é confrontado com observações?</h2>
+      <p class="section-question"><strong>Pergunta:</strong> quais instrumentos,
+        períodos, alturas e critérios de correspondência sustentam a validação?</p>
+      <p class="lead">P0 e LPI representam o ambiente offshore em alturas de
+        rotor; as estações automáticas INMET representam a circulação terrestre
+        a 10 m. As redes respondem a perguntas complementares e permanecem separadas.</p>
 
-      <div id="rede-observacional" class="topic">
-        <h3>5.1 Região, estações e tratamento temporal</h3>
+      {% if validation_panel and meteo_viewer %}
+      <div class="interactive-panel" id="network-viewer">
+        <div class="panel-controls">
+          <label>Período<select id="network-period"></select></label>
+          <label>Rede<select id="network-kind">
+            <option value="all">LiDAR + INMET</option>
+            <option value="LiDAR">LiDAR</option>
+            <option value="INMET">INMET</option>
+          </select></label>
+          <label>Mapa<button type="button" id="network-reset">Redefinir zoom</button></label>
+        </div>
+        <div class="map-and-detail">
+          <div class="map-stage" id="network-stage"></div>
+          <aside class="panel-detail" id="network-detail">
+            <h4>Selecione um ponto</h4>
+            <p>Consulte instrumento, cobertura, alturas, controle de qualidade e correspondência com o MPAS.</p>
+          </aside>
+        </div>
+        <div class="panel-status" id="network-status"></div>
+      </div>
+      {% endif %}
+
+      <details class="method-details">
+        <summary>Ver mapas originais e auditoria metodológica da rede</summary>
+        <div>
         {{ render_gallery(media_groups.get("validation_network"), true) }}
 
         <h4>Auditoria do tratamento de P0 e LPI</h4>
@@ -561,19 +807,72 @@
            P0 possui a variável de disponibilidade por altura; LPI não possui
            flag equivalente. Aplicar um limiar apenas a P0 é rastreável.
            Inventar um limiar para LPI não seria defensável.</p>
+        </div>
+      </details>
+      <p class="section-outro"><strong>Interpretação:</strong> a rede fornece dois
+        eixos de evidência que não devem ser reduzidos a um escore único. A próxima
+        seção permite explorar cada comparação observacional em seu contexto.</p>
+    </section>
+
+    <section id="validacao">
+      <p class="section-kicker">4 · Validação observacional</p>
+      <h2>Qual configuração reproduz melhor as observações?</h2>
+      <p class="section-question"><strong>Pergunta:</strong> como viés, RMSE,
+        correlação, distribuições, ciclos e perfis mudam por rede, ponto, período
+        e altura?</p>
+      <p class="lead">LiDAR e INMET continuam separados. “Melhor resultado
+        numérico” identifica apenas o valor da métrica; significância é comunicada
+        exclusivamente pelos testes e intervalos disponíveis.</p>
+      <div class="banner info">
+        <strong>ERA5 como referência mínima de desempenho.</strong> A comparação
+        usa 10 m nas estações INMET e 100 m nos LiDARs. Em outras alturas LiDAR,
+        o painel mostra explicitamente <strong>“Não avaliado nesta altura”</strong>.
       </div>
 
-      <div id="inmet" class="topic">
-        <h3>5.2 Validação da circulação de superfície — INMET</h3>
+      <div id="painel-validacao" class="topic">
+        <h3>Explorador interativo de validação</h3>
+        <p class="topic-intro">Escolha rede, ponto, período, altura e tipo de
+          evidência. Métricas são dados interativos; figuras PNG são identificadas
+          como produtos pré-renderizados e preservam acesso ao arquivo original.</p>
+        {% if validation_panel and meteo_viewer %}
+        <div class="interactive-panel" id="validation-viewer">
+          <div class="panel-controls">
+            <label>Rede<select id="validation-network">
+              <option value="LiDAR">LiDAR</option>
+              <option value="INMET">INMET</option>
+            </select></label>
+            <label>Sítio ou estação<select id="validation-point"></select></label>
+            <label>Período<select id="validation-period"></select></label>
+            <label>Altura<select id="validation-height"></select></label>
+            <label>Tipo de evidência<select id="validation-chart"></select></label>
+          </div>
+          <div class="source-toggles" id="validation-sources" aria-label="Experimentos exibidos"></div>
+          <div class="map-and-detail">
+            <div class="validation-media" id="validation-stage"></div>
+            <aside class="panel-detail" id="validation-detail">
+              <h4>Evidência selecionada</h4><p>Carregando…</p>
+            </aside>
+          </div>
+          <div class="panel-status" id="validation-status"></div>
+        </div>
+        {% endif %}
+        {% if "network_summary" in tables %}{{ render_table(tables["network_summary"]) }}{% endif %}
+      </div>
+
+      <details id="inmet" class="detail-drawer">
+        <summary>Resultados completos da circulação de superfície — INMET</summary>
+        <div><h3>INMET a 10 m</h3>
         <p class="topic-intro">As estações automáticas testam se o modelo
            representa magnitude, variabilidade espacial e fase do ciclo diurno
            do vento terrestre a 10 m.</p>
         {% if "inmet" in tables %}{{ render_table(tables["inmet"]) }}{% endif %}
         {{ render_gallery(media_groups.get("inmet_validation")) }}
-      </div>
+        </div>
+      </details>
 
-      <div id="lidar" class="topic">
-        <h3>5.3 Validação offshore em altura de rotor — LiDAR</h3>
+      <details id="lidar" class="detail-drawer">
+        <summary>Resultados completos offshore em altura de rotor — LiDAR</summary>
+        <div><h3>LiDARs P0 e LPI</h3>
         <h4>Características dos dados nos sítios</h4>
         <p class="topic-intro">Distribuições e rosas dos ventos descrevem o
            regime observado antes de resumir o desempenho do modelo.</p>
@@ -592,11 +891,19 @@
         </div>
         {% if "lidar" in tables %}{{ render_table(tables["lidar"]) }}{% endif %}
         {{ render_gallery(media_groups.get("lidar_validation")) }}
-      </div>
+        </div>
+      </details>
+      <p class="section-outro"><strong>Limite:</strong> os dois períodos cobrem um
+        mês em cada sítio; diferenças numéricas pequenas devem ser lidas junto dos
+        intervalos pareados e da sensibilidade espacial.</p>
     </section>
 
     <section id="valor-adicionado">
-      <h2>6. Valor adicionado em relação ao ERA5</h2>
+      <p class="section-kicker">5 · Valor adicionado ao ERA5</p>
+      <h2>O downscaling reduz o erro da reanálise?</h2>
+      <p class="section-question"><strong>Pergunta:</strong> onde há ganho
+        detectável, perda detectável, diferença não detectável ou comparação não
+        realizada frente ao ERA5?</p>
       <p class="lead">Valor adicionado significa reduzir o erro da reanálise nas
          observações e/ou acrescentar estrutura espacial fisicamente plausível.
          Maior resolução, sozinha, não garante maior habilidade.</p>
@@ -612,12 +919,20 @@
         mostra a redução do MSE, também chamada de Murphy skill score.
       </div>
       {% if "added_value" in tables %}{{ render_table(tables["added_value"]) }}{% endif %}
+      {% if "inmet_added_value" in tables %}{{ render_table(tables["inmet_added_value"]) }}{% endif %}
       {% if "resource" in tables %}{{ render_table(tables["resource"]) }}{% endif %}
       {{ render_gallery(media_groups.get("added_value")) }}
+      <p class="section-outro"><strong>Interpretação:</strong> ganho espacial ou
+        numérico só é tratado como sustentado quando o intervalo disponível não
+        inclui zero. Alturas sem ERA5 equivalente permanecem “não avaliadas”.</p>
     </section>
 
     <section id="mecanismos">
-      <h2>7. Mecanismos físicos e seleção da configuração</h2>
+      <p class="section-kicker">6 · Interpretação física</p>
+      <h2>As mudanças estatísticas são fisicamente coerentes?</h2>
+      <p class="section-question"><strong>Pergunta:</strong> SST, fluxos de
+        superfície, camada limite e influência da fronteira sustentam a direção
+        das respostas observadas?</p>
       <p class="lead">O ranking estatístico precisa ser consistente com o
          mecanismo esperado. Uma aparente melhora sem resposta coerente em SST,
          fluxos, camada limite ou distância da fronteira não é transferível para
@@ -625,36 +940,101 @@
       <div class="banner info">
         <strong>Gate de integridade: aprovado.</strong>
         <code>check_sst_forcing.py</code> encontra zero células oceânicas no
-        valor de preenchimento da OISST em EXP01 e EXP02, com SST mínima de
-        299,5–300,7 K sobre o oceano e 301,5 K em P0. A cadeia física acompanha:
+        valor de preenchimento da OISST em EXP01, EXP02 e EXP03. Na EXP03, a SST
+        oceânica mínima é 299,97 K em 2021 e 299,47 K em 2022; P0/LPI recebem
+        os mesmos valores corrigidos dos experimentos predecessores. A cadeia física acompanha:
         em P0 os fluxos de calor sensível e latente são positivos (+9,2 e
         +141,7 W m⁻²) e a camada limite tem 624 m.
       </div>
-      {% if "selection" in tables %}{{ render_table(tables["selection"]) }}{% endif %}
       {{ render_gallery(media_groups.get("mechanisms")) }}
+      <p class="section-outro"><strong>Limite:</strong> o desenho é cumulativo e
+        EXP03 altera geometria, decomposição e representação pontual. As evidências
+        sustentam mecanismos plausíveis, não causalidade exclusiva.</p>
     </section>
 
-    <section id="conclusoes">
-      <h2>8. Conclusões e próximos passos</h2>
-      <div class="banner">
-        <strong>Recomendação.</strong> Para as rodadas climatológicas, adotar a
-        configuração <strong>EXP01</strong>: atualização diária de SST
-        NOAA OISST v2.1 com o preenchimento costeiro corrigido, sobre a malha
-        não bufferizada de 76.813 células. Ela supera o CTL em todas as 8
-        comparações sítio–período–altura e não é distinguível do
-        EXP02 em nenhuma delas, custando 24 % menos células.
+    <section id="sintese">
+      <p class="section-kicker">7 · Síntese e seleção científica</p>
+      <h2>O que o conjunto de evidências permite recomendar?</h2>
+      <p class="section-question"><strong>Pergunta:</strong> como desempenho
+        LiDAR, resultados INMET, valor adicionado, testes pareados, sensibilidade
+        espacial e custo se combinam sem produzir um ranking automático?</p>
+      <div class="synthesis-grid">
+        <div class="card"><strong>LiDAR offshore</strong><p>EXP03 acompanha as candidatas corrigidas em P0/2021 e apresenta a menor RMSE a 100 m em LPI/2022.</p></div>
+        <div class="card"><strong>INMET terrestre</strong><p>EXP03 reduz viés e RMSE médios, mas não maximiza a correlação; esse eixo não ranqueia sozinho o recurso offshore.</p></div>
+        <div class="card"><strong>Valor adicionado</strong><p>Em 100 m, EXP03 adiciona habilidade sobre ERA5 nos dois LiDARs; os intervalos permanecem visíveis nas tabelas.</p></div>
+        <div class="card"><strong>Custo e incerteza</strong><p>O custo medido e a sensibilidade à célula precisam acompanhar qualquer decisão de configuração.</p></div>
+      </div>
+
+      <nav class="analysis-flow" aria-label="Fluxo da análise interativa">
+        <a href="#network-viewer">1 · mapa</a>
+        <a href="#painel-validacao">2 · métricas</a>
+        <a href="#comparacao-direta">3 · comparação</a>
+        <a href="#comparacao-direta">4 · significância</a>
+        <a href="#resumo-descritivo">5 · síntese agregada</a>
+      </nav>
+
+      <div class="interactive-panel" id="resumo-descritivo">
+        <div class="panel-controls">
+          <label>Rede observacional<select id="summary-network">
+            <option value="LiDAR">LiDAR offshore</option>
+            <option value="INMET">INMET terrestre</option>
+          </select></label>
+          <label>Métrica de interesse<select id="summary-metric">
+            <option value="rmse">RMSE médio</option>
+            <option value="bias">Viés médio absoluto</option>
+            <option value="r">Correlação média</option>
+            <option value="skill_vs_era5">Murphy skill médio (adimensional)</option>
+          </select></label>
+        </div>
+        <div class="filter-groups">
+          <fieldset class="filter-box"><legend>Sítios ou estações</legend><div class="filter-options" id="summary-points"></div></fieldset>
+          <fieldset class="filter-box"><legend>Períodos</legend><div class="filter-options" id="summary-periods"></div></fieldset>
+          <fieldset class="filter-box"><legend>Alturas</legend><div class="filter-options" id="summary-heights"></div></fieldset>
+        </div>
+        <div class="aggregate-meta" id="summary-meta"></div>
+        <div class="aggregate-grid" id="summary-results"></div>
+        <div class="gain-loss">
+          <h4>Síntese de ganho ou perda frente ao ERA5</h4>
+          <p class="topic-intro">Contagens por unidade observacional: IC95% totalmente positivo = ganho detectável; totalmente negativo = perda detectável; intervalo contendo zero = diferença não detectável. Casos sem avaliação comparável permanecem separados.</p>
+          <div class="gain-loss-grid" id="gain-loss-results"></div>
+        </div>
+        <div class="panel-status" id="summary-status"></div>
+      </div>
+
+      <div class="interactive-panel" id="comparacao-direta">
+        <div class="panel-controls">
+          <label>Experimento A<select id="pair-experiment-a"></select></label>
+          <label>Experimento B<select id="pair-experiment-b"></select></label>
+          <label>Sítio<select id="pair-site"></select></label>
+          <label>Período<select id="pair-period"></select></label>
+          <label>Altura<select id="pair-height"></select></label>
+        </div>
+        <div class="comparison-result" id="pair-result"></div>
+        <div class="panel-status" id="pair-status"></div>
+      </div>
+
+      {% if "selection" in tables %}{{ render_table(tables["selection"]) }}{% endif %}
+      <div class="banner info">
+        <strong>Síntese preliminar, ainda não ratificada.</strong> EXP03 apresenta
+        a menor RMSE a 100 m em LPI/2022 e melhora significativamente sobre EXP01
+        e EXP02 nessa altura. Em P0/2021, EXP03, EXP01 e EXP02 não são
+        estatisticamente distinguíveis entre si. O conjunto sustenta manter EXP03
+        como candidata forte, mas não autoriza por si só uma escolha climatológica
+        definitiva.
       </div>
 
       <h3>O que os resultados permitem afirmar</h3>
       <ul class="plain-list">
-        <li>As três integrações estão completas nos dois períodos, sem lacunas horárias na janela científica pós-spin-up, e cada arquivo foi aberto e lido na auditoria de integridade.</li>
-        <li><strong>A atualização diária de SST melhora o vento em altura de rotor, uma vez que a forçante é sadia.</strong> EXP01 tem erro quadrático médio pareado menor que o CTL em 8 de 8 comparações — todas as alturas, nos dois sítios e nos dois períodos. O viés a 100 m cai de −1,24 para −0,95 m s⁻¹ em P0 e de −0,96 para −0,55 m s⁻¹ em LPI; o viés de densidade de potência eólica melhora de −36,9 % para −30,0 % e de −21,4 % para −13,5 %.</li>
+        <li>As quatro configurações estão completas nos dois períodos, sem lacunas horárias nas janelas científicas: 721 saídas em 2021 e 745 em 2022. A EXP03/2022 passou também pela auditoria NetCDF integral dos 985 históricos e 41 reinícios.</li>
+        <li><strong>A configuração de SST do EXP01 melhora o vento em altura de rotor, uma vez que a forçante é sadia.</strong> EXP01 tem erro quadrático médio pareado menor que o CTL em 8 de 8 comparações — todas as alturas, nos dois sítios e nos dois períodos. O contraste combina a atualização diária e a diferença do estado médio OISST frente à SST inicial do ERA5; este desenho não isola a frequência temporal. O viés a 100 m cai de −1,24 para −0,95 m s⁻¹ em P0 e de −0,96 para −0,55 m s⁻¹ em LPI; o viés de densidade de potência eólica melhora de −36,9 % para −30,0 % e de −21,4 % para −13,5 %.</li>
         <li>Essa conclusão <strong>inverte</strong> a leitura obtida antes da correção da SST, quando o CTL aparecia como a única escolha defensável: o defeito de pré-processamento resfriava artificialmente o mar costeiro, estabilizava a camada superficial e enfraquecia o vento justamente nas alturas avaliadas, mascarando o ganho real. Ver <a href="sst-fix-comparison/index.html">comparação antigo × corrigido</a>.</li>
-        <li><strong>O tratamento de fronteira não se paga nos sítios.</strong> EXP02 não se distingue estatisticamente do EXP01 em nenhuma das 8 comparações, apesar de custar 24 % mais células e cerca de 18 % mais tempo de parede com o mesmo número de ranks.</li>
+        <li><strong>Em P0/2021, a EXP03 acompanha as candidatas corrigidas.</strong> Ela melhora significativamente sobre o CTL nas quatro alturas usadas na seleção (50–200 m); os testes não detectam diferença frente a EXP01 ou EXP02. Isso não demonstra equivalência entre as configurações.</li>
+        <li><strong>Em LPI/2022, a EXP03 é favorecida.</strong> Ela melhora sobre CTL e EXP02 nas quatro alturas; frente a EXP01, a diferença é significativa em 50 e 100 m e não detectável em 150 e 200 m. A 100 m, RMSE = 1,86 m s⁻¹ para EXP03, 2,07 para EXP01 e 2,02 para EXP02.</li>
         <li>Ainda assim, o tratamento de fronteira <strong>atua como projetado</strong>: a diferença média absoluta no vento de 100 m decai monotonicamente com a distância à zona de relaxação do EXP01, de 0,26 m s⁻¹ a menos de 50 km para 0,11 m s⁻¹ entre 300 e 500 km. O efeito é real; os instrumentos é que não estão onde ele importa.</li>
-        <li><strong>O downscaling passa a adicionar skill sobre o ERA5 nos dois sítios.</strong> Escore de Murphy a 100 m, com intervalo de bootstrap em blocos de 95 %: em P0, CTL +0,24 [0,11; 0,39], EXP01 +0,34 [0,22; 0,50], EXP02 +0,40 [0,26; 0,61]; em LPI, CTL +0,12 [−0,02; 0,27] (não significativo), EXP01 +0,30 [0,16; 0,44], EXP02 +0,33 [0,21; 0,47]. Antes da correção, apenas P0 apresentava ganho significativo.</li>
+        <li><strong>EXP03 adiciona habilidade sobre o ERA5 nos dois sítios.</strong> Escore de Murphy a 100 m, com IC95% por bootstrap em blocos: +0,39 [0,25; 0,59] em P0/2021 e +0,43 [0,32; 0,55] em LPI/2022. Em LPI, é o maior ganho entre as quatro configurações.</li>
         <li>INMET e LiDAR trazem diagnósticos complementares e não são agrupados: o primeiro avalia a circulação costeira terrestre a 10 m; o segundo avalia o recurso offshore em alturas de rotor.</li>
-        <li>O custo normalizado permite comparar execuções com números diferentes de ranks. EXP01 e EXP02 rodaram em 90 ranks; execuções anteriores da mesma malha em 60 ranks custaram 2,54 horas-máquina por hora simulada contra 3,22 em 90. <strong>90 ranks sobre-decompõem esta malha</strong> — as rodadas climatológicas devem usar 60.</li>
+        <li>EXP03 usou 60 ranks e consumiu 3,54–3,55 horas-rank por hora simulada nos dois períodos. Esse custo medido deve ser interpretado junto com suas 102.968 células e não como uma comparação bruta de eficiência com execuções em 90 ranks.</li>
+        <li>Nas seis combinações estação–período do eixo INMET, EXP03 apresenta o menor viés e RMSE médios (1,70 e 2,05 m s⁻¹), mas correlação média 0,67, abaixo de CTL/EXP01 (0,72). O eixo terrestre não deve ser usado isoladamente para ranquear o recurso offshore.</li>
       </ul>
 
       <h3>O que ainda não é possível concluir</h3>
@@ -664,26 +1044,29 @@
         <li>O eixo INMET é dominado por representatividade — mastros abrigados contra uma célula de ~5 km — e por isso seu viés absoluto não discrimina configurações. Vale pela fase e pela estrutura ao longo da costa, não pela magnitude.</li>
         <li>O erro de fase diurna em P0 não é interpretável célula a célula: o ciclo observado é <strong>duplo-pico</strong> (08 e 22 h local), de modo que a métrica baseada no máximo salta entre +4 h e −10 h entre alturas vizinhas. A amplitude é o indicador confiável nesse sítio.</li>
         <li>O valor do tratamento de fronteira <strong>perto da própria fronteira</strong> não foi medido contra observações, apenas contra o outro experimento. Se a região próxima ao contorno fizer parte do produto, a decisão muda.</li>
+        <li>A habilidade observacional da EXP03 não demonstra que a extensão do núcleo refinado seja sua causa. Malha, decomposição MPI e representação pontual diferem entre as configurações.</li>
+        <li>A sensibilidade às cinco células oceânicas é pequena em P0, mas
+        relevante em LPI: a amplitude de RMSE entre células é 0,71 m s⁻¹ na
+        EXP03 e 1,08–1,33 m s⁻¹ nas demais configurações. O ranking principal
+        usa sempre a célula geograficamente mais próxima, escolhida sem consultar
+        o desempenho, e deve ser interpretado com essa incerteza de representatividade.</li>
       </ul>
 
       <h3>Próximas ações</h3>
       <ol class="plain-list">
-        <li>Adotar EXP01 como configuração das rodadas climatológicas e registrar a decisão com os números desta seção.</li>
-        <li>Submeter a correção do conversor da OISST ao repositório de origem (<code>usp-utils</code>, em CGFD-USP/MPAS-Research), para que o defeito deixe de atingir outros usuários. A correção está implementada e testada no ramo <code>fix/oisst-coastal-land-fill</code>, mas ainda não foi enviada: o <code>develop</code> segue escrevendo a constante de 273,15 K sobre o continente.</li>
+        <li>Submeter a comparação CTL–EXP03 e sua sensibilidade espacial à avaliação do pesquisador antes de registrar qualquer decisão de configuração climatológica.</li>
         <li>Investigar o viés baixo residual com os diagnósticos já extraídos nos sítios (<code>ust</code>, <code>znt</code>, <code>zol</code>), separando rugosidade, mistura e forçamento lateral.</li>
         <li>Acrescentar um segundo mês, de condições típicas, em P0 — a avaliação atual nesse sítio repousa sobre um extremo climatológico.</li>
-        <li>Avaliar se o próximo experimento de fronteira deve usar uma malha de contorno suave (elíptica), eliminando as quinas do polígono atual, antes de decidir se o tratamento de fronteira volta à pauta.</li>
+        <li>Se necessário para a decisão final, ampliar a amostra temporal mantendo o protocolo de comparação já estabelecido.</li>
       </ol>
-    </section>
-
-    <section id="limitacoes">
-      <h2>9. Limitações e defeitos conhecidos</h2>
+      <details id="limitacoes" class="method-details">
+        <summary>Limitações, incertezas e defeitos conhecidos</summary>
+        <div>
+      <h3>Registro de limitações e incertezas</h3>
       <p class="lead">Registro honesto do que, nesta análise, não deve ser lido
-         literalmente. Está no fim de propósito: nada aqui invalida as
-         conclusões da seção 8, mas cada item muda como um número específico
-         pode ser citado.</p>
+         literalmente. Cada item muda como um número específico pode ser citado.</p>
 
-      <h3>9.1 Números que não devem ser comparados diretamente</h3>
+      <h4>Números que não devem ser comparados diretamente</h4>
       <ul class="plain-list">
         <li><strong>Custo com origem “estimado”.</strong> Quando o wrapper de
           execução não registrou o tempo, ele é reconstruído de carimbos de
@@ -706,13 +1089,14 @@
           longo da costa, não pela magnitude do viés.</li>
       </ul>
 
-      <h3>9.2 Resultados sem explicação</h3>
+      <h4>Resultados sem explicação</h4>
       <ul class="plain-list">
         <li><strong>Viés baixo de vento em todo sítio bem exposto</strong>, de
           −0,5 a −1,1 m s⁻¹ nos LiDARes mesmo após a correção da SST, e com o
           mesmo sinal no próprio ERA5 que fornece as fronteiras. Não é artefato
           de superfície do mar. É o erro mais consequente para avaliação de
-          recurso, porque −20 % em densidade de potência é −20 % em energia, e
+          recurso, porque uma diferença na densidade de potência disponível pode
+          alterar a energia estimada após a aplicação da curva de potência, e
           continua em aberto.</li>
         <li><strong>Duas células oceânicas do CTL em 2022 a 293,5 K.</strong>
           Não é o defeito da OISST — o CTL nem lê o arquivo de atualização de
@@ -721,12 +1105,14 @@
           os sítios, mas o verificador as sinaliza e a causa é outra.</li>
       </ul>
 
-      <h3>9.3 Pontos de atenção operacionais</h3>
+      <h4>Pontos de atenção operacionais</h4>
       <ul class="plain-list">
         <li><strong>90 ranks sobre-decompõem esta malha.</strong> Medido lado a
           lado na mesma malha e mesmos períodos: 3,22 horas-máquina por hora
           simulada em 90 ranks contra 2,54 em 60. Aumentar 1,5× os ranks rendeu
-          1,18× de velocidade. As rodadas climatológicas devem usar 60.</li>
+          1,18× de velocidade. Para essa malha, 60 ranks é a hipótese de
+          paralelismo mais econômica entre as medições disponíveis; EXP03 exige
+          avaliação própria por ter mais células.</li>
         <li><strong>As animações não acompanham a versão em repositório</strong>
           (67 dos 91 MB do pacote). São regeneradas pelo estágio 05.</li>
         <li><strong>O verificador de SST continua auditando as execuções
@@ -735,7 +1121,7 @@
           contaminação nova interrompe o pipeline.</li>
       </ul>
 
-      <h3>9.4 Defeitos encontrados e corrigidos nesta revisão</h3>
+      <h4>Defeitos encontrados e corrigidos nesta revisão</h4>
       <p class="topic-intro">Registrados porque eram silenciosos — nenhum deles
          produzia erro, todos produziam resultado errado ou incompleto.</p>
       <ul class="plain-list">
@@ -756,6 +1142,11 @@
           resultados anteriores à correção, sob os mesmos nomes de experimento,
           e já não eram regeradas pelo pipeline. Foram removidas.</li>
       </ul>
+        </div>
+      </details>
+      <p class="section-outro"><strong>Recomendação:</strong> EXP03 permanece
+        candidata forte para revisão científica final, mas o relatório não
+        ratifica automaticamente a configuração climatológica.</p>
     </section>
   </main>
 </div>
@@ -776,6 +1167,9 @@
   Consulte <code>report_manifest.json</code> para a proveniência de tabelas,
   figuras e animações.
 </footer>
+{% if validation_panel %}<script type="application/json" id="validation-data">{{ validation_panel | tojson }}</script>{% endif %}
+{% if meteo_viewer %}<script type="application/json" id="meteo-data">{{ meteo_viewer | tojson }}</script>{% endif %}
+<script type="application/json" id="table-data">{{ table_data | tojson }}</script>
 <script>
   (() => {
     const lightbox = document.getElementById('figure-lightbox');
@@ -811,6 +1205,681 @@
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && !lightbox.hidden) closeLightbox();
     });
+
+    document.querySelectorAll('[data-media-explorer]').forEach((root) => {
+      const select = root.querySelector('select');
+      if (!select) return;
+      const figures = [...root.querySelectorAll('[data-media-index]')];
+      select.addEventListener('change', () => {
+        figures.forEach((figure) => { figure.hidden = figure.dataset.mediaIndex !== select.value; });
+      });
+    });
+
+    const tableElement = document.getElementById('table-data');
+    const tableData = tableElement ? JSON.parse(tableElement.textContent) : {};
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+    const csvValue = (value) => {
+      const text = value == null ? '' : String(value);
+      return /[;"\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+
+    document.querySelectorAll('.table-explorer[data-table-id]').forEach((root) => {
+      const spec = tableData[root.dataset.tableId];
+      if (!spec) return;
+      const toolbar = root.querySelector('.table-toolbar');
+      const tbody = root.querySelector('tbody');
+      const count = root.querySelector('.table-count');
+      const state = {filters: {}, sort: '', descending: false, visible: spec.rows};
+
+      spec.filters.forEach((column) => {
+        const label = document.createElement('label');
+        label.textContent = spec.labels[column];
+        const select = document.createElement('select');
+        select.innerHTML = '<option value="">Todos</option>';
+        const values = [...new Set(spec.rows.map((row) => row.raw[column]).filter((value) => value != null))]
+          .sort((a, b) => String(a).localeCompare(String(b), 'pt-BR', {numeric: true}));
+        values.forEach((value) => select.add(new Option(String(value), String(value))));
+        select.addEventListener('change', () => { state.filters[column] = select.value; render(); });
+        label.appendChild(select); toolbar.appendChild(label);
+      });
+
+      if (spec.numeric.length) {
+        const label = document.createElement('label'); label.textContent = 'Ordenar por métrica';
+        const select = document.createElement('select');
+        select.innerHTML = '<option value="">Ordem original</option>';
+        spec.numeric.forEach((column) => select.add(new Option(spec.labels[column], column)));
+        select.addEventListener('change', () => { state.sort = select.value; render(); });
+        label.appendChild(select); toolbar.appendChild(label);
+
+        const directionLabel = document.createElement('label'); directionLabel.textContent = 'Direção';
+        const direction = document.createElement('select');
+        direction.innerHTML = '<option value="asc">Menor → maior</option><option value="desc">Maior → menor</option>';
+        direction.addEventListener('change', () => { state.descending = direction.value === 'desc'; render(); });
+        directionLabel.appendChild(direction); toolbar.appendChild(directionLabel);
+      }
+
+      const exportWrap = document.createElement('label'); exportWrap.textContent = 'Dados visíveis';
+      const exportButton = document.createElement('button'); exportButton.type = 'button'; exportButton.textContent = 'Exportar CSV filtrado';
+      exportButton.addEventListener('click', () => {
+        const lines = [spec.columns.map((column) => csvValue(spec.labels[column])).join(';')];
+        state.visible.forEach((row) => lines.push(spec.columns.map((column) => csvValue(row.values[column])).join(';')));
+        const blob = new Blob([`\ufeff${lines.join('\n')}\n`], {type: 'text/csv;charset=utf-8'});
+        const url = URL.createObjectURL(blob); const link = document.createElement('a');
+        link.href = url; link.download = `${spec.id}-filtrado.csv`; link.click(); URL.revokeObjectURL(url);
+      });
+      exportWrap.appendChild(exportButton); toolbar.appendChild(exportWrap);
+
+      function render() {
+        let rows = spec.rows.filter((row) => Object.entries(state.filters).every(([column, value]) =>
+          !value || String(row.raw[column]) === value));
+        if (state.sort) rows = [...rows].sort((a, b) => {
+          const av = Number(a.raw[state.sort]), bv = Number(b.raw[state.sort]);
+          const aFinite = Number.isFinite(av), bFinite = Number.isFinite(bv);
+          if (!aFinite && !bFinite) return 0;
+          if (!aFinite) return 1;
+          if (!bFinite) return -1;
+          return (state.descending ? -1 : 1) * (av - bv);
+        });
+        state.visible = rows;
+        tbody.innerHTML = rows.map((row) => `<tr${row.row_classes ? ` class="${escapeHtml(row.row_classes)}"` : ''}>${spec.columns.map((column) => {
+          const css = row.cell_classes[column];
+          return `<td${css ? ` class="${escapeHtml(css)}"` : ''}>${escapeHtml(row.values[column])}</td>`;
+        }).join('')}</tr>`).join('');
+        count.textContent = `${rows.length} de ${spec.rows.length} linhas exibidas. Destaque amarelo = melhor valor numérico no grupo científico comparável; não implica significância.`;
+      }
+      render();
+    });
+  })();
+
+  (() => {
+    const NS = 'http://www.w3.org/2000/svg';
+    const parseData = (id) => {
+      const element = document.getElementById(id);
+      return element ? JSON.parse(element.textContent) : null;
+    };
+    const number = (value, digits=2) => value == null || !Number.isFinite(Number(value))
+      ? '—' : Number(value).toLocaleString('pt-BR', {minimumFractionDigits: digits, maximumFractionDigits: digits});
+    const interval = (row, key, digits=2) => `${number(row[key], digits)} [${number(row[key + '_lo'], digits)}; ${number(row[key + '_hi'], digits)}]`;
+    const svgElement = (name, attrs={}) => {
+      const element = document.createElementNS(NS, name);
+      Object.entries(attrs).forEach(([key, value]) => element.setAttribute(key, value));
+      return element;
+    };
+
+    function geographicSvg(stage, data, imageUrl=null) {
+      const [x0, x1, y0, y1] = data.extent;
+      const initial = {x: x0, y: -y1, w: x1 - x0, h: y1 - y0};
+      const svg = svgElement('svg', {
+        viewBox: `${initial.x} ${initial.y} ${initial.w} ${initial.h}`,
+        preserveAspectRatio: 'xMidYMid meet', role: 'img',
+        'aria-label': 'Mapa geográfico interativo'
+      });
+      if (imageUrl) svg.appendChild(svgElement('image', {
+        href: imageUrl, x: x0, y: -y1, width: x1 - x0, height: y1 - y0,
+        preserveAspectRatio: 'none'
+      }));
+      for (let lon = Math.ceil(x0 / 2) * 2; lon <= x1; lon += 2) {
+        svg.appendChild(svgElement('line', {x1: lon, x2: lon, y1: -y1, y2: -y0, class: 'map-grid'}));
+      }
+      for (let lat = Math.ceil(y0 / 2) * 2; lat <= y1; lat += 2) {
+        svg.appendChild(svgElement('line', {x1: x0, x2: x1, y1: -lat, y2: -lat, class: 'map-grid'}));
+      }
+      (data.coastline || []).forEach((line) => {
+        const points = line.map(([lon, lat]) => `${lon},${-lat}`).join(' ');
+        svg.appendChild(svgElement('polyline', {points, class: 'map-coast'}));
+      });
+      stage.replaceChildren(svg);
+      const readout = document.createElement('span');
+      readout.className = 'cursor-readout';
+      readout.textContent = 'lon — · lat —';
+      stage.appendChild(readout);
+      let box = {...initial};
+      let drag = null;
+      const apply = () => svg.setAttribute('viewBox', `${box.x} ${box.y} ${box.w} ${box.h}`);
+      const svgPoint = (event) => {
+        const point = svg.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        return point.matrixTransform(svg.getScreenCTM().inverse());
+      };
+      svg.addEventListener('wheel', (event) => {
+        event.preventDefault();
+        const cursor = svgPoint(event);
+        const factor = event.deltaY > 0 ? 1.18 : .84;
+        const nw = Math.min(initial.w, Math.max(initial.w / 12, box.w * factor));
+        const nh = nw * initial.h / initial.w;
+        const ratio = nw / box.w;
+        box.x = cursor.x - (cursor.x - box.x) * ratio;
+        box.y = cursor.y - (cursor.y - box.y) * ratio;
+        box.w = nw; box.h = nh; apply();
+      }, {passive: false});
+      svg.addEventListener('pointerdown', (event) => {
+        if (event.target.closest && event.target.closest('.map-point')) return;
+        svg.setPointerCapture(event.pointerId);
+        drag = {x: event.clientX, y: event.clientY};
+      });
+      svg.addEventListener('pointermove', (event) => {
+        const cursor = svgPoint(event);
+        const lon = cursor.x;
+        const lat = -cursor.y;
+        readout.textContent = `lon ${lon.toFixed(2)}° · lat ${lat.toFixed(2)}°`;
+        if (!drag) return;
+        const matrix = svg.getScreenCTM();
+        box.x -= (event.clientX - drag.x) / Math.abs(matrix.a);
+        box.y -= (event.clientY - drag.y) / Math.abs(matrix.d);
+        drag.x = event.clientX;
+        drag.y = event.clientY;
+        apply();
+      });
+      const endDrag = () => { drag = null; };
+      svg.addEventListener('pointerup', endDrag);
+      svg.addEventListener('pointercancel', endDrag);
+      return {svg, reset: () => { box = {...initial}; apply(); }};
+    }
+
+    const meteo = parseData('meteo-data');
+    if (meteo && document.getElementById('meteo-viewer')) {
+      const experiment = document.getElementById('meteo-experiment');
+      const period = document.getElementById('meteo-period');
+      const variable = document.getElementById('meteo-variable');
+      const stage = document.getElementById('meteo-stage');
+      const detail = document.getElementById('meteo-detail');
+      const status = document.getElementById('meteo-status');
+      let resetMap = () => {};
+      meteo.experiments.forEach((value) => experiment.add(new Option(value, value)));
+      Object.entries(meteo.periods).forEach(([key, value]) => period.add(new Option(value.label, key)));
+      Object.entries(meteo.variables).forEach(([key, value]) => variable.add(new Option(value.label, key)));
+
+      function renderMeteo() {
+        const entry = meteo.entries.find((item) => item.experiment === experiment.value
+          && item.period === period.value && item.variable === variable.value && item.available !== false);
+        if (!entry) {
+          stage.innerHTML = `<div class="unavailable"><div><strong>Produto indisponível</strong><br>
+            ${experiment.value} · ${meteo.periods[period.value].label} · ${meteo.variables[variable.value].label}</div></div>`;
+          detail.innerHTML = '<h4>Combinação não produzida</h4><p>Nenhum resultado de outro experimento ou período foi usado como substituto.</p>';
+          status.textContent = 'Indisponível — seleção preservada sem substituição silenciosa.';
+          resetMap = () => {};
+          return;
+        }
+        if (entry.kind === 'georaster') {
+          const map = geographicSvg(stage, meteo, entry.url);
+          resetMap = map.reset;
+          const gradient = entry.colour_stops.map((stop) => `${stop.colour} ${stop.fraction * 100}%`).join(',');
+          detail.innerHTML = `<h4>${entry.variable_label}</h4>
+            <p><strong>${entry.experiment}</strong> · ${meteo.periods[entry.period].label}</p>
+            <p>${entry.n_hours} horários: ${entry.window_start} a ${entry.window_end}</p>
+            <div class="colourbar" style="background:linear-gradient(90deg,${gradient})"></div>
+            <div class="colourbar-labels"><span>${number(entry.vmin)} ${entry.unit}</span><span>${number(entry.vmax)} ${entry.unit}</span></div>
+            <p><small>${entry.projection}. Escala fixa para esta variável em todos os experimentos e períodos.</small></p>`;
+          status.textContent = `${entry.limitation} Use a roda/pinça para zoom e arraste para deslocar.`;
+        } else if (entry.kind === 'animation') {
+          const video = document.createElement(entry.source.endsWith('.gif') ? 'img' : 'video');
+          video.className = 'diagnostic-image'; video.src = entry.url;
+          if (video.tagName === 'VIDEO') { video.controls = true; video.preload = 'metadata'; }
+          stage.replaceChildren(video); resetMap = () => { if (video.tagName === 'VIDEO') video.currentTime = 0; };
+          detail.innerHTML = `<h4>${entry.variable_label}</h4><p><strong>${entry.experiment}</strong> · ${meteo.periods[entry.period].label}</p>
+            <p>${entry.site ? `Transecto: ${entry.site}. ` : ''}Janela: ${entry.days} dias a partir de ${entry.start}.</p>
+            ${entry.coverage_note ? `<p class="provisional">${entry.coverage_note}</p>` : ''}
+            <p><small>Reprodução sem interpolação: cada quadro representa um horário modelado.</small></p>`;
+          const base = entry.start ? new Date(`${entry.start.slice(0,4)}-${entry.start.slice(4,6)}-${entry.start.slice(6,8)}T00:00:00Z`) : null;
+          const updateTime = () => {
+            if (!base || video.tagName !== 'VIDEO') return;
+            const frame = Math.round(video.currentTime * (entry.fps || 6));
+            const when = new Date(base.getTime() + frame * (entry.frame_hours || 1) * 3600000);
+            status.textContent = `Quadro ${frame + 1} · ${when.toISOString().slice(0,16).replace('T',' ')} UTC. ${entry.limitation}`;
+          };
+          if (video.tagName === 'VIDEO') video.addEventListener('timeupdate', updateTime);
+          updateTime();
+        } else {
+          const image = document.createElement('img'); image.className = 'diagnostic-image'; image.src = entry.url;
+          image.alt = `${entry.variable_label} — ${entry.experiment} ${entry.period}`;
+          stage.replaceChildren(image); resetMap = () => {};
+          detail.innerHTML = `<h4>${entry.variable_label}</h4><p><strong>${entry.experiment}</strong> · ${meteo.periods[entry.period].label}</p>
+            <p>${entry.site ? `Local: ${entry.site}. ` : ''}${entry.unit}.</p>`;
+          status.textContent = entry.limitation;
+        }
+      }
+      [experiment, period, variable].forEach((control) => control.addEventListener('change', renderMeteo));
+      document.getElementById('meteo-reset').addEventListener('click', () => resetMap());
+      renderMeteo();
+    }
+
+    const validation = parseData('validation-data');
+    const selectionBridge = {
+      state: null,
+      listeners: [],
+      update(next, origin) {
+        this.state = {...next};
+        this.listeners.forEach((listener) => listener(this.state, origin));
+      },
+      subscribe(listener) { this.listeners.push(listener); }
+    };
+    const addPointMarker = (map, point, active, available, onClick) => {
+      let marker;
+      if (point.network === 'LiDAR') {
+        marker = svgElement('circle', {cx: point.lon, cy: -point.lat, r: .13});
+      } else {
+        const x = point.lon, y = -point.lat, s = .15;
+        marker = svgElement('polygon', {points: `${x},${y-s} ${x-s},${y+s} ${x+s},${y+s}`});
+      }
+      marker.setAttribute('class', `map-point${active ? ' active' : ''}`);
+      marker.setAttribute('fill', available ? (point.network === 'LiDAR' ? '#d1495b' : '#006d77') : '#9aa7ad');
+      const title = svgElement('title');
+      title.textContent = `${point.name} — ${available ? 'dados disponíveis' : 'indisponível no período'}`;
+      marker.appendChild(title); marker.addEventListener('click', onClick); map.svg.appendChild(marker);
+    };
+
+    if (validation && meteo && document.getElementById('network-viewer')) {
+      const period = document.getElementById('network-period');
+      const network = document.getElementById('network-kind');
+      const stage = document.getElementById('network-stage');
+      const detail = document.getElementById('network-detail');
+      const status = document.getElementById('network-status');
+      let selected = null; let resetMap = () => {};
+      Object.entries(validation.periods).forEach(([key, value]) => period.add(new Option(value.label, key)));
+      function renderNetwork() {
+        const map = geographicSvg(stage, meteo); resetMap = map.reset;
+        validation.points.forEach((point) => {
+          if (network.value !== 'all' && point.network !== network.value) return;
+          const available = point.available_periods.includes(period.value);
+          addPointMarker(map, point, selected && selected.point === point.point, available, () => {
+            selected = point;
+            const selectedPeriod = point.available_periods.includes(period.value)
+              ? period.value : point.available_periods[0];
+            const heights = [...new Set(validation.metrics.filter((row) => row.point === point.point
+              && row.period === selectedPeriod).map((row) => row.height_m))].sort((a,b) => a-b);
+            const previousHeight = selectionBridge.state && Number(selectionBridge.state.height);
+            const selectedHeight = heights.includes(previousHeight) ? previousHeight
+              : (heights.includes(100) ? 100 : heights[0]);
+            selectionBridge.update({network: point.network, point: point.point,
+              period: selectedPeriod, height: selectedHeight}, 'network-map');
+            renderNetwork();
+          });
+        });
+        if (!selected) {
+          detail.innerHTML = '<h4>Selecione um ponto</h4><p>Círculos: LiDAR; triângulos: INMET. Cinza indica ausência de produto no período.</p>';
+        } else {
+          detail.innerHTML = `<h4>${selected.name}</h4>
+            <p>${selected.network} · ${selected.lat.toFixed(3)}°, ${selected.lon.toFixed(3)}°</p>
+            <dl><dt>Instrumento</dt><dd>${selected.instrument}</dd>
+            <dt>Períodos disponíveis</dt><dd>${selected.available_periods.map((key) => validation.periods[key].label).join('; ')}</dd>
+            <dt>Alturas</dt><dd>${selected.available_heights_m.join(', ')} m</dd>
+            <dt>Qualidade</dt><dd>${selected.quality_control}</dd>
+            <dt>Correspondência</dt><dd>${selected.model_matching}</dd></dl>
+            <button type="button" class="panel-action" id="network-to-validation">Ir para métricas deste ponto</button>`;
+          detail.querySelector('#network-to-validation').addEventListener('click', () => {
+            document.getElementById('painel-validacao').scrollIntoView({behavior: 'smooth', block: 'start'});
+            document.getElementById('validation-point').focus();
+          });
+        }
+        status.textContent = 'A seleção descreve disponibilidade e método; métricas e figuras são exploradas na seção seguinte.';
+      }
+      selectionBridge.subscribe((state, origin) => {
+        if (origin === 'network-map') return;
+        const candidate = validation.points.find((item) => item.point === state.point);
+        if (!candidate) return;
+        selected = candidate;
+        network.value = candidate.network;
+        if (candidate.available_periods.includes(state.period)) period.value = state.period;
+        renderNetwork();
+      });
+      period.addEventListener('change', () => {
+        if (selected && selected.available_periods.includes(period.value)) {
+          selectionBridge.update({...selectionBridge.state, network: selected.network,
+            point: selected.point, period: period.value}, 'network-map');
+        } else selected = null;
+        renderNetwork();
+      });
+      network.addEventListener('change', () => { selected = null; renderNetwork(); });
+      document.getElementById('network-reset').addEventListener('click', () => resetMap());
+      renderNetwork();
+    }
+
+    if (validation && document.getElementById('validation-viewer')) {
+      const network = document.getElementById('validation-network');
+      const point = document.getElementById('validation-point');
+      const period = document.getElementById('validation-period');
+      const height = document.getElementById('validation-height');
+      const chart = document.getElementById('validation-chart');
+      const sourceRoot = document.getElementById('validation-sources');
+      const stage = document.getElementById('validation-stage');
+      const detail = document.getElementById('validation-detail');
+      const status = document.getElementById('validation-status');
+      const selectedSources = new Set(validation.sources);
+      const sourceOrder = ['ERA5', 'CTL', 'EXP01', 'EXP02', 'EXP03'];
+      sourceOrder.filter((source) => validation.sources.includes(source)).forEach((source) => {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" value="${source}" checked> ${source}`;
+        const input = label.querySelector('input');
+        input.addEventListener('change', () => {
+          if (input.checked) selectedSources.add(source); else selectedSources.delete(source);
+          if (!selectedSources.size) { input.checked = true; selectedSources.add(source); }
+          renderValidation();
+        });
+        sourceRoot.appendChild(label);
+      });
+
+      const setOptions = (control, entries, preferred) => {
+        const old = preferred ?? control.value;
+        control.replaceChildren(...entries.map(([value, label]) => new Option(label, value)));
+        if (entries.some(([value]) => String(value) === String(old))) control.value = old;
+      };
+      const currentPoint = () => validation.points.find((item) => item.point === point.value);
+      const matchingMedia = () => validation.media.filter((item) => item.network === network.value
+        && (item.point === point.value || item.point === 'all')
+        && (item.period === period.value || item.period === 'all')
+        && (!item.heights.length || item.heights.includes(Number(height.value))));
+
+      function syncControls(preferred={}) {
+        if (preferred.network && [...network.options].some((item) => item.value === preferred.network)) network.value = preferred.network;
+        const points = validation.points.filter((item) => item.network === network.value);
+        setOptions(point, points.map((item) => [item.point, item.name]), preferred.point);
+        const selectedPoint = currentPoint();
+        if (!selectedPoint) return;
+        setOptions(period, selectedPoint.available_periods.map((key) => [key, validation.periods[key].label]), preferred.period);
+        const heights = [...new Set(validation.metrics.filter((row) => row.point === point.value
+          && row.period === period.value).map((row) => row.height_m))].sort((a,b) => a-b);
+        const requestedHeight = Number(preferred.height ?? height.value);
+        const selectedHeight = heights.includes(requestedHeight) ? requestedHeight
+          : (heights.includes(100) ? 100 : heights[0]);
+        setOptions(height, heights.map((value) => [String(value), `${value} m`]), String(selectedHeight));
+        const media = matchingMedia();
+        const chartEntries = [['metrics', 'Métricas e intervalos']];
+        [...new Map(media.map((item) => [item.chart, item.chart_label])).entries()].forEach((entry) => chartEntries.push(entry));
+        setOptions(chart, chartEntries, preferred.chart);
+        renderValidation();
+      }
+
+      const bestValue = (rows, key, mode) => {
+        const values = rows.filter((row) => ['CTL','EXP01','EXP02','EXP03'].includes(row.source))
+          .map((row) => mode === 'abs' ? Math.abs(row[key]) : row[key]).filter(Number.isFinite);
+        return values.length ? (mode === 'max' ? Math.max(...values) : Math.min(...values)) : null;
+      };
+      const bestSources = (rows, key, mode) => {
+        const target = bestValue(rows, key, mode);
+        return target == null ? [] : rows.filter((row) => ['CTL','EXP01','EXP02','EXP03'].includes(row.source)
+          && Number.isFinite(row[key])
+          && Math.abs((mode === 'abs' ? Math.abs(row[key]) : row[key]) - target) < 1e-10).map((row) => row.source);
+      };
+      const marked = (value, target, mode, text) => {
+        const transformed = mode === 'abs' ? Math.abs(value) : value;
+        return target != null && Number.isFinite(transformed) && Math.abs(transformed - target) < 1e-10
+          ? `<span class="metric-best">${text}</span>` : text;
+      };
+      const skillBadge = (row) => {
+        if (row.source === 'ERA5') return '<span class="skill-badge skill-na">Referência ERA5</span>';
+        if (![row.skill_vs_era5, row.skill_lo, row.skill_hi].every((value) => Number.isFinite(value)))
+          return '<span class="skill-badge skill-na">Não avaliado nesta altura</span>';
+        if (row.skill_lo > 0) return '<span class="skill-badge skill-gain">Ganho detectável</span>';
+        if (row.skill_hi < 0) return '<span class="skill-badge skill-loss">Perda detectável</span>';
+        return '<span class="skill-badge skill-neutral">Diferença não detectável</span>';
+      };
+
+      function renderValidation() {
+        const selectedPoint = currentPoint(); if (!selectedPoint) return;
+        const inputs = [...sourceRoot.querySelectorAll('input')];
+        if (chart.value === 'metrics') {
+          inputs.forEach((input) => { input.disabled = false; });
+          const allRows = validation.metrics.filter((row) => row.point === point.value
+            && row.period === period.value && row.height_m === Number(height.value))
+            .sort((a,b) => sourceOrder.indexOf(a.source) - sourceOrder.indexOf(b.source));
+          const rows = allRows.filter((row) => selectedSources.has(row.source));
+          const best = {rmse: bestValue(allRows, 'rmse', 'min'), bias: bestValue(allRows, 'bias', 'abs'), r: bestValue(allRows, 'r', 'max')};
+          const winners = {
+            rmse: bestSources(allRows, 'rmse', 'min'),
+            bias: bestSources(allRows, 'bias', 'abs'),
+            r: bestSources(allRows, 'r', 'max')
+          };
+          const reference = rows.find((row) => row.source === 'ERA5');
+          const mpasRows = rows.filter((row) => row.source !== 'ERA5');
+          const referenceHtml = reference ? `<div class="metric-reference" data-source="ERA5">
+            <div><strong>Referência ERA5</strong><p>Benchmark observacional; não participa da escolha do melhor MPAS.</p></div>
+            <div><strong>RMSE ${interval(reference,'rmse')} <span class="metric-unit">m s⁻¹</span></strong>
+            <small>Viés ${interval(reference,'bias')} m s⁻¹ · r ${interval(reference,'r')}</small></div></div>` : '';
+          const cardsHtml = mpasRows.map((row) => `<div class="metric-card" data-source="${row.source}">
+            <small class="source-name">${row.source}</small>
+            <strong class="metric-primary">RMSE ${marked(row.rmse, best.rmse, 'min', number(row.rmse))} <span class="metric-unit">m s⁻¹</span></strong>
+            <div class="metric-secondary">
+              <span class="metric-interval">IC95% [${number(row.rmse_lo)}; ${number(row.rmse_hi)}]</span>
+              <span>Viés ${marked(row.bias, best.bias, 'abs', number(row.bias))} <span class="metric-unit">m s⁻¹</span> <span class="metric-interval">[${number(row.bias_lo)}; ${number(row.bias_hi)}]</span></span>
+              <span>Correlação r ${marked(row.r, best.r, 'max', number(row.r))} <span class="metric-interval">[${number(row.r_lo)}; ${number(row.r_hi)}]</span></span>
+              <span>Murphy skill (adimensional) ${Number.isFinite(row.skill_vs_era5) ? `${number(row.skill_vs_era5)} [${number(row.skill_lo)}; ${number(row.skill_hi)}]` : '—'}</span>
+            </div>${skillBadge(row)}</div>`).join('');
+          const hiddenWinner = Object.entries(winners).flatMap(([metric, sources]) => {
+            const hidden = sources.filter((source) => !selectedSources.has(source));
+            return hidden.length ? [`${metric === 'rmse' ? 'RMSE' : metric === 'bias' ? 'viés absoluto' : 'correlação'}: ${hidden.join(', ')}`] : [];
+          });
+          const hiddenHtml = hiddenWinner.length ? `<p class="hidden-winner-note"><strong>Melhor resultado oculto pelos filtros:</strong> ${hiddenWinner.join(' · ')}. O destaque não foi transferido para outra configuração.</p>` : '';
+          stage.innerHTML = rows.length ? `<div class="validation-metrics">${referenceHtml}<div class="metric-grid metric-grid-mpas">${cardsHtml}</div>${hiddenHtml}</div>`
+            : '<div class="unavailable"><strong>Combinação sem métricas visíveis</strong></div>';
+          const role = allRows.some((row) => row.selection_role === 'descriptive_only')
+            ? '<p class="provisional">Esta altura é descritiva e não participa dos testes de seleção.</p>' : '';
+          detail.innerHTML = `<h4>${selectedPoint.name}</h4><p>${network.value} · ${validation.periods[period.value].label} · ${height.value} m</p>${role}
+            <p><strong>Amarelo:</strong> melhor resultado numérico entre os quatro experimentos MPAS, inclusive quando algum cartão está oculto. Os badges comunicam separadamente a evidência estatística frente ao ERA5.</p>`;
+          status.textContent = `${validation.methods.confidence_interval}. Murphy skill é adimensional e aparece em escala decimal: 0,41 significa redução de 41% do MSE do modelo frente ao ERA5, nos mesmos horários. Vencedores globais: RMSE ${winners.rmse.join('/') || '—'}; viés ${winners.bias.join('/') || '—'}; r ${winners.r.join('/') || '—'}.`;
+        } else {
+          inputs.forEach((input) => { input.disabled = true; });
+          const item = matchingMedia().find((entry) => entry.chart === chart.value);
+          if (!item) {
+            stage.innerHTML = '<div class="unavailable"><strong>Figura indisponível para esta combinação</strong></div>';
+            detail.innerHTML = '<h4>Produto não produzido</h4><p>Nenhuma figura de outro ponto, período ou altura foi usada como substituta.</p>';
+            status.textContent = 'Indisponível — combinação preservada sem substituição silenciosa.'; return;
+          }
+          stage.innerHTML = `<img src="${item.url}" alt="${item.title}">`;
+          detail.innerHTML = `<h4>${item.title}</h4><p>${item.caption}</p>
+            <p><a href="${item.url}" target="_blank" rel="noopener">Abrir figura original</a></p>
+            <p><small>PNG pré-renderizado; não é um gráfico recalculado no navegador.</small></p>`;
+          status.textContent = 'A figura original contém as fontes definidas na sua geração. Os seletores de experimentos ficam desabilitados para não simular filtragem inexistente.';
+        }
+      }
+      const publishSelection = () => selectionBridge.update({network: network.value, point: point.value,
+        period: period.value, height: Number(height.value)}, 'validation');
+      selectionBridge.subscribe((state, origin) => {
+        if (origin === 'validation') return;
+        syncControls(state);
+      });
+      network.addEventListener('change', () => { syncControls({network: network.value}); publishSelection(); });
+      point.addEventListener('change', () => { syncControls({point: point.value, period: period.value, height: height.value}); publishSelection(); });
+      period.addEventListener('change', () => { syncControls({point: point.value, period: period.value, height: height.value}); publishSelection(); });
+      height.addEventListener('change', () => { renderValidation(); publishSelection(); });
+      chart.addEventListener('change', renderValidation);
+      syncControls({network: network.value});
+      publishSelection();
+    }
+
+    const mpasSources = ['CTL', 'EXP01', 'EXP02', 'EXP03'];
+    const isFiniteValue = (value) => value !== null && value !== '' && Number.isFinite(Number(value));
+    const finiteMean = (values) => {
+      const valid = values.filter(isFiniteValue).map(Number);
+      return valid.length ? valid.reduce((total, value) => total + value, 0) / valid.length : null;
+    };
+    const classifySkill = (row) => {
+      if (![row.skill_vs_era5, row.skill_lo, row.skill_hi].every(isFiniteValue)) return 'not_evaluated';
+      if (Number(row.skill_lo) > 0) return 'gain';
+      if (Number(row.skill_hi) < 0) return 'loss';
+      return 'not_detected';
+    };
+    const aggregateMetrics = (rows) => mpasSources.map((source) => {
+      const sourceRows = rows.filter((row) => row.source === source);
+      const skillRows = sourceRows.filter((row) => isFiniteValue(row.skill_vs_era5));
+      return {
+        source,
+        bias: finiteMean(sourceRows.map((row) => row.bias)),
+        rmse: finiteMean(sourceRows.map((row) => row.rmse)),
+        r: finiteMean(sourceRows.map((row) => row.r)),
+        skill_vs_era5: finiteMean(skillRows.map((row) => row.skill_vs_era5)),
+        n_units: sourceRows.length,
+        n_skill_units: skillRows.length
+      };
+    });
+    const aggregateWinners = (aggregates, metric) => {
+      const available = aggregates.filter((row) => Number.isFinite(row[metric]));
+      if (!available.length) return [];
+      const transformed = (row) => metric === 'bias' ? Math.abs(row.bias) : row[metric];
+      const target = metric === 'r' || metric === 'skill_vs_era5'
+        ? Math.max(...available.map(transformed)) : Math.min(...available.map(transformed));
+      return available.filter((row) => Math.abs(transformed(row) - target) < 1e-10).map((row) => row.source);
+    };
+    const orientPairwise = (rows, experimentA, experimentB, site, period, height) => {
+      const matching = rows.find((row) => String(row.site) === String(site)
+        && String(row.period) === String(period) && Number(row.height_m) === Number(height)
+        && ((row.experiment_a === experimentA && row.experiment_b === experimentB)
+          || (row.experiment_a === experimentB && row.experiment_b === experimentA)));
+      if (!matching) return null;
+      const direct = matching.experiment_a === experimentA;
+      return direct ? {...matching, experiment_a: experimentA, experiment_b: experimentB}
+        : {...matching, experiment_a: experimentA, experiment_b: experimentB,
+          rmse_a: matching.rmse_b, rmse_b: matching.rmse_a,
+          delta_mse: -Number(matching.delta_mse), lo: -Number(matching.hi), hi: -Number(matching.lo)};
+    };
+    window.MEQReportAudit = {isFiniteValue, finiteMean, classifySkill, aggregateMetrics, aggregateWinners, orientPairwise};
+
+    if (validation && document.getElementById('resumo-descritivo')) {
+      const network = document.getElementById('summary-network');
+      const metric = document.getElementById('summary-metric');
+      const pointRoot = document.getElementById('summary-points');
+      const periodRoot = document.getElementById('summary-periods');
+      const heightRoot = document.getElementById('summary-heights');
+      const meta = document.getElementById('summary-meta');
+      const results = document.getElementById('summary-results');
+      const gainLoss = document.getElementById('gain-loss-results');
+      const status = document.getElementById('summary-status');
+
+      const checked = (root) => new Set([...root.querySelectorAll('input:checked')].map((input) => input.value));
+      const renderChecks = (root, entries, preserved, onChange) => {
+        const allowed = new Set(entries.map(([value]) => String(value)));
+        const selected = new Set([...preserved].filter((value) => allowed.has(String(value))).map(String));
+        if (!selected.size) entries.forEach(([value]) => selected.add(String(value)));
+        root.replaceChildren(...entries.map(([value, label]) => {
+          const wrapper = document.createElement('label');
+          const input = document.createElement('input');
+          input.type = 'checkbox'; input.value = String(value); input.checked = selected.has(String(value));
+          input.addEventListener('change', () => {
+            if (!root.querySelector('input:checked')) input.checked = true;
+            onChange();
+          });
+          wrapper.append(input, document.createTextNode(` ${label}`));
+          return wrapper;
+        }));
+      };
+      const rebuildFilters = (reset=false, level='network') => {
+        const oldPoints = reset ? new Set() : checked(pointRoot);
+        const oldPeriods = reset ? new Set() : checked(periodRoot);
+        const oldHeights = reset && network.value === 'LiDAR' ? new Set(['100'])
+          : (reset ? new Set() : checked(heightRoot));
+        const points = validation.points.filter((item) => item.network === network.value);
+        if (level === 'network') renderChecks(pointRoot, points.map((item) => [item.point, item.name]), oldPoints,
+          () => rebuildFilters(false, 'point'));
+        const selectedPoints = checked(pointRoot);
+        const periods = [...new Set(points.filter((item) => selectedPoints.has(item.point))
+          .flatMap((item) => item.available_periods))].sort();
+        if (level !== 'period' && level !== 'height') renderChecks(periodRoot,
+          periods.map((value) => [value, validation.periods[value].label]), oldPeriods,
+          () => rebuildFilters(false, 'period'));
+        const selectedPeriods = checked(periodRoot);
+        const heights = [...new Set(validation.metrics.filter((row) => row.network === network.value
+          && selectedPoints.has(row.point) && selectedPeriods.has(String(row.period))).map((row) => row.height_m))].sort((a,b) => a-b);
+        if (level !== 'height') renderChecks(heightRoot, heights.map((value) => [value,
+          network.value === 'LiDAR' && value === 250
+            ? '250 m — P0 descritivo; fora da seleção científica' : `${value} m`]), oldHeights, renderSummary);
+        renderSummary();
+      };
+      const formatAggregate = (value) => Number.isFinite(value) ? number(value) : 'indisponível';
+
+      function renderSummary() {
+        const points = checked(pointRoot), periods = checked(periodRoot), heights = checked(heightRoot);
+        const rows = validation.metrics.filter((row) => mpasSources.includes(row.source)
+          && row.network === network.value && points.has(row.point)
+          && periods.has(String(row.period)) && heights.has(String(row.height_m)));
+        const aggregates = aggregateMetrics(rows);
+        const winners = aggregateWinners(aggregates, metric.value);
+        results.innerHTML = aggregates.map((row) => `<article class="aggregate-card" data-source="${row.source}">
+          <strong>${row.source}${winners.includes(row.source) ? ' · <span class="metric-best">melhor na métrica selecionada</span>' : ''}</strong>
+          <dl><dt>Viés médio</dt><dd>${formatAggregate(row.bias)} m s⁻¹</dd>
+          <dt>RMSE médio¹</dt><dd>${formatAggregate(row.rmse)} m s⁻¹</dd>
+          <dt>Correlação média²</dt><dd>${formatAggregate(row.r)}</dd>
+          <dt>Murphy skill médio³</dt><dd>${Number.isFinite(row.skill_vs_era5)
+            ? `${number(row.skill_vs_era5)} <span class="metric-unit">adimensional</span>` : 'indisponível'}</dd>
+          <dt>Unidades</dt><dd>${row.n_units}</dd>
+          <dt>Unidades com Murphy skill</dt><dd>${row.n_skill_units}</dd></dl></article>`).join('');
+        gainLoss.innerHTML = mpasSources.map((source) => {
+          const counts = {gain: 0, loss: 0, not_detected: 0, not_evaluated: 0};
+          rows.filter((row) => row.source === source).forEach((row) => { counts[classifySkill(row)] += 1; });
+          return `<div class="gain-loss-item"><strong>${source}</strong>
+            <span>Ganhos detectáveis: ${counts.gain}</span><span>Perdas detectáveis: ${counts.loss}</span>
+            <span>Diferenças não detectáveis: ${counts.not_detected}</span><span>Não avaliadas: ${counts.not_evaluated}</span></div>`;
+        }).join('');
+        const unit = network.value === 'INMET' ? 'estação–período' : 'sítio–período–altura';
+        const descriptiveNote = rows.some((row) => row.selection_role === 'descriptive_only')
+          ? ' P0/250 m é descritivo e permanece excluído dos testes de seleção científica.' : '';
+        meta.innerHTML = `<strong>Unidade com peso igual:</strong> ${unit}. Vencedor descritivo em ${metric.options[metric.selectedIndex].text.toLowerCase()}: ${winners.join('/') || 'indisponível'}.${descriptiveNote}`;
+        status.textContent = `¹ Média aritmética dos RMSEs individuais, não RMSE combinado. ² Média descritiva dos coeficientes r; sem IC ou teste agregado. ³ Murphy skill médio (adimensional) é a média das reduções relativas de MSE das unidades observacionais, calculadas nos mesmos horários; não é necessariamente a redução de um MSE obtido após agrupar todas as observações. Em uma unidade, 0,41 equivale a 41% de redução do MSE frente ao ERA5. Disponível para INMET a 10 m e LiDAR a 100 m.`;
+      }
+      network.addEventListener('change', () => rebuildFilters(true, 'network'));
+      metric.addEventListener('change', renderSummary);
+      rebuildFilters(true, 'network');
+    }
+
+    const analyticalTables = parseData('table-data') || {};
+    if (analyticalTables.selection && document.getElementById('comparacao-direta')) {
+      const rows = analyticalTables.selection.rows.map((row) => row.raw);
+      const experimentA = document.getElementById('pair-experiment-a');
+      const experimentB = document.getElementById('pair-experiment-b');
+      const site = document.getElementById('pair-site');
+      const period = document.getElementById('pair-period');
+      const height = document.getElementById('pair-height');
+      const result = document.getElementById('pair-result');
+      const status = document.getElementById('pair-status');
+      mpasSources.forEach((source) => { experimentA.add(new Option(source, source)); experimentB.add(new Option(source, source)); });
+      experimentA.value = 'CTL'; experimentB.value = 'EXP03';
+      const pairOptions = (control, values, label=(value) => value) => {
+        const old = control.value;
+        control.replaceChildren(...values.map((value) => new Option(label(value), String(value))));
+        if (values.map(String).includes(String(old))) control.value = old;
+      };
+      const candidateRows = () => rows.filter((row) => (row.experiment_a === experimentA.value && row.experiment_b === experimentB.value)
+        || (row.experiment_a === experimentB.value && row.experiment_b === experimentA.value));
+      function syncPair(level='experiments') {
+        if (experimentA.value === experimentB.value) {
+          experimentB.value = mpasSources.find((source) => source !== experimentA.value);
+        }
+        const candidates = candidateRows();
+        if (level === 'experiments') pairOptions(site, [...new Set(candidates.map((row) => row.site))].sort());
+        const siteRows = candidates.filter((row) => String(row.site) === site.value);
+        if (level !== 'period' && level !== 'height') pairOptions(period, [...new Set(siteRows.map((row) => row.period))].sort(),
+          (value) => validation.periods[String(value)] ? validation.periods[String(value)].label : value);
+        const periodRows = siteRows.filter((row) => String(row.period) === period.value);
+        if (level !== 'height') pairOptions(height, [...new Set(periodRows.map((row) => row.height_m))].sort((a,b) => a-b), (value) => `${value} m`);
+        renderPair();
+      }
+      function renderPair() {
+        const comparison = orientPairwise(rows, experimentA.value, experimentB.value, site.value, period.value, height.value);
+        if (!comparison) {
+          result.innerHTML = '<div class="unavailable"><strong>Comparação não avaliada</strong></div>';
+          status.textContent = 'Não existe teste pareado para esta combinação; nenhum contraste foi inferido.'; return;
+        }
+        const numerical = Math.abs(comparison.rmse_a - comparison.rmse_b) < 1e-10 ? 'empate numérico'
+          : (comparison.rmse_a < comparison.rmse_b ? comparison.experiment_a : comparison.experiment_b);
+        const detected = comparison.hi < 0 ? comparison.experiment_a : (comparison.lo > 0 ? comparison.experiment_b : null);
+        const conclusion = detected ? `Diferença detectada: ${detected} apresenta menor MSE no contraste pareado.`
+          : 'Diferença não detectada: o IC95% inclui zero; isso não demonstra equivalência.';
+        result.innerHTML = `<div class="comparison-grid">
+          <div class="comparison-cell"><small>RMSE de ${comparison.experiment_a}</small><strong>${number(comparison.rmse_a)} m s⁻¹</strong></div>
+          <div class="comparison-cell"><small>RMSE de ${comparison.experiment_b}</small><strong>${number(comparison.rmse_b)} m s⁻¹</strong></div>
+          <div class="comparison-cell"><small>MSE(A) − MSE(B)</small><strong>${number(comparison.delta_mse)} m² s⁻²</strong><small>IC95% [${number(comparison.lo)}; ${number(comparison.hi)}]</small></div>
+          <div class="comparison-cell"><small>Horas pareadas</small><strong>n = ${comparison.n}</strong><small>Melhor valor numérico: ${numerical}</small></div>
+        </div><p class="comparison-conclusion"><strong>${conclusion}</strong></p>`;
+        status.textContent = `Convenção de sinal nesta ordem: MSE(${comparison.experiment_a}) − MSE(${comparison.experiment_b}). Valor negativo favorece ${comparison.experiment_a}; positivo favorece ${comparison.experiment_b}. Ao inverter A e B, sinal e limites do IC são invertidos.`;
+      }
+      experimentA.addEventListener('change', () => syncPair('experiments'));
+      experimentB.addEventListener('change', () => syncPair('experiments'));
+      site.addEventListener('change', () => syncPair('site'));
+      period.addEventListener('change', () => syncPair('period'));
+      height.addEventListener('change', renderPair);
+      syncPair('experiments');
+    }
   })();
 </script>
 </body>

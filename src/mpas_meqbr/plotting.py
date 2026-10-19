@@ -18,6 +18,7 @@ EXPERIMENT_COLORS = {
     "CTL":          "#4C4C4C",   # grey — the baseline
     "EXP01":        "#1F77B4",   # blue
     "EXP02":        "#D62728",   # red
+    "EXP03":        "#2CA02C",   # green — MEQ-02A Oval geometry candidate
     "EXP01_BADSST": "#9ECAE1",   # pale blue — contaminated SST forcing
     "EXP02_BADSST": "#FCAE91",   # pale red — contaminated SST forcing
     "ERA5":         "#7F7F7F",   # light grey, dashed where lines are drawn
@@ -28,11 +29,13 @@ EXPERIMENT_COLORS = {
 # preprocessing defect that propagated, not a result, and it belongs in the
 # dedicated before/after comparison (results/report/sst-fix-comparison/) rather
 # than in any figure a reader might mistake for a finding.
-EXPERIMENT_ORDER = ["CTL", "EXP01", "EXP02"]
+EXPERIMENT_ORDER = ["CTL", "EXP01", "EXP02", "EXP03"]
 
 # The full registry, for the few places that must still reach the superseded
 # runs: the SST integrity gate and the before/after audit.
-EXPERIMENT_ORDER_ALL = ["CTL", "EXP01", "EXP01_BADSST", "EXP02", "EXP02_BADSST"]
+EXPERIMENT_ORDER_ALL = [
+    "CTL", "EXP01", "EXP01_BADSST", "EXP02", "EXP02_BADSST", "EXP03",
+]
 
 SITE_MARKERS = {"P0": "o", "LPI": "s"}
 

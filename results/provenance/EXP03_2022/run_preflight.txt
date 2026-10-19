@@ -1,0 +1,25 @@
+preflight_utc=2026-10-14T16:17:57Z
+status=PASS
+workflow_branch=develop
+workflow_commit=13eced8aff3f30c590a509b0826b3da98535c15d
+workflow_clean=true
+atmosphere_sha256=095ee3b1debac20cf58de77717cc9a7934f61621bef7c393dac765541cd1e494
+init_atmosphere_sha256=ab5e4113cf8777ab50307e686033a810f7a01623d28baa762ac7fb207acd173e
+oisst_corrected=42
+oisst_ocean_preservation=PASS
+preproc_validation=PASS
+init=1
+lbc=165
+sfc_update=1
+run_lbc_links=165
+broken_symlinks=0
+initial_history=0
+initial_restart=0
+namelist_normalized_equivalent_to_oval_2021=true
+streams_byte_identical_to_oval_2021=true
+disk=/dev/sda2       182T   45T  128T  27% /p1-swell
+load= 16:17:57 up 17 days, 23:11,  9 users,  load average: 2.92, 12.70, 7.24
+active_mpas_processes=0
+[INFO] MPAS env: PNETCDF=/home/danilocs/mpas-build/libs  (PIO/NETCDF unset -> SMIOL I/O)
+[INFO] mpirun -> /home/danilocs/mpas-build/libs/bin/mpirun
+mpiexec=/home/danilocs/mpas-build/libs/bin/mpiexec

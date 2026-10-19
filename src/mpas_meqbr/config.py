@@ -13,6 +13,7 @@ script should build a path to the run directories by hand.
 
 from __future__ import annotations
 
+import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -48,6 +49,7 @@ class Leg:
     period: str
     history_dir: Path
     mesh: str
+    mesh_file: Path
     analysis_start: pd.Timestamp
     analysis_end: pd.Timestamp
     integration_start: pd.Timestamp
@@ -123,11 +125,16 @@ class Config:
                 f"unknown period {period!r}; known: {', '.join(self.periods)}")
         exp = self.experiments[experiment]
         per = self.periods[period]
+        run_directory = Path(exp.get("run_directory", experiment))
+        run_root = run_directory if run_directory.is_absolute() \
+            else self.runs_root / run_directory
+        history_dir = Path(os.path.normpath(run_root / per["history_subdir"]))
         return Leg(
             experiment=experiment,
             period=period,
-            history_dir=self.runs_root / experiment / per["history_subdir"],
+            history_dir=history_dir,
             mesh=exp["mesh"],
+            mesh_file=self.mesh_file(exp["mesh"]),
             analysis_start=pd.Timestamp(per["analysis_start"]),
             analysis_end=pd.Timestamp(per["analysis_end"]),
             integration_start=pd.Timestamp(per["integration_start"]),
@@ -135,6 +142,24 @@ class Config:
             validation_site=per["validation_site"],
             sst_update=bool(exp["sst_update"]),
         )
+
+    def mesh_file(self, mesh: str) -> Path:
+        """Stable MPAS grid file for *mesh*, independent of init/LBC links.
+
+        ``grid_path`` is versioned as a portable path relative to
+        :attr:`runs_root`. An absolute value is also supported for a local
+        override, but no machine-specific absolute path belongs in the shared
+        experiment registry.
+        """
+        if mesh not in self.meshes:
+            raise KeyError(f"unknown mesh {mesh!r}; known: {', '.join(self.meshes)}")
+        value = self.meshes[mesh].get("grid_path")
+        if not value:
+            raise KeyError(f"mesh {mesh!r} does not declare grid_path")
+        path = Path(value).expanduser()
+        if not path.is_absolute():
+            path = self.runs_root / path
+        return Path(os.path.normpath(path))
 
     def all_legs(self) -> list:
         return [self.leg(e, p)

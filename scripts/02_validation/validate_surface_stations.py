@@ -28,6 +28,7 @@ against an ocean cell would mostly measure the land-sea contrast.
 
 Output: results/tables/inmet_station_metrics.csv
         results/tables/inmet_summary.csv
+        results/site_timeseries/inmet_paired.csv.gz
         figures/validation/inmet_map.png
         figures/validation/inmet_diurnal.png
 """
@@ -128,7 +129,7 @@ def main() -> int:
         print(f"[warning] {era5_path} not found — ERA5 station benchmark omitted",
               file=sys.stderr)
 
-    rows, diurnal_panels, station_meta = [], {}, None
+    rows, paired_rows, diurnal_panels, station_meta = [], [], {}, None
     for period in (args.period or sorted(cfg.periods)):
         period_cfg = cfg.periods[period]
         period_obs = obs[
@@ -165,6 +166,12 @@ def main() -> int:
                              "station": sid, "name": st["name"],
                              "kind": st["kind"], "lat": st["lat"],
                              "lon": st["lon"], **s, **dc})
+                paired_rows.append(pd.DataFrame({
+                    "time": d["time"], "period": period, "station": sid,
+                    "name": st["name"], "kind": st["kind"],
+                    "lat": st["lat"], "lon": st["lon"], "source": "ERA5",
+                    "obs_speed": d["speed"], "model_speed": d["speed_10"],
+                }))
                 diurnal_panels.setdefault((period, sid, st["name"]), {})
                 diurnal_panels[(period, sid, st["name"])]["obs"] = \
                     metrics.diurnal_composite(d["time"], d["speed"])
@@ -198,6 +205,12 @@ def main() -> int:
                 rows.append({"experiment": exp, "period": period, "station": sid,
                              "name": st["name"], "kind": st["kind"],
                              "lat": st["lat"], "lon": st["lon"], **s, **dc})
+                paired_rows.append(pd.DataFrame({
+                    "time": d["time"], "period": period, "station": sid,
+                    "name": st["name"], "kind": st["kind"],
+                    "lat": st["lat"], "lon": st["lon"], "source": exp,
+                    "obs_speed": d["speed"], "model_speed": d["mod_speed"],
+                }))
                 diurnal_panels.setdefault((period, sid, st["name"]), {})
                 diurnal_panels[(period, sid, st["name"])]["obs"] = \
                     metrics.diurnal_composite(d["time"], d["speed"])
@@ -234,6 +247,12 @@ def main() -> int:
     print(by_kind.round(2).to_string())
     by_kind_out = cfg.path("results", "tables", f"{tag}_metrics_by_kind.csv")
     by_kind.round(3).to_csv(by_kind_out)
+
+    paired_out = cfg.path("results", "site_timeseries", f"{tag}_paired.csv.gz")
+    paired = pd.concat(paired_rows, ignore_index=True)
+    paired = paired.sort_values(
+        ["period", "station", "source", "time"], kind="stable")
+    paired.to_csv(paired_out, index=False, compression="gzip")
 
     # ---- diurnal panels ---------------------------------------------------
     keys = sorted(diurnal_panels)
@@ -307,7 +326,7 @@ def main() -> int:
     fig.savefig(map_out)
     plt.close(fig)
 
-    for p in (out, summary_out, by_kind_out, fig_out, map_out):
+    for p in (out, summary_out, by_kind_out, paired_out, fig_out, map_out):
         print(f"-> {p.relative_to(REPO_ROOT)}")
     return 0
 

@@ -255,6 +255,48 @@ def _block_indices(n: int, block: int, rng) -> np.ndarray:
     return np.concatenate([np.arange(s, min(s + block, n)) for s in starts])[:n]
 
 
+def _contiguous_block_indices(times, block: int) -> list[np.ndarray]:
+    """Return candidate moving blocks that never cross an hourly data gap.
+
+    Validation samples are paired first and may therefore contain gaps.  A
+    conventional moving-block bootstrap on the compacted row numbers would
+    incorrectly treat the observations immediately before and after a gap as
+    adjacent.  Candidate blocks are built within truly contiguous hourly
+    segments instead.
+    """
+    t = pd.DatetimeIndex(pd.to_datetime(times))
+    if len(t) == 0:
+        return []
+    if not t.is_monotonic_increasing or t.has_duplicates:
+        raise ValueError("bootstrap times must be sorted and unique")
+    breaks = np.flatnonzero(np.diff(t.asi8) != pd.Timedelta(hours=1).value) + 1
+    segments = np.split(np.arange(len(t)), breaks)
+    candidates = []
+    for segment in segments:
+        if len(segment) <= block:
+            candidates.append(segment)
+        else:
+            candidates.extend(segment[start:start + block]
+                              for start in range(len(segment) - block + 1))
+    return [candidate for candidate in candidates if len(candidate)]
+
+
+def _gap_aware_resample_indices(times, block: int, rng,
+                                candidates=None) -> np.ndarray:
+    """Moving-block resample whose blocks cannot bridge missing timestamps."""
+    candidates = candidates or _contiguous_block_indices(times, block)
+    n = len(times)
+    if not candidates:
+        return np.array([], dtype=int)
+    sampled = []
+    total = 0
+    while total < n:
+        candidate = candidates[int(rng.integers(0, len(candidates)))]
+        sampled.append(candidate)
+        total += len(candidate)
+    return np.concatenate(sampled)[:n]
+
+
 def block_bootstrap_ci(obs, model, statistic, *, block_hours: int = 24,
                        n_boot: int = 1000, alpha: float = 0.05,
                        seed: int = 20260902) -> dict:
@@ -284,6 +326,90 @@ def block_bootstrap_ci(obs, model, statistic, *, block_hours: int = 24,
         "lo": float(np.percentile(vals, 100 * alpha / 2)),
         "hi": float(np.percentile(vals, 100 * (1 - alpha / 2))),
         "n_boot": int(vals.size),
+    }
+
+
+def gap_aware_block_bootstrap_ci(times, obs, model, statistic, *,
+                                 block_hours: int = 24, n_boot: int = 1000,
+                                 alpha: float = 0.05,
+                                 seed: int = 20260902) -> dict:
+    """Paired confidence interval with 24 h blocks that respect data gaps.
+
+    Invalid pairs are removed together with their timestamps, then blocks are
+    sampled only within uninterrupted hourly segments.  This is the report
+    routine for LiDAR and INMET products, whose observational availability can
+    leave interior gaps after strict time pairing.
+    """
+    t = pd.DatetimeIndex(pd.to_datetime(times))
+    o = np.asarray(obs, dtype=float)
+    m = np.asarray(model, dtype=float)
+    ok = np.isfinite(o) & np.isfinite(m) & ~t.isna()
+    t, o, m = t[ok], o[ok], m[ok]
+    order = np.argsort(t.asi8)
+    t, o, m = t[order], o[order], m[order]
+    n = len(t)
+    value = float(statistic(o, m))
+    if n < 3 * block_hours:
+        return {"value": value, "lo": np.nan, "hi": np.nan,
+                "n_boot": 0, "n": n}
+    rng = np.random.default_rng(seed)
+    candidates = _contiguous_block_indices(t, block_hours)
+    vals = []
+    for _ in range(n_boot):
+        idx = _gap_aware_resample_indices(t, block_hours, rng, candidates)
+        v = statistic(o[idx], m[idx])
+        if np.isfinite(v):
+            vals.append(v)
+    vals = np.asarray(vals)
+    return {
+        "value": value,
+        "lo": float(np.percentile(vals, 100 * alpha / 2)),
+        "hi": float(np.percentile(vals, 100 * (1 - alpha / 2))),
+        "n_boot": int(vals.size),
+        "n": n,
+    }
+
+
+def gap_aware_paired_skill_test(times, obs, reference, model, *,
+                                block_hours: int = 24, n_boot: int = 1000,
+                                alpha: float = 0.05,
+                                seed: int = 20260902) -> dict:
+    """Gap-aware paired comparison of a model against a reference forecast."""
+    t = pd.DatetimeIndex(pd.to_datetime(times))
+    o = np.asarray(obs, dtype=float)
+    r = np.asarray(reference, dtype=float)
+    m = np.asarray(model, dtype=float)
+    ok = np.isfinite(o) & np.isfinite(r) & np.isfinite(m) & ~t.isna()
+    t, o, r, m = t[ok], o[ok], r[ok], m[ok]
+    order = np.argsort(t.asi8)
+    t, o, r, m = t[order], o[order], r[order], m[order]
+    n = len(t)
+    if n < 3 * block_hours:
+        return {"n": n, "delta_mse": np.nan, "lo": np.nan, "hi": np.nan,
+                "rmse_reference": np.nan, "rmse_model": np.nan,
+                "skill": np.nan, "skill_lo": np.nan, "skill_hi": np.nan,
+                "significant": False}
+    d = (r - o) ** 2 - (m - o) ** 2
+    mse_reference = float(np.mean((r - o) ** 2))
+    rng = np.random.default_rng(seed)
+    candidates = _contiguous_block_indices(t, block_hours)
+    boot = np.array([
+        d[_gap_aware_resample_indices(t, block_hours, rng, candidates)].mean()
+        for _ in range(n_boot)
+    ])
+    lo = float(np.percentile(boot, 100 * alpha / 2))
+    hi = float(np.percentile(boot, 100 * (1 - alpha / 2)))
+    return {
+        "n": n,
+        "delta_mse": float(d.mean()),
+        "lo": lo,
+        "hi": hi,
+        "rmse_reference": float(np.sqrt(mse_reference)),
+        "rmse_model": float(np.sqrt(np.mean((m - o) ** 2))),
+        "skill": float(d.mean() / mse_reference) if mse_reference > 0 else np.nan,
+        "skill_lo": lo / mse_reference if mse_reference > 0 else np.nan,
+        "skill_hi": hi / mse_reference if mse_reference > 0 else np.nan,
+        "significant": bool(lo > 0 or hi < 0),
     }
 
 

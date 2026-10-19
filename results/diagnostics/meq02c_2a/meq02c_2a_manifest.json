@@ -1,0 +1,247 @@
+{
+  "task": "MEQ-02C/Etapa 2A - validacao espacial das malhas reais",
+  "created_utc": "2026-10-14T12:44:47.483708+00:00",
+  "scope": "geometry-only; no meteorological field was read or produced",
+  "method": {
+    "common_domain": "exact intersection of polygons reconstructed from one-sided MPAS boundary edges",
+    "target_grid": "local Lambert azimuthal equal-area centre-point sampling",
+    "base_equal_area_spacing_km": 5.0,
+    "nearest_mapping": "spherical cKDTree; no extrapolation beyond explicit limit",
+    "areaCell_interpretation": "MPAS spherical cell area in steradians; converted with Earth radius 6371229 m",
+    "base_max_source_distance_km": 8.0,
+    "base_refined_spacing_threshold_km": 5.5,
+    "base_selected_mask": "common AND valid_all AND refined_all AND NOT relaxation_any",
+    "coast_widths_km": [
+      10,
+      25,
+      50
+    ],
+    "surface_reference": {
+      "dataset": "Natural Earth 1:10m Physical - Land",
+      "version": "5.1.1",
+      "url": "https://naturalearth.s3.amazonaws.com/10m_physical/ne_10m_land.zip",
+      "crs": "EPSG:4326",
+      "official_object_last_modified": "2022-05-13",
+      "official_object_etag": "be3001f37196d2894e17aacd13ff2cc2",
+      "component_sha256": {
+        "ne_10m_land.cpg": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824",
+        "ne_10m_land.dbf": "e422520372e65c6fb8220888580e5331d04699bcd71c27e53ad42e241a531cbd",
+        "ne_10m_land.prj": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+        "ne_10m_land.shp": "4cad3a49bc75c1a4c2f3d7efae04f2f8e63151c96764b2658effabf524331fa6",
+        "ne_10m_land.shx": "f3b02a190c3020eeafd0f48de982619826b57ecd853cbc68e4fc049652891a04"
+      }
+    },
+    "map_rendering": "PyProj LAEA + Matplotlib; Cartopy import was unavailable locally (hung beyond 60 s)"
+  },
+  "domains": {
+    "A_all_experiments": {
+      "mesh_names": [
+        "CTL",
+        "EXP01",
+        "EXP02",
+        "OVAL"
+      ],
+      "bounds_lonlat": [
+        -54.9772138763509,
+        -7.687108815040407,
+        -32.67177330783164,
+        6.747193626313366
+      ],
+      "geometry_type": "Polygon",
+      "is_valid": true,
+      "is_empty": false,
+      "boundary_is_closed": true,
+      "geometric_area_km2": 1651239.516443093,
+      "sampled_area_km2": 1651450.0,
+      "target_shape": [
+        320,
+        495
+      ],
+      "target_points_inside": 66058,
+      "target_crs_wkt": "PROJCRS[\"unknown\",BASEGEOGCRS[\"unknown\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]],ID[\"EPSG\",6326]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]]],CONVERSION[\"unknown\",METHOD[\"Lambert Azimuthal Equal Area\",ID[\"EPSG\",9820]],PARAMETER[\"Latitude of natural origin\",-1.16063382469226,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8801]],PARAMETER[\"Longitude of natural origin\",-44.8244451476292,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]],AXIS[\"(N)\",north,ORDER[2],LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]]"
+    },
+    "B_oval_exp02": {
+      "mesh_names": [
+        "OVAL",
+        "EXP02"
+      ],
+      "bounds_lonlat": [
+        -60.21878072721637,
+        -12.337127703894822,
+        -28.79423089597276,
+        11.23641785855071
+      ],
+      "geometry_type": "Polygon",
+      "is_valid": true,
+      "is_empty": false,
+      "boundary_is_closed": true,
+      "geometric_area_km2": 5721407.106841362,
+      "sampled_area_km2": 5721475.0,
+      "target_shape": [
+        523,
+        697
+      ],
+      "target_points_inside": 228859,
+      "target_crs_wkt": "PROJCRS[\"unknown\",BASEGEOGCRS[\"unknown\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]],ID[\"EPSG\",6326]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]]],CONVERSION[\"unknown\",METHOD[\"Lambert Azimuthal Equal Area\",ID[\"EPSG\",9820]],PARAMETER[\"Latitude of natural origin\",-1.00317912856231,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8801]],PARAMETER[\"Longitude of natural origin\",-44.3115797378767,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]],AXIS[\"(N)\",north,ORDER[2],LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]]"
+    }
+  },
+  "sources": {
+    "ctl": {
+      "temporary_transport_path_used": "/tmp/meq02c_2a_grids/ctl_geometry.npz",
+      "temporary_transport_sha256": "f1ffb705307d7fcba3f54307adff307e8cd90534a7544a5263893526513f05e4",
+      "grid_path": "/p1-swell/danilocs/MPAS-Research/grids/meqbr_05km/meqbr_05km.grid.nc",
+      "grid_sha256": "0d2242b369c5361c9c9319fdc5d3a366910c4e8307e096396853799c56e0ccfa",
+      "static_path": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/meqbr_05km.static.nc",
+      "static_sha256": "bc0ed5eca0844750678e2c7201f0aadc6b9a1f80221bd4eebeb631625e039e41",
+      "n_cells": 76813,
+      "mesh_geometry": {
+        "geometry_type": "Polygon",
+        "is_valid": true,
+        "is_empty": false,
+        "boundary_is_closed": true,
+        "bounds_lonlat": [
+          -54.9772138763509,
+          -7.687108815040407,
+          -32.67177330783164,
+          6.747193626313366
+        ],
+        "geometric_area_km2": 1651239.5164430926,
+        "spacing_km_min": 4.444358388494968,
+        "spacing_km_p50": 4.994410540437742,
+        "spacing_km_p95": 5.008689942273881,
+        "spacing_km_max": 5.368289849393094,
+        "cells_below_5_5_km": 76813,
+        "cells_with_bdy_mask": 9093
+      }
+    },
+    "exp02": {
+      "temporary_transport_path_used": "/tmp/meq02c_2a_grids/exp02_geometry.npz",
+      "temporary_transport_sha256": "73aaadf7e20fa335ff7e440620168fbf61a7e2a0f3708404704e9898875397b7",
+      "grid_path": "/p1-swell/danilocs/MPAS-Research/grids/meqbr_05km_buf/meqbr_05km_buf.grid.nc",
+      "grid_sha256": "e618a45e058936c14e0b5058d61afe8a1bb4708d5e116c265d0ee8020e85aa74",
+      "static_path": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/meqbr_05km_buf.static.nc",
+      "static_sha256": "8d3bc40e4762aa09f535c53f26889231e8bcb3c1b7d08b00ff6b1b22436c128f",
+      "n_cells": 95138,
+      "mesh_geometry": {
+        "geometry_type": "Polygon",
+        "is_valid": true,
+        "is_empty": false,
+        "boundary_is_closed": true,
+        "bounds_lonlat": [
+          -60.31528121973412,
+          -13.063230215846932,
+          -27.339560493130648,
+          11.99278615725268
+        ],
+        "geometric_area_km2": 6164466.503412754,
+        "spacing_km_min": 4.368299329890242,
+        "spacing_km_p50": 4.999868770874615,
+        "spacing_km_p95": 18.350323591415123,
+        "spacing_km_max": 35.10663525998613,
+        "cells_below_5_5_km": 77028,
+        "cells_with_bdy_mask": 2188
+      }
+    },
+    "oval": {
+      "temporary_transport_path_used": "/tmp/meq02c_2a_grids/oval_geometry.npz",
+      "temporary_transport_sha256": "d3e70e75c127d0938754d5e39d5d5a1ef67bb70d3f7bf770194d40b8a1d9cfdb",
+      "grid_path": "/p1-swell/danilocs/MPAS-Research/grids/meqbr_05km_oval_meq02a/meqbr_05km_oval_meq02a.grid.nc",
+      "grid_sha256": "ac3e6988dbd7b1d7fff30689393cc7e06e0652ce8e8aea5edd6099222338e271",
+      "static_path": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/meqbr_05km_oval_meq02a.static.nc",
+      "static_sha256": "1dbb7c35aad03b4e0b9d497f52260298e6e1c18205538ae59062cc8582e9d8f7",
+      "n_cells": 102968,
+      "mesh_geometry": {
+        "geometry_type": "Polygon",
+        "is_valid": true,
+        "is_empty": false,
+        "boundary_is_closed": true,
+        "bounds_lonlat": [
+          -60.51717662242669,
+          -12.337127703894822,
+          -28.79423089597276,
+          11.285870097617314
+        ],
+        "geometric_area_km2": 6276598.952044589,
+        "spacing_km_min": 4.446977171307711,
+        "spacing_km_p50": 4.99908492678159,
+        "spacing_km_p95": 17.544115773401636,
+        "spacing_km_max": 34.800253410968566,
+        "cells_below_5_5_km": 86109,
+        "cells_with_bdy_mask": 2210
+      }
+    }
+  },
+  "products": {
+    "domain_coverage": {
+      "path": "results/diagnostics/meq02c_2a/meq02c_2a_domain_coverage.csv",
+      "sha256": "6b55b1d0dae675e1568fce8f2ebc7ca9b9ea0b7a07535daec412db268adccbb8"
+    },
+    "sensitivity": {
+      "path": "results/diagnostics/meq02c_2a/meq02c_2a_sensitivity.csv",
+      "sha256": "12eec5779b6c7137ff2bd87c57010b13d85b20c50ae2c9b88af09107d5aefa83"
+    },
+    "landmask_disagreement": {
+      "path": "results/diagnostics/meq02c_2a/meq02c_2a_landmask_disagreement.csv",
+      "sha256": "cef923e1c21f9cf895f9400f1d81523c3dc23e5154807c005c74587013f436b9"
+    },
+    "relaxation_diagnostics": {
+      "path": "results/diagnostics/meq02c_2a/meq02c_2a_relaxation_diagnostics.csv",
+      "sha256": "720966d96737615153b0bc41d6487243ccf43cfa6282c3d3261fd7022e6e166a"
+    },
+    "mapping_distances": {
+      "path": "results/diagnostics/meq02c_2a/meq02c_2a_mapping_distances.csv",
+      "sha256": "dde7df359c8f1c38bc3383862b54fe855aba9285e7ae20d035a9a2ceac31277a"
+    },
+    "figures": [
+      {
+        "path": "figures/exploratory/meq02c_2a/meq02c_2a_domain_a_four_experiments.png",
+        "sha256": "264a13441d3ab8a61cb72802a22cc8e8e6345d86dbfd602938c41c483392ac71"
+      },
+      {
+        "path": "figures/exploratory/meq02c_2a/meq02c_2a_domain_b_oval_exp02.png",
+        "sha256": "299ca7145d3a6248fda97af93ba67a779ade745b8a258836fc09147983dc9a1d"
+      }
+    ]
+  },
+  "software": {
+    "python": "3.13.5",
+    "numpy": "2.1.2",
+    "scipy": "1.17.1",
+    "shapely": "2.0.7",
+    "pyproj": "3.6.1",
+    "matplotlib": "3.9.2",
+    "pyogrio": "0.12.1"
+  },
+  "git": {
+    "branch": "codex/meq-02c-oval-postprocessing",
+    "head": "3c4e43335b70d3c418686999c924d00c30e5fffa",
+    "local_main": "6fef1bbf230bc372928380e39a2ecbef04be5f81",
+    "stored_origin_main": "6fef1bbf230bc372928380e39a2ecbef04be5f81",
+    "status_before_manifest": [
+      "M config/experiments.yaml",
+      " M config/paths.example.yaml",
+      " M environment.yml",
+      " M scripts/01_extract/compute_field_statistics.py",
+      " M src/mpas_meqbr/__init__.py",
+      " M src/mpas_meqbr/config.py",
+      " M src/mpas_meqbr/fields.py",
+      " M src/mpas_meqbr/io.py",
+      " M src/mpas_meqbr/plotting.py",
+      "?? results/diagnostics/",
+      "?? scripts/05_exploration/validate_meq02c_spatial_masks.py",
+      "?? src/mpas_meqbr/spatial.py",
+      "?? tests/"
+    ],
+    "effective_remote_main_checked_separately": "b7f2fae0649dc36756f27508c6137e78909bf896"
+  },
+  "execution": {
+    "command": "MPLCONFIGDIR=/tmp/meq02c_mplconfig XDG_CACHE_HOME=/tmp/meq02c_cache python scripts/05_exploration/validate_meq02c_spatial_masks.py --geometry-dir /tmp/meq02c_2a_grids",
+    "working_directory": "."
+  },
+  "limitations": [
+    "Equal-area totals use centre-point sampling; boundary cells are not fractionally weighted.",
+    "Natural Earth 1:10m is independent of MPAS native landmasks but is still a generalized coastline product.",
+    "The 5.5 km refined threshold and all tested buffers are diagnostic choices, not scientific ratification.",
+    "CTL and EXP01 intentionally remain distinct experiment identities although they share one grid/static artifact."
+  ]
+}

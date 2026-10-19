@@ -37,7 +37,8 @@ def available_index(leg):
     idx = io.history_index(leg.history_dir, verify=1) if leg.exists() else pd.Series(dtype=object)
     if len(idx) == 0:
         return idx
-    return io.select_window(idx, leg.analysis_start, leg.analysis_end)
+    selected = io.select_window(idx, leg.analysis_start, leg.analysis_end)
+    return io.validate_history_index(selected, label=f"{leg.key} scientific window")
 
 
 def main() -> int:
@@ -66,24 +67,55 @@ def main() -> int:
         legs = [cfg.leg(e, period) for e in experiments
                 if period in cfg.experiments[e]["periods"]]
         indices = {leg.experiment: available_index(leg) for leg in legs}
+        missing = [name for name, index in indices.items() if len(index) == 0]
+        if missing and (args.window == "common" or args.start or args.end):
+            print(f"[{period}] requested comparison members have no scientific "
+                  f"history: {missing}", file=sys.stderr)
+            rc = 1
+            continue
         indices = {k: v for k, v in indices.items() if len(v) > 0}
         if not indices:
             print(f"[{period}] no history available for any experiment — skipping")
             continue
 
+        common_times = None
         if args.start or args.end:
             start = pd.Timestamp(args.start) if args.start else None
             end = pd.Timestamp(args.end) if args.end else None
-        elif args.window == "common":
-            common = None
-            for idx in indices.values():
-                common = idx.index if common is None else common.intersection(idx.index)
-            if common is None or len(common) == 0:
-                print(f"[{period}] no hours common to {list(indices)} — skipping")
+            explicit = {}
+            for name, idx in indices.items():
+                if start is not None:
+                    idx = idx.loc[idx.index >= start]
+                if end is not None:
+                    idx = idx.loc[idx.index <= end]
+                explicit[name] = io.validate_history_index(
+                    idx, label=f"{name} explicit scientific window")
+            try:
+                explicit_times = io.assert_identical_time_indexes(explicit)
+            except ValueError as exc:
+                print(f"[{period}] invalid explicit comparison window: {exc}",
+                      file=sys.stderr)
+                rc = 1
                 continue
-            start, end = common.min(), common.max()
-            print(f"[{period}] common window across {list(indices)}: {start} -> {end} "
-                  f"({len(common)} hours)")
+            indices = explicit
+            start = end = None
+            identity = io.temporal_identity(explicit_times)
+            print(f"[{period}] exact explicit timestamps across {list(indices)}: "
+                  f"{identity['time_start']} -> {identity['time_end']} "
+                  f"({identity['time_count']} hours, "
+                  f"sha256={identity['time_sha256']})")
+        elif args.window == "common":
+            try:
+                indices, common_times = io.common_history_indices(indices)
+            except ValueError as exc:
+                print(f"[{period}] invalid common window: {exc}", file=sys.stderr)
+                rc = 1
+                continue
+            identity = io.temporal_identity(common_times)
+            start, end = common_times[0], common_times[-1]
+            print(f"[{period}] exact common timestamps across {list(indices)}: "
+                  f"{start} -> {end} ({len(common_times)} hours, "
+                  f"sha256={identity['time_sha256']})")
         else:
             start = end = None
 
@@ -96,6 +128,8 @@ def main() -> int:
                 idx = idx.loc[idx.index >= start]
             if end is not None:
                 idx = idx.loc[idx.index <= end]
+            if common_times is not None:
+                idx = idx.loc[common_times]
             if len(idx) < 24:
                 print(f"[{leg.key}] only {len(idx)} hours in window — skipping")
                 continue

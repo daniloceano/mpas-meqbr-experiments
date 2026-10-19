@@ -17,7 +17,7 @@
 #   04  ERA5: added value, climatological context, resource maps
 #   05  exploration: maps, difference maps, cross-sections, animations
 #   06  audit + report: corrected-run integrity check, then the HTML bundle
-set -uo pipefail
+set -euo pipefail
 cd "$(dirname "$0")/.."
 
 PY=${PYTHON:-python}
@@ -25,8 +25,8 @@ FROM=${1:-00}
 # EXP01/EXP02 are the corrected integrations. The _BADSST pair they replaced is
 # kept only as the evidence for the OISST coastal-fill finding, and is excluded
 # from every table that decides anything. See config/experiments.yaml.
-CURRENT="CTL EXP01 EXP02"
-ALL_EXPERIMENTS="CTL EXP01 EXP01_BADSST EXP02 EXP02_BADSST"
+CURRENT="CTL EXP01 EXP02 EXP03"
+ALL_EXPERIMENTS="CTL EXP01 EXP01_BADSST EXP02 EXP02_BADSST EXP03"
 LOG=results/logs
 mkdir -p "$LOG"
 
@@ -36,12 +36,14 @@ run() {   # run <label> <command...>
     echo "=============================================================="
     echo ">> $label"
     echo "=============================================================="
-    "$@" 2>&1 | tee "$LOG/${label}.log" | grep -vE "UserWarning|from pandas" || true
+    set +e
+    "$@" 2>&1 | tee "$LOG/${label}.log" | grep -vE "UserWarning|from pandas"
     local rc=${PIPESTATUS[0]}
+    set -e
     if [ "$rc" -ne 0 ]; then
         echo "!! $label exited $rc (see $LOG/${label}.log)"
     fi
-    return 0
+    return "$rc"
 }
 
 stage() { [ "$1" \> "$FROM" ] || [ "$1" = "$FROM" ]; }
@@ -81,6 +83,7 @@ if stage 02; then
     run 02_distributions    $PY scripts/02_validation/plot_wind_distributions.py
     run 02_cellsensitivity  $PY scripts/02_validation/check_cell_sensitivity.py
     run 02_stations         $PY scripts/02_validation/validate_surface_stations.py
+    run 02_interactive      $PY scripts/02_validation/build_interactive_validation.py
 fi
 
 # --- 03 selection ---------------------------------------------------------
@@ -140,6 +143,7 @@ if stage 05; then
             $PY scripts/05_exploration/animate_cross_section.py \
             --site LPI --experiment "$experiment" --period 2022 --days 3
     done
+    run 05_interactive      $PY scripts/05_exploration/export_interactive_layers.py
 fi
 
 # --- 06 audit + report ----------------------------------------------------

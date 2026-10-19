@@ -13,6 +13,7 @@ Outputs:
     figures/report/experimental_design_ctl_mesh.png
     figures/report/experimental_design_exp01_sst.png
     figures/report/experimental_design_exp02_mesh.png
+    figures/report/experimental_design_exp03_mesh.png
     figures/report/validation_network.png
     figures/report/validation_cells.png
 """
@@ -34,7 +35,7 @@ from scipy.spatial import ConvexHull
 import xarray as xr
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
-from mpas_meqbr import mesh, plotting  # noqa: E402
+from mpas_meqbr import io, mesh, plotting  # noqa: E402
 from mpas_meqbr.config import load_config, REPO_ROOT  # noqa: E402
 
 ANALYSIS_EXTENT = (-46.5, -33.5, -7.5, 1.0)
@@ -51,7 +52,7 @@ def read_mesh(path: Path) -> dict[str, np.ndarray]:
     return {"lat": lat, "lon": lon, "spacing": spacing, "bdy": bdy}
 
 
-def read_mesh_topology(path: Path) -> dict[str, np.ndarray]:
+def read_mesh_topology(path: Path, *, landmask_path: Path | None = None) -> dict[str, np.ndarray]:
     """Cell centres, land mask and Voronoi vertices needed for site zooms."""
     with Dataset(path) as ds:
         out = {
@@ -61,8 +62,14 @@ def read_mesh_topology(path: Path) -> dict[str, np.ndarray]:
             "vertex_lon": np.rad2deg(np.asarray(ds.variables["lonVertex"][:])),
             "vertices_on_cell": np.asarray(ds.variables["verticesOnCell"][:]),
             "n_edges": np.asarray(ds.variables["nEdgesOnCell"][:]),
-            "landmask": np.asarray(ds.variables["landmask"][:]),
         }
+        if "landmask" in ds.variables:
+            out["landmask"] = np.asarray(ds.variables["landmask"][:])
+    if "landmask" not in out:
+        if landmask_path is None:
+            raise KeyError(f"{path} lacks landmask and no fallback was provided")
+        with Dataset(landmask_path) as ds:
+            out["landmask"] = np.asarray(ds.variables["landmask"][:])
     out["lon"] = ((out["lon"] + 180.0) % 360.0) - 180.0
     out["vertex_lon"] = ((out["vertex_lon"] + 180.0) % 360.0) - 180.0
     return out
@@ -122,8 +129,8 @@ def observation_legend_handles() -> list[Line2D]:
 def plot_mesh_resolution(cfg, experiment: str, mesh_name: str, output: Path) -> None:
     import cartopy.crs as ccrs
 
-    data = read_mesh(cfg.runs_root / f"{mesh_name}.static.nc")
-    buffered = experiment == "EXP02"
+    data = read_mesh(cfg.mesh_file(mesh_name))
+    buffered = experiment in {"EXP02", "EXP03"}
     extent = (-61.5, -26.0, -14.0, 13.0) if buffered else (-56.2, -31.4, -9.0, 8.0)
     vmax = 32.0 if buffered else 6.0
 
@@ -146,9 +153,12 @@ def plot_mesh_resolution(cfg, experiment: str, mesh_name: str, output: Path) -> 
     cb = fig.colorbar(sc, ax=ax, orientation="horizontal", pad=0.08,
                       fraction=0.055, extend="max")
     cb.set_label("Espaçamento horizontal equivalente entre centros de célula (km) — vermelho = menor")
-    if buffered:
+    if experiment == "EXP02":
         title = ("EXP02 — malha com zona de transição\n"
                  "~5 km na região de interesse, aumentando gradualmente até 32 km")
+    elif experiment == "EXP03":
+        title = ("EXP03 — malha Oval MEQ-02A\n"
+                 "núcleo refinado orientado ao longo da Margem Equatorial")
     else:
         title = "CTL — malha de referência quase uniforme"
     ax.set_title(title, fontsize=13, pad=12,
@@ -161,7 +171,7 @@ def plot_mesh_resolution(cfg, experiment: str, mesh_name: str, output: Path) -> 
     ax.legend(handles=handles, loc="lower left", fontsize=8)
     plotting.provenance_footer(
         fig,
-        f"Fonte: {mesh_name}.static.nc | espaçamento calculado a partir de areaCell "
+        f"Fonte: {cfg.mesh_file(mesh_name).name} | espaçamento calculado a partir de areaCell "
         "assumindo célula hexagonal equivalente | turbo invertido: vermelho = menor "
         "espaçamento | círculos/quadrados: LiDAR; triângulos: INMET",
         fontsize=6.5, layout=False)
@@ -224,16 +234,20 @@ def hull_polygon(data: dict[str, np.ndarray]) -> tuple[np.ndarray, np.ndarray]:
 def plot_validation_network(cfg, output: Path) -> None:
     import cartopy.crs as ccrs
 
-    ctl = read_mesh(cfg.runs_root / "meqbr_05km.static.nc")
-    buf = read_mesh(cfg.runs_root / "meqbr_05km_buf.static.nc")
+    ctl = read_mesh(cfg.mesh_file("meqbr_05km"))
+    buf = read_mesh(cfg.mesh_file("meqbr_05km_buf"))
+    oval = read_mesh(cfg.mesh_file("meqbr_05km_oval_meq02a"))
     ctl_lon, ctl_lat = hull_polygon(ctl)
     buf_lon, buf_lat = hull_polygon(buf)
+    oval_lon, oval_lat = hull_polygon(oval)
 
     fig, axes = plt.subplots(1, 2, figsize=(13.0, 5.8),
                              subplot_kw={"projection": ccrs.PlateCarree()})
     ax = axes[0]
     ax.plot(buf_lon, buf_lat, color=plotting.EXPERIMENT_COLORS["EXP02"],
             lw=1.8, ls="--", transform=ccrs.PlateCarree(), label="Domínio EXP02")
+    ax.plot(oval_lon, oval_lat, color=plotting.EXPERIMENT_COLORS["EXP03"],
+            lw=1.8, ls="-.", transform=ccrs.PlateCarree(), label="Domínio EXP03")
     ax.plot(ctl_lon, ctl_lat, color=plotting.EXPERIMENT_COLORS["CTL"],
             lw=2.0, transform=ccrs.PlateCarree(), label="Domínio CTL/EXP01")
     ax.add_patch(Rectangle((ANALYSIS_EXTENT[0], ANALYSIS_EXTENT[2]),
@@ -306,15 +320,21 @@ def plot_validation_cells(cfg, output: Path) -> None:
     """Show the exact MPAS cells paired with P0/LPI on both meshes."""
     import cartopy.crs as ccrs
 
-    mesh_names = ["meqbr_05km", "meqbr_05km_buf"]
-    labels = ["CTL/EXP01 — malha ~4,6 km", "EXP02 — malha com buffer"]
-    datasets = {
-        name: read_mesh_topology(cfg.runs_root / f"{name}.static.nc")
-        for name in mesh_names
-    }
+    mesh_names = ["meqbr_05km", "meqbr_05km_buf", "meqbr_05km_oval_meq02a"]
+    mesh_experiments = ["CTL", "EXP02", "EXP03"]
+    labels = ["CTL/EXP01 — malha ~4,6 km", "EXP02 — malha com buffer",
+              "EXP03 — malha Oval"]
+    datasets = {}
+    for name, experiment in zip(mesh_names, mesh_experiments):
+        leg = cfg.leg(experiment, "2021")
+        histories = io.find_history_files(leg.history_dir)
+        if not histories:
+            raise FileNotFoundError(f"no history available for {experiment}/2021")
+        datasets[name] = read_mesh_topology(
+            cfg.mesh_file(name), landmask_path=histories[0])
 
-    fig = plt.figure(figsize=(14.5, 7.6))
-    grid = fig.add_gridspec(2, 3, width_ratios=[1.35, 1, 1],
+    fig = plt.figure(figsize=(18.0, 7.6))
+    grid = fig.add_gridspec(2, 4, width_ratios=[1.35, 1, 1, 1],
                             wspace=0.22, hspace=0.28)
     ax_main = fig.add_subplot(grid[:, 0], projection=ccrs.PlateCarree())
     base = datasets["meqbr_05km"]
@@ -398,7 +418,8 @@ def plot_validation_cells(cfg, output: Path) -> None:
                  fontsize=14, y=0.995)
     plotting.provenance_footer(
         fig,
-        "Fonte: arquivos static.nc das duas malhas | estrela vermelha: posição do "
+        "Fonte: topologia dos arquivos grid.nc e landmask dos históricos das três "
+        "malhas | estrela vermelha: posição do "
         "LiDAR | contorno preto e x: célula oceânica mais próxima e seu centro | "
         "polígonos: células Voronoi nativas do MPAS. A distância quantifica o "
         "deslocamento entre o instrumento pontual e o valor de grade usado na validação. "
@@ -417,14 +438,16 @@ def main() -> int:
         out_dir / "experimental_design_ctl_mesh.png",
         out_dir / "experimental_design_exp01_sst.png",
         out_dir / "experimental_design_exp02_mesh.png",
+        out_dir / "experimental_design_exp03_mesh.png",
         out_dir / "validation_network.png",
         out_dir / "validation_cells.png",
     ]
     plot_mesh_resolution(cfg, "CTL", "meqbr_05km", outputs[0])
     plot_sst_delta(cfg, outputs[1])
     plot_mesh_resolution(cfg, "EXP02", "meqbr_05km_buf", outputs[2])
-    plot_validation_network(cfg, outputs[3])
-    plot_validation_cells(cfg, outputs[4])
+    plot_mesh_resolution(cfg, "EXP03", "meqbr_05km_oval_meq02a", outputs[3])
+    plot_validation_network(cfg, outputs[4])
+    plot_validation_cells(cfg, outputs[5])
     for path in outputs:
         print(f"-> {path.relative_to(REPO_ROOT)}")
     return 0
