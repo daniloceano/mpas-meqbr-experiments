@@ -9,8 +9,11 @@ hardcoded in a script.
 ## 1. MPAS simulation output — read in place, never copied
 
 **Location** `runs_root` = `/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km`
-**Structure** `<EXP>/<period>/history.YYYY-MM-DD_HH.MM.SS.nc`, one timestep per
-file, hourly, 143 MB (`meqbr_05km`) or 178 MB (`meqbr_05km_buf`) each.
+for CTL/EXP01/EXP02. EXP03 uses the portable sibling override
+`../meqbr_05km_oval_meq02a` declared in `config/experiments.yaml`.
+**Structure** `<run_directory>/<period>/history.YYYY-MM-DD_HH.MM.SS.nc`, one
+timestep per file, hourly, 143 MB (`meqbr_05km`), 178 MB (`meqbr_05km_buf`) or
+192 MB (`meqbr_05km_oval_meq02a`) each.
 **Volume** ~700-1000 files per leg; ~500 GB in total across the set.
 
 The authoritative description of the runs is in the simulation repository, not
@@ -25,7 +28,12 @@ Auxiliary files used from the same directories:
 |---|---|
 | `<mesh>.init.nc` | `zgrid` + terrain together (only place both are guaranteed) |
 | `<mesh>.sfc_update.nc` | the SST field `init_atmosphere` case 8 produced — audited by `scripts/03_selection/check_sst_forcing.py` |
-| `namelist.atmosphere`, `streams.atmosphere` | archived configuration, per leg |
+| `namelist.atmosphere`, `streams.atmosphere` | archived configuration, per leg; verified copies in `config/namelists/` |
+
+The permanent inventory, checksums, source paths and known evidence gaps for
+the eight current CTL/EXP01/EXP02/EXP03 cases are recorded in
+[`docs/provenance/MEQ-02D-experimental-configurations.md`](provenance/MEQ-02D-experimental-configurations.md).
+The archive deliberately excludes the superseded `_BADSST` runs.
 
 ---
 

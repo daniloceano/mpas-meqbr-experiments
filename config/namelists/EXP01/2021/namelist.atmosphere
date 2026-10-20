@@ -1,0 +1,92 @@
+&nhyd_model
+    config_time_integration_order = 2
+    config_dt = 30.0
+    config_len_disp = 5000.0
+    config_start_time = '2021-10-21_00:00:00'
+    config_run_duration = '41_00:00:00'
+    config_split_dynamics_transport = true
+    config_number_of_sub_steps = 2
+    config_dynamics_split_steps = 3
+    config_horiz_mixing = '2d_smagorinsky'
+    config_les_model = 'none'
+    config_les_surface = 'none'
+    config_surface_heat_flux = 0.0
+    config_surface_moisture_flux = 0.0
+    config_surface_drag_coefficient = 0.0
+    config_visc4_2dsmag = 0.05
+    config_mix_scalars = false
+    config_scalar_advection = true
+    config_monotonic = true
+    config_coef_3rd_order = 0.25
+    config_smdiv = 0.1
+    config_use_custom_weightsOnEdge = false
+    config_use_custom_coeffs_reconstruct = false
+    config_ke_use_reconstructed_vel = false
+    config_ke_use_vertex_reconstructed_vel = false
+/
+&damping
+    config_zd = 22000.0
+    config_xnutr = 0.2
+    config_epssm_minimum = 0.1
+    config_epssm_maximum = 0.5
+    config_epssm_transition_bottom_z = 30000.
+    config_epssm_transition_top_z = 50000.
+/
+&limited_area
+    config_apply_lbcs = true
+/
+&io
+    config_pio_num_iotasks = 0
+    config_pio_stride = 1
+/
+&decomposition
+    config_block_decomp_file_prefix = 'meqbr_05km.graph.info.part.'
+/
+&restart
+    config_do_restart = false
+/
+&printout
+    config_print_global_minmax_vel = true
+    config_print_detailed_minmax_vel = false
+/
+&IAU
+    config_IAU_option = 'off'
+    config_IAU_window_length_s = 21600.
+/
+&physics
+    config_sst_update = true
+    config_sstdiurn_update = false
+    config_deepsoiltemp_update = false
+    config_radtlw_interval = '00:30:00'
+    config_radtsw_interval = '00:30:00'
+    config_bucket_update = 'none'
+    config_physics_suite = 'mesoscale_reference'
+/
+&soundings
+    config_sounding_interval = 'none'
+/
+&physics_lsm_noahmp
+    config_noahmp_iopt_dveg = 4
+    config_noahmp_iopt_crs = 1
+    config_noahmp_iopt_btr = 1
+    config_noahmp_iopt_runsrf = 3
+    config_noahmp_iopt_runsub = 3
+    config_noahmp_iopt_sfc = 1
+    config_noahmp_iopt_frz = 1
+    config_noahmp_iopt_inf = 1
+    config_noahmp_iopt_rad = 3
+    config_noahmp_iopt_alb = 1
+    config_noahmp_iopt_snf = 1
+    config_noahmp_iopt_tksno = 1
+    config_noahmp_iopt_tbot = 2
+    config_noahmp_iopt_stc = 1
+    config_noahmp_iopt_gla = 1
+    config_noahmp_iopt_rsf = 4
+    config_noahmp_iopt_soil = 1
+    config_noahmp_iopt_pedo = 1
+    config_noahmp_iopt_crop = 0
+    config_noahmp_iopt_irr = 0
+    config_noahmp_iopt_irrm = 0
+    config_noahmp_iopt_infdv = 1
+    config_noahmp_iopt_tdrn = 0
+/
