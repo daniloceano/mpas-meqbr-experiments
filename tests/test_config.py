@@ -53,6 +53,21 @@ class ConfigTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.cfg.leg("UNKNOWN", "2021")
 
+    def test_exp04_to_exp06_use_original_mesh_and_confirmed_physics(self):
+        for experiment in ("EXP04", "EXP05", "EXP06"):
+            meta = self.cfg.experiments[experiment]
+            self.assertEqual(meta["mesh"], "meqbr_05km")
+            self.assertEqual(meta["land_surface_scheme"], "sf_noah")
+            self.assertEqual(meta["periods"], ["2021", "2022"])
+            self.assertIn(experiment, plotting.EXPERIMENT_ORDER)
+            self.assertIn(experiment, plotting.EXPERIMENT_COLORS)
+        self.assertEqual(self.cfg.experiments["EXP04"]["pbl_scheme"], "bl_mynn")
+        self.assertEqual(
+            self.cfg.experiments["EXP05"]["convection_scheme"],
+            "cu_grell_freitas",
+        )
+        self.assertTrue(self.cfg.experiments["EXP06"]["sstdiurn_update"])
+
 
 if __name__ == "__main__":
     unittest.main()

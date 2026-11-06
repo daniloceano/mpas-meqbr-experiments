@@ -145,10 +145,22 @@ def main() -> int:
                                   suffixes=("_a", "_b"))
                 if len(merged) < 3 * args.block_hours:
                     continue
-                res = metrics.paired_skill_test(
-                    merged["obs_speed"].values, merged["mod_speed_a"].values,
-                    merged["mod_speed_b"].values,
-                    block_hours=args.block_hours, n_boot=args.n_boot)
+                raw = metrics.gap_aware_paired_skill_test(
+                    merged["time"], merged["obs_speed"],
+                    merged["mod_speed_a"], merged["mod_speed_b"],
+                    block_hours=args.block_hours, n_boot=args.n_boot,
+                )
+                res = {
+                    "n": raw["n"],
+                    "rmse_a": raw["rmse_reference"],
+                    "rmse_b": raw["rmse_model"],
+                    "delta_mse": raw["delta_mse"],
+                    "lo": raw["lo"],
+                    "hi": raw["hi"],
+                    "significant": raw["significant"],
+                    "block_hours": args.block_hours,
+                    "n_boot": args.n_boot,
+                }
                 better = b if res["delta_mse"] > 0 else a
                 tests.append({
                     "period": period, "site": site_key, "height_m": height,

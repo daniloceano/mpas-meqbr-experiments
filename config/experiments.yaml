@@ -14,7 +14,8 @@
 
 runs_root_note: >
   runs_root is set in paths.local.yaml and points at the directory that holds
-  CTL/, EXP01/, EXP02/, EXP01_BADSST/, EXP02_BADSST/ plus the shared mesh
+  CTL/, EXP01/, EXP02/, EXP04/, EXP05/, EXP06/, EXP01_BADSST/,
+  EXP02_BADSST/ plus the shared mesh
   assets. Experiments outside that conventional directory may declare a
   portable run_directory relative to runs_root. The _BADSST pair is
   superseded; see the experiments block.
@@ -27,8 +28,10 @@ common_configuration:
   dynamics: "RK3 split-explicit, 3 subpassos dinâmicos e 2 subpassos acústicos"
   horizontal_mixing: "mistura horizontal Smagorinsky 2D"
   physics_suite: "mesoscale_reference"
-  physics_components: "microfísica WSM6, radiação RRTMG, camada limite YSU, superfície Monin-Obukhov e convecção Tiedtke"
-  land_surface: "Noah-MP"
+  physics_components: >
+    microfísica WSM6 e radiação RRTMG comuns; camada limite, camada
+    superficial e convecção variam conforme o experimento
+  land_surface: "Noah (sf_noah), confirmado nos logs efetivos; não Noah-MP"
   limited_area: true
   data_assimilation: false
 
@@ -40,7 +43,7 @@ meshes:
     mean_cell_spacing_km: 4.6
     cell_extent: {lat_min: -7.66, lat_max: 6.72, lon_min: -54.95, lon_max: -32.70}
     n_relaxation_cells: 9093
-    used_by: [CTL, EXP01, EXP01_BADSST]
+    used_by: [CTL, EXP01, EXP04, EXP05, EXP06, EXP01_BADSST]
   meqbr_05km_buf:
     n_cells: 95138
     grid_path: "../../grids/meqbr_05km_buf/meqbr_05km_buf.grid.nc"
@@ -103,6 +106,11 @@ experiments:
     delta: "baseline"
     mesh: meqbr_05km
     sst_update: false
+    sstdiurn_update: false
+    pbl_scheme: bl_ysu
+    sfclayer_scheme: sf_monin_obukhov
+    convection_scheme: cu_tiedtke
+    land_surface_scheme: sf_noah
     periods: ["2021", "2022"]
     status: complete
     mpi_ranks: 80
@@ -126,6 +134,11 @@ experiments:
     delta: "config_sst_update = true (NOAA OISST v2.1 daily) instead of SST frozen at the initial ERA5 skin temperature"
     mesh: meqbr_05km
     sst_update: true
+    sstdiurn_update: false
+    pbl_scheme: bl_ysu
+    sfclayer_scheme: sf_monin_obukhov
+    convection_scheme: cu_tiedtke
+    land_surface_scheme: sf_noah
     periods: ["2021", "2022"]
     status: complete         # finished 2026-09-09 11:57:47 UTC; overall exit=0
     mpi_ranks: 90
@@ -155,6 +168,11 @@ experiments:
     delta: "boundary treatment: mesh meqbr_05km_buf (5 -> 32 km ramp) plus ERA5 re-downloaded over a wider box; sst_update stays on"
     mesh: meqbr_05km_buf
     sst_update: true
+    sstdiurn_update: false
+    pbl_scheme: bl_ysu
+    sfclayer_scheme: sf_monin_obukhov
+    convection_scheme: cu_tiedtke
+    land_surface_scheme: sf_noah
     periods: ["2021", "2022"]
     status: complete         # 2021 leg 2026-09-26, 2022 leg 2026-10-07; both rc=0
     mpi_ranks: 90
@@ -192,6 +210,11 @@ experiments:
     # run is a sibling of the conventional meqbr_05km experiment directory.
     run_directory: "../meqbr_05km_oval_meq02a"
     sst_update: true
+    sstdiurn_update: false
+    pbl_scheme: bl_ysu
+    sfclayer_scheme: sf_monin_obukhov
+    convection_scheme: cu_tiedtke
+    land_surface_scheme: sf_noah
     sst_forcing: "NOAA OISST v2.1 daily, corrected coastal interpolation"
     periods: ["2021", "2022"]
     status: complete
@@ -209,6 +232,80 @@ experiments:
         2021-12-01 00:00 inclusive (721 hourly samples) and 2022-10-01 00:00
         through 2022-11-01 00:00 inclusive (745 hourly samples). Outputs before
         those dates are spin-up and must not enter comparative statistics.
+
+  EXP04:
+    label: "EXP04"
+    long_label: "EXP04 — MYNN boundary-layer and surface-layer package"
+    parent: EXP01
+    delta: "EXP01 + config_pbl_scheme = bl_mynn and config_sfclayer_scheme = sf_mynn"
+    mesh: meqbr_05km
+    sst_update: true
+    sstdiurn_update: false
+    sst_forcing: "NOAA OISST v2.1 daily, corrected coastal interpolation"
+    pbl_scheme: bl_mynn
+    sfclayer_scheme: sf_mynn
+    convection_scheme: cu_tiedtke
+    land_surface_scheme: sf_noah
+    periods: ["2021", "2022"]
+    status: complete
+    mpi_ranks: 22
+    mpi_ranks_by_period: {"2021": 90, "2022": 22}
+    relative_cost: 1.00
+    caveats:
+      - >
+        EXP04 changes PBL and surface-layer schemes together. EXP04 - EXP01
+        measures the MYNN package, not either selector in isolation.
+      - >
+        The 2021 leg used 90 MPI ranks; the 2022 leg used 22 ranks during the
+        concurrent campaign. Raw wall time is therefore not a physics-only
+        cost comparison.
+
+  EXP05:
+    label: "EXP05"
+    long_label: "EXP05 — MYNN package + Grell–Freitas convection"
+    parent: EXP04
+    delta: "EXP04 + config_convection_scheme = cu_grell_freitas"
+    mesh: meqbr_05km
+    sst_update: true
+    sstdiurn_update: false
+    sst_forcing: "NOAA OISST v2.1 daily, corrected coastal interpolation"
+    pbl_scheme: bl_mynn
+    sfclayer_scheme: sf_mynn
+    convection_scheme: cu_grell_freitas
+    land_surface_scheme: sf_noah
+    periods: ["2021", "2022"]
+    status: complete
+    mpi_ranks: 22
+    mpi_ranks_by_period: {"2021": 22, "2022": 22}
+    relative_cost: 1.00
+    caveats:
+      - >
+        EXP05 - EXP04 is the conditional contribution of Grell–Freitas with
+        MYNN already active; it is not a factorial estimate independent of PBL.
+
+  EXP06:
+    label: "EXP06"
+    long_label: "EXP06 — MYNN + Grell–Freitas + diurnal SST skin cycle"
+    parent: EXP05
+    delta: "EXP05 + config_sstdiurn_update = true"
+    mesh: meqbr_05km
+    sst_update: true
+    sstdiurn_update: true
+    sst_forcing: "NOAA OISST v2.1 daily, corrected coastal interpolation"
+    pbl_scheme: bl_mynn
+    sfclayer_scheme: sf_mynn
+    convection_scheme: cu_grell_freitas
+    land_surface_scheme: sf_noah
+    periods: ["2021", "2022"]
+    status: complete
+    mpi_ranks: 22
+    mpi_ranks_by_period: {"2021": 22, "2022": 22}
+    relative_cost: 1.00
+    caveats:
+      - >
+        EXP06 - EXP05 is the conditional contribution of the prognostic
+        diurnal skin-temperature cycle with MYNN and Grell–Freitas already
+        active. The prescribed OISST field remains a daily update.
 
   # ---------------------------------------------------------------------------
   # Superseded runs. They are kept registered, and kept in the analysis, because

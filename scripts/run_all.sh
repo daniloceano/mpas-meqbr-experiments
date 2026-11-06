@@ -25,8 +25,8 @@ FROM=${1:-00}
 # EXP01/EXP02 are the corrected integrations. The _BADSST pair they replaced is
 # kept only as the evidence for the OISST coastal-fill finding, and is excluded
 # from every table that decides anything. See config/experiments.yaml.
-CURRENT="CTL EXP01 EXP02 EXP03"
-ALL_EXPERIMENTS="CTL EXP01 EXP01_BADSST EXP02 EXP02_BADSST EXP03"
+CURRENT="CTL EXP01 EXP02 EXP03 EXP04 EXP05 EXP06"
+ALL_EXPERIMENTS="CTL EXP01 EXP01_BADSST EXP02 EXP02_BADSST EXP03 EXP04 EXP05 EXP06"
 LOG=results/logs
 mkdir -p "$LOG"
 
@@ -55,7 +55,8 @@ fi
 
 # --- 01 extraction --------------------------------------------------------
 if stage 01; then
-    run 01_sites            $PY scripts/01_extract/extract_site_timeseries.py
+    run 01_sites            $PY scripts/01_extract/extract_site_timeseries.py \
+                               --experiments $CURRENT
     run 01_fields           $PY scripts/01_extract/compute_field_statistics.py
     # A second set of field statistics over the window common to all
     # experiments. Every leg is complete, so this now equals each leg's own
@@ -70,19 +71,28 @@ fi
 
 # --- 02 validation --------------------------------------------------------
 if stage 02; then
-    run 02_metrics          $PY scripts/02_validation/compute_site_metrics.py
+    run 02_metrics          $PY scripts/02_validation/compute_site_metrics.py \
+                               --experiments $CURRENT
     # ... and again over each experiment's own full window, which is the right
     # view for the two completed experiments.
     run 02_metrics_full     $PY scripts/02_validation/compute_site_metrics.py \
+                               --experiments $CURRENT \
                                --no-common-period \
                                --out results/tables/site_metrics_full_window.csv
-    run 02_timeseries       $PY scripts/02_validation/plot_timeseries_scatter.py
-    run 02_diurnal          $PY scripts/02_validation/plot_diurnal_cycle.py
-    run 02_profile          $PY scripts/02_validation/plot_vertical_profile.py
-    run 02_taylor           $PY scripts/02_validation/plot_taylor_diagram.py
-    run 02_distributions    $PY scripts/02_validation/plot_wind_distributions.py
-    run 02_cellsensitivity  $PY scripts/02_validation/check_cell_sensitivity.py
-    run 02_stations         $PY scripts/02_validation/validate_surface_stations.py
+    run 02_timeseries       $PY scripts/02_validation/plot_timeseries_scatter.py \
+                               --experiments $CURRENT
+    run 02_diurnal          $PY scripts/02_validation/plot_diurnal_cycle.py \
+                               --experiments $CURRENT
+    run 02_profile          $PY scripts/02_validation/plot_vertical_profile.py \
+                               --experiments $CURRENT
+    run 02_taylor           $PY scripts/02_validation/plot_taylor_diagram.py \
+                               --experiments $CURRENT
+    run 02_distributions    $PY scripts/02_validation/plot_wind_distributions.py \
+                               --experiments $CURRENT
+    run 02_cellsensitivity  $PY scripts/02_validation/check_cell_sensitivity.py \
+                               --experiments $CURRENT
+    run 02_stations         $PY scripts/02_validation/validate_surface_stations.py \
+                               --experiments $CURRENT
     run 02_interactive      $PY scripts/02_validation/build_interactive_validation.py
 fi
 
@@ -90,12 +100,14 @@ fi
 if stage 03; then
     run 03_sst_check        $PY scripts/03_selection/check_sst_forcing.py
     run 03_runtime          $PY scripts/03_selection/compute_runtime_metrics.py
-    run 03_ranking          $PY scripts/03_selection/rank_experiments.py
+    run 03_ranking          $PY scripts/03_selection/rank_experiments.py \
+                               --experiments $CURRENT
     # The decision-grade subset: the baseline plus the two current runs. The
     # untagged tables above keep all five experiments so the SST contamination
     # stays auditable, but the configuration choice is made on this one.
     run 03_ranking_cur      $PY scripts/03_selection/rank_experiments.py \
                                --experiments $CURRENT --tag current
+    run 03_exp04_06         $PY scripts/03_selection/compare_exp04_06.py
     run 03_attribution      $PY scripts/03_selection/attribution_diagnostics.py
     run 03_boundary         $PY scripts/03_selection/boundary_influence.py \
                                --period 2021 --tag common \
@@ -104,7 +116,8 @@ fi
 
 # --- 04 ERA5 --------------------------------------------------------------
 if stage 04; then
-    run 04_added_value      $PY scripts/04_era5/added_value.py
+    run 04_added_value      $PY scripts/04_era5/added_value.py \
+                               --experiments $CURRENT
     run 04_added_value_cur  $PY scripts/04_era5/added_value.py \
                                --experiments $CURRENT --tag current
     run 04_climatology      $PY scripts/04_era5/climatological_context.py --months all
@@ -151,6 +164,8 @@ if stage 06; then
     run 06_audit_runs       $PY scripts/06_audit/validate_corrected_runs.py \
                                --runs-root "$(python -c 'import yaml;print(yaml.safe_load(open("config/paths.local.yaml"))["runs_root"])')" \
                                --out results/audit/corrected_runs_validation.json
+    run 06_audit_exp04_06   $PY scripts/06_audit/validate_exp04_06_outputs.py
+    run 06_audit_exp06_sst  $PY scripts/06_audit/audit_exp06_sst.py
     run 06_context          $PY scripts/06_report/plot_report_context.py
     run 06_report           $PY scripts/06_report/build_technical_report.py
 fi

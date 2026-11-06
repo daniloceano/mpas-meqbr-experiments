@@ -33,7 +33,7 @@ from mpas_meqbr.config import REPO_ROOT, load_config       # noqa: E402
 
 EXTENT = (-46.5, -33.5, -7.5, 1.0)
 RESOLUTION = 0.04
-CURRENT = ["CTL", "EXP01", "EXP02", "EXP03"]
+CURRENT = ["CTL", "EXP01", "EXP02", "EXP03", "EXP04", "EXP05", "EXP06"]
 VARIABLES = {
     "wind100_mean": {
         "label": "Vento médio a 100 m", "unit": "m s⁻¹",
@@ -96,16 +96,16 @@ def coastline() -> list[list[list[float]]]:
 def discover_diagnostic_media(entries: list[dict]) -> None:
     patterns = [
         (REPO_ROOT / "figures" / "animations", re.compile(
-            r"wind100_(CTL|EXP01|EXP02|EXP03)_(2021|2022)_(\d{8})_([0-9.]+)d\.(mp4|gif)$"),
+            r"wind100_(CTL|EXP01|EXP02|EXP03|EXP04|EXP05|EXP06)_(2021|2022)_(\d{8})_([0-9.]+)d\.(mp4|gif)$"),
          "wind100_animation", "Vento a 100 m — animação", "animation"),
         (REPO_ROOT / "figures" / "animations", re.compile(
-            r"xsection_(P0|LPI)_(CTL|EXP01|EXP02|EXP03)_(2021|2022)_(\d{8})_([0-9.]+)d\.(mp4|gif)$"),
+            r"xsection_(P0|LPI)_(CTL|EXP01|EXP02|EXP03|EXP04|EXP05|EXP06)_(2021|2022)_(\d{8})_([0-9.]+)d\.(mp4|gif)$"),
          "xsection_animation", "Seção vertical — animação", "animation"),
         (REPO_ROOT / "figures" / "exploration", re.compile(
-            r"xsection_(P0|LPI)_(CTL|EXP01|EXP02|EXP03)_(2021|2022)_composite_15local\.png$"),
+            r"xsection_(P0|LPI)_(CTL|EXP01|EXP02|EXP03|EXP04|EXP05|EXP06)_(2021|2022)_composite_15local\.png$"),
          "xsection_composite", "Seção vertical — composto 15 h local", "image"),
         (REPO_ROOT / "figures" / "era5", re.compile(
-            r"resource_comparison_(CTL|EXP01|EXP02|EXP03)_(2021|2022)\.png$"),
+            r"resource_comparison_(CTL|EXP01|EXP02|EXP03|EXP04|EXP05|EXP06)_(2021|2022)\.png$"),
          "resource_vs_era5", "Comparação espacial com ERA5", "image"),
         (REPO_ROOT / "figures" / "exploration", re.compile(
             r"diff_(EXP01|EXP02|EXP03)_vs_CTL_(2021|2022)(?:_common)?\.png$"),

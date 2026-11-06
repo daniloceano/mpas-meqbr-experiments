@@ -34,6 +34,49 @@ from mpas_meqbr.config import REPO_ROOT, load_config  # noqa: E402
 TS_FMT = "%Y-%m-%dT%H:%M:%SZ"
 MODEL_YEAR_HOURS = 365.0 * 24.0
 REFERENCE_CORES = 100
+CAMPAIGN_PROVENANCE = (
+    REPO_ROOT / "results" / "provenance" / "MEQ-02D_EXP04-06"
+)
+
+
+def _elapsed_seconds(value: str) -> float:
+    """Parse GNU time's ``h:mm:ss`` (or ``m:ss``) elapsed field."""
+    parts = [float(item) for item in value.strip().split(":")]
+    if len(parts) == 3:
+        hours, minutes, seconds = parts
+    elif len(parts) == 2:
+        hours, (minutes, seconds) = 0.0, parts
+    else:
+        return parts[0]
+    return hours * 3600.0 + minutes * 60.0 + seconds
+
+
+def campaign_resource_record(experiment: str, period: str) -> dict | None:
+    """Measured GNU-time record for the completed EXP04--EXP06 campaign."""
+    path = CAMPAIGN_PROVENANCE / f"{experiment}-{period}-resource_usage.txt"
+    if not path.exists():
+        return None
+    text = path.read_text(errors="replace")
+    elapsed = re.search(
+        r"Elapsed \(wall clock\) time \(h:mm:ss or m:ss\):\s*([^\s]+)", text)
+    user = re.search(r"User time \(seconds\):\s*([0-9.]+)", text)
+    system = re.search(r"System time \(seconds\):\s*([0-9.]+)", text)
+    status = re.search(r"Exit status:\s*(\d+)", text)
+    if not elapsed:
+        return None
+    cpu_seconds = (
+        float(user.group(1)) + float(system.group(1))
+        if user and system else np.nan
+    )
+    return {
+        "status": "complete" if status and int(status.group(1)) == 0 else "failed",
+        "wall_seconds": _elapsed_seconds(elapsed.group(1)),
+        "cpu_seconds": cpu_seconds,
+        "method": "gnu_time_campaign_record",
+        "quality": "measured",
+        "source": str(path.relative_to(REPO_ROOT)),
+        "note": f"GNU time exit={status.group(1) if status else 'unknown'}",
+    }
 
 
 def wrapper_logs(cfg, experiment: str) -> list[Path]:
@@ -177,11 +220,15 @@ def build_rows(cfg) -> list[dict]:
     now = datetime.now(timezone.utc)
     for experiment in cfg.experiment_keys:
         exp = cfg.experiments[experiment]
-        ranks_declared = int(exp["mpi_ranks"])
+        ranks_declared_default = int(exp["mpi_ranks"])
         candidates = wrapper_logs(cfg, experiment)
         # The directory was renamed after the run; the log keeps the old name.
         names = (experiment, *exp.get("wrapper_aliases", []))
         for period in exp["periods"]:
+            ranks_declared = int(
+                exp.get("mpi_ranks_by_period", {}).get(str(period),
+                                                        ranks_declared_default)
+            )
             leg = cfg.leg(experiment, str(period))
             if not leg.exists():
                 continue
@@ -196,8 +243,14 @@ def build_rows(cfg) -> list[dict]:
             full_hours = (
                 leg.analysis_end - leg.integration_start).total_seconds() / 3600
 
+            campaign = campaign_resource_record(experiment, str(period))
             timing = None
-            if rec and rec["wall_seconds"] is not None:
+            if campaign is not None:
+                timing = {
+                    **campaign,
+                    "simulated_hours": full_hours,
+                }
+            elif rec and rec["wall_seconds"] is not None:
                 timing = {
                     "status": "complete" if rec["rc"] == 0 else "failed",
                     "wall_seconds": rec["wall_seconds"],
@@ -248,6 +301,9 @@ def build_rows(cfg) -> list[dict]:
                 "wall_hours": round(wall_hours, 3),
                 "sim_hours_per_wall_hour": round(sim_hours / wall_hours, 3),
                 "core_hours": round(wall_hours * ranks, 3),
+                "cpu_hours_observed": round(
+                    timing.get("cpu_seconds", np.nan) / 3600.0, 3
+                ),
                 # Explicit name used by the report. The legacy alias is retained
                 # so downstream notebooks do not break when the table is refreshed.
                 "machine_hours_per_sim_hour_single_core": round(

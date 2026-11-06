@@ -23,6 +23,9 @@
       --exp01: #0077b6;
       --exp02: #e07a1f;
       --exp03: #6a4c93;
+      --exp04: #9467bd;
+      --exp05: #ff7f0e;
+      --exp06: #17becf;
       --era5: #6b7280;
       --gain: #087443;
       --loss: #b42318;
@@ -309,6 +312,9 @@
     .metric-card[data-source="EXP01"] { border-top: 4px solid var(--exp01); }
     .metric-card[data-source="EXP02"] { border-top: 4px solid var(--exp02); }
     .metric-card[data-source="EXP03"] { border-top: 4px solid var(--exp03); }
+    .metric-card[data-source="EXP04"] { border-top: 4px solid var(--exp04); }
+    .metric-card[data-source="EXP05"] { border-top: 4px solid var(--exp05); }
+    .metric-card[data-source="EXP06"] { border-top: 4px solid var(--exp06); }
     .metric-card[data-source="ERA5"] { border-top: 4px solid var(--era5); }
     .metric-best { display: inline-block; padding: .08rem .35rem; border-radius: 4px; background: #fff1a8; font-weight: 900; }
     .validation-metrics { align-self: stretch; width: 100%; color: var(--ink); }
@@ -318,7 +324,7 @@
       border-left: 5px solid var(--era5); border-radius: 8px; background: #f4f7f8;
     }
     .metric-reference p { margin: .12rem 0; }
-    .metric-grid-mpas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .metric-grid-mpas { grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); }
     .metric-card .source-name { margin-bottom: .45rem; font-size: .78rem; letter-spacing: .04em; }
     .metric-card .metric-primary { margin-bottom: .45rem; font-size: 1.02rem; line-height: 1.35; }
     .metric-card .metric-secondary { display: grid; gap: .3rem; font-size: .82rem; line-height: 1.35; }
@@ -348,6 +354,9 @@
     .aggregate-card[data-source="EXP01"] { border-top-color: var(--exp01); }
     .aggregate-card[data-source="EXP02"] { border-top-color: var(--exp02); }
     .aggregate-card[data-source="EXP03"] { border-top-color: var(--exp03); }
+    .aggregate-card[data-source="EXP04"] { border-top-color: var(--exp04); }
+    .aggregate-card[data-source="EXP05"] { border-top-color: var(--exp05); }
+    .aggregate-card[data-source="EXP06"] { border-top-color: var(--exp06); }
     .aggregate-card dl { display: grid; grid-template-columns: 1fr auto; gap: .28rem .5rem; margin: .55rem 0 0; font-size: .8rem; }
     .aggregate-card dt, .aggregate-card dd { margin: 0; }
     .aggregate-card dd { text-align: right; }
@@ -600,13 +609,15 @@
 
       <div class="narrative-divider" id="desenho">
       <h3>Desenho experimental</h3>
-      <p class="lead">Todos os experimentos usam a mesma dinâmica, física,
-         discretização vertical e períodos. Cada experimento herda o anterior e
-         acrescenta uma mudança específica. O desenho é cumulativo, não
-         fatorial: EXP02 − EXP01 representa o efeito
+      <p class="lead">Todos os experimentos usam a mesma dinâmica,
+         discretização vertical e períodos. Microfísica WSM6, radiação RRTMG e
+         superfície terrestre Noah permanecem comuns; PBL, camada superficial,
+         convecção, SST e geometria variam conforme o ramo experimental. O desenho
+         é cumulativo, não fatorial: EXP02 − EXP01 representa o efeito
          <em>incremental</em> do tratamento de fronteira com a atualização de
          SST já ligada; EXP03 avalia a geometria Oval preservando a OISST
-         corrigida e a caixa ERA5 ampla.</p>
+         corrigida e a caixa ERA5 ampla. O ramo EXP04→EXP06 parte diretamente do
+         EXP01 e acumula MYNN, Grell–Freitas e o ciclo diurno da temperatura de pele.</p>
 
       <div id="configuracao-comum">
         <h3>Configuração comum a todos os experimentos</h3>
@@ -651,12 +662,23 @@
           <div class="arrow">→</div>
           <div class="step"><strong>EXP03</strong><br>OISST corrigida + malha Oval</div>
         </div>
+        <div class="flow" aria-label="Ramo cumulativo de física EXP04 a EXP06">
+          <div class="step"><strong>EXP01</strong><br>malha original + OISST diária</div>
+          <div class="arrow">→</div>
+          <div class="step"><strong>EXP04</strong><br>+ PBL/superfície MYNN</div>
+          <div class="arrow">→</div>
+          <div class="step"><strong>EXP05</strong><br>+ Grell–Freitas</div>
+          <div class="arrow">→</div>
+          <div class="step"><strong>EXP06</strong><br>+ SST diurna</div>
+        </div>
         <div class="banner info">
           <strong>Desenho cumulativo.</strong> EXP02 − EXP01 mede o efeito
           incremental do tratamento de fronteira quando a SST diária já está
           ativa. Não é o efeito isolado da malha com buffer. EXP03 acrescenta
           uma nova geometria de malha ao conjunto comparável, sem alterar a
-          física ou a discretização vertical.
+          física ou a discretização vertical. No ramo de física, EXP04−EXP01,
+          EXP05−EXP04 e EXP06−EXP05 são efeitos condicionais sucessivos; não
+          formam um experimento fatorial.
         </div>
         {% for exp in experiments %}
         <article class="experiment">
@@ -682,7 +704,7 @@
       {% if "inventory" in tables %}{{ render_table(tables["inventory"]) }}{% endif %}
       {% if "runtime" in tables %}{{ render_table(tables["runtime"]) }}{% endif %}
       </div>
-      <p class="section-outro"><strong>Interpretação:</strong> as oito pernas
+      <p class="section-outro"><strong>Interpretação:</strong> as quatorze pernas
         científicas estão completas; custo e número de células permanecem
         critérios operacionais, não evidência isolada de habilidade. A próxima
         seção examina o que cada configuração efetivamente simulou.</p>
@@ -701,7 +723,7 @@
 
       <div id="explorador-meteorologico" class="topic">
         <h3>Visualizador exploratório meteorológico</h3>
-        <p class="topic-intro">Use os seletores para comparar as quatro
+        <p class="topic-intro">Use os seletores para comparar as sete
            configurações, os dois períodos e os campos disponíveis sem abrir
            dezenas de figuras. Os rasters médios estão em coordenadas
            geográficas e aceitam zoom e deslocamento; seções e animações são
@@ -940,16 +962,44 @@
       <div class="banner info">
         <strong>Gate de integridade: aprovado.</strong>
         <code>check_sst_forcing.py</code> encontra zero células oceânicas no
-        valor de preenchimento da OISST em EXP01, EXP02 e EXP03. Na EXP03, a SST
+        valor de preenchimento da OISST nas integrações corrigidas. Na EXP03, a SST
         oceânica mínima é 299,97 K em 2021 e 299,47 K em 2022; P0/LPI recebem
         os mesmos valores corrigidos dos experimentos predecessores. A cadeia física acompanha:
         em P0 os fluxos de calor sensível e latente são positivos (+9,2 e
         +141,7 W m⁻²) e a camada limite tem 624 m.
       </div>
+      <div class="banner info">
+        <strong>Física efetivamente resolvida.</strong> Os logs de execução
+        identificam <code>sf_noah</code> como esquema terrestre e
+        <code>sf_noahmp_in = F</code>; portanto, o conjunto usa Noah, não Noah-MP.
+        EXP04 ativa conjuntamente <code>bl_mynn</code> e <code>sf_mynn</code>;
+        EXP05 acrescenta <code>cu_grell_freitas</code>; EXP06 acrescenta
+        <code>config_sstdiurn_update = true</code>. A OISST prescrita continua
+        sendo atualizada diariamente.
+      </div>
+      {% if "exp04_06_tests" in tables %}{{ render_table(tables["exp04_06_tests"]) }}{% endif %}
+      {% if "exp06_sst" in tables %}{{ render_table(tables["exp06_sst"]) }}{% endif %}
       {{ render_gallery(media_groups.get("mechanisms")) }}
+      <details class="method-details">
+        <summary>Referências das hipóteses físicas EXP04–EXP06</summary>
+        <div>
+          <ul class="plain-list">
+            <li>Nakanishi e Niino (2009), desenvolvimento do fechamento MYNN:
+              DOI <code>10.2151/jmsj.87.895</code>.</li>
+            <li>Grell e Freitas (2014), parametrização convectiva consciente de escala:
+              DOI <code>10.5194/acp-14-5233-2014</code>.</li>
+            <li>Zeng e Beljaars (2005), temperatura prognóstica da pele oceânica:
+              DOI <code>10.1029/2005GL023030</code>.</li>
+          </ul>
+          <p>Essas referências fundamentam as hipóteses; não substituem a
+             verificação da implementação efetiva no MPAS nem demonstram ganho
+             para a costa brasileira antes da comparação observacional.</p>
+        </div>
+      </details>
       <p class="section-outro"><strong>Limite:</strong> o desenho é cumulativo e
-        EXP03 altera geometria, decomposição e representação pontual. As evidências
-        sustentam mecanismos plausíveis, não causalidade exclusiva.</p>
+        EXP03 altera geometria, decomposição e representação pontual; EXP04–EXP06
+        acumulam mudanças de física. As evidências sustentam mecanismos plausíveis,
+        não causalidade exclusiva nem interações fatoriais isoladas.</p>
     </section>
 
     <section id="sintese">
@@ -1548,7 +1598,7 @@
       const detail = document.getElementById('validation-detail');
       const status = document.getElementById('validation-status');
       const selectedSources = new Set(validation.sources);
-      const sourceOrder = ['ERA5', 'CTL', 'EXP01', 'EXP02', 'EXP03'];
+      const sourceOrder = ['ERA5', 'CTL', 'EXP01', 'EXP02', 'EXP03', 'EXP04', 'EXP05', 'EXP06'];
       sourceOrder.filter((source) => validation.sources.includes(source)).forEach((source) => {
         const label = document.createElement('label');
         label.innerHTML = `<input type="checkbox" value="${source}" checked> ${source}`;
@@ -1593,13 +1643,13 @@
       }
 
       const bestValue = (rows, key, mode) => {
-        const values = rows.filter((row) => ['CTL','EXP01','EXP02','EXP03'].includes(row.source))
+        const values = rows.filter((row) => ['CTL','EXP01','EXP02','EXP03','EXP04','EXP05','EXP06'].includes(row.source))
           .map((row) => mode === 'abs' ? Math.abs(row[key]) : row[key]).filter(Number.isFinite);
         return values.length ? (mode === 'max' ? Math.max(...values) : Math.min(...values)) : null;
       };
       const bestSources = (rows, key, mode) => {
         const target = bestValue(rows, key, mode);
-        return target == null ? [] : rows.filter((row) => ['CTL','EXP01','EXP02','EXP03'].includes(row.source)
+        return target == null ? [] : rows.filter((row) => ['CTL','EXP01','EXP02','EXP03','EXP04','EXP05','EXP06'].includes(row.source)
           && Number.isFinite(row[key])
           && Math.abs((mode === 'abs' ? Math.abs(row[key]) : row[key]) - target) < 1e-10).map((row) => row.source);
       };
@@ -1657,7 +1707,7 @@
           const role = allRows.some((row) => row.selection_role === 'descriptive_only')
             ? '<p class="provisional">Esta altura é descritiva e não participa dos testes de seleção.</p>' : '';
           detail.innerHTML = `<h4>${selectedPoint.name}</h4><p>${network.value} · ${validation.periods[period.value].label} · ${height.value} m</p>${role}
-            <p><strong>Amarelo:</strong> melhor resultado numérico entre os quatro experimentos MPAS, inclusive quando algum cartão está oculto. Os badges comunicam separadamente a evidência estatística frente ao ERA5.</p>`;
+            <p><strong>Amarelo:</strong> melhor resultado numérico entre os sete experimentos MPAS, inclusive quando algum cartão está oculto. Os badges comunicam separadamente a evidência estatística frente ao ERA5.</p>`;
           status.textContent = `${validation.methods.confidence_interval}. Murphy skill é adimensional e aparece em escala decimal: 0,41 significa redução de 41% do MSE do modelo frente ao ERA5, nos mesmos horários. Vencedores globais: RMSE ${winners.rmse.join('/') || '—'}; viés ${winners.bias.join('/') || '—'}; r ${winners.r.join('/') || '—'}.`;
         } else {
           inputs.forEach((input) => { input.disabled = true; });
@@ -1689,7 +1739,7 @@
       publishSelection();
     }
 
-    const mpasSources = ['CTL', 'EXP01', 'EXP02', 'EXP03'];
+    const mpasSources = ['CTL', 'EXP01', 'EXP02', 'EXP03', 'EXP04', 'EXP05', 'EXP06'];
     const isFiniteValue = (value) => value !== null && value !== '' && Number.isFinite(Number(value));
     const finiteMean = (values) => {
       const valid = values.filter(isFiniteValue).map(Number);

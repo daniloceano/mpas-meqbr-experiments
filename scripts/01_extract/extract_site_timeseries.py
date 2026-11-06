@@ -136,6 +136,9 @@ def extract_leg(leg, site, cfg, *, n_cells: int, force: bool) -> Path | None:
                               np.array([m.distance_km for m in matches], np.float32))
 
     ds["uReconstructZonal"].attrs["units"] = "m s-1"
+    ds["uReconstructMeridional"].attrs["units"] = "m s-1"
+    ds["sst"].attrs["units"] = "K"
+    ds["skintemp"].attrs["units"] = "K"
     ds["height_agl"].attrs["long_name"] = "layer-center height above local terrain"
     ds["height_agl"].attrs["units"] = "m"
     ds.attrs.update({

@@ -28,7 +28,7 @@ from mpas_meqbr import metrics, pairing  # noqa: E402
 from mpas_meqbr.config import REPO_ROOT, load_config  # noqa: E402
 
 
-CURRENT = ["CTL", "EXP01", "EXP02", "EXP03"]
+CURRENT = ["CTL", "EXP01", "EXP02", "EXP03", "EXP04", "EXP05", "EXP06"]
 
 
 def correlation(obs, model) -> float:
@@ -218,7 +218,10 @@ def main() -> int:
     bundle = {
         "schema_version": 1,
         "methods": {
-            "pairing": "same observation hours for ERA5 and CTL/EXP01/EXP02/EXP03",
+            "pairing": (
+                "same observation hours for ERA5 and "
+                "CTL/EXP01/EXP02/EXP03/EXP04/EXP05/EXP06"
+            ),
             "confidence_interval": (
                 f"95% moving-block bootstrap; 24 h blocks; {args.n_boot} resamples; "
                 "blocks never cross data gaps"),

@@ -32,6 +32,10 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from mpas_meqbr.config import REPO_ROOT, load_config  # noqa: E402
 
+CURRENT_EXPERIMENTS = [
+    "CTL", "EXP01", "EXP02", "EXP03", "EXP04", "EXP05", "EXP06",
+]
+
 
 TABLE_SPECS = [
     {
@@ -174,7 +178,7 @@ TABLE_SPECS = [
         "value_maps": {"significant_vs_era5": {True: "sim", False: "não"}},
         "description": (
             "Métricas por estação e período em horas idênticas para ERA5 e os "
-            "quatro experimentos. Os IC95% usam bootstrap móvel em blocos de "
+            "sete experimentos atuais. Os IC95% usam bootstrap móvel em blocos de "
             "24 h, sem atravessar lacunas observacionais."
         ),
         "notes": [
@@ -246,7 +250,7 @@ TABLE_SPECS = [
             "A densidade de potência eólica é WPD = ½ ρ × média(U³), com ρ = 1,15 kg m⁻³ e U em m s⁻¹; o cubo é calculado antes da média.",
             "ERA5 aparece somente a 100 m, seu nível diagnóstico diretamente comparável ao LiDAR; não é extrapolado para as demais alturas.",
             "Todos os experimentos estão completos e são comparados nas mesmas horas observacionais disponíveis dentro de cada janela científica.",
-            "Em cada altura, o negrito indica o melhor entre CTL, EXP01, EXP02 e EXP03: menor valor absoluto para os vieses, menor RMSE e maior r. ERA5 permanece como benchmark e não entra nessa seleção.",
+            "Em cada altura, o negrito indica o melhor entre CTL e EXP01–EXP06: menor valor absoluto para os vieses, menor RMSE e maior r. ERA5 permanece como benchmark e não entra nessa seleção.",
         ],
     },
     {
@@ -285,6 +289,67 @@ TABLE_SPECS = [
             "“Sem diferença detectável” significa que o intervalo cruza zero — é um resultado válido, não uma falha do teste.",
             "O pareamento nos mesmos horários cancela a variabilidade sinótica compartilhada e é muito mais sensível que comparar dois RMSE isolados.",
             "A comparação EXP01 × EXP02 é o efeito incremental do tratamento de fronteira, com a atualização de SST já ligada nos dois.",
+        ],
+    },
+    {
+        "id": "exp04_06_tests",
+        "title": "Contrastes prioritários da campanha EXP04–EXP06",
+        "path": "results/tables/exp04_06_priority_tests.csv",
+        "columns": ["period", "site", "height_m", "experiment_a",
+                    "experiment_b", "n", "rmse_a", "rmse_b", "delta_mse",
+                    "lo", "hi", "better"],
+        "labels": {
+            "period": "Período", "site": "Sítio", "height_m": "Altura (m)",
+            "experiment_a": "Experimento A", "experiment_b": "Experimento B",
+            "n": "Horas pareadas", "rmse_a": "RMSE de A (m s⁻¹)",
+            "rmse_b": "RMSE de B (m s⁻¹)",
+            "delta_mse": "MSE(A) − MSE(B) (m² s⁻²)",
+            "lo": "IC95% inferior", "hi": "IC95% superior", "better": "Resultado",
+        },
+        "numeric": {"height_m": 0, "n": 0, "rmse_a": 2, "rmse_b": 2,
+                    "delta_mse": 2, "lo": 2, "hi": 2},
+        "value_maps": {"better": {
+            "no detectable difference": "sem diferença detectável",
+        }},
+        "description": (
+            "Diferença pareada dos erros quadráticos nas mesmas horas observadas "
+            "pelos sete experimentos atuais, com blocos de 24 h que não atravessam "
+            "lacunas e 2.000 reamostragens."
+        ),
+        "notes": [
+            "EXP04−EXP01 avalia o pacote MYNN; EXP05−EXP04 avalia Grell–Freitas condicional a MYNN; EXP06−EXP05 avalia a SST diurna condicional às duas mudanças anteriores.",
+            "Ausência de diferença detectável não demonstra equivalência estatística.",
+            "As comparações são exploratórias e não recebem correção por multiplicidade.",
+        ],
+    },
+    {
+        "id": "exp06_sst",
+        "title": "Auditoria física da SST diurna do EXP06",
+        "path": "results/tables/exp06_sst_spatial_summary.csv",
+        "columns": ["period", "variable", "surface", "complete_local_days",
+                    "mean_K", "p50_K", "p90_K", "p95_K", "p99_K", "max_K",
+                    "fraction_gt_5K", "extreme_date_local", "extreme_lat",
+                    "extreme_lon"],
+        "labels": {
+            "period": "Período", "variable": "Campo", "surface": "Máscara",
+            "complete_local_days": "Dias locais completos",
+            "mean_K": "Amplitude média (K)", "p50_K": "P50 (K)",
+            "p90_K": "P90 (K)", "p95_K": "P95 (K)", "p99_K": "P99 (K)",
+            "max_K": "Máximo (K)", "fraction_gt_5K": "Fração >5 K",
+            "extreme_date_local": "Data local do extremo",
+            "extreme_lat": "Latitude", "extreme_lon": "Longitude",
+        },
+        "numeric": {"complete_local_days": 0, "mean_K": 3, "p50_K": 3,
+                    "p90_K": 3, "p95_K": 3, "p99_K": 3, "max_K": 3,
+                    "fraction_gt_5K": 5, "extreme_lat": 3, "extreme_lon": 3},
+        "description": (
+            "Amplitude diária calculada hora a hora em dias locais completos "
+            "(UTC−3), separando oceano e continente pelo landmask efetivo do MPAS."
+        ),
+        "notes": [
+            "sst é a forçante prescrita atualizada diariamente; skintemp é a temperatura de pele prognóstica.",
+            "Uma SST finita não é usada como máscara oceânica.",
+            "Extremos continentais não podem ser interpretados como amplitude oceânica.",
         ],
     },
     {
@@ -538,6 +603,12 @@ MEDIA_SPECS = [
     media("mechanisms", "figures/selection/ranking.png",
           "Síntese comparativa dos experimentos",
           "RMSE com intervalos de bootstrap nas horas observacionais comuns. EXP03 integra a mesma comparação dos demais experimentos; a evidência cobre apenas um mês em cada sítio e não constitui seleção climatológica ratificada."),
+    media("mechanisms", "figures/selection/exp04_06_priority_contrasts.png",
+          "Contrastes prioritários EXP04–EXP06",
+          "Diferenças pareadas de MSE nas quatro alturas e nos dois períodos. A/B marca qual lado possui erro menor detectável; ND indica que o intervalo inclui zero e não demonstra equivalência."),
+    media("mechanisms", "figures/selection/exp06_sst_audit.png",
+          "Auditoria oceânica da SST diurna do EXP06",
+          "Distribuições espaciais da amplitude diária com máscara landmask==0 e ciclo médio nos cinco pontos oceânicos mais próximos dos LiDARs. SST prescrita e temperatura de pele são mostradas separadamente."),
 ]
 
 
@@ -582,8 +653,8 @@ def _json_value(value):
 def prepare_table_rows(spec: dict, frame: pd.DataFrame) -> tuple[pd.DataFrame, dict, dict]:
     """Sort rows and attach semantic CSS classes before display formatting."""
     if spec["id"] == "lidar":
-        order = {"CTL": 0, "EXP01": 1, "EXP02": 2, "EXP03": 3,
-                 "EXP01_BADSST": 4, "EXP02_BADSST": 5, "ERA5": 6}
+        order = {name: index for index, name in enumerate(CURRENT_EXPERIMENTS)}
+        order.update({"EXP01_BADSST": 20, "EXP02_BADSST": 21, "ERA5": 22})
         frame = frame.assign(
             _source_order=frame["experiment"].map(order).fillna(99)
         ).sort_values(
@@ -615,8 +686,7 @@ def prepare_table_rows(spec: dict, frame: pd.DataFrame) -> tuple[pd.DataFrame, d
             first_group = False
             # Only the current set competes for "best": highlighting a
             # superseded contaminated run would recommend an artefact.
-            experiments = group[group["experiment"].isin(
-                ["CTL", "EXP01", "EXP02", "EXP03"])]
+            experiments = group[group["experiment"].isin(CURRENT_EXPERIMENTS)]
             add_cell(_best_indices(experiments, "bias", absolute=True),
                      "bias", "best-value")
             add_cell(_best_indices(experiments, "rmse"), "rmse", "best-value")
@@ -635,7 +705,7 @@ def prepare_table_rows(spec: dict, frame: pd.DataFrame) -> tuple[pd.DataFrame, d
         group_columns = [name for name in group_columns if name in frame]
         groups = frame.groupby(group_columns, sort=False, dropna=False) if group_columns else [(None, frame)]
         for _, group in groups:
-            experiments = group[group[source_column].isin(["CTL", "EXP01", "EXP02", "EXP03"])]
+            experiments = group[group[source_column].isin(CURRENT_EXPERIMENTS)]
             for column, largest, absolute in (
                 ("bias", False, True),
                 ("rmse", False, False),
@@ -845,7 +915,7 @@ def _validation_media(groups: dict[str, dict]) -> list[dict]:
                 "caption": item["caption"],
                 "url": item["url"],
                 "kind": "pre_rendered_image",
-                "sources": ["ERA5", "CTL", "EXP01", "EXP02", "EXP03"],
+                "sources": ["ERA5", *CURRENT_EXPERIMENTS],
             })
     return entries
 
@@ -1008,6 +1078,19 @@ def report_configuration(cfg) -> tuple[list[dict], list[dict], list[dict]]:
             "malha Oval MEQ-02A de 102.968 células, cujo núcleo refinado acompanha "
             "a Margem Equatorial. É uma candidata em avaliação, não uma escolha final."
         ),
+        "EXP04": (
+            "Retorna à malha original e às entradas corrigidas do EXP01, trocando "
+            "em conjunto a camada limite YSU/Monin–Obukhov pelo pacote MYNN "
+            "(bl_mynn + sf_mynn)."
+        ),
+        "EXP05": (
+            "Mantém o pacote MYNN do EXP04 e troca somente a convecção para "
+            "Grell–Freitas. O contraste EXP05−EXP04 é condicional a MYNN."
+        ),
+        "EXP06": (
+            "Mantém MYNN e Grell–Freitas do EXP05 e ativa o ciclo diurno "
+            "prognóstico da temperatura de pele; a OISST prescrita continua diária."
+        ),
         "EXP01_BADSST": (
             "Versão superada do EXP01. Foi forçada pelo arquivo de superfície antes "
             "da correção, que levava o valor de preenchimento terrestre da OISST "
@@ -1025,6 +1108,9 @@ def report_configuration(cfg) -> tuple[list[dict], list[dict], list[dict]]:
         "EXP01": "assets/design/experimental_design_exp01_sst.png",
         "EXP02": "assets/design/experimental_design_exp02_mesh.png",
         "EXP03": "assets/design/experimental_design_exp03_mesh.png",
+        "EXP04": "assets/design/experimental_design_ctl_mesh.png",
+        "EXP05": "assets/design/experimental_design_ctl_mesh.png",
+        "EXP06": "assets/design/experimental_design_ctl_mesh.png",
         "EXP01_BADSST": "assets/design/experimental_design_exp01_sst.png",
         "EXP02_BADSST": "assets/design/experimental_design_exp02_mesh.png",
     }
@@ -1033,6 +1119,12 @@ def report_configuration(cfg) -> tuple[list[dict], list[dict], list[dict]]:
         if value.get("sst_forcing_known_bad"):
             continue
         mesh_cfg = cfg.meshes[value["mesh"]]
+        ranks_by_period = value.get("mpi_ranks_by_period", {})
+        ranks = (
+            "; ".join(f"{period}: {ranks_by_period[str(period)]}"
+                      for period in value["periods"] if str(period) in ranks_by_period)
+            if ranks_by_period else str(value["mpi_ranks"])
+        )
         experiments.append({
             "id": key,
             "description": descriptions.get(key, value.get("delta", "")),
@@ -1040,7 +1132,7 @@ def report_configuration(cfg) -> tuple[list[dict], list[dict], list[dict]]:
             "n_cells": f"{int(mesh_cfg['n_cells']):,}".replace(",", "."),
             "spacing": mesh_cfg["mean_cell_spacing_km"],
             "status": status_map.get(value["status"], value["status"]),
-            "mpi_ranks": value["mpi_ranks"],
+            "mpi_ranks": ranks,
             "superseded_by": next(
                 (k for k, v in cfg.experiments.items() if v.get("supersedes") == key),
                 None),

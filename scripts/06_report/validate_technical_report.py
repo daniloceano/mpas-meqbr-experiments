@@ -27,7 +27,8 @@ MAIN_SECTIONS = [
     "mecanismos",
     "sintese",
 ]
-EXPERIMENTS = {"CTL", "EXP01", "EXP02", "EXP03"}
+EXPERIMENTS = {"CTL", "EXP01", "EXP02", "EXP03", "EXP04", "EXP05", "EXP06"}
+LEGACY_EXPERIMENTS = {"CTL", "EXP01", "EXP02", "EXP03"}
 PERIODS = {"2021", "2022"}
 
 
@@ -197,11 +198,15 @@ def validate_report(report_dir: Path) -> dict:
 
     # P0/2021/150 m is the regression case for highlights hidden by display filters.
     regression = grouped_metrics[("P0", "2021", 150)]
-    mpas_regression = [row for row in regression if row["source"] in EXPERIMENTS]
+    # Preserve the historical regression on the original four configurations;
+    # new candidates may legitimately become the overall winner.
+    mpas_regression = [row for row in regression
+                       if row["source"] in LEGACY_EXPERIMENTS]
     rmse_winner = min(mpas_regression, key=lambda row: row["rmse"])
     assert rmse_winner["source"] == "EXP02"
     assert abs(float(rmse_winner["rmse"]) - 1.875137722760282) < 1e-12
-    visible_without_winner = [row for row in mpas_regression if row["source"] != "EXP02"]
+    visible_without_winner = [row for row in mpas_regression
+                              if row["source"] != "EXP02"]
     assert min(visible_without_winner, key=lambda row: row["rmse"])["source"] == "EXP03"
     # The scientific winner remains EXP02; EXP03 is only the best visible card.
     assert min(mpas_regression, key=lambda row: row["rmse"])["source"] == "EXP02"
@@ -233,7 +238,7 @@ def validate_report(report_dir: Path) -> dict:
         gain_loss_checks[source] = dict(counts)
 
     lidar_100m_checks = {}
-    expected_lidar_100m = {
+    expected_legacy_lidar_100m = {
         "CTL": (-1.0998710769131232, 2.243655841897017,
                 0.5666795634591967, 0.17934137420982305),
         "EXP01": (-0.7497034378720098, 2.0453162744981945,
@@ -255,8 +260,13 @@ def validate_report(report_dir: Path) -> dict:
             finite_mean([row["skill_vs_era5"] for row in source_rows]),
         )
         assert all(value is not None for value in values)
-        assert all(abs(float(value) - expected) < 1e-12
-                   for value, expected in zip(values, expected_lidar_100m[source]))
+        if source in expected_legacy_lidar_100m:
+            assert all(
+                abs(float(value) - expected) < 1e-12
+                for value, expected in zip(
+                    values, expected_legacy_lidar_100m[source]
+                )
+            )
         lidar_100m_checks[source] = {
             "units": len(source_rows), "mean_bias": values[0],
             "mean_rmse": values[1], "mean_r": values[2],
@@ -265,7 +275,7 @@ def validate_report(report_dir: Path) -> dict:
 
     p0_250 = [row for row in lidar_rows
               if row["point"] == "P0" and int(row["height_m"]) == 250]
-    assert len(p0_250) == 4
+    assert len(p0_250) == len(EXPERIMENTS)
     assert {row["selection_role"] for row in p0_250} == {"descriptive_only"}
 
     independent_csv = REPO_ROOT / "results/tables/validation_point_metrics.csv"
