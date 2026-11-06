@@ -35,6 +35,14 @@ the eight current CTL/EXP01/EXP02/EXP03 cases are recorded in
 [`docs/provenance/MEQ-02D-experimental-configurations.md`](provenance/MEQ-02D-experimental-configurations.md).
 The archive deliberately excludes the superseded `_BADSST` runs.
 
+EXP04, EXP05 and EXP06 use the same conventional `runs_root`, with one complete
+41-day leg for each period. All six legs ended with exit code zero and contain
+985 hourly history files plus 41 daily restarts. Their final campaign record,
+resource accounting, configuration hashes and SST audit are preserved in
+[`docs/provenance/MEQ-02D-EXP04-06-campaign.md`](provenance/MEQ-02D-EXP04-06-campaign.md)
+and [`results/provenance/MEQ-02D_EXP04-06/`](../results/provenance/MEQ-02D_EXP04-06/).
+The large model outputs remain read in place and are not version controlled.
+
 ---
 
 ## 2. In-situ LiDAR — primary validation

@@ -1,0 +1,35 @@
+MEQ-02D EXP06 SST audit
+Generated: 2026-11-06
+Method: compare MPAS history fields at 00, 06, 12 and 18 UTC on a complete
+interior day; ocean mask is the finite 250--330 K SST support (76813 cells).
+
+EXP06/2021
+AUDIT_DATE=2021-11-10
+CONFIG_SST_UPDATE=YES
+CONFIG_SSTDIURN_UPDATE=YES
+sst_06_vs_00_max_abs_K=0.379119873
+sst_06_vs_00_mean_abs_K=0.0781565966
+sst_06_vs_00_changed_cells=74781
+sst_12_vs_06_max_abs_K=0
+sst_18_vs_12_max_abs_K=0
+skintemp_06_vs_00_max_abs_K=6.02651978
+skintemp_12_vs_06_max_abs_K=24.2687378
+skintemp_18_vs_12_max_abs_K=16.6831055
+
+EXP06/2022
+AUDIT_DATE=2022-10-11
+CONFIG_SST_UPDATE=YES
+CONFIG_SSTDIURN_UPDATE=YES
+sst_06_vs_00_max_abs_K=0.329833984
+sst_06_vs_00_mean_abs_K=0.064770998
+sst_06_vs_00_changed_cells=73834
+sst_12_vs_06_max_abs_K=0
+sst_18_vs_12_max_abs_K=0
+skintemp_06_vs_00_max_abs_K=8.32626343
+skintemp_12_vs_06_max_abs_K=23.6360168
+skintemp_18_vs_12_max_abs_K=16.7045593
+
+INTERPRETATION=The prescribed sst field changes with the daily forcing update
+and then remains constant at the sampled 06/12/18 UTC times. The model surface
+skin temperature evolves subdaily. This distinguishes the unchanged daily
+OISST input cadence from the surface state used by the enabled diurnal scheme.

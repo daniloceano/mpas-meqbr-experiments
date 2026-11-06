@@ -1,0 +1,23 @@
+	Command being timed: "taskset -c 17-21,44-49,73-77,100-105 mpiexec -bind-to none -n 22 ./atmosphere_model"
+	User time (seconds): 17744073.57
+	System time (seconds): 395299.42
+	Percent of CPU this job got: 2180%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 231:04:03
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 750824
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 32
+	Minor (reclaiming a frame) page faults: 81078182175
+	Voluntary context switches: 2621389
+	Involuntary context switches: 95408495
+	Swaps: 0
+	File system inputs: 21615064
+	File system outputs: 454633512
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
