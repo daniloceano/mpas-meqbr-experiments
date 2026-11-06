@@ -37,6 +37,7 @@ def main() -> int:
     records = []
     failures = []
     references = {}
+    candidate_cells = {}
 
     for period in sorted(cfg.periods):
         site = cfg.periods[period]["validation_site"]
@@ -86,6 +87,9 @@ def main() -> int:
                 ds = source.load()
             missing = sorted(REQUIRED - set(ds.variables))
             cells = ds["cell_index"].values.astype(int).tolist()
+            reference_cells = references[(period, site)]
+            reference_is_prefix = cells[:len(reference_cells)] == reference_cells
+            first_candidate = candidate_cells.setdefault((period, site), cells)
             record.update({
                 "cache_time_count": int(ds.sizes["time"]),
                 "cache_cell_count": int(ds.sizes["cell"]),
@@ -107,7 +111,9 @@ def main() -> int:
             record["cache_times_match_raw_window"] = (
                 record["cache_time_sha256"] == record["window_time_sha256"]
             )
-            record["same_cells_as_exp01"] = cells == references[(period, site)]
+            record["exp01_cell_count"] = len(reference_cells)
+            record["exp01_cells_are_prefix"] = reference_is_prefix
+            record["candidate_cells_identical"] = cells == first_candidate
             record["finite_wind_fraction"] = float(np.mean(np.isfinite(
                 ds["uReconstructZonal"].values
             ) & np.isfinite(ds["uReconstructMeridional"].values)))
@@ -137,8 +143,14 @@ def main() -> int:
                     f"{experiment}/{period}: cache has {record['cache_cell_count']} "
                     "cells; expected five nearest ocean cells"
                 )
-            if not record["same_cells_as_exp01"]:
-                failures.append(f"{experiment}/{period}: ocean cells differ from EXP01")
+            if not record["exp01_cells_are_prefix"]:
+                failures.append(
+                    f"{experiment}/{period}: shared ocean cells differ from EXP01"
+                )
+            if not record["candidate_cells_identical"]:
+                failures.append(
+                    f"{experiment}/{period}: five ocean cells differ among EXP04--EXP06"
+                )
             if record["finite_wind_fraction"] != 1.0:
                 failures.append(
                     f"{experiment}/{period}: non-finite wind fraction "
@@ -164,9 +176,11 @@ def main() -> int:
         "checks": records,
         "failures": failures,
         "interpretation": (
-            "Matching EXP01 cell indices is required because EXP01 and EXP04--EXP06 "
-            "share the same mesh and LiDAR site. It is not required for EXP03, "
-            "which uses a different geometry."
+            "The historical EXP01 cache may contain only its primary ocean cell. "
+            "Every cell available there must be an identical prefix of each new "
+            "cache, and all five cells must match across EXP04--EXP06 because the "
+            "four experiments share the same mesh and LiDAR site. EXP03 is exempt "
+            "because it uses a different geometry."
         ),
     }
     output = REPO_ROOT / "results" / "audit" / "exp04_06_output_validation.json"
