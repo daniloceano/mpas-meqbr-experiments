@@ -877,6 +877,32 @@ def copy_media(report_dir: Path) -> tuple[dict[str, dict], list[dict]]:
     return groups, manifest
 
 
+def copy_companion_report(report_dir: Path) -> list[dict]:
+    """Bundle the historical SST correction comparison linked by the report."""
+    source_root = REPO_ROOT / "results" / "report" / "sst-fix-comparison"
+    target_root = report_dir / "sst-fix-comparison"
+    if not source_root.is_dir():
+        raise FileNotFoundError(
+            f"required companion report is missing: {source_root}"
+        )
+    if source_root.resolve() != target_root.resolve():
+        if target_root.exists():
+            shutil.rmtree(target_root)
+        shutil.copytree(source_root, target_root)
+
+    manifest = []
+    for source in sorted(path for path in source_root.rglob("*") if path.is_file()):
+        relative = source.relative_to(source_root)
+        bundled = target_root / relative
+        manifest.append({
+            "source": str(source.relative_to(REPO_ROOT)),
+            "bundled_as": bundled.relative_to(report_dir).as_posix(),
+            "bytes": bundled.stat().st_size,
+            "title": f"Historical SST correction comparison: {relative.as_posix()}",
+        })
+    return manifest
+
+
 def _validation_media(groups: dict[str, dict]) -> list[dict]:
     """Describe existing validation PNGs without pretending they are raw charts."""
     chart_labels = {
@@ -1197,6 +1223,7 @@ def main() -> int:
         if (table := read_table(spec, superseded)) is not None
     }
     media_groups, assets = copy_media(report_dir)
+    assets.extend(copy_companion_report(report_dir))
     validation_panel, meteo_viewer, interactive_assets = bundle_interactive_data(
         report_dir, media_groups)
     assets.extend(interactive_assets)

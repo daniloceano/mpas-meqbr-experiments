@@ -352,8 +352,13 @@ def validate_report(report_dir: Path) -> dict:
         "0,41 significa redução de 41% do MSE",
         "média das reduções relativas de MSE",
         "P0/250 m é descritivo",
+        "As sete configurações estão completas",
+        "Nenhuma configuração é ratificada para a climatologia",
+        "EXP06 não se distingue de EXP05 nos oito contrastes",
+        "landmask == 0",
     ):
         assert required in html, f"missing required wording: {required}"
+    assert "As quatro configurações estão completas" not in html
     assert "new Set(['100'])" in html, "LiDAR default height is not 100 m"
     for required_id in (
         "resumo-descritivo", "summary-results", "gain-loss-results",

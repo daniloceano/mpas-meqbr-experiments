@@ -16,6 +16,7 @@ Outputs:
 
 from __future__ import annotations
 
+import inspect
 import argparse
 import sys
 from pathlib import Path
@@ -61,6 +62,16 @@ def summarize_amplitudes(values: np.ndarray, mask: np.ndarray) -> dict:
         "n_cell_days": int(selected.size),
     })
     return row
+
+
+def boxplot_with_compatible_labels(ax, values, labels):
+    """Use the label keyword supported by the installed Matplotlib."""
+    parameter = (
+        "tick_labels"
+        if "tick_labels" in inspect.signature(ax.boxplot).parameters
+        else "labels"
+    )
+    return ax.boxplot(values, **{parameter: labels}, showfliers=False, whis=(1, 99))
 
 
 def scan_period(cfg, period: str) -> tuple[list[dict], dict]:
@@ -181,8 +192,8 @@ def main() -> int:
         arrays = diagnostics[period]["arrays"]
         ocean = diagnostics[period]["ocean"]
         values = [arrays[name][:, ocean].ravel() for name in VARIABLES]
-        ax.boxplot(values, tick_labels=["prescribed sst", "skintemp"],
-                   showfliers=False, whis=(1, 99))
+        boxplot_with_compatible_labels(
+            ax, values, ["prescribed sst", "skintemp"])
         ax.set_ylabel("daily amplitude over ocean (K)")
         ax.set_title(f"EXP06/{period}: effective ocean mask")
 

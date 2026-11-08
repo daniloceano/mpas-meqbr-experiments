@@ -1009,10 +1009,10 @@
         LiDAR, resultados INMET, valor adicionado, testes pareados, sensibilidade
         espacial e custo se combinam sem produzir um ranking automático?</p>
       <div class="synthesis-grid">
-        <div class="card"><strong>LiDAR offshore</strong><p>EXP03 acompanha as candidatas corrigidas em P0/2021 e apresenta a menor RMSE a 100 m em LPI/2022.</p></div>
-        <div class="card"><strong>INMET terrestre</strong><p>EXP03 reduz viés e RMSE médios, mas não maximiza a correlação; esse eixo não ranqueia sozinho o recurso offshore.</p></div>
-        <div class="card"><strong>Valor adicionado</strong><p>Em 100 m, EXP03 adiciona habilidade sobre ERA5 nos dois LiDARs; os intervalos permanecem visíveis nas tabelas.</p></div>
-        <div class="card"><strong>Custo e incerteza</strong><p>O custo medido e a sensibilidade à célula precisam acompanhar qualquer decisão de configuração.</p></div>
+        <div class="card"><strong>LiDAR offshore</strong><p>EXP04 não se distingue de EXP01 nos oito contrastes prioritários; EXP05 e EXP06 perdem em P0 e não acrescentam ganho detectável entre si.</p></div>
+        <div class="card"><strong>INMET terrestre</strong><p>EXP03 mantém os menores viés e RMSE médios, enquanto EXP04 tem a maior correlação; esse eixo não ranqueia sozinho o recurso offshore.</p></div>
+        <div class="card"><strong>Valor adicionado</strong><p>Em 100 m, EXP04 adiciona habilidade sobre ERA5 nos dois LiDARs; EXP05 e EXP06 o fazem em LPI, mas não em P0.</p></div>
+        <div class="card"><strong>Custo e incerteza</strong><p>EXP04–EXP06 custam em geral 5,17–5,39 horas-máquina por hora simulada; geometria, célula e amostra mensal impedem uma escolha automática.</p></div>
       </div>
 
       <nav class="analysis-flow" aria-label="Fluxo da análise interativa">
@@ -1065,26 +1065,32 @@
 
       {% if "selection" in tables %}{{ render_table(tables["selection"]) }}{% endif %}
       <div class="banner info">
-        <strong>Síntese preliminar, ainda não ratificada.</strong> EXP03 apresenta
-        a menor RMSE a 100 m em LPI/2022 e melhora significativamente sobre EXP01
-        e EXP02 nessa altura. Em P0/2021, EXP03, EXP01 e EXP02 não são
-        estatisticamente distinguíveis entre si. O conjunto sustenta manter EXP03
-        como candidata forte, mas não autoriza por si só uma escolha climatológica
-        definitiva.
+        <strong>Síntese preliminar, ainda não ratificada.</strong> O pacote MYNN
+        (EXP04) preserva desempenho próximo de EXP01, mas não produz ganho pareado
+        detectável nos oito contrastes prioritários. A inclusão de Grell–Freitas
+        (EXP05) degrada quatro contrastes frente a EXP04, concentrados em P0; a
+        SST diurna (EXP06) não se distingue de EXP05. EXP03 permanece a referência
+        observacional mais forte no agregado, porém pertence ao ramo de geometria.
+        Nenhuma configuração é ratificada para a climatologia por este relatório.
       </div>
 
       <h3>O que os resultados permitem afirmar</h3>
       <ul class="plain-list">
-        <li>As quatro configurações estão completas nos dois períodos, sem lacunas horárias nas janelas científicas: 721 saídas em 2021 e 745 em 2022. A EXP03/2022 passou também pela auditoria NetCDF integral dos 985 históricos e 41 reinícios.</li>
+        <li><strong>As sete configurações estão completas</strong> nos dois períodos, sem lacunas horárias nas janelas científicas: 721 saídas em 2021 e 745 em 2022. A EXP03/2022 passou também pela auditoria NetCDF integral dos 985 históricos e 41 reinícios; os seis caches de EXP04–EXP06 foram auditados separadamente.</li>
         <li><strong>A configuração de SST do EXP01 melhora o vento em altura de rotor, uma vez que a forçante é sadia.</strong> EXP01 tem erro quadrático médio pareado menor que o CTL em 8 de 8 comparações — todas as alturas, nos dois sítios e nos dois períodos. O contraste combina a atualização diária e a diferença do estado médio OISST frente à SST inicial do ERA5; este desenho não isola a frequência temporal. O viés a 100 m cai de −1,24 para −0,95 m s⁻¹ em P0 e de −0,96 para −0,55 m s⁻¹ em LPI; o viés de densidade de potência eólica melhora de −36,9 % para −30,0 % e de −21,4 % para −13,5 %.</li>
         <li>Essa conclusão <strong>inverte</strong> a leitura obtida antes da correção da SST, quando o CTL aparecia como a única escolha defensável: o defeito de pré-processamento resfriava artificialmente o mar costeiro, estabilizava a camada superficial e enfraquecia o vento justamente nas alturas avaliadas, mascarando o ganho real. Ver <a href="sst-fix-comparison/index.html">comparação antigo × corrigido</a>.</li>
         <li><strong>Em P0/2021, a EXP03 acompanha as candidatas corrigidas.</strong> Ela melhora significativamente sobre o CTL nas quatro alturas usadas na seleção (50–200 m); os testes não detectam diferença frente a EXP01 ou EXP02. Isso não demonstra equivalência entre as configurações.</li>
         <li><strong>Em LPI/2022, a EXP03 é favorecida.</strong> Ela melhora sobre CTL e EXP02 nas quatro alturas; frente a EXP01, a diferença é significativa em 50 e 100 m e não detectável em 150 e 200 m. A 100 m, RMSE = 1,86 m s⁻¹ para EXP03, 2,07 para EXP01 e 2,02 para EXP02.</li>
+        <li><strong>EXP04 não apresenta ganho detectável sobre EXP01</strong> em nenhum dos oito contrastes de sítio, período e altura. Frente a EXP03, sete contrastes não são detectáveis e um favorece EXP03. Isso mantém MYNN como hipótese física plausível, não como melhoria demonstrada.</li>
+        <li><strong>EXP05 perde para EXP04 em quatro dos oito contrastes</strong>, todos em P0/2021, e não se distingue nos quatro de LPI/2022. EXP06 não se distingue de EXP05 nos oito contrastes; portanto, a SST diurna não produz ganho observacional incremental detectável nesta amostra.</li>
+        <li><strong>Os ganhos acumulados contra EXP01 não são positivos:</strong> EXP01 supera EXP05 e EXP06 em quatro contrastes, todos em P0, e os outros quatro não são detectáveis. EXP03 supera EXP05 em cinco e EXP06 em seis dos oito contrastes prioritários.</li>
+        <li><strong>Em 100 m, a separação entre períodos é decisiva.</strong> Em P0/2021, RMSE = 2,03, 2,52 e 2,71 m s⁻¹ para EXP04–EXP06; em LPI/2022, 2,03, 2,06 e 2,07 m s⁻¹. O skill de Murphy frente ao ERA5 é +0,34 [0,16; 0,57] para EXP04 em P0, mas não detectável para EXP05/EXP06; em LPI, os três ganhos são detectáveis (+0,30 a +0,32).</li>
+        <li><strong>A auditoria da SST diurna separa oceano e continente por <code>landmask == 0</code>.</strong> A amplitude oceânica máxima de <code>skintemp</code> é 3,61 K em 2021 e 4,03 K em 2022, sem casos acima de 5 K. Os máximos de 33,78–37,85 K são continentais e não podem ser atribuídos à SST oceânica.</li>
         <li>Ainda assim, o tratamento de fronteira <strong>atua como projetado</strong>: a diferença média absoluta no vento de 100 m decai monotonicamente com a distância à zona de relaxação do EXP01, de 0,26 m s⁻¹ a menos de 50 km para 0,11 m s⁻¹ entre 300 e 500 km. O efeito é real; os instrumentos é que não estão onde ele importa.</li>
-        <li><strong>EXP03 adiciona habilidade sobre o ERA5 nos dois sítios.</strong> Escore de Murphy a 100 m, com IC95% por bootstrap em blocos: +0,39 [0,25; 0,59] em P0/2021 e +0,43 [0,32; 0,55] em LPI/2022. Em LPI, é o maior ganho entre as quatro configurações.</li>
+        <li><strong>EXP03 adiciona habilidade sobre o ERA5 nos dois sítios.</strong> Escore de Murphy a 100 m, com IC95% por bootstrap em blocos: +0,39 [0,25; 0,59] em P0/2021 e +0,43 [0,32; 0,55] em LPI/2022. Em LPI, é o maior ganho entre as sete configurações.</li>
         <li>INMET e LiDAR trazem diagnósticos complementares e não são agrupados: o primeiro avalia a circulação costeira terrestre a 10 m; o segundo avalia o recurso offshore em alturas de rotor.</li>
-        <li>EXP03 usou 60 ranks e consumiu 3,54–3,55 horas-rank por hora simulada nos dois períodos. Esse custo medido deve ser interpretado junto com suas 102.968 células e não como uma comparação bruta de eficiência com execuções em 90 ranks.</li>
-        <li>Nas seis combinações estação–período do eixo INMET, EXP03 apresenta o menor viés e RMSE médios (1,70 e 2,05 m s⁻¹), mas correlação média 0,67, abaixo de CTL/EXP01 (0,72). O eixo terrestre não deve ser usado isoladamente para ranquear o recurso offshore.</li>
+        <li>EXP03 usou 60 ranks e consumiu 3,54–3,55 horas-máquina por hora simulada. EXP04/2021, com 90 ranks, consumiu 3,62; as demais pernas EXP04–EXP06, com 22 ranks, consumiram 5,17–5,39. Essas métricas normalizadas não medem escalabilidade nem custo de fila.</li>
+        <li>Nas seis combinações estação–período do eixo INMET, EXP03 apresenta o menor viés e RMSE médios (1,70 e 2,05 m s⁻¹), enquanto EXP04 tem a maior correlação (0,75). EXP05/EXP06 ficam próximos entre si (RMSE 2,35–2,37 m s⁻¹). O eixo terrestre não deve ser usado isoladamente para ranquear o recurso offshore.</li>
       </ul>
 
       <h3>O que ainda não é possível concluir</h3>
@@ -1104,7 +1110,8 @@
 
       <h3>Próximas ações</h3>
       <ol class="plain-list">
-        <li>Submeter a comparação CTL–EXP03 e sua sensibilidade espacial à avaliação do pesquisador antes de registrar qualquer decisão de configuração climatológica.</li>
+        <li>Submeter o candidato CTL–EXP06, incluindo os contrastes prioritários, a auditoria de SST e a sensibilidade espacial, à avaliação do pesquisador antes de registrar qualquer decisão climatológica.</li>
+        <li>Decidir cientificamente se EXP04 deve seguir como candidato do ramo de física apesar da ausência de ganho detectável, e se a degradação de EXP05/EXP06 em P0 justifica encerrar esse ramo cumulativo.</li>
         <li>Investigar o viés baixo residual com os diagnósticos já extraídos nos sítios (<code>ust</code>, <code>znt</code>, <code>zol</code>), separando rugosidade, mistura e forçamento lateral.</li>
         <li>Acrescentar um segundo mês, de condições típicas, em P0 — a avaliação atual nesse sítio repousa sobre um extremo climatológico.</li>
         <li>Se necessário para a decisão final, ampliar a amostra temporal mantendo o protocolo de comparação já estabelecido.</li>
@@ -1194,9 +1201,11 @@
       </ul>
         </div>
       </details>
-      <p class="section-outro"><strong>Recomendação:</strong> EXP03 permanece
-        candidata forte para revisão científica final, mas o relatório não
-        ratifica automaticamente a configuração climatológica.</p>
+      <p class="section-outro"><strong>Recomendação:</strong> nenhuma
+        configuração é ratificada. EXP03 permanece a referência observacional
+        mais forte, mas pertence ao ramo de geometria; EXP04 é o único novo
+        candidato de física que não mostra degradação sistemática frente a EXP01.
+        A aprovação climatológica exige decisão científica explícita.</p>
     </section>
   </main>
 </div>
