@@ -211,7 +211,7 @@ input[type=range] { width: 100%; accent-color: var(--ink); }
   <div class="masthead-inner">
     <p class="kicker">MPAS-Atmosphere · Margem Equatorial Brasileira · ~5 km · relatório técnico</p>
     <h1>Seleção de configuração do MPAS para recurso eólico na Margem Equatorial Brasileira</h1>
-    <p class="meta">Relatório técnico gerado em 2026-11-09T13:37:23+00:00 · análise <code>11dd6b2</code> (árvore com alterações não versionadas)</p>
+    <p class="meta">Relatório técnico gerado em 2026-11-09T21:07:52+00:00 · análise <code>a51bcbf</code> (árvore com alterações não versionadas)</p>
   </div>
 </header>
 
@@ -440,9 +440,12 @@ input[type=range] { width: 100%; accent-color: var(--ink); }
       <div>
         <h3>Testes pareados (ΔMSE)</h3>
         <div id="pairwise-grid" class="pairwise"></div>
-        <p class="caption">Célula = experimento com menor erro quadrático nas
-          mesmas horas quando o IC95% de MSE(A) − MSE(B) exclui zero; “·” =
-          diferença não detectável (não demonstra equivalência).</p>
+        <p class="caption">Cada teste compara dois experimentos nas mesmas horas
+          observadas: ΔMSE = MSE(A) − MSE(B). A incerteza é estimada por
+          bootstrap em blocos de 24 h, com 2.000 reamostragens e IC95%.
+          ΔMSE positivo favorece B; negativo favorece A. A matriz identifica
+          vencedor somente quando o intervalo exclui zero; “·” indica diferença
+          não detectável, não equivalência.</p>
       </div>
     </div>
 
@@ -538,13 +541,18 @@ input[type=range] { width: 100%; accent-color: var(--ink); }
     </article>
 
     <article class="hypothesis">
-      <header><span class="tag">H2</span><h3>Afastar a fronteira altera o escoamento perto da zona de relaxação</h3></header>
+      <header><span class="tag">H2</span><h3>Como o afastamento da zona de relaxação modifica o campo de vento?</h3></header>
       <div class="chart" id="chart-boundary" style="height:240px"></div>
-      <p class="caption">|EXP02 − EXP01| médio do vento a 100 m por distância à
-        zona de relaxação do EXP01 (nov 2021).</p>
-      <p class="verdict"><b>Veredito:</b> o tratamento atua como projetado — o
-        efeito decai monotonicamente com a distância —, mas os instrumentos
-        estão longe de onde ele importa.</p>
+      <p class="caption">Em novembro de 2021, o vento médio a 100 m de EXP02 e EXP01
+        foi interpolado para uma grade comum. A diferença absoluta |EXP02 − EXP01|
+        foi agrupada pela distância à zona de relaxação do EXP01, identificada
+        diretamente na malha.</p>
+      <p class="verdict"><b>Veredito:</b> as diferenças tendem a diminuir com a
+        distância da zona de relaxação original: cerca de 0,27 m/s até 100 km
+        e 0,11 m/s entre 300 e 500 km. O padrão é compatível com influência
+        das fronteiras, mas não comprova melhora nos LiDARs nem isola esse
+        mecanismo, pois EXP02 também modificou o domínio e a área das
+        forçantes ERA5.</p>
     </article>
 
     <article class="hypothesis">
@@ -561,13 +569,18 @@ input[type=range] { width: 100%; accent-color: var(--ink); }
     </article>
 
     <article class="hypothesis">
-      <header><span class="tag">H4</span><h3>O resultado não depende da célula escolhida</h3></header>
+      <header><span class="tag">H4</span><h3>Quanto a escolha da célula influencia a validação?</h3></header>
       <div class="chart" id="chart-cells" style="height:260px"></div>
-      <p class="caption">RMSE a 100 m nas cinco células oceânicas mais próximas
-        de cada LiDAR, por distância ao instrumento. Símbolo cheio = célula usada
-        no ranking (a mais próxima, escolhida sem consultar o desempenho).</p>
-      <p class="verdict"><b>Veredito:</b> sensibilidade pequena em P0, relevante
-        em LPI — o ranking em LPI carrega incerteza de representatividade.</p>
+      <p class="caption">A RMSE a 100 m é recalculada para a célula oceânica
+        mais próxima de cada LiDAR e, quando disponíveis, para as quatro
+        seguintes. Isso avalia a sensibilidade da comparação entre uma
+        observação pontual e a malha de aproximadamente 5 km. Símbolo cheio =
+        célula usada no ranking. Os caches de EXP01 e EXP02 disponibilizam
+        apenas essa célula principal.</p>
+      <p class="verdict"><b>Veredito:</b> a sensibilidade espacial é relativamente
+        pequena em P0, mas relevante em LPI. Diferenças pequenas entre
+        experimentos podem ser influenciadas pela célula escolhida; o ranking
+        em LPI deve considerar essa incerteza de representatividade.</p>
     </article>
 
     <details class="drawer">
@@ -604,9 +617,13 @@ input[type=range] { width: 100%; accent-color: var(--ink); }
         <div class="chart" id="chart-tradeoff" style="height:280px"></div>
       </div>
     </div>
-    <p class="caption"><b>a</b> Vitórias (direita) e derrotas (esquerda)
-      significativas em todos os testes pareados LiDAR. <b>b</b> RMSE LiDAR médio
-      a 100 m contra horas-núcleo por hora simulada; canto inferior esquerdo é preferível.</p>
+    <p class="caption"><b>a</b> Saldo de vitórias (direita) e derrotas (esquerda)
+      detectáveis nos testes pareados LiDAR, por sítio, período e altura.
+      Cada vitória indica menor MSE com IC95% da diferença excluindo zero;
+      o saldo não é probabilidade de superioridade nem reúne testes independentes.
+      As comparações são exploratórias, sem ajuste global para multiplicidade.
+      <b>b</b> RMSE LiDAR médio a 100 m contra horas-núcleo por hora simulada;
+      canto inferior esquerdo é preferível.</p>
 
     <div class="conclusion">
       <h3>Conclusão</h3>

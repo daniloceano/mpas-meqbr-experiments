@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-11-09T13:37:23+00:00",
-  "analysis_commit": "11dd6b2",
+  "generated_utc": "2026-11-09T21:07:52+00:00",
+  "analysis_commit": "a51bcbf",
   "analysis_branch": "unknown",
   "working_tree_dirty": true,
   "execution_environment": "local working tree",
@@ -1159,8 +1159,8 @@
   ],
   "index": {
     "path": "results/report/index.html",
-    "bytes": 1466263,
-    "sha256": "6d04ebc6fa355e6bb37095165a31c456ce8f710d008a5b7904e53da63722381a"
+    "bytes": 1467454,
+    "sha256": "5c2a63f4ef10147401dc430a66dec70b0f3bcf2f5b913a23f15ce97b3ffad638"
   },
   "builder": "scripts/06_report/build_technical_report.py",
   "editorial_schema_version": 2
