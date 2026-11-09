@@ -116,7 +116,7 @@ def main() -> int:
                            [d["mod_speed"].values for d in scatter_frames.values()]), 99.8)) * 1.1
         for ax, (exp, d) in zip(axes[0], scatter_frames.items()):
             x, y = d["obs_speed"].values, d["mod_speed"].values
-            ax.scatter(x, y, c=density_colors(x, y), s=6, cmap="viridis", lw=0)
+            ax.scatter(x, y, c=density_colors(x, y), s=6, cmap="batlow", lw=0)
             ax.plot([0, lim], [0, lim], color="0.4", lw=0.8)
             s = metrics.basic_scores(x, y)
             r = metrics.resource_scores(x, y)

@@ -187,7 +187,7 @@ def main() -> int:
                 axes[0], panels.items()):
             tri, idx = mesh.triangulation(lat, lon, extent)
             values = np.where(landmask[idx] == 0, field[idx], np.nan)
-            pc = ax.tripcolor(tri, values, cmap="RdYlBu_r", vmin=290, vmax=304,
+            pc = ax.tripcolor(tri, values, cmap="roma_r", vmin=290, vmax=304,
                               shading="gouraud", transform=ccrs.PlateCarree())
             plotting.coastlines(ax)
             plotting.add_site_markers(ax, cfg.sites, transform=ccrs.PlateCarree())

@@ -10,21 +10,26 @@ from __future__ import annotations
 
 import numpy as np
 
+from . import sci_colormaps  # noqa: F401  registers Crameri maps with Matplotlib
+
 # Fixed identity per experiment, used in every figure. The superseded _BADSST
 # runs keep the hue of the experiment they were replaced by, washed out: the
 # current pair is the scientific result, the _BADSST pair is the audit trail for
 # the OISST coastal land-fill finding and should read as secondary.
 EXPERIMENT_COLORS = {
-    "CTL":          "#4C4C4C",   # grey — the baseline
-    "EXP01":        "#1F77B4",   # blue
-    "EXP02":        "#D62728",   # red
-    "EXP03":        "#2CA02C",   # green — MEQ-02A Oval geometry candidate
-    "EXP04":        "#9467BD",   # purple — MYNN package
-    "EXP05":        "#FF7F0E",   # orange — MYNN + Grell-Freitas
-    "EXP06":        "#17BECF",   # cyan — MYNN + GF + diurnal SST
-    "EXP01_BADSST": "#9ECAE1",   # pale blue — contaminated SST forcing
-    "EXP02_BADSST": "#FCAE91",   # pale red — contaminated SST forcing
-    "ERA5":         "#7F7F7F",   # light grey, dashed where lines are drawn
+    # Crameri scientific colour maps (see sci_colormaps): the incremental
+    # SST/boundary/mesh experiments take cool hues (roma blues, batlow green),
+    # the physics-package experiments EXP04-06 warm hues (roma reds/ochres).
+    "CTL":          "#4D4D4D",   # neutral grey — the baseline
+    "EXP01":        "#1950A6",   # roma 0.93 — daily SST
+    "EXP02":        "#3394C3",   # roma 0.77 — boundary buffer
+    "EXP03":        "#5F7843",   # batlow 0.42 — Oval MEQ-02A mesh
+    "EXP04":        "#883007",   # roma 0.04 — MYNN package
+    "EXP05":        "#A1611C",   # roma 0.15 — MYNN + Grell-Freitas
+    "EXP06":        "#B89035",   # roma 0.26 — MYNN + GF + diurnal skin SST
+    "EXP01_BADSST": "#9DB4DA",   # washed EXP01 — contaminated SST forcing
+    "EXP02_BADSST": "#A9D2E6",   # washed EXP02 — contaminated SST forcing
+    "ERA5":         "#8C8C8C",   # grey, dashed where lines are drawn
     "OBS":          "#000000",
 }
 # Every figure script iterates this list, so it decides what appears in a plot.
@@ -43,10 +48,21 @@ EXPERIMENT_ORDER_ALL = [
 
 SITE_MARKERS = {"P0": "o", "LPI": "s"}
 
-# Sequential map for wind speed; diverging for differences. Both are
-# perceptually uniform and survive greyscale printing reasonably.
-CMAP_SPEED = "viridis"
-CMAP_DIFF = "RdBu_r"
+# Crameri scientific colour maps (perceptually uniform, CVD-safe), selected
+# following https://dominicroye.github.io/color-for-geoscience/. Names resolve
+# through ``get_cmap`` below, which also accepts any Matplotlib name.
+CMAP_SPEED = "batlow"       # wind speed
+CMAP_WPD = "lipari"         # wind power density
+CMAP_CONSTANCY = "devon_r"  # directional constancy
+CMAP_AMPLITUDE = "lajolla"  # diurnal amplitude
+CMAP_SST = "roma_r"         # temperature
+CMAP_DIFF = "vik"           # differences and skill (diverging, centred)
+
+
+def get_cmap(name: str):
+    """Resolve a Crameri map from ``sci_colormaps`` or fall back to Matplotlib."""
+    from .sci_colormaps import get_cmap as _get
+    return _get(name)
 
 
 def use_style(scale: float = 1.0) -> None:
@@ -57,16 +73,27 @@ def use_style(scale: float = 1.0) -> None:
         "figure.dpi": 110,
         "savefig.dpi": 200,
         "savefig.bbox": "tight",
-        "font.size": 9 * scale,
-        "axes.titlesize": 10 * scale,
-        "axes.labelsize": 9 * scale,
-        "axes.grid": True,
-        "grid.alpha": 0.25,
-        "grid.linewidth": 0.5,
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Arial", "Helvetica", "Liberation Sans", "DejaVu Sans"],
+        "font.size": 8 * scale,
+        "axes.titlesize": 8.5 * scale,
+        "axes.titleweight": "bold",
+        "axes.titlelocation": "left",
+        "axes.labelsize": 8 * scale,
+        "axes.linewidth": 0.6,
+        "axes.edgecolor": "0.15",
+        "axes.grid": False,
+        "xtick.direction": "out",
+        "ytick.direction": "out",
+        "xtick.major.width": 0.6,
+        "ytick.major.width": 0.6,
+        "xtick.major.size": 3,
+        "ytick.major.size": 3,
         "axes.spines.top": False,
         "axes.spines.right": False,
         "legend.frameon": False,
-        "lines.linewidth": 1.4,
+        "lines.linewidth": 1.2,
+        "legend.fontsize": 7 * scale,
     })
 
 

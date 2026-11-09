@@ -94,6 +94,7 @@ if stage 02; then
     run 02_stations         $PY scripts/02_validation/validate_surface_stations.py \
                                --experiments $CURRENT
     run 02_interactive      $PY scripts/02_validation/build_interactive_validation.py
+    run 02_point_series     $PY scripts/02_validation/export_point_series.py
 fi
 
 # --- 03 selection ---------------------------------------------------------
@@ -167,6 +168,7 @@ if stage 06; then
     run 06_audit_exp04_06   $PY scripts/06_audit/validate_exp04_06_outputs.py
     run 06_audit_exp06_sst  $PY scripts/06_audit/audit_exp06_sst.py
     run 06_context          $PY scripts/06_report/plot_report_context.py
+    run 06_geography        $PY scripts/06_report/export_report_geography.py
     run 06_report           $PY scripts/06_report/build_technical_report.py
 fi
 

@@ -8,8 +8,11 @@ be edited by hand.
 
 ```bash
 python scripts/03_selection/compute_runtime_metrics.py
+python scripts/02_validation/export_point_series.py   # on Swell: needs results/site_timeseries
 python scripts/06_report/plot_report_context.py
-python scripts/06_report/build_technical_report.py
+python scripts/06_report/export_report_geography.py   # Natural Earth via the cartopy cache
+python scripts/06_report/build_technical_report.py    # --layout v1 for the legacy panels
+python scripts/06_report/validate_technical_report.py
 ```
 
 Output:
@@ -25,19 +28,43 @@ The context-figure stage reads mesh/static files and cached means. The builder
 then reads only consolidated CSV tables and generated media. Neither stage opens
 raw MPAS history, so rebuilding the HTML is safe while a simulation runs.
 
-## Narrative order
+## Narrative order (layout v2)
 
-The report is organized for a reader who did not work on the project:
+A linear sequence of seven chapters with a fixed chapter rail and
+previous/next links. Each chapter answers one question with one primary
+interactive view; detail is one click away.
 
-1. purpose, common configuration and cumulative experimental design;
-2. integration status and normalized computational cost;
-3. spatial fields followed by local/point behavior;
-4. observational network, data treatment and validation;
-5. value added relative to ERA5;
-6. physical attribution, limitations and next decisions.
+1. **Experiments and meshes** — clickable cumulative-design tree, the three
+   distinct meshes (not one per experiment), integration windows and cost.
+2. **Simulated fields** — separate tabs for static mean fields (Leaflet map,
+   EPSG:4326, coastline and state boundaries, A|B swipe comparison on a shared
+   colour scale), derived diagnostics, and synchronised side-by-side animations.
+3. **Observation network** — map of LiDARs and INMET stations; clicking a point
+   loads its paired hourly series (observation, ERA5, seven experiments), the
+   mean diurnal cycle, the speed distribution and its metrics.
+4. **Validation** — scorecard (unit × source, colour relative to the row,
+   metric switch), confidence-interval chart and pairwise-test matrix for the
+   selected unit, LiDAR vertical profiles, and per-network summary.
+5. **Added value vs ERA5** — Murphy skill with CIs (LiDAR and INMET), month
+   representativeness, domain resource difference and MPAS × ERA5 maps.
+6. **Physical coherence** — hypothesis → evidence → verdict blocks (SST chain,
+   boundary influence, EXP04–06 contrast matrix, EXP06 skin SST, cell sensitivity).
+7. **Synthesis** — criteria × experiment matrix without weights, pairwise
+   win/loss balance, error × cost, conclusion and open limitations.
 
-Media are explicitly curated rather than copied by wildcard. Every displayed
-table and figure has a plain-language caption, metric definitions and units.
+Charts are drawn in the browser from embedded JSON (Plotly basic bundle);
+only maps of fields and meshes remain pre-rendered PNG. Styling follows a
+journal-figure convention (white, Arial, hairline axes). Colour maps are
+Crameri's scientific colour maps (batlow, lipari, devon, lajolla, roma, vik),
+embedded in `src/mpas_meqbr/sci_colormaps.py`; experiments keep one fixed
+colour everywhere (`plotting.EXPERIMENT_COLORS`).
+
+### Offline runtime
+
+`index.html` inlines `docs/templates/report_v2/report.{css,js}`. Plotly and
+Leaflet are vendored in `docs/templates/vendor/` and copied to
+`assets/vendor/`. Point series are small `.js` files under `assets/series/`,
+loaded on demand with `<script>` so the page works from `file://`.
 
 ## Evidence model
 

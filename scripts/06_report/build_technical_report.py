@@ -449,13 +449,13 @@ def media(group, path, title, caption, *, kind="image"):
 MEDIA_SPECS = [
     media("design", "figures/report/experimental_design_ctl_mesh.png",
           "CTL: malha de referência",
-          "Distribuição do espaçamento horizontal da malha quase uniforme usada no controle; no mapa turbo invertido, vermelho indica menor espaçamento. Pontos escuros mostram a relaxação lateral, círculos/quadrados os LiDARs e triângulos as estações INMET."),
+          "Distribuição do espaçamento horizontal da malha quase uniforme usada no controle; no mapa batlow, azul-escuro indica menor espaçamento. Pontos escuros mostram a relaxação lateral, círculos/quadrados os LiDARs e triângulos as estações INMET."),
     media("design", "figures/report/experimental_design_exp01_sst.png",
           "EXP01: mudança da condição de superfície",
           "Diferença da SST média EXP01 − CTL em novembro de 2021. Ela inclui duas mudanças inseparáveis neste desenho cumulativo: a atualização temporal diária e a diferença entre a média OISST e a SST inicial do ERA5 mantida pelo CTL. Tons quentes indicam mar mais quente no EXP01. Nenhuma célula oceânica fica abaixo de 296 K."),
     media("design", "figures/report/experimental_design_exp02_mesh.png",
           "EXP02: tratamento da fronteira",
-          "Malha com aproximadamente 5 km no interior e transição gradual para 32 km junto à fronteira; vermelho indica menor espaçamento. A zona de relaxação escura fica mais distante dos LiDARs e das estações INMET."),
+          "Malha com aproximadamente 5 km no interior e transição gradual para 32 km junto à fronteira; azul-escuro indica menor espaçamento. A zona de relaxação escura fica mais distante dos LiDARs e das estações INMET."),
     media("design", "figures/report/experimental_design_exp03_mesh.png",
           "EXP03: geometria Oval MEQ-02A",
           "Malha de 102.968 células com núcleo refinado orientado ao longo da Margem Equatorial. A geometria é uma hipótese experimental; o tamanho do domínio não é usado como evidência de habilidade meteorológica."),
@@ -1192,6 +1192,226 @@ def observation_methods(cfg) -> list[dict]:
     ]
 
 
+
+# ---------------------------------------------------------------------------
+# Layout v2: linear narrative with interactive charts rendered in the browser
+# ---------------------------------------------------------------------------
+
+V2_TABLES = {
+    "point_metrics": "results/tables/validation_point_metrics.csv",
+    "network_summary": "results/tables/validation_network_summary.csv",
+    "site_metrics": "results/tables/site_metrics.csv",
+    "ranking": "results/tables/experiment_ranking_current.csv",
+    "pairwise": "results/tables/pairwise_tests_current.csv",
+    "added_value": "results/tables/era5_added_value_current.csv",
+    "inmet_added_value": "results/tables/inmet_added_value.csv",
+    "inmet_summary": "results/tables/inmet_summary.csv",
+    "inmet_station_metrics": "results/tables/inmet_station_metrics.csv",
+    "resource": "results/tables/resource_comparison.csv",
+    "climatology": "results/tables/era5_climatology_sites.csv",
+    "representativeness": "results/tables/era5_month_representativeness.csv",
+    "contrasts": "results/tables/exp04_06_priority_tests.csv",
+    "contrast_summary": "results/tables/exp04_06_contrast_summary.csv",
+    "sst_spatial": "results/tables/exp06_sst_spatial_summary.csv",
+    "sst_site_cycle": "results/tables/exp06_sst_site_cycle.csv",
+    "attribution": "results/tables/attribution_summary.csv",
+    "boundary": "results/tables/boundary_influence.csv",
+    "cell_sensitivity": "results/tables/cell_sensitivity.csv",
+    "runtime": "results/tables/runtime_metrics.csv",
+    "inventory": "results/tables/experiment_inventory.csv",
+}
+
+MESH_FIGURES = {
+    "meqbr_05km": "experimental_design_ctl_mesh.png",
+    "meqbr_05km_buf": "experimental_design_exp02_mesh.png",
+    "meqbr_05km_oval_meq02a": "experimental_design_exp03_mesh.png",
+}
+MESH_LABELS = {
+    "meqbr_05km": "Quase uniforme (~4,6 km)",
+    "meqbr_05km_buf": "Com zona de transição 5→32 km",
+    "meqbr_05km_oval_meq02a": "Oval MEQ-02A (núcleo ~5 km)",
+}
+EXPERIMENT_SHORT = {
+    "CTL": "Referência: SST ERA5 fixa",
+    "EXP01": "+ SST diária OISST",
+    "EXP02": "+ malha com buffer e caixa ERA5 ampla",
+    "EXP03": "malha Oval MEQ-02A",
+    "EXP04": "+ PBL/superfície MYNN",
+    "EXP05": "+ convecção Grell–Freitas",
+    "EXP06": "+ SST diurna (pele)",
+}
+EXPERIMENT_PARENT = {"CTL": None, "EXP01": "CTL", "EXP02": "EXP01", "EXP03": "EXP01",
+                     "EXP04": "EXP01", "EXP05": "EXP04", "EXP06": "EXP05"}
+
+
+def _records(df: pd.DataFrame) -> list[dict]:
+    out = []
+    for row in df.to_dict(orient="records"):
+        out.append({key: _json_value(value) for key, value in row.items()})
+    return out
+
+
+def _decision_matrix(data: dict) -> dict:
+    """Criteria x experiment summary computed only from the consolidated tables.
+
+    Each criterion is a count or mean that a reader can trace back to one CSV;
+    no weighting or composite score is formed on purpose.
+    """
+    pairwise = pd.DataFrame(data["pairwise"])
+    added = pd.DataFrame(data["added_value"])
+    inmet = pd.DataFrame(data["inmet_summary"])
+    runtime = pd.DataFrame(data["runtime"])
+    rows = []
+    for exp in CURRENT_EXPERIMENTS:
+        sub = pairwise[(pairwise.experiment_a == exp) | (pairwise.experiment_b == exp)] \
+            if not pairwise.empty else pairwise
+        sig = sub[sub.significant.astype(bool)] if not sub.empty else sub
+        wins = int((sig.better == exp).sum()) if not sig.empty else 0
+        losses = int(len(sig) - wins) if not sig.empty else 0
+        av = added[added.source == exp] if not added.empty else added
+        gains = int(((av.skill_lo > 0)).sum()) if not av.empty else 0
+        av_losses = int(((av.skill_hi < 0)).sum()) if not av.empty else 0
+        skill_mean = float(av.skill_vs_era5.mean()) if not av.empty else None
+        lidar = pd.DataFrame(data["ranking"])
+        lidar = lidar[(lidar.experiment == exp) & (lidar.height_m == 100)]
+        inm = inmet[inmet.experiment == exp] if not inmet.empty else inmet
+        rt = runtime[runtime.experiment == exp] if not runtime.empty else runtime
+        rows.append({
+            "experiment": exp,
+            "pairwise_wins": wins,
+            "pairwise_losses": losses,
+            "pairwise_total": int(len(sub)),
+            "lidar_rmse_100": float(lidar.rmse.mean()) if not lidar.empty else None,
+            "era5_gains": gains, "era5_losses": av_losses,
+            "era5_units": int(len(av)), "era5_skill_mean": skill_mean,
+            "inmet_rmse": float(inm.rmse.iloc[0]) if not inm.empty else None,
+            "inmet_r": float(inm.r.iloc[0]) if not inm.empty else None,
+            "cost": float(rt.core_hours_per_sim_hour.mean()) if not rt.empty else None,
+        })
+    return {"rows": rows, "criteria": [
+        {"key": "pairwise", "label": "Testes pareados LiDAR",
+         "source": "pairwise_tests_current.csv",
+         "help": "Vitórias − derrotas significativas (IC95% do ΔMSE exclui zero) em todos os pares, sítios, períodos e alturas."},
+        {"key": "lidar_rmse_100", "label": "RMSE LiDAR a 100 m",
+         "source": "experiment_ranking_current.csv",
+         "help": "Média dos RMSE de P0/2021 e LPI/2022 a 100 m (m s⁻¹); menor é melhor."},
+        {"key": "era5", "label": "Valor adicionado vs ERA5",
+         "source": "era5_added_value_current.csv",
+         "help": "Sítios com ganho detectável (IC95% do skill de Murphy > 0) a 100 m."},
+        {"key": "inmet_rmse", "label": "INMET 10 m (RMSE)",
+         "source": "inmet_summary.csv",
+         "help": "RMSE médio nas estações automáticas (m s⁻¹); eixo de representatividade terrestre."},
+        {"key": "cost", "label": "Custo computacional",
+         "source": "runtime_metrics.csv",
+         "help": "Horas-núcleo por hora simulada (média dos períodos); menor é melhor."},
+    ]}
+
+
+def build_v2_payload(cfg, report_dir: Path, superseded: set[str],
+                     experiments: list[dict], periods: list[dict],
+                     media_groups: dict, meteo: dict | None,
+                     validation: dict | None) -> tuple[dict, list[dict], dict]:
+    """Everything the v2 page renders, as plain JSON, plus copied assets."""
+    from mpas_meqbr import plotting
+    copied: list[dict] = []
+    data: dict = {}
+    for key, rel in V2_TABLES.items():
+        path = REPO_ROOT / rel
+        if not path.exists():
+            data[key] = []
+            continue
+        frame = drop_superseded(pd.read_csv(path), superseded)
+        data[key] = _records(frame)
+
+    # Meshes: one card per distinct mesh, listing every experiment on it.
+    design_items = {Path(i["url"]).name: i["url"]
+                    for i in media_groups.get("design", {}).get("items", [])}
+    meshes = []
+    for name, mesh_cfg in cfg.meshes.items():
+        users = [e["id"] for e in experiments if e["mesh"] == name]
+        if not users:
+            continue
+        ext = mesh_cfg.get("cell_extent") or {}
+        meshes.append({
+            "name": name, "label": MESH_LABELS.get(name, name),
+            "n_cells": int(mesh_cfg["n_cells"]),
+            "spacing_km": mesh_cfg.get("mean_cell_spacing_km"),
+            "n_relaxation_cells": mesh_cfg.get("n_relaxation_cells"),
+            "extent": [ext.get("lon_min"), ext.get("lat_min"),
+                       ext.get("lon_max"), ext.get("lat_max")] if ext else None,
+            "experiments": users,
+            "figure": design_items.get(MESH_FIGURES.get(name, "")),
+        })
+    for exp in experiments:
+        exp["short"] = EXPERIMENT_SHORT.get(exp["id"], "")
+        exp["parent"] = EXPERIMENT_PARENT.get(exp["id"])
+    sst_fig = design_items.get("experimental_design_exp01_sst.png")
+
+    # Point series: copied next to the page and loaded on demand.
+    series_src = REPO_ROOT / "results" / "interactive" / "series"
+    series_index = {}
+    if (series_src / "index.json").exists():
+        index = json.loads((series_src / "index.json").read_text(encoding="utf-8"))
+        target = report_dir / "assets" / "series"
+        target.mkdir(parents=True, exist_ok=True)
+        for row in index["points"]:
+            source = series_src / row["file"]
+            if not source.exists():
+                continue
+            shutil.copy2(source, target / row["file"])
+            rel = f"assets/series/{row['file']}"
+            series_index[row["key"]] = {**row, "url": rel}
+            copied.append({"source": str(source.relative_to(REPO_ROOT)),
+                           "bundled_as": rel, "bytes": source.stat().st_size,
+                           "title": f"Série horária {row['key']}"})
+
+    geo_path = REPO_ROOT / "results" / "interactive" / "geo" / "geography.json"
+    geography = json.loads(geo_path.read_text(encoding="utf-8")) if geo_path.exists() else None
+
+    # Vendored libraries (offline runtime).
+    vendor_src = REPO_ROOT / "docs" / "templates" / "vendor"
+    vendor = {}
+    for name in ("leaflet.js", "leaflet.css", "plotly-basic.min.js"):
+        source = vendor_src / name
+        if source.exists():
+            target = report_dir / "assets" / "vendor" / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+            vendor[name] = f"assets/vendor/{name}"
+            copied.append({"source": str(source.relative_to(REPO_ROOT)),
+                           "bundled_as": vendor[name], "bytes": source.stat().st_size,
+                           "title": f"Biblioteca {name}"})
+
+    from mpas_meqbr import sci_colormaps
+    payload = {
+        "colors": {k: v for k, v in plotting.EXPERIMENT_COLORS.items()
+                   if "BADSST" not in k},
+        "order": CURRENT_EXPERIMENTS,
+        "palettes": {name: sci_colormaps.stops(name, 11)
+                     for name in ("vik", "batlow", "lajolla", "roma")},
+        "experiments": experiments,
+        "meshes": meshes,
+        "sst_figure": sst_fig,
+        "periods": periods,
+        "period_windows": [
+            {"id": str(key), "site": per["validation_site"],
+             "integration_start": str(pd.Timestamp(per["integration_start"]).isoformat()),
+             "analysis_start": str(pd.Timestamp(per["analysis_start"]).isoformat()),
+             "analysis_end": str(pd.Timestamp(per["analysis_end"]).isoformat())}
+            for key, per in cfg.periods.items()],
+        "sites": {key: {"lat": site.lat, "lon": site.lon,
+                        "label": getattr(site, "label", key)}
+                  for key, site in cfg.sites.items()},
+        "series": series_index,
+        "points": (validation or {}).get("points", []),
+        "media": {group: value.get("items", []) for group, value in media_groups.items()},
+        "geography": geography,
+        **data,
+    }
+    payload["decision"] = _decision_matrix(payload)
+    return payload, copied, vendor
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="results/report")
@@ -1200,6 +1420,9 @@ def main() -> int:
         help=("override config/paths.local.yaml; only experiment metadata are "
               "needed when rebuilding the report from existing derivatives"),
     )
+    parser.add_argument(
+        "--layout", choices=("v2", "v1"), default="v2",
+        help="v2 = linear narrative with in-browser charts (default); v1 = legacy panels")
     args = parser.parse_args()
 
     cfg = load_config(runs_root=args.runs_root)
@@ -1240,8 +1463,24 @@ def main() -> int:
         loader=FileSystemLoader(REPO_ROOT / "docs/templates"),
         autoescape=select_autoescape(["html", "xml"]),
     )
-    template = env.get_template("technical_report.html.j2")
+    v2 = None
+    vendor = {}
+    if args.layout == "v2":
+        v2, v2_assets, vendor = build_v2_payload(
+            cfg, report_dir, superseded, experiments, periods, media_groups,
+            meteo_viewer, validation_panel)
+        assets.extend(v2_assets)
+    template = env.get_template(
+        "technical_report_v2.html.j2" if args.layout == "v2" else "technical_report.html.j2")
+    asset_text = {}
+    if args.layout == "v2":
+        for name in ("report.css", "report.js"):
+            asset_text[name] = (REPO_ROOT / "docs/templates/report_v2" / name).read_text(encoding="utf-8")
     html = template.render(
+        report_data=v2,
+        vendor=vendor,
+        report_css=asset_text.get("report.css", ""),
+        report_js=asset_text.get("report.js", ""),
         generated=generated,
         commit=commit,
         dirty=dirty,

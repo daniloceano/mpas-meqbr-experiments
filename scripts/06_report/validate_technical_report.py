@@ -337,20 +337,14 @@ def validate_report(report_dir: Path) -> dict:
                              item["variable"] == variable)
                 assert "coverage_note" in entry, f"unmarked short animation: {experiment}/{period}/{variable}"
 
+    report_data = embedded_json(html, "report-data")
     for required in (
         "Não avaliado nesta altura",
         "Ganho detectável",
         "Perda detectável",
         "Diferença não detectável",
-        "Exportar CSV filtrado",
-        "PNG pré-renderizado",
-        "Melhor resultado oculto pelos filtros",
-        "Média aritmética dos RMSEs individuais",
         "MSE(A) − MSE(B)",
-        "Ao inverter A e B, sinal e limites do IC são invertidos",
-        "Murphy skill médio (adimensional)",
         "0,41 significa redução de 41% do MSE",
-        "média das reduções relativas de MSE",
         "P0/250 m é descritivo",
         "As sete configurações estão completas",
         "Nenhuma configuração é ratificada para a climatologia",
@@ -359,12 +353,24 @@ def validate_report(report_dir: Path) -> dict:
     ):
         assert required in html, f"missing required wording: {required}"
     assert "As quatro configurações estão completas" not in html
-    assert "new Set(['100'])" in html, "LiDAR default height is not 100 m"
+    assert "hs.indexOf('100') >= 0 ? '100'" in html, "LiDAR default height is not 100 m"
     for required_id in (
-        "resumo-descritivo", "summary-results", "gain-loss-results",
-        "comparacao-direta", "pair-result", "network-to-validation",
+        "design-tree", "mesh-panel", "field-map", "fields-static", "fields-anim",
+        "network-map", "point-panel", "scorecard", "chart-forest", "pairwise-grid",
+        "chart-skill-lidar", "contrast-matrix", "decision-matrix",
     ):
-        assert required_id in html, f"missing interactive component: {required_id}"
+        assert f'id="{required_id}"' in html, f"missing interactive component: {required_id}"
+    for library in ("assets/vendor/plotly-basic.min.js", "assets/vendor/leaflet.js",
+                    "assets/vendor/leaflet.css"):
+        assert library in html and (report_dir / library).is_file(), f"missing library: {library}"
+    series = report_data.get("series", {})
+    assert {"LiDAR_P0_2021", "LiDAR_LPI_2022"} <= set(series), "missing LiDAR point series"
+    for key, item in series.items():
+        assert (report_dir / item["url"]).is_file(), f"missing point series: {item['url']}"
+    assert report_data.get("geography", {}).get("layers", {}).get("states"), "missing state boundaries"
+    assert {m["name"] for m in report_data.get("meshes", [])} == {
+        "meqbr_05km", "meqbr_05km_buf", "meqbr_05km_oval_meq02a"}, "unexpected mesh set"
+    assert {row["experiment"] for row in report_data["decision"]["rows"]} == EXPERIMENTS
     validate_javascript(html)
 
     return {
@@ -382,6 +388,7 @@ def validate_report(report_dir: Path) -> dict:
         "lidar_aggregate_checks": aggregate_checks,
         "lidar_100m_aggregate_checks": lidar_100m_checks,
         "lidar_gain_loss_checks": gain_loss_checks,
+        "point_series": len(report_data.get("series", {})),
         "meteorological_entries": len(meteo["entries"]),
         "meteorological_available": len(available),
         "meteorological_variables": len(meteo["variables"]),

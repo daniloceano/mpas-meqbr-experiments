@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPAS MEQ-Br — Relatório técnico</title>
+{% if vendor['leaflet.css'] %}<link rel="stylesheet" href="{{ vendor['leaflet.css'] }}">{% endif %}
+<style>
+{{ report_css | safe }}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="kicker">MPAS-Atmosphere · Margem Equatorial Brasileira · ~5 km · relatório técnico</p>
+    <h1>Seleção de configuração do MPAS para recurso eólico na Margem Equatorial Brasileira</h1>
+    <p class="meta">Relatório técnico gerado em {{ generated }} · análise <code>{{ commit }}</code>{% if dirty %} (árvore com alterações não versionadas){% endif %}</p>
+  </div>
+</header>
+
+<nav class="chapters" id="chapter-nav" aria-label="Capítulos">
+  <div class="progress"><span id="progress-bar"></span></div>
+  <ol>
+    <li><a href="#introducao"><span>1</span>Experimentos e malhas</a></li>
+    <li><a href="#resultados-modelo"><span>2</span>Campos simulados</a></li>
+    <li><a href="#rede-observacional"><span>3</span>Rede observacional</a></li>
+    <li><a href="#validacao"><span>4</span>Validação</a></li>
+    <li><a href="#valor-adicionado"><span>5</span>Valor adicionado</a></li>
+    <li><a href="#mecanismos"><span>6</span>Física</a></li>
+    <li><a href="#sintese"><span>7</span>Síntese</a></li>
+  </ol>
+</nav>
+
+<main>
+  <div class="status{% if provisional %} critical{% endif %}"><strong>Status:</strong> {{ status_text }}</div>
+
+  <!-- 1 ─────────────────────────────────────────────────────────────── -->
+  <section id="introducao" class="chapter">
+    <p class="chapter-no">Capítulo 1</p>
+    <h2>Experimentos e malhas</h2>
+    <p class="lead">Objetivo: escolher uma configuração do MPAS (~5 km) adequada a
+      futuras simulações climatológicas de recurso eólico na MEqBr, com ganho
+      físico e estatístico que justifique o custo. Sete configurações foram
+      integradas em dois meses — novembro de 2021 (LiDAR P0) e outubro de
+      2022 (LiDAR LPI).</p>
+
+    <div class="questions">
+      <div><b>Q1 · Superfície oceânica.</b> A SST diária melhora o vento em altura de rotor?</div>
+      <div><b>Q2 · Fronteira lateral.</b> Afastar a zona de relaxação melhora a mesoescala na área de interesse?</div>
+      <div><b>Q3 · Geometria.</b> A malha Oval mantém ou melhora a habilidade observacional?</div>
+      <div><b>Q4 · Física da CLP.</b> MYNN, Grell–Freitas e SST diurna trazem ganho detectável?</div>
+      <div><b>Q5 · Valor adicionado.</b> O downscaling reduz o erro do ERA5 nos LiDARs?</div>
+    </div>
+
+    <h3>Desenho cumulativo</h3>
+    <p>O desenho é cumulativo, não fatorial: cada seta adiciona uma mudança à
+      configuração de origem. Clique em um experimento para ver o que muda.</p>
+    <div class="design-tree" id="design-tree" aria-label="Árvore do desenho experimental"></div>
+    <div class="exp-detail" id="exp-detail" aria-live="polite"></div>
+
+    <h3>Três malhas para sete experimentos</h3>
+    <p>CTL, EXP01, EXP04, EXP05 e EXP06 compartilham a mesma malha; somente
+      EXP02 e EXP03 alteram a geometria.</p>
+    <div class="tabs" id="mesh-tabs" role="tablist"></div>
+    <figure class="panel" id="mesh-panel"></figure>
+
+    <div class="grid-2">
+      <div>
+        <h3>Janelas de integração</h3>
+        <div class="chart" id="chart-periods" style="height:190px"></div>
+        <p class="caption"><b>a</b> Spin-up descartado (cinza) e janela científica
+          (preto) de cada período. O mesmo LiDAR valida todos os experimentos
+          em cada período.</p>
+      </div>
+      <div>
+        <h3>Custo computacional</h3>
+        <div class="chart" id="chart-cost" style="height:190px"></div>
+        <p class="caption"><b>b</b> Horas-núcleo por hora simulada. Mede custo
+          normalizado, não escalabilidade nem tempo de fila.</p>
+      </div>
+    </div>
+
+    <details class="drawer">
+      <summary>Configuração comum a todos os experimentos</summary>
+      <table class="kv">
+        {% for row in common_configuration %}<tr><th>{{ row.item }}</th><td>{{ row.value }}</td></tr>{% endfor %}
+      </table>
+    </details>
+    <div class="note"><b>Procedência da SST.</b> Uma primeira versão de EXP01 e
+      EXP02 levava o valor de preenchimento terrestre da OISST (273,15 K) a
+      células oceânicas costeiras. O conversor foi corrigido e os experimentos
+      repetidos; <b>tudo aqui vem das execuções corrigidas</b>
+      (<a href="sst-fix-comparison/index.html">antigo × corrigido</a>).
+      As sete configurações estão completas nos dois períodos.</div>
+    <nav class="pager"><span></span><a href="#resultados-modelo">Campos simulados →</a></nav>
+  </section>
+
+  <!-- 2 ─────────────────────────────────────────────────────────────── -->
+  <section id="resultados-modelo" class="chapter">
+    <p class="chapter-no">Capítulo 2</p>
+    <h2>Campos simulados</h2>
+    <p class="lead">Onde as configurações alteram vento, recurso, SST e ciclo
+      diurno? Padrões espaciais formulam hipóteses; não decidem qual
+      configuração é melhor — isso é tarefa dos capítulos 4 e 5.</p>
+    <div class="tabs big" role="tablist">
+      <button class="tab active" data-tab="fields-static" type="button">Campos médios (estáticos)</button>
+      <button class="tab" data-tab="fields-diag" type="button">Diagnósticos derivados</button>
+      <button class="tab" data-tab="fields-anim" type="button">Animações</button>
+    </div>
+
+    <div class="tabpane active" id="fields-static">
+      <div class="controls">
+        <label>Variável <select id="f-var"></select></label>
+        <label>Período <select id="f-period"></select></label>
+        <label>Experimento <select id="f-exp-a"></select></label>
+        <label class="inline"><input type="checkbox" id="f-compare"> comparar com</label>
+        <label>&nbsp;<select id="f-exp-b" disabled></select></label>
+      </div>
+      <div class="map-wrap">
+        <div class="map" id="field-map"></div>
+        <div class="map-labels" id="field-labels"></div>
+      </div>
+      <div class="colorbar" id="field-colorbar"></div>
+      <p class="caption" id="field-caption"></p>
+      <p class="caption small">WPD = ½ ρ ⟨U³⟩ com ρ = 1,15 kg m⁻³, cubo calculado
+        hora a hora antes da média. No modo comparação, arraste a barra vertical
+        sobre o mapa para revelar cada experimento (mesma escala de cores).</p>
+    </div>
+
+    <div class="tabpane" id="fields-diag">
+      <div class="controls">
+        <label>Produto <select id="d-product"></select></label>
+        <label>Período <select id="d-period"></select></label>
+        <label>Experimento <select id="d-exp"></select></label>
+      </div>
+      <figure class="panel"><img id="d-img" alt=""><figcaption id="d-caption"></figcaption></figure>
+    </div>
+
+    <div class="tabpane" id="fields-anim">
+      <div class="controls">
+        <label>Animação <select id="a-product"></select></label>
+        <label>Período <select id="a-period"></select></label>
+        <label>Esquerda <select id="a-exp-a"></select></label>
+        <label>Direita <select id="a-exp-b"></select></label>
+        <button type="button" id="a-play" class="btn">▶ reproduzir</button>
+        <label>Velocidade <select id="a-rate"><option>0.5</option><option selected>1</option><option>2</option></select></label>
+      </div>
+      <div class="video-pair">
+        <figure><video id="a-video-a" muted playsinline preload="metadata"></video><figcaption id="a-cap-a"></figcaption></figure>
+        <figure><video id="a-video-b" muted playsinline preload="metadata"></video><figcaption id="a-cap-b"></figcaption></figure>
+      </div>
+      <input type="range" id="a-seek" min="0" max="1000" value="0" aria-label="Posição da animação">
+      <p class="caption small" id="a-note">Os dois vídeos são sincronizados: reproduzir, pausar e a barra de tempo atuam nos dois.</p>
+    </div>
+    <nav class="pager"><a href="#introducao">← Experimentos</a><a href="#rede-observacional">Rede observacional →</a></nav>
+  </section>
+
+  <!-- 3 ─────────────────────────────────────────────────────────────── -->
+  <section id="rede-observacional" class="chapter">
+    <p class="chapter-no">Capítulo 3</p>
+    <h2>Rede observacional</h2>
+    <p class="lead">Dois eixos independentes: LiDARs offshore (P0, LPI) em altura
+      de rotor e estações automáticas INMET a 10 m. Clique em um ponto para ver
+      as séries pareadas com ERA5 e os sete experimentos.</p>
+    <div class="network">
+      <div>
+        <div class="map tall" id="network-map"></div>
+        <div class="legend-row" id="network-legend"></div>
+      </div>
+      <aside class="point-panel" id="point-panel">
+        <h3 id="pt-title">Selecione um ponto</h3>
+        <p class="meta" id="pt-meta"></p>
+        <div class="controls compact">
+          <label>Período <select id="pt-period"></select></label>
+          <label>Altura <select id="pt-height"></select></label>
+        </div>
+        <div class="source-chips" id="pt-sources"></div>
+        <div class="chart" id="chart-pt-series" style="height:260px"></div>
+        <div class="grid-2 tight">
+          <div class="chart" id="chart-pt-diurnal" style="height:220px"></div>
+          <div class="chart" id="chart-pt-hist" style="height:220px"></div>
+        </div>
+        <table class="mini" id="pt-metrics"></table>
+      </aside>
+    </div>
+    <details class="drawer">
+      <summary>Tratamento dos dados observacionais e pareamento</summary>
+      <div class="grid-2">
+        {% for method in observation_methods %}
+        <div><h4>{{ method.site }} — {{ method.instrument }} ({{ method.period }})</h4>
+          <p><b>Arquivo nativo:</b> {{ method.native }}.</p>
+          <p><b>QC:</b> {{ method.qc }}.</p>
+          <p><b>Alturas:</b> {{ method.heights }}.</p></div>
+        {% endfor %}
+      </div>
+      <p>P0 e LPI são agregados em médias horárias centradas no horário do MPAS,
+        janela [t−30 min, t+30 min), com no mínimo {{ pairing.min_samples }} de 6
+        amostras; velocidade como média escalar. O modelo usa a célula oceânica
+        mais próxima e níveis coincidentes; o ERA5 é comparado somente a 100 m
+        (LiDAR) e 10 m (INMET). Horário local = UTC−3.</p>
+    </details>
+    <nav class="pager"><a href="#resultados-modelo">← Campos</a><a href="#validacao">Validação →</a></nav>
+  </section>
+
+  <!-- 4 ─────────────────────────────────────────────────────────────── -->
+  <section id="validacao" class="chapter">
+    <p class="chapter-no">Capítulo 4</p>
+    <h2>Validação</h2>
+    <p class="lead">Quadro de desempenho: cada linha é uma unidade observacional
+      (sítio × período × altura), cada coluna uma fonte. A cor compara as fontes
+      <em>dentro da linha</em>; clique em uma linha para ver valores com
+      intervalos de confiança e os testes pareados.</p>
+    <div class="controls">
+      <div class="seg" id="sc-metric" role="radiogroup" aria-label="Métrica">
+        <button type="button" data-m="rmse" class="active">RMSE</button>
+        <button type="button" data-m="bias">Viés</button>
+        <button type="button" data-m="r">Correlação</button>
+        <button type="button" data-m="skill_vs_era5">Skill vs ERA5</button>
+      </div>
+      <div class="seg" id="sc-network" role="radiogroup" aria-label="Rede">
+        <button type="button" data-n="LiDAR" class="active">LiDAR offshore</button>
+        <button type="button" data-n="INMET">INMET 10 m</button>
+      </div>
+    </div>
+    <div class="scorecard-wrap"><table class="scorecard" id="scorecard"></table></div>
+    <div class="colorbar small" id="sc-colorbar"></div>
+    <p class="caption" id="sc-caption"></p>
+
+    <div class="grid-2">
+      <div>
+        <h3 id="forest-title">Intervalos de confiança</h3>
+        <div class="chart" id="chart-forest" style="height:300px"></div>
+        <p class="caption">Ponto = estimativa; barra = IC95% por bootstrap em blocos
+          de 24 h (2000 reamostragens). Intervalos sobrepostos não demonstram
+          diferença — os testes pareados ao lado é que decidem.</p>
+      </div>
+      <div>
+        <h3>Testes pareados (ΔMSE)</h3>
+        <div id="pairwise-grid" class="pairwise"></div>
+        <p class="caption">Célula = experimento com menor erro quadrático nas
+          mesmas horas quando o IC95% de MSE(A) − MSE(B) exclui zero; “·” =
+          diferença não detectável (não demonstra equivalência).</p>
+      </div>
+    </div>
+
+    <h3>Perfil vertical e ciclo diurno nos LiDARs</h3>
+    <div class="controls compact">
+      <div class="seg" id="prof-site"><button type="button" data-s="P0|2021" class="active">P0 · nov 2021</button><button type="button" data-s="LPI|2022">LPI · out 2022</button></div>
+    </div>
+    <div class="grid-3">
+      <div class="chart" id="chart-profile" style="height:300px"></div>
+      <div class="chart" id="chart-profile-rmse" style="height:300px"></div>
+      <div class="chart" id="chart-diurnal-amp" style="height:300px"></div>
+    </div>
+    <p class="caption"><b>a</b> Velocidade média por altura (observação em preto).
+      <b>b</b> RMSE por altura com IC95%. <b>c</b> Amplitude do ciclo diurno
+      médio por altura; o erro de fase não é mostrado porque o ciclo
+      observado em P0 tem dois picos (08 e 22 h local).
+      P0/250 m é descritivo e não entra na seleção.</p>
+
+    <h3>Resumo por rede</h3>
+    <div class="chart" id="chart-network-summary" style="height:280px"></div>
+    <p class="caption">Médias sobre todas as unidades de cada rede (mesmas horas
+      para todas as fontes). LiDAR e INMET não são agregados entre si.</p>
+    <nav class="pager"><a href="#rede-observacional">← Rede</a><a href="#valor-adicionado">Valor adicionado →</a></nav>
+  </section>
+
+  <!-- 5 ─────────────────────────────────────────────────────────────── -->
+  <section id="valor-adicionado" class="chapter">
+    <p class="chapter-no">Capítulo 5</p>
+    <h2>Valor adicionado ao ERA5</h2>
+    <p class="lead">O downscaling reduz o erro da reanálise? Skill de Murphy
+      = 1 − MSE<sub>MPAS</sub>/MSE<sub>ERA5</sub>, nas mesmas horas e no mesmo
+      instrumento: 0,41 significa redução de 41% do MSE; valores negativos
+      significam perda.</p>
+    <div class="grid-2">
+      <div>
+        <h3>LiDAR a 100 m</h3>
+        <div class="chart" id="chart-skill-lidar" style="height:330px"></div>
+      </div>
+      <div>
+        <h3>INMET a 10 m</h3>
+        <div class="chart" id="chart-skill-inmet" style="height:330px"></div>
+      </div>
+    </div>
+    <p class="caption">Símbolo cheio = ganho ou perda detectável (IC95% exclui zero);
+      vazado = diferença não detectável.</p>
+    <div class="legend-row">
+      <span class="pill gain">Ganho detectável</span>
+      <span class="pill loss">Perda detectável</span>
+      <span class="pill nd">Diferença não detectável</span>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h3>Os meses simulados são típicos?</h3>
+        <div class="chart" id="chart-climatology" style="height:300px"></div>
+        <p class="caption">Vento médio mensal a 100 m no ERA5, 1990–2020, para o
+          mês simulado em cada sítio (pontos cinza = anos), e o mês simulado
+          (losango). Novembro de 2021 em P0 foi o mais fraco da série.</p>
+      </div>
+      <div>
+        <h3>Recurso no domínio: MPAS − ERA5</h3>
+        <div class="chart" id="chart-resource" style="height:300px"></div>
+        <p class="caption">Diferença relativa da densidade de potência média no
+          domínio (MPAS − ERA5)/ERA5, na mesma grade e horas.</p>
+      </div>
+    </div>
+    <h3>Mapas MPAS × ERA5</h3>
+    <div class="controls compact">
+      <label>Experimento <select id="res-exp"></select></label>
+      <label>Período <select id="res-period"></select></label>
+    </div>
+    <figure class="panel"><img id="res-img" alt=""><figcaption id="res-caption"></figcaption></figure>
+    <nav class="pager"><a href="#validacao">← Validação</a><a href="#mecanismos">Física →</a></nav>
+  </section>
+
+  <!-- 6 ─────────────────────────────────────────────────────────────── -->
+  <section id="mecanismos" class="chapter">
+    <p class="chapter-no">Capítulo 6</p>
+    <h2>Coerência física</h2>
+    <p class="lead">Uma melhora estatística só é transferível para a climatologia
+      se seguir um mecanismo plausível. Cada bloco abaixo parte de uma hipótese,
+      mostra a evidência e dá o veredito.</p>
+
+    <article class="hypothesis">
+      <header><span class="tag">H1</span><h3>A SST corrigida aquece o mar costeiro e aumenta os fluxos de superfície</h3></header>
+      <div class="chart" id="chart-attribution" style="height:260px"></div>
+      <p class="caption">Médias nos sítios: SST, fluxo de calor latente, altura da
+        camada limite e vento a 100 m por experimento (cadeia SST → fluxos → CLP → vento).
+        Fluxos e CLP ausentes indicam variáveis não gravadas naquele experimento.</p>
+      <p class="verdict"><b>Veredito:</b> gate de integridade aprovado — zero
+        células oceânicas no valor de preenchimento; EXP01 tem menor erro que o
+        CTL em 8 de 8 comparações.</p>
+    </article>
+
+    <article class="hypothesis">
+      <header><span class="tag">H2</span><h3>Afastar a fronteira altera o escoamento perto da zona de relaxação</h3></header>
+      <div class="chart" id="chart-boundary" style="height:240px"></div>
+      <p class="caption">|EXP02 − EXP01| médio do vento a 100 m por distância à
+        zona de relaxação do EXP01 (nov 2021).</p>
+      <p class="verdict"><b>Veredito:</b> o tratamento atua como projetado — o
+        efeito decai monotonicamente com a distância —, mas os instrumentos
+        estão longe de onde ele importa.</p>
+    </article>
+
+    <article class="hypothesis">
+      <header><span class="tag">H3</span><h3>MYNN, Grell–Freitas e SST diurna melhoram o vento em altura de rotor</h3></header>
+      <div class="scorecard-wrap"><table class="contrast" id="contrast-matrix"></table></div>
+      <p class="caption">Contrastes prioritários pareados (ΔMSE, IC95%). A cor indica qual
+        lado tem menor erro detectável; “ND” = não detectável.</p>
+      <div class="chart" id="chart-sst-cycle" style="height:240px"></div>
+      <p class="caption">EXP06: ciclo diurno médio da SST prescrita e da temperatura
+        de pele na célula oceânica mais próxima de cada LiDAR (landmask == 0).</p>
+      <p class="verdict"><b>Veredito:</b> EXP04 não se distingue de EXP01;
+        EXP05 perde para EXP04 em quatro contrastes (todos em P0); EXP06 não se
+        distingue de EXP05 nos oito contrastes.</p>
+    </article>
+
+    <article class="hypothesis">
+      <header><span class="tag">H4</span><h3>O resultado não depende da célula escolhida</h3></header>
+      <div class="chart" id="chart-cells" style="height:260px"></div>
+      <p class="caption">RMSE a 100 m nas cinco células oceânicas mais próximas
+        de cada LiDAR, por distância ao instrumento. Símbolo cheio = célula usada
+        no ranking (a mais próxima, escolhida sem consultar o desempenho).</p>
+      <p class="verdict"><b>Veredito:</b> sensibilidade pequena em P0, relevante
+        em LPI — o ranking em LPI carrega incerteza de representatividade.</p>
+    </article>
+
+    <details class="drawer">
+      <summary>Física efetivamente resolvida e referências</summary>
+      <p>Os logs identificam <code>sf_noah</code> (Noah, não Noah-MP). EXP04 ativa
+        <code>bl_mynn</code> + <code>sf_mynn</code>; EXP05 acrescenta
+        <code>cu_grell_freitas</code>; EXP06 acrescenta
+        <code>config_sstdiurn_update = true</code>, com a OISST ainda diária.</p>
+      <ul>
+        <li>Nakanishi & Niino (2009), doi:10.2151/jmsj.87.895</li>
+        <li>Grell & Freitas (2014), doi:10.5194/acp-14-5233-2014</li>
+        <li>Zeng & Beljaars (2005), doi:10.1029/2005GL023030</li>
+      </ul>
+    </details>
+    <nav class="pager"><a href="#valor-adicionado">← Valor adicionado</a><a href="#sintese">Síntese →</a></nav>
+  </section>
+
+  <!-- 7 ─────────────────────────────────────────────────────────────── -->
+  <section id="sintese" class="chapter">
+    <p class="chapter-no">Capítulo 7</p>
+    <h2>Síntese</h2>
+    <p class="lead">Cinco critérios, lado a lado, sem peso nem escore composto.
+      Cada célula vem de uma única tabela consolidada.</p>
+    <div class="scorecard-wrap"><table class="decision" id="decision-matrix"></table></div>
+    <p class="caption">Tons mais escuros = melhor desempenho no critério (escala
+      por linha). Passe o cursor no nome do critério para ver a definição e a tabela de origem.</p>
+    <div class="grid-2">
+      <div>
+        <h3>Saldo dos testes pareados</h3>
+        <div class="chart" id="chart-dominance" style="height:280px"></div>
+      </div>
+      <div>
+        <h3>Erro × custo</h3>
+        <div class="chart" id="chart-tradeoff" style="height:280px"></div>
+      </div>
+    </div>
+    <p class="caption"><b>a</b> Vitórias (direita) e derrotas (esquerda)
+      significativas em todos os testes pareados LiDAR. <b>b</b> RMSE LiDAR médio
+      a 100 m contra horas-núcleo por hora simulada; canto inferior esquerdo é preferível.</p>
+
+    <div class="conclusion">
+      <h3>Conclusão</h3>
+      <ol>
+        <li><b>SST diária (EXP01) é a mudança mais robusta:</b> menor erro que o CTL
+          em 8 de 8 comparações, com viés de densidade de potência reduzido em P0 e LPI.</li>
+        <li><b>EXP03 (Oval) é a referência observacional mais forte no agregado</b> e
+          adiciona habilidade sobre o ERA5 nos dois sítios (+0,39 em P0, +0,43 em LPI),
+          mas seu ganho não é atribuível à extensão do núcleo refinado.</li>
+        <li><b>O ramo de física não traz ganho:</b> EXP04 não se distingue de EXP01;
+          EXP05 degrada em P0; EXP06 não se distingue de EXP05 nos oito contrastes.</li>
+        <li><b>O tratamento de fronteira (EXP02) atua</b>, mas longe dos instrumentos.</li>
+      </ol>
+      <p class="verdict">Nenhuma configuração é ratificada para a climatologia por
+        este relatório: a evidência cobre um mês por sítio, e novembro de 2021 foi
+        atípico em P0.</p>
+    </div>
+    <details class="drawer">
+      <summary>O que ainda não é possível concluir</summary>
+      <ul>
+        <li>Um mês por sítio; novembro de 2021 foi o mais fraco de 31 anos em P0 (percentil 0, z = −2,46).</li>
+        <li>Persiste viés baixo de vento (−0,5 a −1,1 m s⁻¹ nos LiDARs) que não é artefato da SST.</li>
+        <li>O eixo INMET é dominado por representatividade; vale pela fase e estrutura costeira, não pela magnitude.</li>
+        <li>O valor do tratamento de fronteira junto ao contorno não foi medido contra observações.</li>
+        <li>Malha, decomposição MPI e representação pontual diferem entre EXP03 e as demais.</li>
+      </ul>
+    </details>
+    <nav class="pager"><a href="#mecanismos">← Física</a><a href="#introducao">Início ↑</a></nav>
+  </section>
+
+  <footer class="footer">
+    <p>Gerado por <code>scripts/06_report/build_technical_report.py</code> a partir de
+      tabelas consolidadas; não edite à mão. Proveniência completa em
+      <a href="report_manifest.json">report_manifest.json</a>. Paletas: Crameri (2018),
+      doi:10.5281/zenodo.1243862. Geografia: Natural Earth.</p>
+  </footer>
+</main>
+
+{% if vendor['plotly-basic.min.js'] %}<script src="{{ vendor['plotly-basic.min.js'] }}"></script>{% endif %}
+{% if vendor['leaflet.js'] %}<script src="{{ vendor['leaflet.js'] }}"></script>{% endif %}
+<script type="application/json" id="report-data">{{ report_data | tojson }}</script>
+{% if validation_panel %}<script type="application/json" id="validation-data">{{ validation_panel | tojson }}</script>{% endif %}
+{% if meteo_viewer %}<script type="application/json" id="meteo-data">{{ meteo_viewer | tojson }}</script>{% endif %}
+<script type="application/json" id="table-data">{{ table_data | tojson }}</script>
+<script>
+{{ report_js | safe }}
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+{
+ "created_by": "scripts/02_validation/export_point_series.py",
+ "created": "2026-11-09T13:10:48.629999+00:00",
+ "points": [
+  {
+   "key": "LiDAR_P0_2021",
+   "network": "LiDAR",
+   "point": "P0",
+   "period": "2021",
+   "file": "LiDAR_P0_2021.js",
+   "heights": [
+    "50",
+    "100",
+    "150",
+    "200",
+    "250"
+   ]
+  },
+  {
+   "key": "LiDAR_LPI_2022",
+   "network": "LiDAR",
+   "point": "LPI",
+   "period": "2022",
+   "file": "LiDAR_LPI_2022.js",
+   "heights": [
+    "50",
+    "100",
+    "150",
+    "200"
+   ]
+  },
+  {
+   "key": "INMET_81715099999_2021",
+   "network": "INMET",
+   "point": "81715099999",
+   "period": "2021",
+   "file": "INMET_81715099999_2021.js",
+   "heights": [
+    "10"
+   ]
+  },
+  {
+   "key": "INMET_81758099999_2021",
+   "network": "INMET",
+   "point": "81758099999",
+   "period": "2021",
+   "file": "INMET_81758099999_2021.js",
+   "heights": [
+    "10"
+   ]
+  },
+  {
+   "key": "INMET_81798099999_2021",
+   "network": "INMET",
+   "point": "81798099999",
+   "period": "2021",
+   "file": "INMET_81798099999_2021.js",
+   "heights": [
+    "10"
+   ]
+  },
+  {
+   "key": "INMET_81715099999_2022",
+   "network": "INMET",
+   "point": "81715099999",
+   "period": "2022",
+   "file": "INMET_81715099999_2022.js",
+   "heights": [
+    "10"
+   ]
+  },
+  {
+   "key": "INMET_81758099999_2022",
+   "network": "INMET",
+   "point": "81758099999",
+   "period": "2022",
+   "file": "INMET_81758099999_2022.js",
+   "heights": [
+    "10"
+   ]
+  },
+  {
+   "key": "INMET_81835099999_2022",
+   "network": "INMET",
+   "point": "81835099999",
+   "period": "2022",
+   "file": "INMET_81835099999_2022.js",
+   "heights": [
+    "10"
+   ]
+  }
+ ]
+}

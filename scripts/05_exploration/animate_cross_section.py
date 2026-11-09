@@ -163,7 +163,7 @@ def main() -> int:
     vmax = float(np.ceil(np.nanpercentile(all_temperature, 99)))
 
     fig, ax = plt.subplots(figsize=(11.4, 6.4))
-    pc = ax.pcolormesh(x, centers, frames[0]["temperature_c"], cmap="RdYlBu_r",
+    pc = ax.pcolormesh(x, centers, frames[0]["temperature_c"], cmap="roma_r",
                        vmin=vmin, vmax=vmax, shading="gouraud")
     ax.fill_between(distance, 0, terrain, color="0.38", zorder=7)
     ax.axvline(0, color="k", ls=":", lw=1.1, zorder=8)

@@ -137,7 +137,7 @@ def plot_mesh_resolution(cfg, experiment: str, mesh_name: str, output: Path) -> 
     fig, ax = plt.subplots(figsize=(10.5, 6.2),
                            subplot_kw={"projection": ccrs.PlateCarree()})
     sc = ax.scatter(data["lon"], data["lat"], c=data["spacing"], s=1.0,
-                    cmap="turbo_r", vmin=4.0, vmax=vmax, linewidths=0,
+                    cmap="batlow", vmin=4.0, vmax=vmax, linewidths=0,
                     rasterized=True, transform=ccrs.PlateCarree())
     relaxation = data["bdy"] > 0
     if relaxation.any():
@@ -152,7 +152,7 @@ def plot_mesh_resolution(cfg, experiment: str, mesh_name: str, output: Path) -> 
     gridlines(ax)
     cb = fig.colorbar(sc, ax=ax, orientation="horizontal", pad=0.08,
                       fraction=0.055, extend="max")
-    cb.set_label("Espaçamento horizontal equivalente entre centros de célula (km) — vermelho = menor")
+    cb.set_label("Espaçamento horizontal equivalente entre centros de célula (km) — azul-escuro = menor")
     if experiment == "EXP02":
         title = ("EXP02 — malha com zona de transição\n"
                  "~5 km na região de interesse, aumentando gradualmente até 32 km")
@@ -172,7 +172,7 @@ def plot_mesh_resolution(cfg, experiment: str, mesh_name: str, output: Path) -> 
     plotting.provenance_footer(
         fig,
         f"Fonte: {cfg.mesh_file(mesh_name).name} | espaçamento calculado a partir de areaCell "
-        "assumindo célula hexagonal equivalente | turbo invertido: vermelho = menor "
+        "assumindo célula hexagonal equivalente | batlow: azul-escuro = menor "
         "espaçamento | círculos/quadrados: LiDAR; triângulos: INMET",
         fontsize=6.5, layout=False)
     fig.savefig(output, dpi=300)
@@ -199,7 +199,7 @@ def plot_sst_delta(cfg, output: Path) -> None:
     values = np.where(ocean[idx], delta[idx], np.nan)
     fig, ax = plt.subplots(figsize=(10.5, 6.2),
                            subplot_kw={"projection": ccrs.PlateCarree()})
-    pc = ax.tripcolor(tri, values, cmap="RdBu_r", vmin=-10, vmax=10,
+    pc = ax.tripcolor(tri, values, cmap="vik", vmin=-10, vmax=10,
                       shading="gouraud", rasterized=True,
                       transform=ccrs.PlateCarree())
     plotting.coastlines(ax, resolution="10m", lw=0.7)

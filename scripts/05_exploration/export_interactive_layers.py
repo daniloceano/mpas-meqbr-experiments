@@ -43,30 +43,30 @@ VARIABLES = {
     },
     "wpd100_mean": {
         "label": "Densidade de potência eólica a 100 m", "unit": "W m⁻²",
-        "cmap": "magma", "values": fields.wind_power_density_field,
+        "cmap": plotting.CMAP_WPD, "values": fields.wind_power_density_field,
         "mask": "ocean",
     },
     "constancy100": {
         "label": "Constância direcional a 100 m",
-        "unit": "|vetor médio| / média escalar", "cmap": "cividis",
+        "unit": "|vetor médio| / média escalar", "cmap": plotting.CMAP_CONSTANCY,
         "values": lambda ds: ds["constancy_100"].values,
         "mask": None, "limits": (0.5, 1.0),
     },
     "diurnal_amplitude100": {
         "label": "Amplitude diurna a 100 m", "unit": "m s⁻¹",
-        "cmap": "plasma", "values": fields.diurnal_amplitude,
+        "cmap": plotting.CMAP_AMPLITUDE, "values": fields.diurnal_amplitude,
         "mask": None,
     },
     "sst_mean": {
         "label": "Temperatura média da superfície", "unit": "K",
-        "cmap": "turbo", "values": lambda ds: ds["mean_sst"].values,
+        "cmap": plotting.CMAP_SST, "values": lambda ds: ds["mean_sst"].values,
         "mask": "ocean",
     },
 }
 
 
 def colour_stops(cmap_name: str) -> list[dict]:
-    cmap = matplotlib.colormaps.get_cmap(cmap_name)
+    cmap = plotting.get_cmap(cmap_name)
     return [{"fraction": fraction, "colour": mcolors.to_hex(cmap(fraction))}
             for fraction in np.linspace(0, 1, 9)]
 
@@ -193,7 +193,7 @@ def main() -> int:
                 lat_grid, lon_grid, max_distance_km=8.0)
             vmin, vmax = scales[variable]
             normal = mcolors.Normalize(vmin=vmin, vmax=vmax, clip=True)
-            rgba = matplotlib.colormaps.get_cmap(spec["cmap"])(normal(grid))
+            rgba = plotting.get_cmap(spec["cmap"])(normal(grid))
             rgba[..., 3] = np.where(np.isfinite(grid), 0.94, 0.0)
             output = layer_dir / f"{variable}_{experiment}_{period}.png"
             plt.imsave(output, rgba, origin="lower")
