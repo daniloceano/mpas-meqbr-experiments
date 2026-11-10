@@ -1,9 +1,8 @@
 # Meq-BR — Roadmap científico e operacional
 
-> **Estado:** conteúdo v1.0 e publicação Git de `research/ROADMAP.md` aprovados especificamente pelo pesquisador em 08/10/2026; registro de publicação rastreável no histórico do repositório.
-> **Versão aprovada para publicação:** 1.0 — 08/10/2026.
-> **Destino autorizado:** `research/ROADMAP.md` na `main` de `daniloceano/mpas-meqbr-experiments`, por branch e PR dedicados.
-> **Referência remota consultada na preparação:** `main` em `5833f3e36d1744edf97f0c4f08847db5d1550e98` (08/10/2026). Conferir novamente antes de qualquer publicação.
+> **Versão:** 1.1 — 10/11/2026, reconciliação documental da MEQ-01 após a seleção da EXP03 (MEQ-03); base `main@085f96c`.
+> **Mudanças da v1.1:** MEQ-01 concluída (decisão do pesquisador, 10/11/2026); MEQ-04 mantida em andamento com números da EXP03; campos-padrão em MEQ-00 a MEQ-03; seção 3 e seção 8 atualizadas. Os commits `8394fbb` e `085f96c` foram integrados diretamente na `main`, sem PR; registra-se o fato para rastreabilidade.
+> **Histórico:** v1.0 aprovada pelo pesquisador em 08/10/2026 e publicada pelo PR #3 (commit `fe16f0b`, merge `6fef1bb`, 09/10/2026).
 
 ## 1. Propósito e alcance
 
@@ -30,11 +29,13 @@ O HTML principal existente cobre desenho experimental, andamento e custo, campos
 | Identificador | Significado científico | Uso na decisão |
 | --- | --- | --- |
 | `CTL` | Controle: SST inicial do ERA5 mantida fixa; malha `meqbr_05km`. | Comparação de referência. |
-| `EXP01` | Atualização diária NOAA OISST v2.1, com tratamento costeiro corrigido; malha `meqbr_05km`. | Melhor candidato entre os experimentos analisados até aqui; **não ratificado definitivamente**. |
+| `EXP01` | Atualização diária NOAA OISST v2.1, com tratamento costeiro corrigido; malha `meqbr_05km`. | Ganho robusto sobre `CTL`; alternativa de menor domínio e custo. |
 | `EXP02` | Herda `EXP01` e altera conjuntamente a malha para `meqbr_05km_buf` **e** a caixa ERA5 de fronteira. | Testa o efeito **incremental do tratamento de fronteira**, não o buffer isolado. |
+| `EXP03` | Herda `EXP01` (OISST corrigida, caixa ERA5 ampla) com a malha Oval `meqbr_05km_oval_meq02a` (102.968 células). | **Selecionado na MEQ-03 (10/11/2026)** para a próxima etapa; não demonstra superioridade universal. |
+| `EXP04`–`EXP06` | Ramo de física sobre `EXP01`: MYNN; + Grell–Freitas; + ciclo diurno da SST de pele. | Sem ganho detectável sobre `EXP01` (EXP04) ou sem benefício consistente (EXP05/EXP06). |
 | `EXP01_BADSST`, `EXP02_BADSST` | Integrações históricas com OISST costeiro contaminado por valor de preenchimento sobre terra. | Preservadas como evidência da falha; **excluídas da seleção científica atual**. |
 
-O registro de análise indica integrações completas nos dois períodos amostrados e auditoria positiva das quatro pernas corrigidas em `results/audit/corrected_runs_validation.json`. Nos testes pareados atuais, `EXP01` é favorecido frente ao `CTL` em **8/8** comparações sítio–período–altura; `EXP02` e `EXP01` não apresentam diferença estatisticamente distinguível em **8/8** comparações, apesar de a malha do `EXP02` possuir aproximadamente **24% mais células**. Esses são **resultados documentados**, ainda sujeitos à avaliação de novas configurações e à ratificação final.
+O registro de análise indica integrações completas nos dois períodos amostrados e auditoria positiva das quatro pernas corrigidas em `results/audit/corrected_runs_validation.json`. Nos testes pareados atuais, `EXP01` é favorecido frente ao `CTL` em **8/8** comparações sítio–período–altura; `EXP02` e `EXP01` não apresentam diferença estatisticamente distinguível em **8/8** comparações, apesar de a malha do `EXP02` possuir aproximadamente **24% mais células**. Esses resultados descrevem a análise da v1.0 (08/10/2026). A comparação atual, com EXP03–EXP06 e a decisão de seleção, está em `results/tables/selection_summary_current.md` e `research/MEQ-03-selection-decision.md`.
 
 A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a média da SST também muda. Comparações devem usar horas comuns e distinguir melhora estatística, mecanismo físico, representatividade observacional e custo computacional.
 
@@ -43,7 +44,7 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 ### MEQ-00 — Auditoria e preservação da proveniência
 
 - **Objetivo:** identificar o estado dos repositórios e ambientes e preservar evidências operacionais relevantes antes de intervenções posteriores.
-- **Situação:** **encerrada em 08/10/2026**, com MEQ-00A (auditoria factual) e MEQ-00B (preservação seletiva).
+- **Situação:** **concluída em 08/10/2026**, com MEQ-00A (auditoria factual) e MEQ-00B (preservação seletiva).
 - **Evidências:** `docs/provenance/MEQ-00B-preservation.md`, PR científico [#2](https://github.com/daniloceano/mpas-meqbr-experiments/pull/2), integrado à `main` no commit `5833f3e`.
 - **Dependências:** nenhuma para o encerramento já registrado; as etapas futuras devem respeitar os arquivos preservados e sua proveniência.
 - **Critério de encerramento:** satisfeitos pela aprovação do registro e integração documental; o relato de testes do agente não constitui nova auditoria independente nesta missão.
@@ -52,37 +53,43 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 ### MEQ-01 — Planejamento, governança e roadmap
 
 - **Objetivo:** estabelecer a fonte oficial de planejamento, fronteiras de escopo, sequência das frentes, rastreamento de decisões e condições de avanço.
-- **Situação:** **em andamento**. A organização, o conteúdo v1.0 e sua publicação Git específica foram aprovados; a conclusão operacional da MEQ-01A depende da confirmação do merge.
-- **Evidências:** repositório científico `main`; instruções permanentes; documentação MEQ-00B; relatório técnico existente.
+- **Situação:** **concluída em 09/10/2026**. Roadmap v1.0 publicado pelo PR #3 (commit `fe16f0b`, merge `6fef1bb`); encerramento decidido pelo pesquisador em 10/11/2026. A reconciliação v1.1 é manutenção desta governança, não reabertura da frente.
+- **Evidências:** PR [#3](https://github.com/daniloceano/mpas-meqbr-experiments/pull/3); histórico de `research/ROADMAP.md`; documentação MEQ-00B.
 - **Dependências:** aprovação deste roadmap; nova conferência Git antes de operações de escrita.
 - **Critério de encerramento:** conteúdo aprovado explicitamente, arquivo publicado no repositório científico por branch/PR autorizados e conferência documentada de commit, push e merge; alternativamente, bloqueio ou cancelamento registrado.
-- **Decisões pendentes:** nenhuma quanto à publicação v1.0 especificamente autorizada; novas versões, operações ou alterações fora do escopo exigem decisão própria.
+- **Decisões pendentes:** nenhuma para a frente; novas versões do roadmap seguem as regras da seção 7. A adoção efetiva do registro `DEC-MEQ-NNN` (nenhum criado até 10/11/2026) fica como proposta separada.
 
 ### MEQ-02 — Exploração de novas configurações MPAS
 
 - **Objetivo:** testar alternativas capazes de superar ou complementar `EXP01` antes da seleção para climatologia.
-- **Situação:** **concluída**. CTL e EXP01–EXP06 foram integrados e validados para P0/2021 e LPI/2022; os produtos EXP01_BADSST/EXP02_BADSST permanecem apenas como evidência do erro histórico de SST, não como candidatos válidos.
+- **Situação:** **concluída em 10/11/2026**. CTL e EXP01–EXP06 foram integrados e validados para P0/2021 e LPI/2022; os produtos EXP01_BADSST/EXP02_BADSST permanecem apenas como evidência do erro histórico de SST, não como candidatos válidos.
 - **Evidências:** `config/experiments.yaml`, `docs/provenance/MEQ-02D-EXP04-06-campaign.md`, `results/tables/site_metrics.csv`, `results/tables/pairwise_tests_current.csv`, `results/tables/exp04_06_priority_tests.csv` e relatório HTML.
 - **Resultado:** EXP01 trouxe ganhos robustos sobre CTL; EXP02/EXP03 avaliaram o desenho do domínio; EXP04 não apresentou ganho detectável sobre EXP01 e EXP05/EXP06 não justificaram sua adoção com os períodos observados. A seleção final foi deliberada na MEQ-03.
 - **Limitações:** dois períodos curtos e diferenças de configuração/recursos que impedem atribuição universal de mecanismos ou escalabilidade.
+- **Dependências:** MEQ-00.
+- **Critério de encerramento:** experimentos candidatos integrados, auditados e comparados nos dois períodos, com resultado submetido à seleção da MEQ-03.
+- **Decisões pendentes:** nenhuma.
 
 ### MEQ-03 — Validação e seleção científica da configuração
 
 - **Objetivo:** integrar as evidências, comparar desempenho, custo e mecanismos e selecionar a configuração para a próxima fase.
-- **Situação:** **concluída — EXP03 selecionado**. Em 10/11/2026, o pesquisador comunicou a decisão tomada em conjunto com seu supervisor de seguir com EXP03 como melhor candidato para as próximas simulações.
+- **Situação:** **concluída em 10/11/2026 — EXP03 selecionado**. Em 10/11/2026, o pesquisador comunicou a decisão tomada em conjunto com seu supervisor de seguir com EXP03 como melhor candidato para as próximas simulações.
 - **Registro da decisão e ressalvas:** `research/MEQ-03-selection-decision.md`.
 - **Evidências:** `results/tables/pairwise_tests_current.csv`, `results/tables/selection_summary_current.md`, `results/tables/site_metrics.csv`, `results/tables/era5_added_value_current.csv`, `results/tables/cell_sensitivity.csv`, `results/tables/runtime_metrics.csv` e relatório HTML v2.
 - **Escopo da ratificação:** escolha científica para prosseguir com EXP03; não comprova superioridade universal/climatológica, não encerra a MEQ-04 e não substitui o benchmark operacional MEQ-05.
 - **Próxima dependência:** MEQ-05 deve medir a eficiência paralela e fundamentar o custo das integrações multianuais na configuração selecionada. A síntese narrativa do HTML ainda deve ser atualizada para refletir a decisão humana, sem recalcular resultados.
+- **Dependências:** MEQ-02.
+- **Critério de encerramento:** escolha registrada e ratificada pelo pesquisador, com evidências e ressalvas versionadas.
+- **Decisões pendentes:** nenhuma para a seleção; a atualização editorial do HTML segue na seção 8.
 
 ### MEQ-04 — Valor agregado sobre ERA5
 
 - **Objetivo:** estabelecer onde e em que condições o MPAS oferece ganho confiável sobre ERA5 na observação de vento offshore e na representação espacial do recurso.
-- **Situação:** **parcialmente realizada**, com análise extensa já disponível. Os resultados corrigidos de `EXP01` a 100 m mostram Murphy skill positivo nos dois sítios/períodos: aproximadamente **+0,34 em P0/2021** e **+0,30 em LPI/2022**, com intervalos de confiança documentados acima de zero.
+- **Situação:** **em andamento** (decisão do pesquisador, 10/11/2026), com análise extensa já disponível e síntese ainda não ratificada. Para a configuração selecionada (`EXP03`), o skill de Murphy (MSE) a 100 m frente ao ERA5 é aproximadamente **+0,39 em P0/2021** (IC95% 0,25–0,59) e **+0,43 em LPI/2022** (IC95% 0,32–0,55). Referência histórica da v1.0: `EXP01` com +0,34 e +0,30.
 - **Evidências:** `results/tables/era5_added_value_current.csv`, `resource_comparison.csv`, `era5_month_representativeness.csv`; seção 6 e demais figuras do relatório HTML principal.
 - **Dependências:** interpretação da representatividade e da comparabilidade, e atualização seletiva para a configuração que resultar da MEQ-03. A análise existente não deve ser repetida sem justificativa.
 - **Critério de encerramento:** síntese científica aprovada do ganho e de suas limitações **para os períodos e variáveis avaliados**, distinção entre habilidade observacional e estrutura espacial plausível, e atualização do HTML principal quando necessária.
-- **Decisões pendentes:** necessidade e extensão de validações complementares antes da extrapolação climatológica.
+- **Decisões pendentes:** ratificação da síntese do valor agregado para EXP03; necessidade e extensão de validações complementares antes da extrapolação climatológica; atualização do HTML principal (template, validador e regeneração).
 
 ### MEQ-05 — Benchmark de paralelismo e viabilidade computacional
 
@@ -142,6 +149,10 @@ Mudanças no roadmap devem indicar o que mudou, por quê, quem aprovou e em que 
 
 ## 8. Próximas ações e decisões científicas
 
-A organização das frentes e o **conteúdo inicial v1.0 estão aprovados**, assim como a publicação específica de **somente** `research/ROADMAP.md` no repositório científico, por branch, commit, PR e merge dedicados. A execução dessa autorização exige conferência do estado Git e ausência de conflitos ou riscos novos.
+Situação em 10/11/2026 (v1.1); o texto da v1.0 desta seção está preservado no histórico do repositório (`fe16f0b`).
 
-Não ratificar `EXP01` definitivamente antes da MEQ-02/MEQ-03; não iniciar novos experimentos ou benchmarking com base apenas neste roadmap. Preparar, em etapa posterior e com autorização própria, a inspeção da malha oval e propostas de hipóteses testáveis. O PR #19 permanece fora do escopo de governança do roadmap, exceto como referência à implementação OISST corrigida necessária às futuras execuções.
+- **MEQ-05:** próxima frente operacional prevista; requer plano concreto e autorização explícita antes de qualquer execução.
+- **MEQ-04:** síntese do valor agregado da EXP03 a ratificar pelo pesquisador.
+- **Revisão editorial do HTML principal:** refletir a seleção da EXP03 no template `docs/templates/technical_report_v2.html.j2`, ajustar o validador `scripts/06_report/validate_technical_report.py` (que hoje exige a frase “Nenhuma configuração é ratificada…”) e regenerar o relatório; trabalho técnico com autorização própria, sem recalcular resultados.
+- **`SCIENTIFIC_NOTES.md`:** a entrada de 07/10/2026 ainda é marcada como conclusão vigente com `EXP01`; nova entrada datada deve registrar a decisão da MEQ-03 sem apagar a anterior.
+- **MEQ-06:** não autorizada; depende das condições da própria frente.
