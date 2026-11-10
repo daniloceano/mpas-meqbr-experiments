@@ -61,20 +61,19 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 ### MEQ-02 — Exploração de novas configurações MPAS
 
 - **Objetivo:** testar alternativas capazes de superar ou complementar `EXP01` antes da seleção para climatologia.
-- **Situação:** **planejada**. Primeira candidata indicada pelo pesquisador: **malha oval já criada em `MPAS-BR/grids`**; localização, características, compatibilidade e identidade dos arquivos ainda precisam de verificação operacional. Outras melhorias físicas ou numéricas serão levantadas e priorizadas em decisão futura, sem assumir testes previamente autorizados.
-- **Evidências:** `config/experiments.yaml`, registros das simulações existentes e os resultados de validação disponíveis no HTML principal.
-- **Dependências:** verificação do artefato da malha, justificativa científica de cada hipótese, orçamento de execução e **uso comprovado da correção OISST**; toda simulação depende de autorização específica.
-- **Critério de encerramento:** conjunto de candidatos **aprovado** pelo pesquisador testado com controles comparáveis; diferenças de malha, fronteiras, resolução, parametrizações e custo documentadas; resultados integrados à evidência para MEQ-03.
-- **Decisões pendentes:** quais outras melhorias investigar, quais experimentos executar e critérios de priorização após inspeção da malha oval.
+- **Situação:** **concluída**. CTL e EXP01–EXP06 foram integrados e validados para P0/2021 e LPI/2022; os produtos EXP01_BADSST/EXP02_BADSST permanecem apenas como evidência do erro histórico de SST, não como candidatos válidos.
+- **Evidências:** `config/experiments.yaml`, `docs/provenance/MEQ-02D-EXP04-06-campaign.md`, `results/tables/site_metrics.csv`, `results/tables/pairwise_tests_current.csv`, `results/tables/exp04_06_priority_tests.csv` e relatório HTML.
+- **Resultado:** EXP01 trouxe ganhos robustos sobre CTL; EXP02/EXP03 avaliaram o desenho do domínio; EXP04 não apresentou ganho detectável sobre EXP01 e EXP05/EXP06 não justificaram sua adoção com os períodos observados. A seleção final foi deliberada na MEQ-03.
+- **Limitações:** dois períodos curtos e diferenças de configuração/recursos que impedem atribuição universal de mecanismos ou escalabilidade.
 
 ### MEQ-03 — Validação e seleção científica da configuração
 
-- **Objetivo:** integrar evidências existentes e novos candidatos, comparar desempenho, custo e mecanismos e ratificar uma configuração para as integrações climatológicas.
-- **Situação:** **parcialmente realizada**. `EXP01` é a melhor escolha entre as configurações **já testadas**, não a escolha final ratificada.
-- **Evidências:** `results/tables/pairwise_tests_current.csv`, `selection_summary_current.md`, `results/tables/site_metrics*.csv`, diagnóstico de SST e mecanismos; seções de validação/seleção do HTML principal.
-- **Dependências:** MEQ-02 e adequação do protocolo de comparação (horas comuns, LiDARs, representatividade, incerteza e custo); não é obrigatório refazer análises que permaneçam válidas.
-- **Critério de encerramento:** comparações justificadas entre as alternativas aprovadas, resultados e limitações incorporados ao HTML principal e **decisão científica final do pesquisador registrada com evidências**.
-- **Decisões pendentes:** ratificação da configuração, após a exploração experimental; eventual necessidade de ampliar períodos ou testar robustez de hipóteses.
+- **Objetivo:** integrar as evidências, comparar desempenho, custo e mecanismos e selecionar a configuração para a próxima fase.
+- **Situação:** **concluída — EXP03 selecionado**. Em 10/11/2026, o pesquisador comunicou a decisão tomada em conjunto com seu supervisor de seguir com EXP03 como melhor candidato para as próximas simulações.
+- **Registro da decisão e ressalvas:** `research/MEQ-03-selection-decision.md`.
+- **Evidências:** `results/tables/pairwise_tests_current.csv`, `results/tables/selection_summary_current.md`, `results/tables/site_metrics.csv`, `results/tables/era5_added_value_current.csv`, `results/tables/cell_sensitivity.csv`, `results/tables/runtime_metrics.csv` e relatório HTML v2.
+- **Escopo da ratificação:** escolha científica para prosseguir com EXP03; não comprova superioridade universal/climatológica, não encerra a MEQ-04 e não substitui o benchmark operacional MEQ-05.
+- **Próxima dependência:** MEQ-05 deve medir a eficiência paralela e fundamentar o custo das integrações multianuais na configuração selecionada. A síntese narrativa do HTML ainda deve ser atualizada para refletir a decisão humana, sem recalcular resultados.
 
 ### MEQ-04 — Valor agregado sobre ERA5
 
