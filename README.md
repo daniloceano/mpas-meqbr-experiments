@@ -21,9 +21,12 @@ for what each experiment *is*. This repository holds only the analysis.
 > evidence for the finding. Details:
 > [`SCIENTIFIC_NOTES.md`](SCIENTIFIC_NOTES.md), entry 2026-10-07.
 >
-> **Current answer:** `EXP01` — daily OISST update on the unbuffered mesh. It
-> beats `CTL` in 8 of 8 site-period-height comparisons; the buffered mesh is
-> indistinguishable from it and costs 24 % more cells.
+> **Current answer (10 Nov 2026):** `EXP03` — corrected daily OISST on the Oval
+> MEQ-02A mesh (102 968 cells) — was selected by the researcher and supervisor
+> for the next stage (MEQ-03). This is a choice supported by two one-month
+> validation periods, not proof of universal superiority. `EXP01` remains the
+> cheaper alternative with robust gains over `CTL`. Decision and caveats:
+> [`research/MEQ-03-selection-decision.md`](research/MEQ-03-selection-decision.md).
 
 ## What is being compared
 
