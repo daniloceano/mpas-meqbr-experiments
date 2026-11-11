@@ -1570,6 +1570,10 @@ def main() -> int:
     for asset in assets:
         bundled = report_dir / asset["bundled_as"]
         asset["sha256"] = hashlib.sha256(bundled.read_bytes()).hexdigest()
+        # Animations are not versioned (results/report/**/*.mp4 is ignored):
+        # a clone may lack them, so the validator only warns when they are
+        # absent and still checks size and hash when they are present.
+        asset["optional"] = bundled.suffix.lower() == ".mp4"
 
     manifest = {
         "generated_utc": generated,

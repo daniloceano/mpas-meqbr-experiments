@@ -12,6 +12,7 @@ import math
 import re
 import shutil
 import subprocess
+import sys
 from collections import Counter, defaultdict
 from html.parser import HTMLParser
 from pathlib import Path
@@ -169,8 +170,14 @@ def validate_report(report_dir: Path) -> dict:
         validate_record(record, REPO_ROOT)
     for record in manifest.get("interactive_data", []):
         validate_record(record, REPO_ROOT)
+    warnings: list[str] = []
+    optional_missing: set[str] = set()
     for asset in manifest.get("assets", []):
         bundled = report_dir / asset["bundled_as"]
+        if asset.get("optional") and not bundled.is_file():
+            warnings.append(f"optional asset absent: {asset['bundled_as']}")
+            optional_missing.add(asset["bundled_as"])
+            continue
         assert bundled.is_file(), f"missing asset: {asset['bundled_as']}"
         assert bundled.stat().st_size == asset["bytes"], asset["bundled_as"]
         assert sha256(bundled) == asset["sha256"], asset["bundled_as"]
@@ -327,7 +334,8 @@ def validate_report(report_dir: Path) -> dict:
         else:
             assert entry["experiment"] in EXPERIMENTS
         assert entry["period"] in PERIODS
-        assert (report_dir / entry["url"]).is_file(), entry["url"]
+        assert (entry["url"] in optional_missing
+                or (report_dir / entry["url"]).is_file()), entry["url"]
         coverage[entry["variable"]].add((entry["experiment"], entry["period"]))
         if entry["kind"] == "georaster":
             scales[entry["variable"]].add((entry["vmin"], entry["vmax"]))
@@ -389,7 +397,10 @@ def validate_report(report_dir: Path) -> dict:
     review = validate_review_additions(html, meteo, report_data, report_dir)
     validate_javascript(html)
 
+    for warning in warnings:
+        print(f"WARNING: {warning}", file=sys.stderr)
     return {
+        "warnings": warnings,
         "review_checks": review,
         "sections": len(parser.section_ids),
         "ids": len(parser.ids),

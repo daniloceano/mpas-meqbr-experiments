@@ -102,3 +102,30 @@ def test_numeric_values_round_trip(tmp_path, monkeypatch):
     # Both layers share one quantisation per variable, so A - B is exact up to it.
     assert entries[1]["values"]["offset"] == meta["offset"]
     assert entries[1]["values"]["scale"] == meta["scale"]
+
+
+def test_validator_passes_with_warnings_when_videos_are_absent(tmp_path):
+    """A clone lacks the unversioned *.mp4: the validator must warn, not fail."""
+    import json
+    import shutil
+
+    report = ROOT / "results" / "report"
+    if not (report / "report_manifest.json").is_file():
+        pytest.skip("no built report in this checkout")
+    manifest = json.loads((report / "report_manifest.json").read_text(encoding="utf-8"))
+    if not any(a.get("optional") for a in manifest["assets"]):
+        pytest.skip("report built before optional assets were recorded")
+    clone = tmp_path / "report"
+    shutil.copytree(report, clone, ignore=shutil.ignore_patterns("*.mp4"))
+    validator = _load("validate_technical_report",
+                      "scripts/06_report/validate_technical_report.py")
+    summary = validator.validate_report(clone)
+    optional = {a["bundled_as"] for a in manifest["assets"] if a.get("optional")}
+    assert optional and all(a.endswith(".mp4") for a in optional)
+    assert summary["warnings"] == [f"optional asset absent: {a}" for a in
+                                   [x["bundled_as"] for x in manifest["assets"] if x.get("optional")]]
+    # Required assets are still enforced.
+    required = next(a for a in manifest["assets"] if not a.get("optional"))
+    (clone / required["bundled_as"]).unlink()
+    with pytest.raises(AssertionError):
+        validator.validate_report(clone)
