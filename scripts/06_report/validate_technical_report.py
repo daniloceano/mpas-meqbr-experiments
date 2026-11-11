@@ -22,8 +22,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 ERA5_LAYER_VARIABLES = {"wind100_mean", "wpd100_mean", "constancy100",
                         "diurnal_amplitude100"}
 BUFFERED_MESHES = {"meqbr_05km_buf", "meqbr_05km_oval_meq02a"}
-REVIEW_IDS = ("mesh-view", "chart-mesh-profile", "res-map", "cost-mode",
+REVIEW_IDS = ("mesh-view", "chart-mesh-profile", "chart-resource", "cost-mode",
               "tradeoff-mode", "wins-drawer", "f-mode")
+RETIRED_IDS = ("res-map", "res-var", "res-exp", "res-period", "d-product")
+RETIRED_PRODUCTS = {"resource_vs_era5", "difference_vs_ctl"}
 MAIN_SECTIONS = [
     "introducao",
     "resultados-modelo",
@@ -458,9 +460,15 @@ def validate_review_additions(html: str, meteo: dict, report_data: dict,
         for period in PERIODS:
             exps = groups.get((variable, period), set())
             assert EXPERIMENTS <= exps, f"{variable}/{period} lacks {sorted(EXPERIMENTS - exps)}"
-    for period in PERIODS:
-        assert "EXP03" in groups.get(("difference_vs_ctl", period), set()), \
-            f"difference_vs_ctl/{period} lacks EXP03"
+    # Sections retired on 2026-11-11: static MPAS x ERA5 maps and the
+    # difference-vs-CTL tab (both superseded by the field viewer).
+    for required_id in RETIRED_IDS:
+        assert f'id="{required_id}"' not in html, f"retired component still present: {required_id}"
+    assert "Mapas MPAS × ERA5" not in html
+    assert not {e["variable"] for e in meteo["entries"]} & RETIRED_PRODUCTS, "retired viewer product bundled"
+    assert "Recurso no domínio" in html
+    assert 'href="#resultados-modelo">Campos simulados</a> (ERA5 selecionável' in html, \
+        "missing pointer from the resource chart to Campos simulados"
 
     # Spacing-decay profile for the two buffered meshes only.
     profile = report_data.get("mesh_profile", [])
