@@ -190,8 +190,46 @@
         '<div><b>' + m.experiments.map(function (x) { return '<span class="chip" style="--c:' + color(x) + '"><i></i>' + x + '</span>'; }).join(' ') + '</b>experimentos</div></div>' +
         (m.figure ? '<img src="' + m.figure + '" alt="Malha ' + esc(m.name) + '" loading="lazy">' : '<div class="empty">Figura da malha não produzida.</div>') +
         '<figcaption><code>' + esc(m.name) + '</code>: espaçamento equivalente entre centros de célula (batlow; azul-escuro = menor). Pontos escuros = zona de relaxação lateral; círculo/quadrado = LiDARs; triângulos = estações INMET.</figcaption>';
+      // Spacing-decay sub-view, only for meshes with a buffer (no CTL profile).
+      var prof = (D.mesh_profile || []).filter(function (r) { return r.mesh === m.name; });
+      $('mesh-view').hidden = !prof.length;
+      if (!prof.length) meshView = 'mesh';
+      Array.prototype.forEach.call($('mesh-view').querySelectorAll('button'), function (b) { b.classList.toggle('active', b.dataset.v === meshView); });
+      $('mesh-panel').classList.toggle('show-profile', meshView === 'profile');
+      $('mesh-profile-wrap').hidden = meshView !== 'profile';
+      if (meshView === 'profile') renderMeshProfile(m, prof);
     }
-    tabs.addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b) showMesh(Number(b.dataset.mesh)); });
+    var meshView = 'mesh', currentMesh = 0;
+    segment('mesh-view', function (d) { meshView = d.v; showMesh(currentMesh); });
+    function renderMeshProfile(m, rows) {
+      var c = color(m.experiments[m.experiments.length - 1]);
+      var inner = rows.filter(function (r) { return r.kind === 'interior'; }).sort(function (a, b) { return a.dist_km - b.dist_km; });
+      var relax = rows.filter(function (r) { return r.kind === 'relaxation'; });
+      var theory = rows.filter(function (r) { return r.kind === 'theory'; });
+      var marks = rows.filter(function (r) { return r.kind === 'marker'; });
+      var xs = inner.map(function (r) { return r.dist_km; });
+      var tr = [
+        { type: 'scatter', mode: 'lines', x: xs, y: inner.map(function (r) { return r.p10_km; }), line: { width: 0 }, hoverinfo: 'skip', showlegend: false },
+        { type: 'scatter', mode: 'lines', name: 'p10–p90', x: xs, y: inner.map(function (r) { return r.p90_km; }), fill: 'tonexty', fillcolor: 'rgba(120,120,120,0.22)', line: { width: 0 }, hoverinfo: 'skip' },
+        { type: 'scatter', mode: 'lines', name: 'mediana', x: xs, y: inner.map(function (r) { return r.median_km; }), line: { color: c, width: 1.8 },
+          customdata: inner.map(function (r) { return [r.n, r.p10_km, r.p90_km]; }),
+          hovertemplate: '%{x:.0f} km: mediana %{y:.1f} km (p10 %{customdata[1]:.1f}, p90 %{customdata[2]:.1f}; n = %{customdata[0]})<extra></extra>' },
+        { type: 'scatter', mode: 'markers', name: 'zona de relaxação', x: relax.map(function (r) { return r.dist_km; }), y: relax.map(function (r) { return r.median_km; }),
+          marker: { symbol: 'diamond-open', size: 7, color: '#1a1a1a', line: { width: 1.2 } },
+          customdata: relax.map(function (r) { return r.n; }), hovertemplate: 'relaxação, %{x:.0f} km: mediana %{y:.1f} km (n = %{customdata})<extra></extra>' },
+        { type: 'scatter', mode: 'lines', name: 'perfil pedido', x: theory.map(function (r) { return r.dist_km; }), y: theory.map(function (r) { return r.theory_km; }),
+          line: { color: '#1a1a1a', width: 1.1, dash: 'dash' }, hoverinfo: 'skip' }
+      ];
+      var LBL = { 'area of interest': 'borda da área de interesse', 'end of ramp': 'fim da rampa', 'LBC zone starts': 'início da zona de LBC', 'mesh edge': 'borda da malha' };
+      var shapes = marks.map(function (r) { return { type: 'line', xref: 'x', yref: 'paper', x0: r.dist_km, x1: r.dist_km, y0: 0, y1: 1, line: { color: '#7a7a7a', width: 0.8, dash: 'dot' } }; });
+      var ann = marks.map(function (r) { return { xref: 'x', yref: 'paper', x: r.dist_km, y: 1, text: LBL[r.marker] || r.marker, textangle: -90, xanchor: 'right', yanchor: 'top', showarrow: false, font: { size: 9, color: '#4a4a4a' } }; });
+      plot('chart-mesh-profile', tr, { showlegend: true, legend: { orientation: 'h', y: -0.22, x: 0 }, shapes: shapes, annotations: ann,
+        xaxis: { title: { text: 'distância à borda da área de interesse (km; negativa dentro)' } }, yaxis: { title: { text: 'espaçamento (km)' }, rangemode: 'tozero' } });
+      var r0 = rows[0] || {};
+      $('mesh-profile-note').innerHTML = 'MPAS-Research <code>' + esc(String(r0.mpas_research_sha || '').slice(0, 8)) + '</code>.' +
+        (truthy(r0.theory_reconstructed) ? ' Malha gerada antes de o código ser versionado: o perfil pedido foi reconstruído a partir dos parâmetros registrados no <code>domain.txt</code>.' : '');
+    }
+    tabs.addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b) { currentMesh = Number(b.dataset.mesh); showMesh(currentMesh); } });
     showMesh(0);
 
     // Periods
@@ -210,16 +248,25 @@
 
     // Cost
     var rt = (D.runtime || []).filter(function (r) { return ORDER.indexOf(r.experiment) >= 0; });
-    var costTr = ['2021', '2022'].map(function (p, k) {
-      var rows = rt.filter(function (r) { return String(r.period) === p; });
-      return { type: 'scatter', mode: 'markers', name: PERIOD_LABEL[p],
-        x: rows.map(function (r) { return r.core_hours_per_sim_hour; }), y: rows.map(function (r) { return r.experiment; }),
-        marker: { symbol: k ? 'square-open' : 'circle', size: 8, color: rows.map(function (r) { return color(r.experiment); }), line: { width: 1.4, color: rows.map(function (r) { return color(r.experiment); }) } },
-        customdata: rows.map(function (r) { return [r.mpi_ranks, r.quality]; }),
-        hovertemplate: '%{y} ' + PERIOD_LABEL[p] + ': %{x:.2f} h-núcleo/h simulada<br>%{customdata[0]} ranks · %{customdata[1]}<extra></extra>' };
-    });
-    plot('chart-cost', costTr, { showlegend: true, legend: { orientation: 'h', y: 1.12, x: 0 }, xaxis: { title: { text: 'horas-núcleo por hora simulada' }, rangemode: 'tozero' },
-      yaxis: { categoryorder: 'array', categoryarray: ORDER.slice().reverse() }, margin: { l: 56, r: 12, t: 26, b: 40 } });
+    var ranks = rt.map(function (r) { return num(r.mpi_ranks); }).filter(isFinite);
+    if (ranks.length) $('cost-ranks').textContent = Math.min.apply(null, ranks) + ' a ' + Math.max.apply(null, ranks);
+    function drawCost(mode) {
+      var perCells = mode === 'cells';
+      var costTr = ['2021', '2022'].map(function (p, k) {
+        var rows = rt.filter(function (r) { return String(r.period) === p; });
+        return { type: 'scatter', mode: 'markers', name: PERIOD_LABEL[p],
+          x: rows.map(function (r) { return perCells ? r.core_hours_per_sim_hour / (r.n_cells / 1e5) : r.core_hours_per_sim_hour; }), y: rows.map(function (r) { return r.experiment; }),
+          marker: { symbol: k ? 'square-open' : 'circle', size: 8, color: rows.map(function (r) { return color(r.experiment); }), line: { width: 1.4, color: rows.map(function (r) { return color(r.experiment); }) } },
+          customdata: rows.map(function (r) { return [r.mpi_ranks, r.quality, Number(r.n_cells).toLocaleString('pt-BR')]; }),
+          hovertemplate: '%{y} ' + PERIOD_LABEL[p] + ': %{x:.2f} ' + (perCells ? 'h-núcleo/h simulada por 10⁵ células' : 'h-núcleo/h simulada') +
+            '<br>%{customdata[0]} ranks · %{customdata[2]} células · %{customdata[1]}<extra></extra>' };
+      });
+      plot('chart-cost', costTr, { showlegend: true, legend: { orientation: 'h', y: 1.12, x: 0 },
+        xaxis: { title: { text: perCells ? 'horas-núcleo por hora simulada e por 10⁵ células' : 'horas-núcleo por hora simulada' }, rangemode: 'tozero' },
+        yaxis: { categoryorder: 'array', categoryarray: ORDER.slice().reverse() }, margin: { l: 56, r: 12, t: 26, b: 40 } });
+    }
+    segment('cost-mode', function (d) { drawCost(d.c); });
+    drawCost('hour');
   }
 
   // ======================================================================
@@ -827,20 +874,78 @@
     plot('chart-resource', tr4, { barmode: 'group', bargap: 0.25, showlegend: true, legend: { orientation: 'h', y: 1.12, x: 0 }, margin: { l: 56, r: 12, t: 30, b: 36 },
       yaxis: { title: { text: 'Δ WPD relativa ao ERA5 (%)' }, zeroline: true, zerolinecolor: '#1a1a1a', zerolinewidth: 0.8 } });
 
-    // Resource maps
-    var maps = (METEO.entries || []).filter(function (e) { return e.variable === 'resource_vs_era5' && e.url && e.available !== false; });
+    // Resource maps: MPAS (left) × ERA5 (right) on the shared MPAS colour scale.
+    var rasters = (METEO.entries || []).filter(function (e) { return e.kind === 'georaster' && e.url && e.available !== false; });
+    var refs = rasters.filter(function (e) { return e.experiment === 'ERA5'; });
+    var vars = METEO.variables || {};
+    var resVars = uniq(refs.map(function (e) { return e.variable; }));
+    if (!resVars.length) { if ($('res-map')) $('res-map').innerHTML = '<div class="empty">Camadas ERA5 não produzidas.</div>'; return; }
+    select('res-var', resVars.map(function (k) { return { value: k, label: (vars[k] || {}).label || k }; }), resVars[0]);
+    var ext = METEO.extent || [-46.5, -33.5, -7.5, 1.0];
+    var bounds = [[ext[2], ext[0]], [ext[3], ext[1]]];
+    var resMap = baseMap('res-map');
+    if (!resMap) return;
+    resMap.fitBounds(bounds);
+    var sw = swipe(resMap, 'res-map');
+    function find(v, p, e) { return rasters.filter(function (r) { return r.variable === v && String(r.period) === p && r.experiment === e; })[0]; }
     function renderRes() {
-      var ex = ORDER.filter(function (e) { return maps.some(function (m) { return m.experiment === e; }); });
+      var v = $('res-var').value;
+      var ex = ORDER.filter(function (e) { return rasters.some(function (r) { return r.variable === v && r.experiment === e; }); });
       var e = ex.indexOf($('res-exp').value) >= 0 ? $('res-exp').value : ex[0];
       select('res-exp', ex, e);
-      var ps = uniq(maps.filter(function (m) { return m.experiment === e; }).map(function (m) { return String(m.period); })).sort();
+      var ps = uniq(refs.filter(function (r) { return r.variable === v && find(v, String(r.period), e); }).map(function (r) { return String(r.period); })).sort();
       var p = ps.indexOf($('res-period').value) >= 0 ? $('res-period').value : ps[0];
       select('res-period', ps.map(function (x) { return { value: x, label: PERIOD_LABEL[x] || x }; }), p);
-      var item = maps.filter(function (m) { return m.experiment === e && String(m.period) === p; })[0];
-      if (item) { $('res-img').src = item.url; $('res-img').alt = 'MPAS × ERA5 ' + e; $('res-caption').innerHTML = '<b>' + e + ' × ERA5, ' + (PERIOD_LABEL[p] || p) + '.</b> ' + esc(item.caption || 'Recurso eólico a 100 m na mesma grade.'); }
+      var ea = find(v, p, e), eb = find(v, p, 'ERA5');
+      sw.show(ea, eb, bounds);
+      $('res-labels').innerHTML = ea && eb ? '<span>' + esc(e) + '</span><span>ERA5</span>' : '';
+      if (ea && eb) {
+        var d = ea.vmax < 2 ? 2 : 1, sat = eb.saturation || {};
+        $('res-colorbar').innerHTML = '<span>' + fmt(ea.vmin, d) + '</span><div class="bar" style="background:' + gradient(ea.colour_stops) + '"></div><span>' + fmt(ea.vmax, d) + '</span><span>' + esc(ea.unit) + '</span>';
+        $('res-caption').innerHTML = '<b>' + esc(ea.variable_label) + ' — ' + esc(e) + ' (esquerda) × ERA5 (direita), ' + (PERIOD_LABEL[p] || p) + '.</b> Média de ' + ea.n_hours + ' h (' + esc(ea.window_start) + ' a ' + esc(ea.window_end) + '); ERA5 nas mesmas horas (' + eb.n_hours + ' h), resolução nativa ' + fmt(eb.native_resolution_deg, 2) + '°, célula mais próxima sem suavização. ' +
+          'Escala dos campos MPAS: ' + fmt(100 * (sat.below_vmin || 0), 1) + '% das células ERA5 saturam abaixo e ' + fmt(100 * (sat.above_vmax || 0), 1) + '% acima.';
+      }
     }
-    ['res-exp', 'res-period'].forEach(function (id) { $(id).addEventListener('change', renderRes); });
-    if (maps.length) renderRes();
+    ['res-var', 'res-exp', 'res-period'].forEach(function (id) { $(id).addEventListener('change', renderRes); });
+    renderRes();
+  }
+
+  // A|B swipe over a Leaflet map: A fills the map, B is clipped left of the handle.
+  function swipe(map, wrapId) {
+    var wrap = $(wrapId), handle = null, handleX = null, A = null, B = null;
+    function clip() {
+      if (!B || !handle) return;
+      var img = B.getElement(); if (!img) return;
+      var mapRect = wrap.getBoundingClientRect(), imgRect = img.getBoundingClientRect();
+      var x = handleX === null ? mapRect.width / 2 : handleX;
+      handle.style.left = x + 'px';
+      img.style.clipPath = 'inset(0 0 0 ' + Math.max(0, mapRect.left + x - imgRect.left) + 'px)';
+    }
+    function ensureHandle() {
+      if (handle) return;
+      handle = document.createElement('div'); handle.className = 'swipe-handle'; wrap.appendChild(handle);
+      var drag = false;
+      var move = function (ev) {
+        if (!drag) return;
+        var r = wrap.getBoundingClientRect(), cx = (ev.touches ? ev.touches[0].clientX : ev.clientX);
+        handleX = Math.max(0, Math.min(r.width, cx - r.left)); clip(); ev.preventDefault();
+      };
+      handle.addEventListener('mousedown', function (ev) { drag = true; map.dragging.disable(); ev.stopPropagation(); });
+      handle.addEventListener('touchstart', function (ev) { drag = true; map.dragging.disable(); ev.stopPropagation(); }, { passive: true });
+      window.addEventListener('mousemove', move);
+      window.addEventListener('touchmove', move, { passive: false });
+      var up = function () { if (drag) { drag = false; map.dragging.enable(); } };
+      window.addEventListener('mouseup', up); window.addEventListener('touchend', up);
+    }
+    map.on('move zoom resize viewreset', clip);
+    return {
+      show: function (ea, eb, bounds) {
+        if (A) map.removeLayer(A); if (B) map.removeLayer(B); A = B = null;
+        if (ea) A = L.imageOverlay(ea.url, bounds, { opacity: 1 }).addTo(map);
+        if (eb) { B = L.imageOverlay(eb.url, bounds, { opacity: 1 }).addTo(map); B.on('load', clip); ensureHandle(); }
+        setTimeout(clip, 0);
+      }
+    };
   }
 
   // ======================================================================
@@ -959,10 +1064,46 @@
     ], { barmode: 'relative', xaxis: { title: { text: '← derrotas · vitórias →' }, zeroline: true, zerolinecolor: '#1a1a1a', zerolinewidth: 1 }, margin: { l: 56, r: 12, t: 8, b: 42 } });
 
     var pts = ORDER.filter(function (e) { return rows[e] && isFinite(num(rows[e].cost)) && isFinite(num(rows[e].lidar_rmse_100)); });
-    plot('chart-tradeoff', [{ type: 'scatter', mode: 'markers+text', x: pts.map(function (e) { return rows[e].cost; }), y: pts.map(function (e) { return rows[e].lidar_rmse_100; }),
-      text: pts, textposition: 'top center', textfont: { size: 10, color: pts.map(color) },
-      marker: { size: 11, color: pts.map(color) }, hovertemplate: '%{text}: %{x:.2f} h-núcleo/h · RMSE %{y:.2f} m s⁻¹<extra></extra>' }],
-      { xaxis: { title: { text: 'horas-núcleo por hora simulada' } }, yaxis: { title: { text: 'RMSE LiDAR médio a 100 m (m s⁻¹)' } } });
+    var TO = D.tradeoff || { rows: [] }, rel = {};
+    TO.rows.forEach(function (r) { rel[r.experiment] = r; });
+    function pct(v) { return (v >= 0 ? '+' : '') + fmt(100 * v, 0) + '%'; }
+    if (isFinite(num(TO.x_divider))) {
+      $('tradeoff-div').textContent = 'custo relativo ' + fmt(TO.x_divider, 2);
+      $('tradeoff-range').textContent = pct(TO.partition_lo - 1) + ' e ' + pct(TO.partition_hi - 1) + ' de custo em relação ao CTL';
+    }
+    function drawTradeoff(mode) {
+      if (mode !== 'rel') {
+        plot('chart-tradeoff', [{ type: 'scatter', mode: 'markers+text', x: pts.map(function (e) { return rows[e].cost; }), y: pts.map(function (e) { return rows[e].lidar_rmse_100; }),
+          text: pts, textposition: 'top center', textfont: { size: 10, color: pts.map(color) },
+          marker: { size: 11, color: pts.map(color) }, hovertemplate: '%{text}: %{x:.2f} h-núcleo/h · RMSE %{y:.2f} m s⁻¹<extra></extra>' }],
+          { xaxis: { title: { text: 'horas-núcleo por hora simulada' } }, yaxis: { title: { text: 'RMSE LiDAR médio a 100 m (m s⁻¹)' } } });
+        return;
+      }
+      var pr = ORDER.filter(function (e) { return rel[e]; });
+      var xs = pr.map(function (e) { return rel[e].cost_rel; }), ys = pr.map(function (e) { return rel[e].rmse_reduction_pct; });
+      var xmin = Math.min.apply(null, xs), xmax = Math.max.apply(null, xs), ymin = Math.min.apply(null, ys), ymax = Math.max.apply(null, ys);
+      var px = 0.08 * (xmax - xmin || 1), py = 0.15 * (ymax - ymin || 1);
+      var X0 = xmin - px, X1 = xmax + px, Y0 = Math.min(ymin, 0) - py, Y1 = Math.max(ymax, 0) + py, xd = TO.x_divider;
+      var q = function (x, y, t, xa, ya) { return { x: x, y: y, xref: 'x', yref: 'y', text: t, showarrow: false, xanchor: xa, yanchor: ya, font: { size: 10, color: '#7a7a7a' } }; };
+      plot('chart-tradeoff', [{ type: 'scatter', mode: 'markers+text', x: xs, y: ys, text: pr, textposition: 'top center', textfont: { size: 10, color: pr.map(color) },
+        marker: { size: 11, color: pr.map(color) }, hovertemplate: '%{text}: custo ×%{x:.2f} do CTL · RMSE %{y:+.1f}% vs CTL<extra></extra>' }],
+        { shapes: [
+            { type: 'line', x0: X0, x1: X1, y0: 0, y1: 0, line: { color: '#1a1a1a', width: 0.8 } },
+            { type: 'line', x0: xd, x1: xd, y0: Y0, y1: Y1, line: { color: '#1a1a1a', width: 0.8, dash: 'dot' } }],
+          annotations: [q(X0, Y1, 'bons e baratos', 'left', 'top'), q(X1, Y1, 'bons e caros', 'right', 'top'),
+            q(X0, Y0, 'ruins e baratos', 'left', 'bottom'), q(X1, Y0, 'ruins e caros', 'right', 'bottom')],
+          xaxis: { title: { text: 'custo relativo ao CTL (horas-núcleo por hora simulada)' }, range: [X0, X1] },
+          yaxis: { title: { text: 'redução do RMSE a 100 m vs CTL (%)' }, range: [Y0, Y1] } });
+    }
+    segment('tradeoff-mode', function (d) { drawTradeoff(d.t); });
+    drawTradeoff('abs');
+
+    // What counts as a win: totals always come from the decision matrix.
+    var wr = ORDER.filter(function (e) { return rows[e]; });
+    if (wr.length) {
+      $('wins-n').textContent = uniq(wr.map(function (e) { return rows[e].pairwise_total; })).join(', ');
+      $('wins-totals').textContent = wr.map(function (e) { return e + ' ' + rows[e].pairwise_wins + '/' + rows[e].pairwise_losses; }).join(' · ');
+    }
   }
 
   function safe(fn, name) {

@@ -195,3 +195,8 @@ input[type=range] { width: 100%; accent-color: var(--ink); }
   main, .masthead { margin-left: 0; padding-left: 0; }
   .tabpane { display: block; }
 }
+
+/* review 2026-11: sub-views and toggles */
+.seg + .chart, .seg + .panel, #mesh-view + .panel { margin-top: 8px; }
+#mesh-view { margin-top: 10px; }
+#mesh-panel.show-profile img, #mesh-panel.show-profile figcaption { display: none; }

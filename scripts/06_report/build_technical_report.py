@@ -1219,6 +1219,7 @@ V2_TABLES = {
     "cell_sensitivity": "results/tables/cell_sensitivity.csv",
     "runtime": "results/tables/runtime_metrics.csv",
     "inventory": "results/tables/experiment_inventory.csv",
+    "mesh_profile": "results/tables/mesh_spacing_profile.csv",
 }
 
 MESH_FIGURES = {
@@ -1305,6 +1306,37 @@ def _decision_matrix(data: dict) -> dict:
          "source": "runtime_metrics.csv",
          "help": "Horas-núcleo por hora simulada (média dos períodos); menor é melhor."},
     ]}
+
+
+def _tradeoff(decision: dict) -> dict:
+    """Error x cost relative to CTL, with the quadrant dividers.
+
+    x = cost / cost(CTL); y = RMSE reduction at 100 m relative to CTL (%).
+    The vertical divider is the midpoint between the smallest and largest
+    relative cost; ``partition_lo``/``partition_hi`` bound the divider
+    positions that leave every experiment in the same quadrant. Descriptive
+    only: no significance is attached to the position.
+    """
+    rows = {r["experiment"]: r for r in decision["rows"]}
+    ctl = rows.get("CTL")
+    if not ctl or not ctl.get("cost") or not ctl.get("lidar_rmse_100"):
+        return {"rows": []}
+    out = []
+    for exp, r in rows.items():
+        if r.get("cost") is None or r.get("lidar_rmse_100") is None:
+            continue
+        out.append({"experiment": exp,
+                    "cost_rel": r["cost"] / ctl["cost"],
+                    "rmse_reduction_pct": 100.0 * (ctl["lidar_rmse_100"] - r["lidar_rmse_100"])
+                    / ctl["lidar_rmse_100"]})
+    xs = sorted(r["cost_rel"] for r in out)
+    divider = 0.5 * (xs[0] + xs[-1])
+    below = [x for x in xs if x < divider]
+    above = [x for x in xs if x > divider]
+    return {"rows": out, "x_divider": divider, "y_divider": 0.0,
+            "cost_rel_min": xs[0], "cost_rel_max": xs[-1],
+            "partition_lo": max(below) if below else xs[0],
+            "partition_hi": min(above) if above else xs[-1]}
 
 
 def build_v2_payload(cfg, report_dir: Path, superseded: set[str],
@@ -1409,6 +1441,7 @@ def build_v2_payload(cfg, report_dir: Path, superseded: set[str],
         **data,
     }
     payload["decision"] = _decision_matrix(payload)
+    payload["tradeoff"] = _tradeoff(payload["decision"])
     return payload, copied, vendor
 
 
