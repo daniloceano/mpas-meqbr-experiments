@@ -215,7 +215,23 @@ In brief:
 
 ## Results and Interpretation
 
-### 2026-10-07 — Corrected OISST forcing: the ranking reverses — **[current conclusion]**
+### 2026-11-10 — MEQ-03 decision: `EXP03` selected — **[current conclusion]**
+
+On 2026-11-10 the researcher and supervisor selected `EXP03` (Oval MEQ-02A mesh
+`meqbr_05km_oval_meq02a`, corrected daily OISST, wider ERA5 box) as the
+configuration to carry into the next simulations. The decision, its evidence
+and its limitations are recorded in
+[`research/MEQ-03-selection-decision.md`](research/MEQ-03-selection-decision.md)
+(decision record `DEC-MEQ-001`). This entry adds no new interpretation.
+
+The selection is a choice supported by the available evidence, **not** a
+demonstration of universal superiority. Limitations carried with it: validation
+rests on two one-month periods (P0/Nov 2021, LPI/Oct 2022); paired contrasts are
+exploratory, with no global multiplicity adjustment; the LPI score is sensitive
+to the choice of ocean cell; and differences in domain, geometry and forcing do
+not allow the gain to be attributed to the oval design alone.
+
+### 2026-10-07 — Corrected OISST forcing: the ranking reverses — **[superseded 2026-11-10 → MEQ-03 decision]**
 
 `EXP01_BADSST` and `EXP02_BADSST` were repeated as `EXP01` and `EXP02`
 after the coastal land-fill bug in the OISST→WPS converter was fixed (land
@@ -604,7 +620,8 @@ a property of this comparison, not of the site.
    corrected experiments.
 2. ~~Re-run `EXP01_BADSST` with the corrected forcing.~~ Done, both periods, as
    `EXP01`. The SST-update hypothesis is confirmed: 8 of 8 against `CTL`.
-3. ~~Decide `EXP02_BADSST`'s fate.~~ Re-run as `EXP02`, both periods. It is
+3. **[superseded 2026-11-10 → see 2026-11-10 entry]**
+   ~~Decide `EXP02_BADSST`'s fate.~~ Re-run as `EXP02`, both periods. It is
    indistinguishable from `EXP01` at every site, period and height, for
    +23.9 % cells. The cheaper mesh is the better buy unless the near-boundary
    region is itself part of the product.

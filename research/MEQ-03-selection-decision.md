@@ -38,3 +38,19 @@ O relatório HTML v2 contém as evidências já validadas, mas sua conclusão, e
 - [Relatório técnico HTML](../results/report/index.html)
 
 **Registro:** decisão humana comunicada em conversa de 10/11/2026; os resultados e suas limitações derivam dos produtos versionados e não de simulações adicionais.
+
+## Registro de decisão `DEC-MEQ-001`
+
+Entrada no formato da seção 7 do [ROADMAP](ROADMAP.md). Resume e remete às seções acima; não as substitui.
+
+- **Identificador:** `DEC-MEQ-001`
+- **Data:** 10/11/2026
+- **Frente:** MEQ-03 — Validação e seleção científica da configuração
+- **Enunciado:** adotar EXP03 (malha oval `meqbr_05km_oval_meq02a`, OISST diária corrigida, caixa ERA5 ampliada) como configuração para as próximas simulações; escolha apoiada na evidência disponível, sem demonstração de superioridade universal.
+- **Responsável pela aprovação:** o pesquisador, em decisão conjunta com seu supervisor.
+- **Alternativas consideradas:** EXP01, EXP02, EXP04 e o ramo EXP05/EXP06 (ver “Base da decisão”).
+- **Justificativa:** ver “Base da decisão”.
+- **Fontes:** este documento e as tabelas listadas em “Evidências versionadas”; ratificação no commit `8394fbb`; encerramento da MEQ-03 no roadmap em `085f96c`; reconciliação do roadmap v1.1 no PR #7 (merge `c2e15cd`).
+- **Limitações:** as cinco listadas em “Limitações preservadas”.
+- **Consequências:** MEQ-03 encerrada; MEQ-05 passa a ser a próxima frente operacional, sobre a configuração EXP03; nenhuma autorização implícita para simulações multianuais, alterações no código do MPAS ou nos dados; o texto de decisão do relatório HTML v2 segue pendente de atualização editorial.
+- **Condição de revisão:** nova decisão do pesquisador e do supervisor, registrada em entrada `DEC-MEQ-NNN` que referencie esta, por exemplo diante de custo inviável medido na MEQ-05 ou de evidência observacional adicional contrária. Esta entrada não é apagada. Condição de revisão aprovada pelo pesquisador em 11/11/2026.
