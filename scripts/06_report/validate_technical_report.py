@@ -18,6 +18,10 @@ from urllib.parse import unquote, urlsplit
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+ERA5_LAYER_VARIABLES = {"wind100_mean", "wpd100_mean"}
+BUFFERED_MESHES = {"meqbr_05km_buf", "meqbr_05km_oval_meq02a"}
+REVIEW_IDS = ("mesh-view", "chart-mesh-profile", "res-map", "cost-mode",
+              "tradeoff-mode", "wins-drawer")
 MAIN_SECTIONS = [
     "introducao",
     "resultados-modelo",
@@ -312,7 +316,12 @@ def validate_report(report_dir: Path) -> dict:
     available = [entry for entry in meteo["entries"] if entry.get("available", True)]
     assert available, "no available meteorological entries"
     for entry in available:
-        assert entry["experiment"] in EXPERIMENTS
+        if entry.get("reference"):
+            # ERA5 layers ride on the MPAS colour scale (checked below).
+            assert entry["experiment"] == "ERA5", entry["experiment"]
+            assert entry["variable"] in ERA5_LAYER_VARIABLES, entry["variable"]
+        else:
+            assert entry["experiment"] in EXPERIMENTS
         assert entry["period"] in PERIODS
         assert (report_dir / entry["url"]).is_file(), entry["url"]
         coverage[entry["variable"]].add((entry["experiment"], entry["period"]))
@@ -347,7 +356,9 @@ def validate_report(report_dir: Path) -> dict:
         "0,41 significa redução de 41% do MSE",
         "P0/250 m é descritivo",
         "As sete configurações estão completas",
-        "Nenhuma configuração é ratificada para a climatologia",
+        "adotada pelo pesquisador e pelo supervisor",
+        "DEC-MEQ-001",
+        "não demonstra superioridade universal",
         "EXP06 não se distingue de EXP05 nos oito contrastes",
         "landmask == 0",
     ):
@@ -371,9 +382,11 @@ def validate_report(report_dir: Path) -> dict:
     assert {m["name"] for m in report_data.get("meshes", [])} == {
         "meqbr_05km", "meqbr_05km_buf", "meqbr_05km_oval_meq02a"}, "unexpected mesh set"
     assert {row["experiment"] for row in report_data["decision"]["rows"]} == EXPERIMENTS
+    review = validate_review_additions(html, meteo, report_data)
     validate_javascript(html)
 
     return {
+        "review_checks": review,
         "sections": len(parser.section_ids),
         "ids": len(parser.ids),
         "local_references": len(parser.references),
@@ -394,6 +407,58 @@ def validate_report(report_dir: Path) -> dict:
         "meteorological_variables": len(meteo["variables"]),
         "shorter_animation_windows": shorter_windows,
         "index_sha256": manifest["index"]["sha256"],
+    }
+
+
+def validate_review_additions(html: str, meteo: dict, report_data: dict) -> dict:
+    """Checks added by the 2026-11 review (EXP03 parity, ERA5, meshes, synthesis)."""
+    available = [e for e in meteo["entries"] if e.get("available", True)]
+    # EXP03 must appear wherever the other buffered/unbuffered siblings do.
+    groups: dict[tuple[str, str], set[str]] = defaultdict(set)
+    for entry in available:
+        groups[(entry["variable"], str(entry["period"]))].add(entry["experiment"])
+    for (variable, period), exps in groups.items():
+        if {"EXP01", "EXP02"} <= exps:
+            assert "EXP03" in exps, f"EXP03 missing from {variable}/{period}: {sorted(exps)}"
+    resource = {(r["experiment"], str(r["period"])) for r in report_data["resource"]}
+    for period in PERIODS:
+        for exp in ("CTL", "EXP01", "EXP02", "EXP03"):
+            assert (exp, period) in resource, f"resource_comparison lacks {exp}/{period}"
+
+    # ERA5 layers: both variables and periods, on the MPAS scale, documented.
+    era5 = [e for e in available if e.get("reference")]
+    assert {(e["variable"], str(e["period"])) for e in era5} == {
+        (v, p) for v in ERA5_LAYER_VARIABLES for p in PERIODS}, "incomplete ERA5 layers"
+    for entry in era5:
+        mpas = {(e["vmin"], e["vmax"]) for e in available
+                if e["variable"] == entry["variable"] and e["kind"] == "georaster"
+                and not e.get("reference")}
+        assert mpas == {(entry["vmin"], entry["vmax"])}, f"ERA5 off the MPAS scale: {entry['variable']}"
+        assert entry["native_resolution_deg"] == 0.25
+        assert {"below_vmin", "above_vmax"} <= set(entry["saturation"])
+
+    # Spacing-decay profile for the two buffered meshes only.
+    profile = report_data.get("mesh_profile", [])
+    assert {r["mesh"] for r in profile} == BUFFERED_MESHES, "mesh_spacing_profile meshes"
+    for mesh_name in BUFFERED_MESHES:
+        kinds = Counter(r["kind"] for r in profile if r["mesh"] == mesh_name)
+        assert kinds["interior"] and kinds["relaxation"] and kinds["theory"], mesh_name
+        assert kinds["marker"] == 4, mesh_name
+
+    for required_id in REVIEW_IDS:
+        assert f'id="{required_id}"' in html, f"missing interactive component: {required_id}"
+    assert "O que conta como vitória" in html
+
+    # Cost divider of the normalised error x cost chart inside the observed range.
+    tradeoff = report_data["tradeoff"]
+    assert tradeoff["cost_rel_min"] <= tradeoff["x_divider"] <= tradeoff["cost_rel_max"]
+    assert tradeoff["partition_lo"] < tradeoff["x_divider"] < tradeoff["partition_hi"]
+    assert {r["experiment"] for r in tradeoff["rows"]} == EXPERIMENTS
+    return {
+        "era5_layers": len(era5),
+        "mesh_profile_rows": len(profile),
+        "x_divider": tradeoff["x_divider"],
+        "partition": [tradeoff["partition_lo"], tradeoff["partition_hi"]],
     }
 
 
