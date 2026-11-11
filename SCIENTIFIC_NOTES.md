@@ -620,7 +620,8 @@ a property of this comparison, not of the site.
    corrected experiments.
 2. ~~Re-run `EXP01_BADSST` with the corrected forcing.~~ Done, both periods, as
    `EXP01`. The SST-update hypothesis is confirmed: 8 of 8 against `CTL`.
-3. ~~Decide `EXP02_BADSST`'s fate.~~ Re-run as `EXP02`, both periods. It is
+3. **[superseded 2026-11-10 → see 2026-11-10 entry]**
+   ~~Decide `EXP02_BADSST`'s fate.~~ Re-run as `EXP02`, both periods. It is
    indistinguishable from `EXP01` at every site, period and height, for
    +23.9 % cells. The cheaper mesh is the better buy unless the near-boundary
    region is itself part of the product.
