@@ -27,6 +27,8 @@ A próxima frente operacional é **MEQ-05**, com benchmark reprodutível de para
 
 O relatório HTML v2 contém as evidências já validadas, mas sua conclusão, escrita antes desta ratificação, ainda pode declarar que nenhuma configuração foi selecionada. Atualizar o texto de decisão no **template fonte** e regenerar o HTML via Swell é um ajuste editorial subsequente; não implica refazer os cálculos.
 
+> **Nota (11/11/2026):** pendência atendida no PR #9 (merge `784e9bc`). O veredito da síntese do HTML v2 passou a registrar a adoção da EXP03 (DEC-MEQ-001) e as ressalvas, o validador exige esse texto, e o relatório foi regenerado no Swell sem recalcular resultados.
+
 ## Evidências versionadas
 
 - [Métricas LiDAR](../results/tables/site_metrics.csv)
