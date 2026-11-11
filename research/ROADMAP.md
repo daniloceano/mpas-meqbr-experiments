@@ -80,7 +80,7 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 - **Próxima dependência:** MEQ-05 deve medir a eficiência paralela e fundamentar o custo das integrações multianuais na configuração selecionada. A síntese narrativa do HTML foi atualizada para refletir a decisão humana, sem recalcular resultados (atendido em 11/11/2026, PR #9, merge `784e9bc`).
 - **Dependências:** MEQ-02.
 - **Critério de encerramento:** escolha registrada e ratificada pelo pesquisador, com evidências e ressalvas versionadas.
-- **Decisões pendentes:** nenhuma para a seleção; a atualização editorial do HTML segue na seção 8.
+- **Decisões pendentes:** nenhuma para a seleção; a atualização editorial do HTML segue na seção 8 (atendida em 11/11/2026, PR #9, merge `784e9bc`).
 
 ### MEQ-04 — Valor agregado sobre ERA5
 
@@ -153,6 +153,6 @@ Situação em 10/11/2026 (v1.1); o texto da v1.0 desta seção está preservado 
 
 - **MEQ-05:** próxima frente operacional prevista; requer plano concreto e autorização explícita antes de qualquer execução.
 - **MEQ-04:** síntese do valor agregado da EXP03 a ratificar pelo pesquisador.
-- **Revisão editorial do HTML principal:** refletir a seleção da EXP03 no template `docs/templates/technical_report_v2.html.j2`, ajustar o validador `scripts/06_report/validate_technical_report.py` (que hoje exige a frase “Nenhuma configuração é ratificada…”) e regenerar o relatório; trabalho técnico com autorização própria, sem recalcular resultados.
+- **Revisão editorial do HTML principal:** refletir a seleção da EXP03 no template `docs/templates/technical_report_v2.html.j2`, ajustar o validador `scripts/06_report/validate_technical_report.py` (que hoje exige a frase “Nenhuma configuração é ratificada…”) e regenerar o relatório; trabalho técnico com autorização própria, sem recalcular resultados — **atendida em 11/11/2026, PR #9, merge `784e9bc`**.
 - **`SCIENTIFIC_NOTES.md`:** a entrada de 07/10/2026 ainda é marcada como conclusão vigente com `EXP01`; nova entrada datada deve registrar a decisão da MEQ-03 sem apagar a anterior.
 - **MEQ-06:** não autorizada; depende das condições da própria frente.

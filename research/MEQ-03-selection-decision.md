@@ -54,5 +54,5 @@ Entrada no formato da seção 7 do [ROADMAP](ROADMAP.md). Resume e remete às se
 - **Justificativa:** ver “Base da decisão”.
 - **Fontes:** este documento e as tabelas listadas em “Evidências versionadas”; ratificação no commit `8394fbb`; encerramento da MEQ-03 no roadmap em `085f96c`; reconciliação do roadmap v1.1 no PR #7 (merge `c2e15cd`).
 - **Limitações:** as cinco listadas em “Limitações preservadas”.
-- **Consequências:** MEQ-03 encerrada; MEQ-05 passa a ser a próxima frente operacional, sobre a configuração EXP03; nenhuma autorização implícita para simulações multianuais, alterações no código do MPAS ou nos dados; o texto de decisão do relatório HTML v2 segue pendente de atualização editorial.
+- **Consequências:** MEQ-03 encerrada; MEQ-05 passa a ser a próxima frente operacional, sobre a configuração EXP03; nenhuma autorização implícita para simulações multianuais, alterações no código do MPAS ou nos dados; o texto de decisão do relatório HTML v2 segue pendente de atualização editorial (atendida em 11/11/2026, PR #9, merge `784e9bc`).
 - **Condição de revisão:** nova decisão do pesquisador e do supervisor, registrada em entrada `DEC-MEQ-NNN` que referencie esta, por exemplo diante de custo inviável medido na MEQ-05 ou de evidência observacional adicional contrária. Esta entrada não é apagada. Condição de revisão aprovada pelo pesquisador em 11/11/2026.
