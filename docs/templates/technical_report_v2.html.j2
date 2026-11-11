@@ -128,6 +128,9 @@
     </div>
 
     <div class="tabpane active" id="fields-static">
+      <div class="seg" id="f-mode" role="radiogroup" aria-label="Modo do mapa">
+        <button type="button" data-m="values" class="active">Valores</button><button type="button" data-m="diff">Diferença A − B</button>
+      </div>
       <div class="controls">
         <label>Variável <select id="f-var"></select></label>
         <label>Período <select id="f-period"></select></label>
@@ -143,7 +146,11 @@
       <p class="caption" id="field-caption"></p>
       <p class="caption small">WPD = ½ ρ ⟨U³⟩ com ρ = 1,15 kg m⁻³, cubo calculado
         hora a hora antes da média. No modo comparação, arraste a barra vertical
-        sobre o mapa para revelar cada experimento (mesma escala de cores).</p>
+        sobre o mapa para revelar cada experimento (mesma escala de cores). O ERA5
+        está disponível nos dois lados para vento, densidade de potência, constância e
+        amplitude diurna a 100 m (célula ERA5 de 0,25° mais próxima, na escala dos campos
+        MPAS); não há equivalente ERA5 para a SST. No modo diferença, A − B é calculado
+        a partir dos valores numéricos de cada camada, em escala divergente.</p>
     </div>
 
     <div class="tabpane" id="fields-diag">

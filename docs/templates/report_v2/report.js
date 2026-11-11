@@ -318,7 +318,9 @@
     var overlayA = null, overlayB = null, handle = null, handleX = null;
 
     function find(v, p, e) { return rasters.filter(function (r) { return r.variable === v && String(r.period) === p && r.experiment === e; })[0]; }
-    function experimentsFor(v, p) { return ORDER.filter(function (e) { return find(v, p, e); }); }
+    function experimentsFor(v, p) { return ORDER.concat(['ERA5']).filter(function (e) { return find(v, p, e); }); }
+    var mode = 'values', diffToken = 0;
+    segment('f-mode', function (d) { mode = d.m; render(); });
 
     function clip() {
       if (!overlayB || !handle) return;
@@ -357,6 +359,9 @@
       if (avail.indexOf(b) < 0 || b === a) b = avail.filter(function (x) { return x !== a; })[0] || a;
       select('f-exp-a', avail, a);
       select('f-exp-b', avail.filter(function (x) { return x !== a; }), b);
+      $('f-compare').disabled = mode === 'diff';
+      if (mode === 'diff') { $('f-exp-b').disabled = avail.length < 2; renderDiff(v, p, a, b); return; }
+      diffToken++;
       var compare = $('f-compare').checked && avail.length > 1;
       $('f-exp-b').disabled = !compare;
       var ea = find(v, p, a), eb = compare ? find(v, p, b) : null;
@@ -372,6 +377,50 @@
         $('field-caption').innerHTML = '<b>' + esc(ea.variable_label) + '</b> — ' + esc(a) + (eb ? ' (esquerda) × ' + esc(b) + ' (direita)' : '') + ', ' + (PERIOD_LABEL[p] || p) +
           '; média de ' + ea.n_hours + ' h (' + esc(ea.window_start) + ' a ' + esc(ea.window_end) + '). ' + esc(ea.limitation || '');
       }
+    }
+    // ---- A − B from the numeric twins (assets/interactive/values/*.js) ----
+    function renderDiff(v, p, a, b) {
+      var ea = find(v, p, a), eb = find(v, p, b), token = ++diffToken;
+      if (overlayA) fieldMap.removeLayer(overlayA);
+      if (overlayB) fieldMap.removeLayer(overlayB);
+      overlayA = overlayB = null; ensureHandle(false);
+      $('field-labels').innerHTML = ea && eb ? '<span>' + esc(a) + ' − ' + esc(b) + '</span>' : '';
+      if (!ea || !eb || !ea.values || !eb.values || !ea.values.url || !eb.values.url) {
+        $('field-colorbar').innerHTML = ''; $('field-caption').textContent = 'Valores numéricos indisponíveis para esta combinação.'; return;
+      }
+      $('field-caption').textContent = 'Carregando valores…';
+      loadValues(ea.values, function (qa) {
+        loadValues(eb.values, function (qb) {
+          if (token !== diffToken) return;
+          if (!qa || !qb) { $('field-caption').textContent = 'Falha ao carregar os valores numéricos.'; return; }
+          var A = ea.values, B = eb.values, n = qa.length, d = new Float32Array(n), mags = [];
+          for (var i = 0; i < n; i++) {
+            if (qa[i] === A.nodata || qb[i] === B.nodata) { d[i] = NaN; continue; }
+            d[i] = (A.offset + qa[i] * A.scale) - (B.offset + qb[i] * B.scale);
+            mags.push(Math.abs(d[i]));
+          }
+          if (!mags.length) { $('field-caption').textContent = 'Sem área comum entre ' + a + ' e ' + b + '.'; return; }
+          mags.sort(function (x, y) { return x - y; });
+          var lim = mags[Math.min(mags.length - 1, Math.floor(0.99 * mags.length))] || 1e-6;
+          var ny = A.shape[0], nx = A.shape[1], cv = document.createElement('canvas');
+          cv.width = nx; cv.height = ny;
+          var ctx = cv.getContext('2d'), img = ctx.createImageData(nx, ny), lut = vikLut();
+          for (var k = 0; k < n; k++) {
+            if (!isFinite(d[k])) continue;
+            var t = Math.max(0, Math.min(255, Math.round(255 * (0.5 + 0.5 * d[k] / lim)))), c = lut[t];
+            img.data[4 * k] = c[0]; img.data[4 * k + 1] = c[1]; img.data[4 * k + 2] = c[2]; img.data[4 * k + 3] = 240;
+          }
+          ctx.putImageData(img, 0, 0);
+          overlayA = L.imageOverlay(cv.toDataURL('image/png'), bounds, { opacity: 1 }).addTo(fieldMap);
+          var dec = lim < 2 ? 2 : (lim < 20 ? 1 : 0);
+          $('field-colorbar').innerHTML = '<span>−' + fmt(lim, dec) + '</span><div class="bar" style="background:' + gradient((D.palettes || {}).vik || []) + '"></div><span>+' + fmt(lim, dec) + '</span><span>' + esc(ea.unit) + '</span>';
+          $('field-caption').innerHTML = '<b>' + esc(ea.variable_label) + ': ' + esc(a) + ' − ' + esc(b) + '</b>, ' + (PERIOD_LABEL[p] || p) +
+            '; médias de ' + ea.n_hours + ' h e ' + eb.n_hours + ' h (' + esc(ea.window_start) + ' a ' + esc(ea.window_end) + '). ' +
+            'Escala divergente simétrica em ±p99 de |A − B| (vermelho = A maior). Diferença calculada célula a célula na grade de 0,04°; ' +
+            (a === 'ERA5' || b === 'ERA5' ? 'o ERA5 (0,25°) entra pela célula ERA5 mais próxima, sem suavização. ' : '') +
+            'Quantização dos valores: ' + fmt(A.scale, 4) + ' ' + esc(ea.unit) + '.';
+        });
+      });
     }
     ['f-var', 'f-period', 'f-exp-a', 'f-exp-b', 'f-compare'].forEach(function (id) { $(id).addEventListener('change', render); });
     render();
@@ -449,6 +498,32 @@
   // ======================================================================
   var seriesCache = {};
   var hiddenSources = {};
+  var valueCache = {};
+  function loadValues(v, cb) {
+    var have = window.MEQ_FIELDS && window.MEQ_FIELDS[v.key];
+    if (have) { cb(decodeValues(have)); return; }
+    if (valueCache[v.key]) { valueCache[v.key].push(cb); return; }
+    valueCache[v.key] = [cb];
+    var s = document.createElement('script'); s.src = v.url;
+    s.onload = function () { var raw = window.MEQ_FIELDS && window.MEQ_FIELDS[v.key]; var q = raw ? decodeValues(raw) : null; valueCache[v.key].forEach(function (f) { f(q); }); valueCache[v.key] = null; };
+    s.onerror = function () { valueCache[v.key].forEach(function (f) { f(null); }); valueCache[v.key] = null; };
+    document.head.appendChild(s);
+  }
+  function decodeValues(b64) {
+    var bin = atob(b64), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Uint16Array(bytes.buffer);       // little-endian, as written
+  }
+  var VIK_LUT = null;
+  function vikLut() {
+    if (VIK_LUT) return VIK_LUT;
+    VIK_LUT = [];
+    for (var i = 0; i < 256; i++) {
+      var c = paletteAt('vik', i / 255), m = /rgb\((\d+),(\d+),(\d+)\)/.exec(c);
+      VIK_LUT.push(m ? [+m[1], +m[2], +m[3]] : hexToRgb(c));
+    }
+    return VIK_LUT;
+  }
   function loadSeries(key, url, cb) {
     window.MEQ_SERIES = window.MEQ_SERIES || {};
     if (window.MEQ_SERIES[key]) { cb(window.MEQ_SERIES[key]); return; }
