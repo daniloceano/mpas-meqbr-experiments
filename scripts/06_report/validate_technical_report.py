@@ -413,12 +413,14 @@ def validate_report(report_dir: Path) -> dict:
 def validate_review_additions(html: str, meteo: dict, report_data: dict) -> dict:
     """Checks added by the 2026-11 review (EXP03 parity, ERA5, meshes, synthesis)."""
     available = [e for e in meteo["entries"] if e.get("available", True)]
-    # EXP03 must appear wherever the other buffered/unbuffered siblings do.
+    # EXP03 must appear wherever CTL, EXP01 and EXP02 all do. Products that
+    # are themselves differences against CTL (difference_vs_ctl) never list CTL
+    # and are therefore outside this rule.
     groups: dict[tuple[str, str], set[str]] = defaultdict(set)
     for entry in available:
         groups[(entry["variable"], str(entry["period"]))].add(entry["experiment"])
     for (variable, period), exps in groups.items():
-        if {"EXP01", "EXP02"} <= exps:
+        if {"CTL", "EXP01", "EXP02"} <= exps:
             assert "EXP03" in exps, f"EXP03 missing from {variable}/{period}: {sorted(exps)}"
     resource = {(r["experiment"], str(r["period"])) for r in report_data["resource"]}
     for period in PERIODS:
