@@ -30,16 +30,20 @@ for what each experiment *is*. This repository holds only the analysis.
 
 ## What is being compared
 
-| | `CTL` | `EXP01` | `EXP02` | `EXP01_BADSST` | `EXP02_BADSST` |
-|---|---|---|---|---|---|
-| Delta vs parent | baseline | daily NOAA OISST SST update | buffered mesh (5 → 32 km ramp) + wider ERA5 box | superseded `EXP01` | superseded `EXP02` |
-| Mesh | `meqbr_05km` (76 813) | same | `meqbr_05km_buf` (95 138) | `meqbr_05km` | `meqbr_05km_buf` |
-| Relative cost | 1.00 | 1.00 | 1.24 | 1.00 | 1.24 |
-| MPI ranks | 80 | 90 | 90 | 60 | 60 |
-| SST forcing | frozen ERA5 skin | **clean** | **clean** | contaminated | contaminated |
+| | `CTL` | `EXP01` | `EXP02` | `EXP03` | `EXP04` | `EXP05` | `EXP06` | `EXP01_BADSST` | `EXP02_BADSST` |
+|---|---|---|---|---|---|---|---|---|---|
+| Parent | — | `CTL` | `EXP01` | `EXP02` | `EXP01` | `EXP04` | `EXP05` | `CTL` | `EXP01_BADSST` |
+| Delta vs parent | baseline | daily NOAA OISST SST update | buffered mesh (5 → 32 km ramp) + wider ERA5 box | Oval MEQ-02A mesh; SST update and wider ERA5 box retained | MYNN PBL + MYNN surface layer | + Grell–Freitas convection | + diurnal SST skin cycle | superseded `EXP01` | superseded `EXP02` |
+| Mesh | `meqbr_05km` (76 813) | same | `meqbr_05km_buf` (95 138) | `meqbr_05km_oval_meq02a` (102 968) | `meqbr_05km` | `meqbr_05km` | `meqbr_05km` | `meqbr_05km` | `meqbr_05km_buf` |
+| Relative cost (cells) | 1.00 | 1.00 | 1.24 | 1.34 | 1.00 | 1.00 | 1.00 | 1.00 | 1.24 |
+| MPI ranks | 80 | 90 | 90 | 60 | 90 (2021) / 22 (2022) | 22 | 22 | 60 | 60 |
+| SST forcing | frozen ERA5 skin | **clean** | **clean** | **clean** | **clean** | **clean** | **clean** + diurnal skin | contaminated | contaminated |
 
-All five integrations are complete in both periods; see generated
-[`docs/run_status.md`](docs/run_status.md). Use `EXP01`/`EXP02` for every
+Definitions are restated from [`config/experiments.yaml`](config/experiments.yaml).
+Every experiment is registered `complete` in both periods there; the generated
+[`docs/run_status.md`](docs/run_status.md) does not yet list `EXP04`–`EXP06`.
+Relative cost is the cell-count ratio to `CTL`, not measured wall-clock: ranks
+differ between runs. Use the corrected experiments for every
 scientific statement; the `_BADSST` pair exists so the forcing bug stays
 reproducible, and is excluded from every table that decides anything.
 
@@ -50,7 +54,15 @@ LiDAR**. Current disk status: [`docs/run_status.md`](docs/run_status.md)
 
 The design is **cumulative**: `EXP02 = EXP01 + boundary treatment`, so
 `EXP02 − EXP01` is the *incremental* effect of the boundary treatment given the
-SST update is already on.
+SST update is already on. Likewise `EXP03` builds on `EXP02`, and
+`EXP04` → `EXP05` → `EXP06` build on `EXP01`.
+
+Current paired result for `EXP02` vs `EXP01`
+([`results/tables/pairwise_tests_current.csv`](results/tables/pairwise_tests_current.csv),
+8 site-period-height contrasts, 24 h block bootstrap, 95 % CI): **6 with no
+detectable difference, 1 favouring `EXP02`** (P0/2021, 200 m) **and 1 favouring
+`EXP01`** (LPI/2022, 200 m). This replaces the "8 of 8 no difference" count
+quoted in the 2026-10-07 notes entry.
 
 ## Where the answers are
 
