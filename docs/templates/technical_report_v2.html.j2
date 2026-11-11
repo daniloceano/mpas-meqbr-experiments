@@ -154,8 +154,8 @@
     </div>
 
     <div class="tabpane" id="fields-diag">
+      <h3>Seções verticais</h3>
       <div class="controls">
-        <label>Produto <select id="d-product"></select></label>
         <label>Período <select id="d-period"></select></label>
         <label>Experimento <select id="d-exp"></select></label>
       </div>
@@ -332,26 +332,12 @@
         <h3>Recurso no domínio: MPAS − ERA5</h3>
         <div class="chart" id="chart-resource" style="height:300px"></div>
         <p class="caption">Diferença relativa da densidade de potência média no
-          domínio (MPAS − ERA5)/ERA5, na mesma grade e horas.</p>
+          domínio (MPAS − ERA5)/ERA5, na mesma grade e horas. Os mapas de MPAS e
+          ERA5, lado a lado ou como diferença, estão em
+          <a href="#resultados-modelo">Campos simulados</a> (ERA5 selecionável e modo
+          diferença A − B).</p>
       </div>
     </div>
-    <h3>Mapas MPAS × ERA5</h3>
-    <div class="controls compact">
-      <label>Variável <select id="res-var"></select></label>
-      <label>Experimento <select id="res-exp"></select></label>
-      <label>Período <select id="res-period"></select></label>
-    </div>
-    <div class="map-wrap">
-      <div class="map" id="res-map"></div>
-      <div class="map-labels" id="res-labels"></div>
-    </div>
-    <div class="colorbar" id="res-colorbar"></div>
-    <p class="caption" id="res-caption"></p>
-    <p class="caption small">Arraste a barra vertical: MPAS à esquerda, ERA5 à
-      direita, mesma escala de cores e mesmas horas. O ERA5 (resolução nativa de
-      0,25°) é mostrado pela célula ERA5 mais próxima na grade de 0,04°, sem
-      suavização; a escala é a dos campos MPAS, de modo que valores ERA5 fora dela
-      saturam nas cores extremas (fração saturada na legenda).</p>
     <nav class="pager"><a href="#validacao">← Validação</a><a href="#mecanismos">Física →</a></nav>
   </section>
 

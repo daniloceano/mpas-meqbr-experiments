@@ -425,13 +425,9 @@
     ['f-var', 'f-period', 'f-exp-a', 'f-exp-b', 'f-compare'].forEach(function (id) { $(id).addEventListener('change', render); });
     render();
 
-    // Derived diagnostics (pre-rendered maps/sections)
-    var diag = entries.filter(function (e) { return e.kind === 'image' && e.variable !== 'resource_vs_era5'; });
-    var products = uniq(diag.map(function (e) { return e.variable; }));
-    select('d-product', products.map(function (k) { return { value: k, label: (vars[k] || {}).label || k }; }), products[0]);
+    // Derived diagnostics: vertical cross-sections (15 h local composites)
+    var rows = entries.filter(function (e) { return e.kind === 'image' && e.variable === 'xsection_composite'; });
     function renderDiag() {
-      var pr = $('d-product').value;
-      var rows = diag.filter(function (e) { return e.variable === pr; });
       var ps = uniq(rows.map(function (e) { return String(e.period); })).sort();
       var p = ps.indexOf($('d-period').value) >= 0 ? $('d-period').value : ps[0];
       select('d-period', ps.map(function (x) { return { value: x, label: PERIOD_LABEL[x] || x }; }), p);
@@ -444,8 +440,8 @@
         $('d-caption').innerHTML = '<b>' + esc(item.variable_label) + ' — ' + esc(e) + ', ' + (PERIOD_LABEL[p] || p) + '.</b> ' + esc(item.caption || item.description || '');
       }
     }
-    ['d-product', 'd-period', 'd-exp'].forEach(function (id) { $(id).addEventListener('change', renderDiag); });
-    if (products.length) renderDiag();
+    ['d-period', 'd-exp'].forEach(function (id) { $(id).addEventListener('change', renderDiag); });
+    if (rows.length) renderDiag();
 
     // Animations
     var anims = entries.filter(function (e) { return e.kind === 'animation'; });
@@ -949,78 +945,6 @@
     plot('chart-resource', tr4, { barmode: 'group', bargap: 0.25, showlegend: true, legend: { orientation: 'h', y: 1.12, x: 0 }, margin: { l: 56, r: 12, t: 30, b: 36 },
       yaxis: { title: { text: 'Δ WPD relativa ao ERA5 (%)' }, zeroline: true, zerolinecolor: '#1a1a1a', zerolinewidth: 0.8 } });
 
-    // Resource maps: MPAS (left) × ERA5 (right) on the shared MPAS colour scale.
-    var rasters = (METEO.entries || []).filter(function (e) { return e.kind === 'georaster' && e.url && e.available !== false; });
-    var refs = rasters.filter(function (e) { return e.experiment === 'ERA5'; });
-    var vars = METEO.variables || {};
-    var resVars = uniq(refs.map(function (e) { return e.variable; }));
-    if (!resVars.length) { if ($('res-map')) $('res-map').innerHTML = '<div class="empty">Camadas ERA5 não produzidas.</div>'; return; }
-    select('res-var', resVars.map(function (k) { return { value: k, label: (vars[k] || {}).label || k }; }), resVars[0]);
-    var ext = METEO.extent || [-46.5, -33.5, -7.5, 1.0];
-    var bounds = [[ext[2], ext[0]], [ext[3], ext[1]]];
-    var resMap = baseMap('res-map');
-    if (!resMap) return;
-    resMap.fitBounds(bounds);
-    var sw = swipe(resMap, 'res-map');
-    function find(v, p, e) { return rasters.filter(function (r) { return r.variable === v && String(r.period) === p && r.experiment === e; })[0]; }
-    function renderRes() {
-      var v = $('res-var').value;
-      var ex = ORDER.filter(function (e) { return rasters.some(function (r) { return r.variable === v && r.experiment === e; }); });
-      var e = ex.indexOf($('res-exp').value) >= 0 ? $('res-exp').value : ex[0];
-      select('res-exp', ex, e);
-      var ps = uniq(refs.filter(function (r) { return r.variable === v && find(v, String(r.period), e); }).map(function (r) { return String(r.period); })).sort();
-      var p = ps.indexOf($('res-period').value) >= 0 ? $('res-period').value : ps[0];
-      select('res-period', ps.map(function (x) { return { value: x, label: PERIOD_LABEL[x] || x }; }), p);
-      var ea = find(v, p, e), eb = find(v, p, 'ERA5');
-      sw.show(ea, eb, bounds);
-      $('res-labels').innerHTML = ea && eb ? '<span>' + esc(e) + '</span><span>ERA5</span>' : '';
-      if (ea && eb) {
-        var d = ea.vmax < 2 ? 2 : 1, sat = eb.saturation || {};
-        $('res-colorbar').innerHTML = '<span>' + fmt(ea.vmin, d) + '</span><div class="bar" style="background:' + gradient(ea.colour_stops) + '"></div><span>' + fmt(ea.vmax, d) + '</span><span>' + esc(ea.unit) + '</span>';
-        $('res-caption').innerHTML = '<b>' + esc(ea.variable_label) + ' — ' + esc(e) + ' (esquerda) × ERA5 (direita), ' + (PERIOD_LABEL[p] || p) + '.</b> Média de ' + ea.n_hours + ' h (' + esc(ea.window_start) + ' a ' + esc(ea.window_end) + '); ERA5 nas mesmas horas (' + eb.n_hours + ' h), resolução nativa ' + fmt(eb.native_resolution_deg, 2) + '°, célula mais próxima sem suavização. ' +
-          'Escala dos campos MPAS: ' + fmt(100 * (sat.below_vmin || 0), 1) + '% das células ERA5 saturam abaixo e ' + fmt(100 * (sat.above_vmax || 0), 1) + '% acima.';
-      }
-    }
-    ['res-var', 'res-exp', 'res-period'].forEach(function (id) { $(id).addEventListener('change', renderRes); });
-    renderRes();
-  }
-
-  // A|B swipe over a Leaflet map: A fills the map, B is clipped left of the handle.
-  function swipe(map, wrapId) {
-    var wrap = $(wrapId), handle = null, handleX = null, A = null, B = null;
-    function clip() {
-      if (!B || !handle) return;
-      var img = B.getElement(); if (!img) return;
-      var mapRect = wrap.getBoundingClientRect(), imgRect = img.getBoundingClientRect();
-      var x = handleX === null ? mapRect.width / 2 : handleX;
-      handle.style.left = x + 'px';
-      img.style.clipPath = 'inset(0 0 0 ' + Math.max(0, mapRect.left + x - imgRect.left) + 'px)';
-    }
-    function ensureHandle() {
-      if (handle) return;
-      handle = document.createElement('div'); handle.className = 'swipe-handle'; wrap.appendChild(handle);
-      var drag = false;
-      var move = function (ev) {
-        if (!drag) return;
-        var r = wrap.getBoundingClientRect(), cx = (ev.touches ? ev.touches[0].clientX : ev.clientX);
-        handleX = Math.max(0, Math.min(r.width, cx - r.left)); clip(); ev.preventDefault();
-      };
-      handle.addEventListener('mousedown', function (ev) { drag = true; map.dragging.disable(); ev.stopPropagation(); });
-      handle.addEventListener('touchstart', function (ev) { drag = true; map.dragging.disable(); ev.stopPropagation(); }, { passive: true });
-      window.addEventListener('mousemove', move);
-      window.addEventListener('touchmove', move, { passive: false });
-      var up = function () { if (drag) { drag = false; map.dragging.enable(); } };
-      window.addEventListener('mouseup', up); window.addEventListener('touchend', up);
-    }
-    map.on('move zoom resize viewreset', clip);
-    return {
-      show: function (ea, eb, bounds) {
-        if (A) map.removeLayer(A); if (B) map.removeLayer(B); A = B = null;
-        if (ea) A = L.imageOverlay(ea.url, bounds, { opacity: 1 }).addTo(map);
-        if (eb) { B = L.imageOverlay(eb.url, bounds, { opacity: 1 }).addTo(map); B.on('load', clip); ensureHandle(); }
-        setTimeout(clip, 0);
-      }
-    };
   }
 
   // ======================================================================
