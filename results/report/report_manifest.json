@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-11-11T19:29:20+00:00",
-  "analysis_commit": "7ddefb4",
+  "generated_utc": "2026-11-11T19:50:34+00:00",
+  "analysis_commit": "2a882ac",
   "analysis_branch": "feat/report-v2-review",
   "working_tree_dirty": false,
   "execution_environment": "Swell working tree /p1-swell/danilocs/mpas-meqbr-experiments",
@@ -254,20 +254,6 @@
       "bytes": 106793,
       "title": "Ganho ou perda de habilidade frente ao ERA5",
       "sha256": "6866c382f4c1532359a65d20264e1025ea2349f1e80d36eaef04813a77976bb8"
-    },
-    {
-      "source": "figures/era5/resource_comparison_CTL_2021.png",
-      "bundled_as": "assets/added_value/resource_comparison_CTL_2021.png",
-      "bytes": 158750,
-      "title": "Estrutura espacial MPAS e ERA5 — 2021",
-      "sha256": "d14d63c51867498ced56d62b910538afe23763223ef17f3df1a20d9ce89e3162"
-    },
-    {
-      "source": "figures/era5/resource_comparison_CTL_2022.png",
-      "bundled_as": "assets/added_value/resource_comparison_CTL_2022.png",
-      "bytes": 162818,
-      "title": "Estrutura espacial MPAS e ERA5 — 2022",
-      "sha256": "c922232aefc7bba5c0684649f31470405a0a6b7d69e4379df5bed6cc6263fd0e"
     },
     {
       "source": "figures/selection/sst_forcing_2021.png",
@@ -1754,146 +1740,6 @@
       "sha256": "bf2123544bec4ae39d141c6aade5f99e4b1cf02e38994ae97a39404f66606add"
     },
     {
-      "source": "figures/era5/resource_comparison_CTL_2021.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_CTL_2021.png",
-      "bytes": 158750,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "d14d63c51867498ced56d62b910538afe23763223ef17f3df1a20d9ce89e3162"
-    },
-    {
-      "source": "figures/era5/resource_comparison_CTL_2022.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_CTL_2022.png",
-      "bytes": 162818,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "c922232aefc7bba5c0684649f31470405a0a6b7d69e4379df5bed6cc6263fd0e"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP01_2021.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP01_2021.png",
-      "bytes": 159944,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "efeea56cc719abebae44352ba407baa19513608bb2249e2e9bf70af46e998bd5"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP01_2022.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP01_2022.png",
-      "bytes": 163934,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "c4aa84560f96b8ecac12a2c5d18db404b5f02fd30b5b9c377a1dd66813505ea1"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP02_2021.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP02_2021.png",
-      "bytes": 165515,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "97a8c713912f8f0356b3b7afb58832db1aaae2bd83360abace019fa6542e8e9c"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP02_2022.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP02_2022.png",
-      "bytes": 169327,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "91a25a1f6a45e0de69adffb607fab843d2eca7397d4e5364aa9dc5b96fefcb8f"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP03_2021.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP03_2021.png",
-      "bytes": 166695,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "0185e655e79e518fca97e584ae53e2aa7935ad06839ac6a7a46df4add315bb6c"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP03_2022.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP03_2022.png",
-      "bytes": 170690,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "912a1f013a1de0f438fe884ff7c5a397315cfa682f8ff932a67e63fe8c471c17"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP04_2021.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP04_2021.png",
-      "bytes": 160279,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "4a29c672d47aae71b86fe403bd4a56967382fcb48fdfbd6ec98656d62d33f57a"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP04_2022.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP04_2022.png",
-      "bytes": 164632,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "6dc54f39e062f08f53b9bd29fcbb42d26054e238d8f158dff0b340be979a2c4b"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP05_2021.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP05_2021.png",
-      "bytes": 161162,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "df276258b237283d257ec05b865274cc9021a59d2853a61c3858533e210c0b82"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP05_2022.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP05_2022.png",
-      "bytes": 164595,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "e202d336cf31a7e32b5a0b27ebb89f7c0e5fc55fee1acc17c19dad5725844fa4"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP06_2021.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP06_2021.png",
-      "bytes": 161988,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "863ba6464f59d716adc0434b080f95e4bac7a16aebee0af4331140c87166178a"
-    },
-    {
-      "source": "figures/era5/resource_comparison_EXP06_2022.png",
-      "bundled_as": "assets/interactive/era5/resource_comparison_EXP06_2022.png",
-      "bytes": 165444,
-      "title": "Comparação espacial com ERA5",
-      "sha256": "58e175e08762d03c2e128a694d24c31e62e2c3276731c9d5726b3bedc3a5ac71"
-    },
-    {
-      "source": "figures/exploration/diff_EXP01_vs_CTL_2021_common.png",
-      "bundled_as": "assets/interactive/exploration/diff_EXP01_vs_CTL_2021_common.png",
-      "bytes": 468223,
-      "title": "Diferença espacial em relação ao CTL",
-      "sha256": "67d064cc0ad41d1def691e371847699588e03ef1c9d1d82f1e5ef97dcea5cb2a"
-    },
-    {
-      "source": "figures/exploration/diff_EXP01_vs_CTL_2022_common.png",
-      "bundled_as": "assets/interactive/exploration/diff_EXP01_vs_CTL_2022_common.png",
-      "bytes": 465599,
-      "title": "Diferença espacial em relação ao CTL",
-      "sha256": "c3b0f159dc5c9740e5e053dfbfdff687354fad3ed333bc0b9bbb78d52577cbaa"
-    },
-    {
-      "source": "figures/exploration/diff_EXP02_vs_CTL_2021_common.png",
-      "bundled_as": "assets/interactive/exploration/diff_EXP02_vs_CTL_2021_common.png",
-      "bytes": 469445,
-      "title": "Diferença espacial em relação ao CTL",
-      "sha256": "3a2961aff7b5c27ecbacab0a7a516e0062419ec11500605d01446ab53d883a7c"
-    },
-    {
-      "source": "figures/exploration/diff_EXP02_vs_CTL_2022_common.png",
-      "bundled_as": "assets/interactive/exploration/diff_EXP02_vs_CTL_2022_common.png",
-      "bytes": 470308,
-      "title": "Diferença espacial em relação ao CTL",
-      "sha256": "22b4ceca4956e7baab9d4de64103b5a913707edc109895e7e7ac97c358da410b"
-    },
-    {
-      "source": "figures/exploration/diff_EXP03_vs_CTL_2021_common.png",
-      "bundled_as": "assets/interactive/exploration/diff_EXP03_vs_CTL_2021_common.png",
-      "bytes": 471710,
-      "title": "Diferença espacial em relação ao CTL",
-      "sha256": "d70480013129e1d3f3e2e4406f202d4ff7288a54349c3c6d297410396d2c2be6"
-    },
-    {
-      "source": "figures/exploration/diff_EXP03_vs_CTL_2022_common.png",
-      "bundled_as": "assets/interactive/exploration/diff_EXP03_vs_CTL_2022_common.png",
-      "bytes": 470152,
-      "title": "Diferença espacial em relação ao CTL",
-      "sha256": "fb46aea846cc8a6c04a0462f68751cf7f57b4e1101bfec422926cc692114bfee"
-    },
-    {
       "source": "results/interactive/series/LiDAR_P0_2021.js",
       "bundled_as": "assets/series/LiDAR_P0_2021.js",
       "bytes": 108635,
@@ -1985,8 +1831,8 @@
   ],
   "index": {
     "path": "results/report/index.html",
-    "bytes": 1683690,
-    "sha256": "f32cdbd66bf95e05fdda78f9f5004973b9e11e37ee3ba95481078ea618a3acca"
+    "bytes": 1665398,
+    "sha256": "7af104cb155ed2611375b6ab40e3bf0d4f1e06a74920d750a9037652d5545bdd"
   },
   "builder": "scripts/06_report/build_technical_report.py",
   "editorial_schema_version": 2
