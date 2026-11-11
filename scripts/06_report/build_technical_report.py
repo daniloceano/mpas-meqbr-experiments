@@ -1355,6 +1355,19 @@ def build_v2_payload(cfg, report_dir: Path, superseded: set[str],
         frame = drop_superseded(pd.read_csv(path), superseded)
         data[key] = _records(frame)
 
+    # Spacing profile: provenance once per mesh, slim numeric rows for the page.
+    keep = ("mesh", "kind", "marker", "dist_km", "n", "median_km", "p10_km",
+            "p90_km", "theory_km")
+    meta_cols = ("mpas_research_sha", "theory_reconstructed", "note", "source",
+                 "grid_path")
+    profile_meta = {}
+    for row in data.get("mesh_profile", []):
+        profile_meta.setdefault(row["mesh"], {k: row.get(k) for k in meta_cols})
+    data["mesh_profile"] = [
+        {k: row[k] for k in keep if row.get(k) is not None}
+        for row in data.get("mesh_profile", [])]
+    data["mesh_profile_meta"] = profile_meta
+
     # Meshes: one card per distinct mesh, listing every experiment on it.
     design_items = {Path(i["url"]).name: i["url"]
                     for i in media_groups.get("design", {}).get("items", [])}

@@ -225,7 +225,7 @@
       var ann = marks.map(function (r) { return { xref: 'x', yref: 'paper', x: r.dist_km, y: 1, text: LBL[r.marker] || r.marker, textangle: -90, xanchor: 'right', yanchor: 'top', showarrow: false, font: { size: 9, color: '#4a4a4a' } }; });
       plot('chart-mesh-profile', tr, { showlegend: true, legend: { orientation: 'h', y: -0.22, x: 0 }, shapes: shapes, annotations: ann,
         xaxis: { title: { text: 'distância à borda da área de interesse (km; negativa dentro)' } }, yaxis: { title: { text: 'espaçamento (km)' }, rangemode: 'tozero' } });
-      var r0 = rows[0] || {};
+      var r0 = (D.mesh_profile_meta || {})[m.name] || {};
       $('mesh-profile-note').innerHTML = 'MPAS-Research <code>' + esc(String(r0.mpas_research_sha || '').slice(0, 8)) + '</code>.' +
         (truthy(r0.theory_reconstructed) ? ' Malha gerada antes de o código ser versionado: o perfil pedido foi reconstruído a partir dos parâmetros registrados no <code>domain.txt</code>.' : '');
     }
