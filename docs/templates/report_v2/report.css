@@ -200,3 +200,4 @@ input[type=range] { width: 100%; accent-color: var(--ink); }
 .seg + .chart, .seg + .panel, #mesh-view + .panel { margin-top: 8px; }
 #mesh-view { margin-top: 10px; }
 #mesh-panel.show-profile img, #mesh-panel.show-profile figcaption { display: none; }
+.video-missing { border: 1px solid var(--rule); padding: 28px 12px; text-align: center; font-size: .82rem; color: var(--muted); background: #fff; }

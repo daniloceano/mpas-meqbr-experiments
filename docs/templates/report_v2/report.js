@@ -448,6 +448,16 @@
     var aprods = uniq(anims.map(function (e) { return e.variable; }));
     select('a-product', aprods.map(function (k) { return { value: k, label: (vars[k] || {}).label || k }; }), aprods[0]);
     var va = $('a-video-a'), vb = $('a-video-b'), playing = false;
+    // Animations are optional in the bundle (*.mp4 are not versioned): when a
+    // video cannot be loaded, show a short note in its place.
+    [va, vb].forEach(function (v) {
+      var note = document.createElement('div');
+      note.className = 'video-missing'; note.hidden = true;
+      note.textContent = 'Vídeo disponível no pacote completo do relatório (Swell).';
+      v.parentNode.insertBefore(note, v.nextSibling);
+      v.addEventListener('error', function () { v.hidden = true; note.hidden = false; });
+      v.addEventListener('loadeddata', function () { v.hidden = false; note.hidden = true; });
+    });
     function renderAnim() {
       var pr = $('a-product').value;
       var rows = anims.filter(function (e) { return e.variable === pr; });
