@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-11-11T19:50:34+00:00",
-  "analysis_commit": "2a882ac",
+  "generated_utc": "2026-11-11T20:11:45+00:00",
+  "analysis_commit": "0a19b65",
   "analysis_branch": "feat/report-v2-review",
   "working_tree_dirty": false,
   "execution_environment": "Swell working tree /p1-swell/danilocs/mpas-meqbr-experiments",
@@ -85,1736 +85,1984 @@
       "bundled_as": "assets/design/experimental_design_ctl_mesh.png",
       "bytes": 887921,
       "title": "CTL: malha de referência",
-      "sha256": "88feb0e9b7fbafe787579e5156460adbbb205cbeaed016925e25a7c434df165a"
+      "sha256": "88feb0e9b7fbafe787579e5156460adbbb205cbeaed016925e25a7c434df165a",
+      "optional": false
     },
     {
       "source": "figures/report/experimental_design_exp01_sst.png",
       "bundled_as": "assets/design/experimental_design_exp01_sst.png",
       "bytes": 512240,
       "title": "EXP01: mudança da condição de superfície",
-      "sha256": "9ffcdf6e1b9c748c8cec9ece8ecb5dd18b76f339597e637ceac458d3d7ee295d"
+      "sha256": "9ffcdf6e1b9c748c8cec9ece8ecb5dd18b76f339597e637ceac458d3d7ee295d",
+      "optional": false
     },
     {
       "source": "figures/report/experimental_design_exp02_mesh.png",
       "bundled_as": "assets/design/experimental_design_exp02_mesh.png",
       "bytes": 1020234,
       "title": "EXP02: tratamento da fronteira",
-      "sha256": "5f7082052cfbb83bfcdb48c452fcaffab3a3a242a415bbfce80d8142678a2fc2"
+      "sha256": "5f7082052cfbb83bfcdb48c452fcaffab3a3a242a415bbfce80d8142678a2fc2",
+      "optional": false
     },
     {
       "source": "figures/report/experimental_design_exp03_mesh.png",
       "bundled_as": "assets/design/experimental_design_exp03_mesh.png",
       "bytes": 1101566,
       "title": "EXP03: geometria Oval MEQ-02A",
-      "sha256": "79633f4b21e6baa8ae9cfb24847d417c50d793137f7ab8520f7dff69abbb9636"
+      "sha256": "79633f4b21e6baa8ae9cfb24847d417c50d793137f7ab8520f7dff69abbb9636",
+      "optional": false
     },
     {
       "source": "figures/report/validation_network.png",
       "bundled_as": "assets/validation_network/validation_network.png",
       "bytes": 523342,
       "title": "Domínios e pontos de validação",
-      "sha256": "07467843945133cddb4c605ba7b0a9168593fb1005e7bc2f352e9edc72f469ad"
+      "sha256": "07467843945133cddb4c605ba7b0a9168593fb1005e7bc2f352e9edc72f469ad",
+      "optional": false
     },
     {
       "source": "figures/report/validation_cells.png",
       "bundled_as": "assets/validation_network/validation_cells.png",
       "bytes": 1525239,
       "title": "Células usadas na comparação com P0 e LPI",
-      "sha256": "13e8a49924e587654a188e455290b6f00d2eead724773556e1ff689c01c6f487"
+      "sha256": "13e8a49924e587654a188e455290b6f00d2eead724773556e1ff689c01c6f487",
+      "optional": false
     },
     {
       "source": "figures/validation/distribution_2021_P0_100m.png",
       "bundled_as": "assets/observed_data/distribution_2021_P0_100m.png",
       "bytes": 214386,
       "title": "Distribuição observada em P0 a 100 m",
-      "sha256": "a7b449f946e99b0a2ecac4a7bc83dfe9e72528454a9635875212f898e705a729"
+      "sha256": "a7b449f946e99b0a2ecac4a7bc83dfe9e72528454a9635875212f898e705a729",
+      "optional": false
     },
     {
       "source": "figures/validation/distribution_2022_LPI_100m.png",
       "bundled_as": "assets/observed_data/distribution_2022_LPI_100m.png",
       "bytes": 208680,
       "title": "Distribuição observada em LPI a 100 m",
-      "sha256": "cdc725453a889af6dc3c595ce1bdfcb90789ab542d6236c679f1a72403c60aa0"
+      "sha256": "cdc725453a889af6dc3c595ce1bdfcb90789ab542d6236c679f1a72403c60aa0",
+      "optional": false
     },
     {
       "source": "figures/validation/windrose_2021_P0_100m.png",
       "bundled_as": "assets/observed_data/windrose_2021_P0_100m.png",
       "bytes": 534671,
       "title": "Regime direcional em P0",
-      "sha256": "59005c7e0f9e0adea9e41790d9c3329a8056a31d160f7839b2a8ca7001e6d52b"
+      "sha256": "59005c7e0f9e0adea9e41790d9c3329a8056a31d160f7839b2a8ca7001e6d52b",
+      "optional": false
     },
     {
       "source": "figures/validation/windrose_2022_LPI_100m.png",
       "bundled_as": "assets/observed_data/windrose_2022_LPI_100m.png",
       "bytes": 594946,
       "title": "Regime direcional em LPI",
-      "sha256": "070e89aa83452a660b68775dbdbb1fab0ea67bb8f3c3982fdf6b51e5156620c8"
+      "sha256": "070e89aa83452a660b68775dbdbb1fab0ea67bb8f3c3982fdf6b51e5156620c8",
+      "optional": false
     },
     {
       "source": "figures/validation/inmet_map.png",
       "bundled_as": "assets/inmet_validation/inmet_map.png",
       "bytes": 214566,
       "title": "Viés do vento de superfície por estação",
-      "sha256": "19acd9bf3a1100a9f4f451d81a66d3ff7768c238d58688791979a212d452b909"
+      "sha256": "19acd9bf3a1100a9f4f451d81a66d3ff7768c238d58688791979a212d452b909",
+      "optional": false
     },
     {
       "source": "figures/validation/inmet_diurnal.png",
       "bundled_as": "assets/inmet_validation/inmet_diurnal.png",
       "bytes": 440119,
       "title": "Ciclo diurno nas estações INMET",
-      "sha256": "31e36b6bc4bfe714ea1fc186e74bedade2fa98eeec5c88b6409e5f998c822b12"
+      "sha256": "31e36b6bc4bfe714ea1fc186e74bedade2fa98eeec5c88b6409e5f998c822b12",
+      "optional": false
     },
     {
       "source": "figures/validation/profile_2021_P0.png",
       "bundled_as": "assets/lidar_validation/profile_2021_P0.png",
       "bytes": 249048,
       "title": "Perfil vertical médio em P0",
-      "sha256": "bee6869f75b3e4ef4ca2a994f2327617d3c6136790db4c36fa3c1d8533464480"
+      "sha256": "bee6869f75b3e4ef4ca2a994f2327617d3c6136790db4c36fa3c1d8533464480",
+      "optional": false
     },
     {
       "source": "figures/validation/profile_2022_LPI.png",
       "bundled_as": "assets/lidar_validation/profile_2022_LPI.png",
       "bytes": 259590,
       "title": "Perfil vertical médio em LPI",
-      "sha256": "8ef58ea4253a499cb0abb46a3f1e2037b224ac0db29c623fa0271e380e0047ed"
+      "sha256": "8ef58ea4253a499cb0abb46a3f1e2037b224ac0db29c623fa0271e380e0047ed",
+      "optional": false
     },
     {
       "source": "figures/validation/diurnal_2021_P0.png",
       "bundled_as": "assets/lidar_validation/diurnal_2021_P0.png",
       "bytes": 317937,
       "title": "Ciclo diurno do vento em P0",
-      "sha256": "8aff0bedd76e47c1d3ad1a62d330b5a8c0ec4bf3265ad484b6aa9e75285b0974"
+      "sha256": "8aff0bedd76e47c1d3ad1a62d330b5a8c0ec4bf3265ad484b6aa9e75285b0974",
+      "optional": false
     },
     {
       "source": "figures/validation/diurnal_2022_LPI.png",
       "bundled_as": "assets/lidar_validation/diurnal_2022_LPI.png",
       "bytes": 348545,
       "title": "Ciclo diurno do vento em LPI",
-      "sha256": "fdf97f5da002f767c9e78b45c7f6e95d2ac152169ce859e033f3bd8bfec6a1d1"
+      "sha256": "fdf97f5da002f767c9e78b45c7f6e95d2ac152169ce859e033f3bd8bfec6a1d1",
+      "optional": false
     },
     {
       "source": "figures/validation/timeseries_2021_P0_100m.png",
       "bundled_as": "assets/lidar_validation/timeseries_2021_P0_100m.png",
       "bytes": 551908,
       "title": "Evolução horária em P0 a 100 m",
-      "sha256": "2e0dbace81338a23ecf42729c6cb03c383f0f815d08ad6ccd4faca948725b424"
+      "sha256": "2e0dbace81338a23ecf42729c6cb03c383f0f815d08ad6ccd4faca948725b424",
+      "optional": false
     },
     {
       "source": "figures/validation/timeseries_2022_LPI_100m.png",
       "bundled_as": "assets/lidar_validation/timeseries_2022_LPI_100m.png",
       "bytes": 646124,
       "title": "Evolução horária em LPI a 100 m",
-      "sha256": "dd2339ec06d55b3470bbc77b4232b7a198e6c50525f819acc6fb8571ff5e18b2"
+      "sha256": "dd2339ec06d55b3470bbc77b4232b7a198e6c50525f819acc6fb8571ff5e18b2",
+      "optional": false
     },
     {
       "source": "figures/validation/scatter_2021_P0_100m.png",
       "bundled_as": "assets/lidar_validation/scatter_2021_P0_100m.png",
       "bytes": 584542,
       "title": "Dispersão modelo–observação em P0",
-      "sha256": "33ee5a52c5b72c1d68a9cf00bd82c02f418cb7097edd0ddddc46de55d183361f"
+      "sha256": "33ee5a52c5b72c1d68a9cf00bd82c02f418cb7097edd0ddddc46de55d183361f",
+      "optional": false
     },
     {
       "source": "figures/validation/scatter_2022_LPI_100m.png",
       "bundled_as": "assets/lidar_validation/scatter_2022_LPI_100m.png",
       "bytes": 760109,
       "title": "Dispersão modelo–observação em LPI",
-      "sha256": "46ebc277598777240ef827cd3bb00a911a6430f5d01ac4efade3d2eb7dd37a66"
+      "sha256": "46ebc277598777240ef827cd3bb00a911a6430f5d01ac4efade3d2eb7dd37a66",
+      "optional": false
     },
     {
       "source": "figures/validation/taylor_2021_P0.png",
       "bundled_as": "assets/lidar_validation/taylor_2021_P0.png",
       "bytes": 190479,
       "title": "Síntese estatística em P0",
-      "sha256": "f2fe727df3f43de50791f47f505b4bc2f8c0a26074ad79e78ea20ff40b090abc"
+      "sha256": "f2fe727df3f43de50791f47f505b4bc2f8c0a26074ad79e78ea20ff40b090abc",
+      "optional": false
     },
     {
       "source": "figures/validation/taylor_2022_LPI.png",
       "bundled_as": "assets/lidar_validation/taylor_2022_LPI.png",
       "bytes": 189597,
       "title": "Síntese estatística em LPI",
-      "sha256": "75aa5160496b2488c708d139aff6f147f3ee661c4aab8f00aad925a93368b7ae"
+      "sha256": "75aa5160496b2488c708d139aff6f147f3ee661c4aab8f00aad925a93368b7ae",
+      "optional": false
     },
     {
       "source": "figures/validation/cell_sensitivity.png",
       "bundled_as": "assets/lidar_validation/cell_sensitivity.png",
       "bytes": 203836,
       "title": "Sensibilidade à célula escolhida",
-      "sha256": "c77fd42a4c43de02cde87d8b31e24f9fedec92fa35c9b0a5eee69a8eacdf46af"
+      "sha256": "c77fd42a4c43de02cde87d8b31e24f9fedec92fa35c9b0a5eee69a8eacdf46af",
+      "optional": false
     },
     {
       "source": "figures/era5/climatological_context.png",
       "bundled_as": "assets/added_value/climatological_context.png",
       "bytes": 259762,
       "title": "Contexto climatológico dos meses simulados",
-      "sha256": "0bb2be2b9101bfe367b249d3469f56c98ef48276a49b650bca7208989aa5d2ef"
+      "sha256": "0bb2be2b9101bfe367b249d3469f56c98ef48276a49b650bca7208989aa5d2ef",
+      "optional": false
     },
     {
       "source": "figures/era5/added_value.png",
       "bundled_as": "assets/added_value/added_value.png",
       "bytes": 106793,
       "title": "Ganho ou perda de habilidade frente ao ERA5",
-      "sha256": "6866c382f4c1532359a65d20264e1025ea2349f1e80d36eaef04813a77976bb8"
+      "sha256": "6866c382f4c1532359a65d20264e1025ea2349f1e80d36eaef04813a77976bb8",
+      "optional": false
     },
     {
       "source": "figures/selection/sst_forcing_2021.png",
       "bundled_as": "assets/mechanisms/sst_forcing_2021.png",
       "bytes": 694721,
       "title": "SST efetivamente vista pelo modelo",
-      "sha256": "d90a06cf61e80a174d73e824a9697b2c8b0e6c6c7490d9615e682ac5179e2bf5"
+      "sha256": "d90a06cf61e80a174d73e824a9697b2c8b0e6c6c7490d9615e682ac5179e2bf5",
+      "optional": false
     },
     {
       "source": "figures/selection/attribution_2021_P0.png",
       "bundled_as": "assets/mechanisms/attribution_2021_P0.png",
       "bytes": 1098556,
       "title": "Cadeia física da resposta em P0",
-      "sha256": "b48e9cdd3fd674891696a81f7775abc07980d449d49f74aaf2df53f458ab3660"
+      "sha256": "b48e9cdd3fd674891696a81f7775abc07980d449d49f74aaf2df53f458ab3660",
+      "optional": false
     },
     {
       "source": "figures/selection/attribution_2022_LPI.png",
       "bundled_as": "assets/mechanisms/attribution_2022_LPI.png",
       "bytes": 1157150,
       "title": "Cadeia física da resposta em LPI",
-      "sha256": "41891a8a32a57f9364730591dce8e43ccbb1799a6f273e657842dbeafd607ccb"
+      "sha256": "41891a8a32a57f9364730591dce8e43ccbb1799a6f273e657842dbeafd607ccb",
+      "optional": false
     },
     {
       "source": "figures/selection/boundary_influence_2021.png",
       "bundled_as": "assets/mechanisms/boundary_influence_2021.png",
       "bytes": 354847,
       "title": "Influência da distância à fronteira",
-      "sha256": "6b8702aff796d0c975c0b24fe0d1f4ef4b4de1d32f598caefbb433f01c95536e"
+      "sha256": "6b8702aff796d0c975c0b24fe0d1f4ef4b4de1d32f598caefbb433f01c95536e",
+      "optional": false
     },
     {
       "source": "figures/selection/ranking.png",
       "bundled_as": "assets/mechanisms/ranking.png",
       "bytes": 144763,
       "title": "Síntese comparativa dos experimentos",
-      "sha256": "c9f0aedd43cd0e9913ee2fcef37663ba3f119390440593f84ec0534ca2eafa07"
+      "sha256": "c9f0aedd43cd0e9913ee2fcef37663ba3f119390440593f84ec0534ca2eafa07",
+      "optional": false
     },
     {
       "source": "figures/selection/exp04_06_priority_contrasts.png",
       "bundled_as": "assets/mechanisms/exp04_06_priority_contrasts.png",
       "bytes": 220715,
       "title": "Contrastes prioritários EXP04–EXP06",
-      "sha256": "0e4fd93889c94f7d3fa9ab2cc42e9c99b7c7900b9b09d19bb3aa046c65f46bc4"
+      "sha256": "0e4fd93889c94f7d3fa9ab2cc42e9c99b7c7900b9b09d19bb3aa046c65f46bc4",
+      "optional": false
     },
     {
       "source": "figures/selection/exp06_sst_audit.png",
       "bundled_as": "assets/mechanisms/exp06_sst_audit.png",
       "bytes": 385968,
       "title": "Auditoria oceânica da SST diurna do EXP06",
-      "sha256": "c70643f983e929c192570d66695bc8f4e6c960dcf67ce53cf04fb2e50fa6dec2"
+      "sha256": "c70643f983e929c192570d66695bc8f4e6c960dcf67ce53cf04fb2e50fa6dec2",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/compare_corrected_lidar.py",
       "bundled_as": "sst-fix-comparison/compare_corrected_lidar.py",
       "bytes": 33468,
       "title": "Historical SST correction comparison: compare_corrected_lidar.py",
-      "sha256": "02867fa510aa1aa9e712a42e8ff978c768f8eb47c5f4a0cbf0480b4a220b51b4"
+      "sha256": "02867fa510aa1aa9e712a42e8ff978c768f8eb47c5f4a0cbf0480b4a220b51b4",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/figures/diurnal_100m.png",
       "bundled_as": "sst-fix-comparison/figures/diurnal_100m.png",
       "bytes": 646494,
       "title": "Historical SST correction comparison: figures/diurnal_100m.png",
-      "sha256": "d13b4657442afb47439404ce8e38d5a56be6cba0aa14c48c463e0d895c9dca66"
+      "sha256": "d13b4657442afb47439404ce8e38d5a56be6cba0aa14c48c463e0d895c9dca66",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/figures/metrics_old_corrected.png",
       "bundled_as": "sst-fix-comparison/figures/metrics_old_corrected.png",
       "bytes": 470662,
       "title": "Historical SST correction comparison: figures/metrics_old_corrected.png",
-      "sha256": "e58dc129e14f4cc3c712cf2ee54734f99ff3950318637da33f5bc682675c3fcb"
+      "sha256": "e58dc129e14f4cc3c712cf2ee54734f99ff3950318637da33f5bc682675c3fcb",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/figures/rmse_improvement.png",
       "bundled_as": "sst-fix-comparison/figures/rmse_improvement.png",
       "bytes": 150069,
       "title": "Historical SST correction comparison: figures/rmse_improvement.png",
-      "sha256": "dfd7858ad6ecd228e4561f6cb9776dc78e72a14e52bca564cbea0833e8372fb8"
+      "sha256": "dfd7858ad6ecd228e4561f6cb9776dc78e72a14e52bca564cbea0833e8372fb8",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/figures/sst_old_corrected.png",
       "bundled_as": "sst-fix-comparison/figures/sst_old_corrected.png",
       "bytes": 301964,
       "title": "Historical SST correction comparison: figures/sst_old_corrected.png",
-      "sha256": "10d9da36fe1854b9df35cbb0c9090b4db99b2e61b2565b7f4d2b51366a7a6092"
+      "sha256": "10d9da36fe1854b9df35cbb0c9090b4db99b2e61b2565b7f4d2b51366a7a6092",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/index.html",
       "bundled_as": "sst-fix-comparison/index.html",
       "bytes": 18289,
       "title": "Historical SST correction comparison: index.html",
-      "sha256": "960e5c2795bb229bc1fd384ecdd117cf3ca26ccaaf899120da134a7fc3e2ddce"
+      "sha256": "960e5c2795bb229bc1fd384ecdd117cf3ca26ccaaf899120da134a7fc3e2ddce",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/run_integrity.json",
       "bundled_as": "sst-fix-comparison/run_integrity.json",
       "bytes": 7093,
       "title": "Historical SST correction comparison: run_integrity.json",
-      "sha256": "3498f2495572565261cee88897d0219b8c8e621b0eb92428baff12a09b55bd0a"
+      "sha256": "3498f2495572565261cee88897d0219b8c8e621b0eb92428baff12a09b55bd0a",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/sha256sums.txt",
       "bundled_as": "sst-fix-comparison/sha256sums.txt",
       "bytes": 1103,
       "title": "Historical SST correction comparison: sha256sums.txt",
-      "sha256": "3afc6c95354f2f8e459e92c5467f7c78b85d52a0bd880585c577596755d60efd"
+      "sha256": "3afc6c95354f2f8e459e92c5467f7c78b85d52a0bd880585c577596755d60efd",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/tables/all_scores.csv",
       "bundled_as": "sst-fix-comparison/tables/all_scores.csv",
       "bytes": 25676,
       "title": "Historical SST correction comparison: tables/all_scores.csv",
-      "sha256": "7cfeec193ba668ba16a06e17eb3613f50077a62ba2cfd820120409ebe7a35968"
+      "sha256": "7cfeec193ba668ba16a06e17eb3613f50077a62ba2cfd820120409ebe7a35968",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/tables/old_vs_corrected_metrics.csv",
       "bundled_as": "sst-fix-comparison/tables/old_vs_corrected_metrics.csv",
       "bytes": 7406,
       "title": "Historical SST correction comparison: tables/old_vs_corrected_metrics.csv",
-      "sha256": "2157460ada20fd60d5651b6a4535a6ab07fa146ff50af1f56bae51786c97e78f"
+      "sha256": "2157460ada20fd60d5651b6a4535a6ab07fa146ff50af1f56bae51786c97e78f",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/tables/paired_mse_tests.csv",
       "bundled_as": "sst-fix-comparison/tables/paired_mse_tests.csv",
       "bytes": 2634,
       "title": "Historical SST correction comparison: tables/paired_mse_tests.csv",
-      "sha256": "a13864745b0f2af9492adc86b0385f4eda2f377b78fe50adc220fcd234773425"
+      "sha256": "a13864745b0f2af9492adc86b0385f4eda2f377b78fe50adc220fcd234773425",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/tables/sst_at_lidar_cells.csv",
       "bundled_as": "sst-fix-comparison/tables/sst_at_lidar_cells.csv",
       "bytes": 557,
       "title": "Historical SST correction comparison: tables/sst_at_lidar_cells.csv",
-      "sha256": "026f21abc3945cd534d6af498f13d77f4caf2cd1334c0a2123cd68ac11d61cca"
+      "sha256": "026f21abc3945cd534d6af498f13d77f4caf2cd1334c0a2123cd68ac11d61cca",
+      "optional": false
     },
     {
       "source": "results/report/sst-fix-comparison/tables/verdict.json",
       "bundled_as": "sst-fix-comparison/tables/verdict.json",
       "bytes": 300,
       "title": "Historical SST correction comparison: tables/verdict.json",
-      "sha256": "743972de4136a61f5d0406671aa46a80418edd043d53d251c2e79ab04f7a1757"
+      "sha256": "743972de4136a61f5d0406671aa46a80418edd043d53d251c2e79ab04f7a1757",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_CTL_2021.js",
       "bundled_as": "assets/interactive/values/wind100_mean_CTL_2021.js",
       "bytes": 185245,
       "title": "Valores numéricos wind100_mean_CTL_2021",
-      "sha256": "affbff151dfe902939973d2de85bcfb8f6cd3bb66e3dd6a683eb753a2cd8fca2"
+      "sha256": "affbff151dfe902939973d2de85bcfb8f6cd3bb66e3dd6a683eb753a2cd8fca2",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_CTL_2021.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_CTL_2021.png",
       "bytes": 50375,
       "title": "Vento médio a 100 m",
-      "sha256": "e48def3e75d4f3bb1c8bc7419de515ba5cc4d9a9ff1bb00695af865ac9b89355"
+      "sha256": "e48def3e75d4f3bb1c8bc7419de515ba5cc4d9a9ff1bb00695af865ac9b89355",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_CTL_2021.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_CTL_2021.js",
       "bytes": 185244,
       "title": "Valores numéricos wpd100_mean_CTL_2021",
-      "sha256": "2ede1d8fd74392a12813d7803f90e232be738fcb3e49cfb292ec09c074b54c02"
+      "sha256": "2ede1d8fd74392a12813d7803f90e232be738fcb3e49cfb292ec09c074b54c02",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_CTL_2021.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_CTL_2021.png",
       "bytes": 17688,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "f9028883dc4b6e668cb8828626fc0169c3e2270d556418f94d6ac31ed76949b7"
+      "sha256": "f9028883dc4b6e668cb8828626fc0169c3e2270d556418f94d6ac31ed76949b7",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_CTL_2021.js",
       "bundled_as": "assets/interactive/values/constancy100_CTL_2021.js",
       "bytes": 185245,
       "title": "Valores numéricos constancy100_CTL_2021",
-      "sha256": "9c03e9d8560eeb61139e26fec4391998ce62758958897fd1889454f42437126b"
+      "sha256": "9c03e9d8560eeb61139e26fec4391998ce62758958897fd1889454f42437126b",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_CTL_2021.png",
       "bundled_as": "assets/interactive/layers/constancy100_CTL_2021.png",
       "bytes": 35140,
       "title": "Constância direcional a 100 m",
-      "sha256": "cb4d7ad188192ea4205fea507333ea8ce3f27299ba75584b01168db9b6e8c315"
+      "sha256": "cb4d7ad188192ea4205fea507333ea8ce3f27299ba75584b01168db9b6e8c315",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_CTL_2021.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_CTL_2021.js",
       "bytes": 185253,
       "title": "Valores numéricos diurnal_amplitude100_CTL_2021",
-      "sha256": "8491ca09c1a74cba356e07f249480cad7ddd7512bad8046e5ed5eefb39c75a23"
+      "sha256": "8491ca09c1a74cba356e07f249480cad7ddd7512bad8046e5ed5eefb39c75a23",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_CTL_2021.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_CTL_2021.png",
       "bytes": 67625,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "b4d8f9e061cdcfa2b39ca76a0a116e37cca0201560a9489f9ce57426f641f534"
+      "sha256": "b4d8f9e061cdcfa2b39ca76a0a116e37cca0201560a9489f9ce57426f641f534",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_CTL_2021.js",
       "bundled_as": "assets/interactive/values/sst_mean_CTL_2021.js",
       "bytes": 185241,
       "title": "Valores numéricos sst_mean_CTL_2021",
-      "sha256": "a5100cd3ef45b97ad784d3dd1f6e23d46cd0baf1e8d5c6a8e4dec231f307370c"
+      "sha256": "a5100cd3ef45b97ad784d3dd1f6e23d46cd0baf1e8d5c6a8e4dec231f307370c",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_CTL_2021.png",
       "bundled_as": "assets/interactive/layers/sst_mean_CTL_2021.png",
       "bytes": 26080,
       "title": "Temperatura média da superfície",
-      "sha256": "5f212638d6ba93a5f9a0a4a9aa90b90fb8356e25491bf1594ba0d3c3b700e945"
+      "sha256": "5f212638d6ba93a5f9a0a4a9aa90b90fb8356e25491bf1594ba0d3c3b700e945",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_CTL_2022.js",
       "bundled_as": "assets/interactive/values/wind100_mean_CTL_2022.js",
       "bytes": 185245,
       "title": "Valores numéricos wind100_mean_CTL_2022",
-      "sha256": "fcaea320b3181df970f60f10847ada73736a37c6e1d9bd1468fe92a7d6edf01f"
+      "sha256": "fcaea320b3181df970f60f10847ada73736a37c6e1d9bd1468fe92a7d6edf01f",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_CTL_2022.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_CTL_2022.png",
       "bytes": 58802,
       "title": "Vento médio a 100 m",
-      "sha256": "e4c013a7ef1eb67c05c7e6a181b3e12a7a4b6df38338572ad434fca885ee8704"
+      "sha256": "e4c013a7ef1eb67c05c7e6a181b3e12a7a4b6df38338572ad434fca885ee8704",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_CTL_2022.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_CTL_2022.js",
       "bytes": 185244,
       "title": "Valores numéricos wpd100_mean_CTL_2022",
-      "sha256": "223711dd541adb3cce512d3e2600153fa459e444310671b9737bcfb2b49c7168"
+      "sha256": "223711dd541adb3cce512d3e2600153fa459e444310671b9737bcfb2b49c7168",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_CTL_2022.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_CTL_2022.png",
       "bytes": 27671,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "54eec2130a943bd5dc26aa298db0928ae771173758f2ea2b6f69d76585e6ccfd"
+      "sha256": "54eec2130a943bd5dc26aa298db0928ae771173758f2ea2b6f69d76585e6ccfd",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_CTL_2022.js",
       "bundled_as": "assets/interactive/values/constancy100_CTL_2022.js",
       "bytes": 185245,
       "title": "Valores numéricos constancy100_CTL_2022",
-      "sha256": "72a6c97438bc28fc8b7023a6e54f60a253b8f7c284351b9b499589c730181601"
+      "sha256": "72a6c97438bc28fc8b7023a6e54f60a253b8f7c284351b9b499589c730181601",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_CTL_2022.png",
       "bundled_as": "assets/interactive/layers/constancy100_CTL_2022.png",
       "bytes": 36270,
       "title": "Constância direcional a 100 m",
-      "sha256": "c63c4277b88daafbf81d3edb80a38972e6101c8357d32ab63c0af95b72a04c33"
+      "sha256": "c63c4277b88daafbf81d3edb80a38972e6101c8357d32ab63c0af95b72a04c33",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_CTL_2022.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_CTL_2022.js",
       "bytes": 185253,
       "title": "Valores numéricos diurnal_amplitude100_CTL_2022",
-      "sha256": "ce1322e28b0fc6be989fce6611619904e89c42cba14dc480acce7613da580290"
+      "sha256": "ce1322e28b0fc6be989fce6611619904e89c42cba14dc480acce7613da580290",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_CTL_2022.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_CTL_2022.png",
       "bytes": 68535,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "68888d1dff640ae56a4f1f52d4a8b0328047b906d23ebdc39f9ac1d3081b3161"
+      "sha256": "68888d1dff640ae56a4f1f52d4a8b0328047b906d23ebdc39f9ac1d3081b3161",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_CTL_2022.js",
       "bundled_as": "assets/interactive/values/sst_mean_CTL_2022.js",
       "bytes": 185241,
       "title": "Valores numéricos sst_mean_CTL_2022",
-      "sha256": "0e2822c4d96fc9d0d9b32a97718525c2f6963fa1a1f1bdf20405200c866b3ccd"
+      "sha256": "0e2822c4d96fc9d0d9b32a97718525c2f6963fa1a1f1bdf20405200c866b3ccd",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_CTL_2022.png",
       "bundled_as": "assets/interactive/layers/sst_mean_CTL_2022.png",
       "bytes": 19410,
       "title": "Temperatura média da superfície",
-      "sha256": "084deb3c2ce5f4b52e2e857d1b052903b275c1ff6cd5436ff5f89407222b8b13"
+      "sha256": "084deb3c2ce5f4b52e2e857d1b052903b275c1ff6cd5436ff5f89407222b8b13",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP01_2021.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP01_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP01_2021",
-      "sha256": "e9a39c63edb447c352cfd3f42f2094e6b5c383c06ff501a42ff3b061f40db495"
+      "sha256": "e9a39c63edb447c352cfd3f42f2094e6b5c383c06ff501a42ff3b061f40db495",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP01_2021.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP01_2021.png",
       "bytes": 50048,
       "title": "Vento médio a 100 m",
-      "sha256": "87c8053e6dc3fb254946c6565b05c34a5fe355b5c3179f7d6af00a84933f2a73"
+      "sha256": "87c8053e6dc3fb254946c6565b05c34a5fe355b5c3179f7d6af00a84933f2a73",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP01_2021.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP01_2021.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP01_2021",
-      "sha256": "1ab7c11909ec1d453332cde7fef308175e19cfe12df4422e32e537101ff34c75"
+      "sha256": "1ab7c11909ec1d453332cde7fef308175e19cfe12df4422e32e537101ff34c75",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP01_2021.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP01_2021.png",
       "bytes": 17387,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "e0797a9397b5dce560e53ff1999f5b8becdcf051fbd345fe428bf94234a0c99e"
+      "sha256": "e0797a9397b5dce560e53ff1999f5b8becdcf051fbd345fe428bf94234a0c99e",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP01_2021.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP01_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP01_2021",
-      "sha256": "bdde78ed1adde973b7f3a888a343dd773ad6192bf3b3876661df3bb0011b0599"
+      "sha256": "bdde78ed1adde973b7f3a888a343dd773ad6192bf3b3876661df3bb0011b0599",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP01_2021.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP01_2021.png",
       "bytes": 34033,
       "title": "Constância direcional a 100 m",
-      "sha256": "bd29d77db44910c7e0588d79ec5e85a5421bfd4b698a1c6e75999a5cacb555e4"
+      "sha256": "bd29d77db44910c7e0588d79ec5e85a5421bfd4b698a1c6e75999a5cacb555e4",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP01_2021.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP01_2021.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP01_2021",
-      "sha256": "80e2bd54dba87a27ce07a5258da6e03b88fe3c3f16312a3ee417acb07b41392e"
+      "sha256": "80e2bd54dba87a27ce07a5258da6e03b88fe3c3f16312a3ee417acb07b41392e",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP01_2021.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP01_2021.png",
       "bytes": 67358,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "3fd7ee3add54f2652f0d68ebc1dc3ded23f863c222444a13dd7e1b2d8ecaa598"
+      "sha256": "3fd7ee3add54f2652f0d68ebc1dc3ded23f863c222444a13dd7e1b2d8ecaa598",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP01_2021.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP01_2021.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP01_2021",
-      "sha256": "d745b001a98f25b0b2c75b396be4f23ddec87329bff4ec919740390305661e22"
+      "sha256": "d745b001a98f25b0b2c75b396be4f23ddec87329bff4ec919740390305661e22",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP01_2021.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP01_2021.png",
       "bytes": 19529,
       "title": "Temperatura média da superfície",
-      "sha256": "0c7cc3e67280432abed2772ba0bfffa4a69cdc20c1843a7292bdfcac2d3028b4"
+      "sha256": "0c7cc3e67280432abed2772ba0bfffa4a69cdc20c1843a7292bdfcac2d3028b4",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP01_2022.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP01_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP01_2022",
-      "sha256": "2be609a72e6b3bd56f795cb33f4d8f0152d6d198ec865db4ca127a3b4e37055d"
+      "sha256": "2be609a72e6b3bd56f795cb33f4d8f0152d6d198ec865db4ca127a3b4e37055d",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP01_2022.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP01_2022.png",
       "bytes": 57857,
       "title": "Vento médio a 100 m",
-      "sha256": "df07f07540e354e88bb4bd8c86b00af707f5ce47088a5dd3f90474e19f621695"
+      "sha256": "df07f07540e354e88bb4bd8c86b00af707f5ce47088a5dd3f90474e19f621695",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP01_2022.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP01_2022.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP01_2022",
-      "sha256": "bfec3c6330608cfcd433a5577cf11d8886e770d467f02695e42842dd13eb48e8"
+      "sha256": "bfec3c6330608cfcd433a5577cf11d8886e770d467f02695e42842dd13eb48e8",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP01_2022.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP01_2022.png",
       "bytes": 26882,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "91ab094390837cb30cfee4cf44087a29155e6f60a1a094b399e4f0e4bc1ae8a2"
+      "sha256": "91ab094390837cb30cfee4cf44087a29155e6f60a1a094b399e4f0e4bc1ae8a2",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP01_2022.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP01_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP01_2022",
-      "sha256": "846b9552e12c05bc93a8f7e14a7072be9ff785b39cf2388d1cc7753e7a8ff727"
+      "sha256": "846b9552e12c05bc93a8f7e14a7072be9ff785b39cf2388d1cc7753e7a8ff727",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP01_2022.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP01_2022.png",
       "bytes": 35211,
       "title": "Constância direcional a 100 m",
-      "sha256": "8df40363f3e1860f277f773c93eb8eba703c32a5dc8c8df60832b60f4560f1ff"
+      "sha256": "8df40363f3e1860f277f773c93eb8eba703c32a5dc8c8df60832b60f4560f1ff",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP01_2022.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP01_2022.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP01_2022",
-      "sha256": "41115b0a8734c16853e3e3633355228df5aa818e61ca268b241443c4e525d5f4"
+      "sha256": "41115b0a8734c16853e3e3633355228df5aa818e61ca268b241443c4e525d5f4",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP01_2022.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP01_2022.png",
       "bytes": 68662,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "53834299610318c73d3fe62b8abe2f05f8732002e35200a90aae066a76c7b47f"
+      "sha256": "53834299610318c73d3fe62b8abe2f05f8732002e35200a90aae066a76c7b47f",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP01_2022.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP01_2022.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP01_2022",
-      "sha256": "d1ee16f8695f1c5b6ee885a2823140a0746c2ce5202b95f5e0f456d46e9af848"
+      "sha256": "d1ee16f8695f1c5b6ee885a2823140a0746c2ce5202b95f5e0f456d46e9af848",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP01_2022.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP01_2022.png",
       "bytes": 17474,
       "title": "Temperatura média da superfície",
-      "sha256": "e07a5ad975408e668adc5409b4a98b556e840b53995eeb4df74ca94877df2ad7"
+      "sha256": "e07a5ad975408e668adc5409b4a98b556e840b53995eeb4df74ca94877df2ad7",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP02_2021.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP02_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP02_2021",
-      "sha256": "eda52eec5ed5635f1d647a4b489a1e7d8f7ee121dd5185ac2e891794e31675ee"
+      "sha256": "eda52eec5ed5635f1d647a4b489a1e7d8f7ee121dd5185ac2e891794e31675ee",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP02_2021.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP02_2021.png",
       "bytes": 67252,
       "title": "Vento médio a 100 m",
-      "sha256": "34883f9b158152c459cca3c7d88a13d016345ed34162686c49d7a66e53f24b0a"
+      "sha256": "34883f9b158152c459cca3c7d88a13d016345ed34162686c49d7a66e53f24b0a",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP02_2021.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP02_2021.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP02_2021",
-      "sha256": "58dcebcfaa7e30077bff6c50b843d4c2251099a182354817312b0935e73fa7a7"
+      "sha256": "58dcebcfaa7e30077bff6c50b843d4c2251099a182354817312b0935e73fa7a7",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP02_2021.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP02_2021.png",
       "bytes": 22950,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "8e5e0b3981add361348308cf3796b1465ee56009b2dc25b29d2d17fe8c739ea5"
+      "sha256": "8e5e0b3981add361348308cf3796b1465ee56009b2dc25b29d2d17fe8c739ea5",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP02_2021.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP02_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP02_2021",
-      "sha256": "4d312eca4d4bc2102e875eae349f14c635b757927356521cfe0efa33209abdae"
+      "sha256": "4d312eca4d4bc2102e875eae349f14c635b757927356521cfe0efa33209abdae",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP02_2021.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP02_2021.png",
       "bytes": 43783,
       "title": "Constância direcional a 100 m",
-      "sha256": "11fffebc5a5fa8a335c762d09d63055d9ceef10006556c352505abf283c034f7"
+      "sha256": "11fffebc5a5fa8a335c762d09d63055d9ceef10006556c352505abf283c034f7",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP02_2021.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP02_2021.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP02_2021",
-      "sha256": "b2bdd78749852965430fb42d6cb5bf77c4bc60add2bfab6a3aab473d9572fdbb"
+      "sha256": "b2bdd78749852965430fb42d6cb5bf77c4bc60add2bfab6a3aab473d9572fdbb",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP02_2021.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP02_2021.png",
       "bytes": 88300,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "b5f8fa081d4371100d44b239e93d91beb5cdb8c0bd19a4247cad814debb29f3b"
+      "sha256": "b5f8fa081d4371100d44b239e93d91beb5cdb8c0bd19a4247cad814debb29f3b",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP02_2021.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP02_2021.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP02_2021",
-      "sha256": "b6ccfc18da256c029b8b3ba47c65a5a36019cd4346d0cef519d8574dcfc6aee8"
+      "sha256": "b6ccfc18da256c029b8b3ba47c65a5a36019cd4346d0cef519d8574dcfc6aee8",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP02_2021.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP02_2021.png",
       "bytes": 25815,
       "title": "Temperatura média da superfície",
-      "sha256": "420b4067c501cd8cac92b8841e794d848f909b847e8112256b179d78b5087d07"
+      "sha256": "420b4067c501cd8cac92b8841e794d848f909b847e8112256b179d78b5087d07",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP02_2022.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP02_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP02_2022",
-      "sha256": "095bd6e96628a7f03f1da1f63e7e8281793fa685905dc85e7aef2ebedeb73add"
+      "sha256": "095bd6e96628a7f03f1da1f63e7e8281793fa685905dc85e7aef2ebedeb73add",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP02_2022.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP02_2022.png",
       "bytes": 76898,
       "title": "Vento médio a 100 m",
-      "sha256": "6750c41a99359117e05692c5e7c3d717036958460e682657b15862a3a1b08c31"
+      "sha256": "6750c41a99359117e05692c5e7c3d717036958460e682657b15862a3a1b08c31",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP02_2022.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP02_2022.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP02_2022",
-      "sha256": "955940aa66c0b88651651d42ce3646510027091643461a0c3f2f40e6e4193c73"
+      "sha256": "955940aa66c0b88651651d42ce3646510027091643461a0c3f2f40e6e4193c73",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP02_2022.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP02_2022.png",
       "bytes": 34178,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "598f0925e4e67a7648d516b9d2771e970dc144e1b1a622c838aaf55841df2608"
+      "sha256": "598f0925e4e67a7648d516b9d2771e970dc144e1b1a622c838aaf55841df2608",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP02_2022.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP02_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP02_2022",
-      "sha256": "87237507aef0bc390113588f11fdd7b333638a3be3192adda2acac7af3b81fa9"
+      "sha256": "87237507aef0bc390113588f11fdd7b333638a3be3192adda2acac7af3b81fa9",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP02_2022.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP02_2022.png",
       "bytes": 48147,
       "title": "Constância direcional a 100 m",
-      "sha256": "832b8504c6a969f52e22d046a43728f16b887c2261ab38f7d88cb8687e4e3c72"
+      "sha256": "832b8504c6a969f52e22d046a43728f16b887c2261ab38f7d88cb8687e4e3c72",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP02_2022.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP02_2022.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP02_2022",
-      "sha256": "d2fbb11a7072f56ad39a1468c66c6e0e5332ff79c678e61ae84303f5db0002e2"
+      "sha256": "d2fbb11a7072f56ad39a1468c66c6e0e5332ff79c678e61ae84303f5db0002e2",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP02_2022.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP02_2022.png",
       "bytes": 89629,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "c51a7bb946852ff646e69ca764b0a7bf184e6ec969d33169c2e8cdc664a71ce0"
+      "sha256": "c51a7bb946852ff646e69ca764b0a7bf184e6ec969d33169c2e8cdc664a71ce0",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP02_2022.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP02_2022.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP02_2022",
-      "sha256": "966bfb2042902269f368980f7aec4b5d8f38fb090f513b58d0794183f0062444"
+      "sha256": "966bfb2042902269f368980f7aec4b5d8f38fb090f513b58d0794183f0062444",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP02_2022.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP02_2022.png",
       "bytes": 24642,
       "title": "Temperatura média da superfície",
-      "sha256": "afc32779a1e83fe9ff7fac1d8e923ad22c0b9ab83321777f77fc3d1711448d79"
+      "sha256": "afc32779a1e83fe9ff7fac1d8e923ad22c0b9ab83321777f77fc3d1711448d79",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP03_2021.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP03_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP03_2021",
-      "sha256": "522ff2ebc0098a7998b6d7b33153241451c120be0bef5763b4ac1429cc46cbc5"
+      "sha256": "522ff2ebc0098a7998b6d7b33153241451c120be0bef5763b4ac1429cc46cbc5",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP03_2021.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP03_2021.png",
       "bytes": 70640,
       "title": "Vento médio a 100 m",
-      "sha256": "d58f54519ec94ee08de76be4cf7cbbf594c2f267c8d470b8d12f58c66296bd4e"
+      "sha256": "d58f54519ec94ee08de76be4cf7cbbf594c2f267c8d470b8d12f58c66296bd4e",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP03_2021.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP03_2021.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP03_2021",
-      "sha256": "40feb48803e04f339d0aaceeced42f19ed12cdf67ac573c69e6e788e9daf7a07"
+      "sha256": "40feb48803e04f339d0aaceeced42f19ed12cdf67ac573c69e6e788e9daf7a07",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP03_2021.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP03_2021.png",
       "bytes": 24513,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "83a66e23265112466e5c4098b9fe32b592afe193ad596a31b63801c75e2843f3"
+      "sha256": "83a66e23265112466e5c4098b9fe32b592afe193ad596a31b63801c75e2843f3",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP03_2021.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP03_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP03_2021",
-      "sha256": "473862bf4cbfc531258ba7d19b53f3ca83ef83e0bd1ed4773c88bc04d099085c"
+      "sha256": "473862bf4cbfc531258ba7d19b53f3ca83ef83e0bd1ed4773c88bc04d099085c",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP03_2021.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP03_2021.png",
       "bytes": 44534,
       "title": "Constância direcional a 100 m",
-      "sha256": "309bd57f1e15de4c59b4dcc5c1fd4419593233caf007e8840ba1d7746440f9e2"
+      "sha256": "309bd57f1e15de4c59b4dcc5c1fd4419593233caf007e8840ba1d7746440f9e2",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP03_2021.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP03_2021.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP03_2021",
-      "sha256": "a1047a3b5f9f184cf6998ea37db142b90addc1c0d74457bd3c2acecb40928378"
+      "sha256": "a1047a3b5f9f184cf6998ea37db142b90addc1c0d74457bd3c2acecb40928378",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP03_2021.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP03_2021.png",
       "bytes": 92716,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "350a2341d17b57f94e6ad2d0c7b322246b7f3613aac57f8fff30787e340fc2f0"
+      "sha256": "350a2341d17b57f94e6ad2d0c7b322246b7f3613aac57f8fff30787e340fc2f0",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP03_2021.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP03_2021.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP03_2021",
-      "sha256": "29849b0c5175b408b0c02a2f11a0afd84c1c69bce575345010adb4b965da04f8"
+      "sha256": "29849b0c5175b408b0c02a2f11a0afd84c1c69bce575345010adb4b965da04f8",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP03_2021.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP03_2021.png",
       "bytes": 26947,
       "title": "Temperatura média da superfície",
-      "sha256": "7e8b1f3a875be196386774f26f24e1e45ffdbd3460e656eab31c032d98acc60f"
+      "sha256": "7e8b1f3a875be196386774f26f24e1e45ffdbd3460e656eab31c032d98acc60f",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP03_2022.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP03_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP03_2022",
-      "sha256": "6ab9ae97042d7b5d15907c13ed4fe0448e67170d90e4e5a384bfb6d7a7b4c0a6"
+      "sha256": "6ab9ae97042d7b5d15907c13ed4fe0448e67170d90e4e5a384bfb6d7a7b4c0a6",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP03_2022.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP03_2022.png",
       "bytes": 80354,
       "title": "Vento médio a 100 m",
-      "sha256": "672fdb3b1ad203c37b1245977f51062c4f49cb74adc747e0125489e74be23db2"
+      "sha256": "672fdb3b1ad203c37b1245977f51062c4f49cb74adc747e0125489e74be23db2",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP03_2022.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP03_2022.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP03_2022",
-      "sha256": "50ac1544eedb196032a8c17a2bdb5692861e4eab55099421f0e95421a8991384"
+      "sha256": "50ac1544eedb196032a8c17a2bdb5692861e4eab55099421f0e95421a8991384",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP03_2022.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP03_2022.png",
       "bytes": 35856,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "8c54ac17810cf982622800a07528d18ae8646050e2878b8dcaf651cb9f1abb7d"
+      "sha256": "8c54ac17810cf982622800a07528d18ae8646050e2878b8dcaf651cb9f1abb7d",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP03_2022.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP03_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP03_2022",
-      "sha256": "4620209e5976797bb59ddeb68b9125aad9ec757ba4fb21293c5168410232e64d"
+      "sha256": "4620209e5976797bb59ddeb68b9125aad9ec757ba4fb21293c5168410232e64d",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP03_2022.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP03_2022.png",
       "bytes": 50901,
       "title": "Constância direcional a 100 m",
-      "sha256": "8ac9abeecb45500516552dfff8bc03be4df33d455840fe3cb0b4d27ab35937d2"
+      "sha256": "8ac9abeecb45500516552dfff8bc03be4df33d455840fe3cb0b4d27ab35937d2",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP03_2022.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP03_2022.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP03_2022",
-      "sha256": "0aaa0f2b04f8e31aac4e726bd81c0e4f08edecd840a528bbd4a8087d8c351584"
+      "sha256": "0aaa0f2b04f8e31aac4e726bd81c0e4f08edecd840a528bbd4a8087d8c351584",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP03_2022.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP03_2022.png",
       "bytes": 93767,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "d645bf7782fdd2bb07e81eb0b0333cb5e04d7bc46ba75f5b7bb80c9dfd25791c"
+      "sha256": "d645bf7782fdd2bb07e81eb0b0333cb5e04d7bc46ba75f5b7bb80c9dfd25791c",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP03_2022.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP03_2022.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP03_2022",
-      "sha256": "484081299a2a4ddff9c879f015ad4cbc8b558d67a7744a4bff71f4939bf01461"
+      "sha256": "484081299a2a4ddff9c879f015ad4cbc8b558d67a7744a4bff71f4939bf01461",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP03_2022.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP03_2022.png",
       "bytes": 25583,
       "title": "Temperatura média da superfície",
-      "sha256": "0dc370baa790059d1f7b51ca955261963ff988c3b5fa9160f5ffeac656c27a81"
+      "sha256": "0dc370baa790059d1f7b51ca955261963ff988c3b5fa9160f5ffeac656c27a81",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP04_2021.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP04_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP04_2021",
-      "sha256": "b04e4899c5c320533c3eb72b86a785b2a29570b02981c668f9f0981e94c7c405"
+      "sha256": "b04e4899c5c320533c3eb72b86a785b2a29570b02981c668f9f0981e94c7c405",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP04_2021.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP04_2021.png",
       "bytes": 50598,
       "title": "Vento médio a 100 m",
-      "sha256": "d9c4b9e0829bc77131e9c7e236e057945201271c6ea773e32872ae98854666e1"
+      "sha256": "d9c4b9e0829bc77131e9c7e236e057945201271c6ea773e32872ae98854666e1",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP04_2021.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP04_2021.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP04_2021",
-      "sha256": "63ac01550f244ec7ae4246d6440375a616c9d1f5bdcfd31878a02f1d50052c81"
+      "sha256": "63ac01550f244ec7ae4246d6440375a616c9d1f5bdcfd31878a02f1d50052c81",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP04_2021.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP04_2021.png",
       "bytes": 18257,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "ca12f0f2a13f7db827be4714b35a77626849f332ab67cf256fea1e0bd9e7ad13"
+      "sha256": "ca12f0f2a13f7db827be4714b35a77626849f332ab67cf256fea1e0bd9e7ad13",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP04_2021.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP04_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP04_2021",
-      "sha256": "4d35d8e3cdcfbef8de55c530a911316bf8884e9d948d58b8417a3012f3ead77d"
+      "sha256": "4d35d8e3cdcfbef8de55c530a911316bf8884e9d948d58b8417a3012f3ead77d",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP04_2021.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP04_2021.png",
       "bytes": 37049,
       "title": "Constância direcional a 100 m",
-      "sha256": "fd7577625ccefe7a2fa9fb5c8a45aa4503b7769c69ebe43b30e087f663f11863"
+      "sha256": "fd7577625ccefe7a2fa9fb5c8a45aa4503b7769c69ebe43b30e087f663f11863",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP04_2021.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP04_2021.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP04_2021",
-      "sha256": "bf366fe242609061f1d459f5406ae1a06d767f010b3b14ea6bf7534c84ca0d9c"
+      "sha256": "bf366fe242609061f1d459f5406ae1a06d767f010b3b14ea6bf7534c84ca0d9c",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP04_2021.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP04_2021.png",
       "bytes": 68435,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "0800d86ced3502ffa92e8a11b9df2de32cdf2a368205b53944e638b60c031b55"
+      "sha256": "0800d86ced3502ffa92e8a11b9df2de32cdf2a368205b53944e638b60c031b55",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP04_2021.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP04_2021.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP04_2021",
-      "sha256": "4439c91c125235b364a099457a0cbdcc5d11ec50cc71a8ecdebf57edcefdef84"
+      "sha256": "4439c91c125235b364a099457a0cbdcc5d11ec50cc71a8ecdebf57edcefdef84",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP04_2021.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP04_2021.png",
       "bytes": 19529,
       "title": "Temperatura média da superfície",
-      "sha256": "0c7cc3e67280432abed2772ba0bfffa4a69cdc20c1843a7292bdfcac2d3028b4"
+      "sha256": "0c7cc3e67280432abed2772ba0bfffa4a69cdc20c1843a7292bdfcac2d3028b4",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP04_2022.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP04_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP04_2022",
-      "sha256": "c5d98964ca9534a3ea060cd698c07a0155a37c684f7ab7a5d50ec556b590700c"
+      "sha256": "c5d98964ca9534a3ea060cd698c07a0155a37c684f7ab7a5d50ec556b590700c",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP04_2022.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP04_2022.png",
       "bytes": 58090,
       "title": "Vento médio a 100 m",
-      "sha256": "c62dc03c1ce90192615e6d1055f6eee70517d83bf15e7494bb67635af8445569"
+      "sha256": "c62dc03c1ce90192615e6d1055f6eee70517d83bf15e7494bb67635af8445569",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP04_2022.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP04_2022.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP04_2022",
-      "sha256": "13a5ec6d6ea0c994b717d50bc541e7e297449ede00f8b816215af7846620f279"
+      "sha256": "13a5ec6d6ea0c994b717d50bc541e7e297449ede00f8b816215af7846620f279",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP04_2022.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP04_2022.png",
       "bytes": 27584,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "0773ac9aaf25500a2e871b864add39132015e997f4f03c0242d84d3694807ac3"
+      "sha256": "0773ac9aaf25500a2e871b864add39132015e997f4f03c0242d84d3694807ac3",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP04_2022.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP04_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP04_2022",
-      "sha256": "2917a033bd4f51c82d09f7ce5ed24fe35f7c74f91001cc8455a892eb4b549e20"
+      "sha256": "2917a033bd4f51c82d09f7ce5ed24fe35f7c74f91001cc8455a892eb4b549e20",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP04_2022.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP04_2022.png",
       "bytes": 35657,
       "title": "Constância direcional a 100 m",
-      "sha256": "a473bd3752a3a45cfe3c1b22bfc7572dac5ed73ca4eb643f2e2a4d62c985411d"
+      "sha256": "a473bd3752a3a45cfe3c1b22bfc7572dac5ed73ca4eb643f2e2a4d62c985411d",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP04_2022.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP04_2022.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP04_2022",
-      "sha256": "4c74ec4f85cda716b3594d10ae9848c620a342842c211ff15b41a1ab5d90183e"
+      "sha256": "4c74ec4f85cda716b3594d10ae9848c620a342842c211ff15b41a1ab5d90183e",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP04_2022.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP04_2022.png",
       "bytes": 70165,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "38314e03674742d00298232142622a7c94d37763843e5d8316014369a357816b"
+      "sha256": "38314e03674742d00298232142622a7c94d37763843e5d8316014369a357816b",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP04_2022.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP04_2022.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP04_2022",
-      "sha256": "f59f5ba119baac9e7a2e47423bc32c7afafe73b2934e0b08fc56c624987f08f2"
+      "sha256": "f59f5ba119baac9e7a2e47423bc32c7afafe73b2934e0b08fc56c624987f08f2",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP04_2022.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP04_2022.png",
       "bytes": 17474,
       "title": "Temperatura média da superfície",
-      "sha256": "e07a5ad975408e668adc5409b4a98b556e840b53995eeb4df74ca94877df2ad7"
+      "sha256": "e07a5ad975408e668adc5409b4a98b556e840b53995eeb4df74ca94877df2ad7",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP05_2021.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP05_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP05_2021",
-      "sha256": "0e200c98440f3d548bc90e2e02608746ab32b2bba10fc39ea4fe623be813b47a"
+      "sha256": "0e200c98440f3d548bc90e2e02608746ab32b2bba10fc39ea4fe623be813b47a",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP05_2021.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP05_2021.png",
       "bytes": 51250,
       "title": "Vento médio a 100 m",
-      "sha256": "1e7ba137c0118e5adfcd25a9aa6a00c8b23d602382bb79eaa3f451fed75440fa"
+      "sha256": "1e7ba137c0118e5adfcd25a9aa6a00c8b23d602382bb79eaa3f451fed75440fa",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP05_2021.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP05_2021.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP05_2021",
-      "sha256": "0ef474f2616fa774db8b71ebf4ec3195025929858c65e779b367da6a1809ba2c"
+      "sha256": "0ef474f2616fa774db8b71ebf4ec3195025929858c65e779b367da6a1809ba2c",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP05_2021.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP05_2021.png",
       "bytes": 19469,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "c7668225ec506e573340a5999fc1fca5f6b753c5d582680c2a544c44f7c86ad9"
+      "sha256": "c7668225ec506e573340a5999fc1fca5f6b753c5d582680c2a544c44f7c86ad9",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP05_2021.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP05_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP05_2021",
-      "sha256": "42cb325c8489670f1e6dfe999221e3c3198c14c3164af02f45f9d683c62f5900"
+      "sha256": "42cb325c8489670f1e6dfe999221e3c3198c14c3164af02f45f9d683c62f5900",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP05_2021.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP05_2021.png",
       "bytes": 40999,
       "title": "Constância direcional a 100 m",
-      "sha256": "b89a26cfd631d4eff0de96cd2d6934260df5466276c5ce20e16d8c99a0621870"
+      "sha256": "b89a26cfd631d4eff0de96cd2d6934260df5466276c5ce20e16d8c99a0621870",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP05_2021.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP05_2021.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP05_2021",
-      "sha256": "6d693bd195f4545a80d2865a4b1772df085969b476b2668ae27e5e8d6a4b2cd5"
+      "sha256": "6d693bd195f4545a80d2865a4b1772df085969b476b2668ae27e5e8d6a4b2cd5",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP05_2021.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP05_2021.png",
       "bytes": 69566,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "9b04fff33e5d10c42c2232880f8e23a598c93e78f80c63c6c96d282e9c612fab"
+      "sha256": "9b04fff33e5d10c42c2232880f8e23a598c93e78f80c63c6c96d282e9c612fab",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP05_2021.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP05_2021.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP05_2021",
-      "sha256": "6e84cf588dd320d7223ee07c606881fe592b774b428876f5aa47b88effeeec6c"
+      "sha256": "6e84cf588dd320d7223ee07c606881fe592b774b428876f5aa47b88effeeec6c",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP05_2021.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP05_2021.png",
       "bytes": 19529,
       "title": "Temperatura média da superfície",
-      "sha256": "0c7cc3e67280432abed2772ba0bfffa4a69cdc20c1843a7292bdfcac2d3028b4"
+      "sha256": "0c7cc3e67280432abed2772ba0bfffa4a69cdc20c1843a7292bdfcac2d3028b4",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP05_2022.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP05_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP05_2022",
-      "sha256": "8df2a7906aff371aa0493773cc2ae29ff902555a6b8edb5e8e2fdb705069b50a"
+      "sha256": "8df2a7906aff371aa0493773cc2ae29ff902555a6b8edb5e8e2fdb705069b50a",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP05_2022.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP05_2022.png",
       "bytes": 58578,
       "title": "Vento médio a 100 m",
-      "sha256": "410d2244268af067367f9237de9947a8a3ca570459bfb17fb53333eb6e0b0753"
+      "sha256": "410d2244268af067367f9237de9947a8a3ca570459bfb17fb53333eb6e0b0753",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP05_2022.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP05_2022.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP05_2022",
-      "sha256": "b6248a3e11861b8ef66879983e3e449302273ee8793db115b2905c85753653de"
+      "sha256": "b6248a3e11861b8ef66879983e3e449302273ee8793db115b2905c85753653de",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP05_2022.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP05_2022.png",
       "bytes": 27912,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "9c1e153c09fafe52fe1a4bc64c41a5ff528ab95e311f68f2b515498e4f213d4e"
+      "sha256": "9c1e153c09fafe52fe1a4bc64c41a5ff528ab95e311f68f2b515498e4f213d4e",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP05_2022.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP05_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP05_2022",
-      "sha256": "404950768fe4fb2827035445fedc5395de0930f396908559ccbee42eaafc138b"
+      "sha256": "404950768fe4fb2827035445fedc5395de0930f396908559ccbee42eaafc138b",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP05_2022.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP05_2022.png",
       "bytes": 36435,
       "title": "Constância direcional a 100 m",
-      "sha256": "9e4d07c9a401d1ffdc79917fcda74a643908236980912cc6c30b83f2f776f00e"
+      "sha256": "9e4d07c9a401d1ffdc79917fcda74a643908236980912cc6c30b83f2f776f00e",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP05_2022.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP05_2022.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP05_2022",
-      "sha256": "bbf033b1ea1263ba573d818e9ad82dee58f7f0752e006981aa5f659fe6c53de9"
+      "sha256": "bbf033b1ea1263ba573d818e9ad82dee58f7f0752e006981aa5f659fe6c53de9",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP05_2022.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP05_2022.png",
       "bytes": 71721,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "891a8c10039d3d5c0c5f01277436361f0ca2cfc9f9b19e6b575238df4994d371"
+      "sha256": "891a8c10039d3d5c0c5f01277436361f0ca2cfc9f9b19e6b575238df4994d371",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP05_2022.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP05_2022.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP05_2022",
-      "sha256": "0cc87fd9ab20ca6e5399bfd3e6da0497b7d9d29246192b347dabfff0f183af7e"
+      "sha256": "0cc87fd9ab20ca6e5399bfd3e6da0497b7d9d29246192b347dabfff0f183af7e",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP05_2022.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP05_2022.png",
       "bytes": 17474,
       "title": "Temperatura média da superfície",
-      "sha256": "e07a5ad975408e668adc5409b4a98b556e840b53995eeb4df74ca94877df2ad7"
+      "sha256": "e07a5ad975408e668adc5409b4a98b556e840b53995eeb4df74ca94877df2ad7",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP06_2021.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP06_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP06_2021",
-      "sha256": "cba8f349d3842317de4ca329ef9954910f7a095ddf89a2ad90fc12f1e46bcc4f"
+      "sha256": "cba8f349d3842317de4ca329ef9954910f7a095ddf89a2ad90fc12f1e46bcc4f",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP06_2021.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP06_2021.png",
       "bytes": 50742,
       "title": "Vento médio a 100 m",
-      "sha256": "71e00772a64ef580e65cdb20628c204a4e3b9514c2ad3cd5efa7ff2939c872d8"
+      "sha256": "71e00772a64ef580e65cdb20628c204a4e3b9514c2ad3cd5efa7ff2939c872d8",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP06_2021.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP06_2021.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP06_2021",
-      "sha256": "e2654b6e9fb76f4ec3f0509b5f3d99cb13fbe05fcde3a9668c136b00ef7867af"
+      "sha256": "e2654b6e9fb76f4ec3f0509b5f3d99cb13fbe05fcde3a9668c136b00ef7867af",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP06_2021.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP06_2021.png",
       "bytes": 19034,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "d4cc6360c8a995385cade0afa4ec60ba762fc2271f4e72bd91a77aae805d3308"
+      "sha256": "d4cc6360c8a995385cade0afa4ec60ba762fc2271f4e72bd91a77aae805d3308",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP06_2021.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP06_2021.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP06_2021",
-      "sha256": "fd383df456d6681a8799afbb0ab55797c3bd3c33ba79bd839ed6f054542eaf45"
+      "sha256": "fd383df456d6681a8799afbb0ab55797c3bd3c33ba79bd839ed6f054542eaf45",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP06_2021.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP06_2021.png",
       "bytes": 40540,
       "title": "Constância direcional a 100 m",
-      "sha256": "d4f331a10d5030a3c13eebcea40ae4af5695e0cf3b5d1752dbfe50d1997bdfa4"
+      "sha256": "d4f331a10d5030a3c13eebcea40ae4af5695e0cf3b5d1752dbfe50d1997bdfa4",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP06_2021.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP06_2021.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP06_2021",
-      "sha256": "ac04bd0250e82e4586d69b99dcf843dc0b94c811e9ca84c246e93fcf9ace8b18"
+      "sha256": "ac04bd0250e82e4586d69b99dcf843dc0b94c811e9ca84c246e93fcf9ace8b18",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP06_2021.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP06_2021.png",
       "bytes": 69583,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "39802ac5b5039c69e8630c36dc8e46f011ff1ec12e461f0910eaab9c01f25c03"
+      "sha256": "39802ac5b5039c69e8630c36dc8e46f011ff1ec12e461f0910eaab9c01f25c03",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP06_2021.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP06_2021.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP06_2021",
-      "sha256": "c7af1aa038796feed0308930ff79f581efab4f9ba2043a79aa8dd77437746ab4"
+      "sha256": "c7af1aa038796feed0308930ff79f581efab4f9ba2043a79aa8dd77437746ab4",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP06_2021.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP06_2021.png",
       "bytes": 19529,
       "title": "Temperatura média da superfície",
-      "sha256": "0c7cc3e67280432abed2772ba0bfffa4a69cdc20c1843a7292bdfcac2d3028b4"
+      "sha256": "0c7cc3e67280432abed2772ba0bfffa4a69cdc20c1843a7292bdfcac2d3028b4",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_EXP06_2022.js",
       "bundled_as": "assets/interactive/values/wind100_mean_EXP06_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos wind100_mean_EXP06_2022",
-      "sha256": "28c662b49c2c7fdae090c21817e2c8c062552982aace971c06800307ad010371"
+      "sha256": "28c662b49c2c7fdae090c21817e2c8c062552982aace971c06800307ad010371",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_EXP06_2022.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_EXP06_2022.png",
       "bytes": 58681,
       "title": "Vento médio a 100 m",
-      "sha256": "b265fdddaa2b1e73eef6ceed2e29b4efcc725d6cf42ad1fc0a4dc49bb2ab49e6"
+      "sha256": "b265fdddaa2b1e73eef6ceed2e29b4efcc725d6cf42ad1fc0a4dc49bb2ab49e6",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_EXP06_2022.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_EXP06_2022.js",
       "bytes": 185246,
       "title": "Valores numéricos wpd100_mean_EXP06_2022",
-      "sha256": "6a85d5443c039ea48801476fbc8e2178dcddafab31fc2d0bd545c0768e9275cd"
+      "sha256": "6a85d5443c039ea48801476fbc8e2178dcddafab31fc2d0bd545c0768e9275cd",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_EXP06_2022.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_EXP06_2022.png",
       "bytes": 27750,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "ec397a2f15a28a6343f6feeea874a91f3a18ff1d53bac20f5d757f9155498642"
+      "sha256": "ec397a2f15a28a6343f6feeea874a91f3a18ff1d53bac20f5d757f9155498642",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_EXP06_2022.js",
       "bundled_as": "assets/interactive/values/constancy100_EXP06_2022.js",
       "bytes": 185247,
       "title": "Valores numéricos constancy100_EXP06_2022",
-      "sha256": "ddfe951c369d06566ac28d45b11e841b8d3db203ad1546aba118e24cd5eb7c97"
+      "sha256": "ddfe951c369d06566ac28d45b11e841b8d3db203ad1546aba118e24cd5eb7c97",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_EXP06_2022.png",
       "bundled_as": "assets/interactive/layers/constancy100_EXP06_2022.png",
       "bytes": 36093,
       "title": "Constância direcional a 100 m",
-      "sha256": "3215b45ae6f036c49c8954f3e81814c4dec0b1c2790154eab1a106b48623b6fd"
+      "sha256": "3215b45ae6f036c49c8954f3e81814c4dec0b1c2790154eab1a106b48623b6fd",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_EXP06_2022.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_EXP06_2022.js",
       "bytes": 185255,
       "title": "Valores numéricos diurnal_amplitude100_EXP06_2022",
-      "sha256": "ccffc8433dbcd1242861613c637e79e507d15a1876d542d716616f3e43441f02"
+      "sha256": "ccffc8433dbcd1242861613c637e79e507d15a1876d542d716616f3e43441f02",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_EXP06_2022.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_EXP06_2022.png",
       "bytes": 71674,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "caa3385708b7e753bfc44c346538b4502e489dff22187b402506ae6935db6207"
+      "sha256": "caa3385708b7e753bfc44c346538b4502e489dff22187b402506ae6935db6207",
+      "optional": false
     },
     {
       "source": "results/interactive/values/sst_mean_EXP06_2022.js",
       "bundled_as": "assets/interactive/values/sst_mean_EXP06_2022.js",
       "bytes": 185243,
       "title": "Valores numéricos sst_mean_EXP06_2022",
-      "sha256": "fa64df4dfda20b3bf9ede15ab6b3871f57a6acc1282e748302fecb15a3e0016c"
+      "sha256": "fa64df4dfda20b3bf9ede15ab6b3871f57a6acc1282e748302fecb15a3e0016c",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/sst_mean_EXP06_2022.png",
       "bundled_as": "assets/interactive/layers/sst_mean_EXP06_2022.png",
       "bytes": 17474,
       "title": "Temperatura média da superfície",
-      "sha256": "e07a5ad975408e668adc5409b4a98b556e840b53995eeb4df74ca94877df2ad7"
+      "sha256": "e07a5ad975408e668adc5409b4a98b556e840b53995eeb4df74ca94877df2ad7",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_ERA5_2021.js",
       "bundled_as": "assets/interactive/values/wind100_mean_ERA5_2021.js",
       "bytes": 185246,
       "title": "Valores numéricos wind100_mean_ERA5_2021",
-      "sha256": "04e3fa7bc2d462bd208dd3a3c1629b25c6050bba8a02c6eccde1722388e3c917"
+      "sha256": "04e3fa7bc2d462bd208dd3a3c1629b25c6050bba8a02c6eccde1722388e3c917",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_ERA5_2021.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_ERA5_2021.png",
       "bytes": 5137,
       "title": "Vento médio a 100 m",
-      "sha256": "55ee9aad8e63d460ba05651d32cd52d4b1944a07c5109fdbcd1287891843210c"
+      "sha256": "55ee9aad8e63d460ba05651d32cd52d4b1944a07c5109fdbcd1287891843210c",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_ERA5_2021.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_ERA5_2021.js",
       "bytes": 185245,
       "title": "Valores numéricos wpd100_mean_ERA5_2021",
-      "sha256": "e3302996555ce1c0248566260c695ae5b7a9b8152b7d713971aac5682d4278eb"
+      "sha256": "e3302996555ce1c0248566260c695ae5b7a9b8152b7d713971aac5682d4278eb",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_ERA5_2021.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_ERA5_2021.png",
       "bytes": 5330,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "cbc7cd3a3370b2e36ef9645dfe345ff7ac76bcbbc30f6ab6ea57464a889e80e6"
+      "sha256": "cbc7cd3a3370b2e36ef9645dfe345ff7ac76bcbbc30f6ab6ea57464a889e80e6",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_ERA5_2021.js",
       "bundled_as": "assets/interactive/values/constancy100_ERA5_2021.js",
       "bytes": 185246,
       "title": "Valores numéricos constancy100_ERA5_2021",
-      "sha256": "64d71175b545461e6added27e3d6dc455df48a8abfc44126b2dc78b02c6c8eb0"
+      "sha256": "64d71175b545461e6added27e3d6dc455df48a8abfc44126b2dc78b02c6c8eb0",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_ERA5_2021.png",
       "bundled_as": "assets/interactive/layers/constancy100_ERA5_2021.png",
       "bytes": 4207,
       "title": "Constância direcional a 100 m",
-      "sha256": "8e867d62d396aed88f6fa759582ddaf15ae6031424fb6eac3a56e5d1bc7d1578"
+      "sha256": "8e867d62d396aed88f6fa759582ddaf15ae6031424fb6eac3a56e5d1bc7d1578",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_ERA5_2021.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_ERA5_2021.js",
       "bytes": 185254,
       "title": "Valores numéricos diurnal_amplitude100_ERA5_2021",
-      "sha256": "ecf1f98b6c55ed87f0e260a1c2fc87f53ae10ee6d5722e05138df419b8aab90c"
+      "sha256": "ecf1f98b6c55ed87f0e260a1c2fc87f53ae10ee6d5722e05138df419b8aab90c",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_ERA5_2021.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_ERA5_2021.png",
       "bytes": 6233,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "8335f8b49d7baf5deac1cbee3296c7b0565fbf67fa2cbc580687f39cdf499559"
+      "sha256": "8335f8b49d7baf5deac1cbee3296c7b0565fbf67fa2cbc580687f39cdf499559",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wind100_mean_ERA5_2022.js",
       "bundled_as": "assets/interactive/values/wind100_mean_ERA5_2022.js",
       "bytes": 185246,
       "title": "Valores numéricos wind100_mean_ERA5_2022",
-      "sha256": "1fe75036d8f073f28b3417b26fa5c8d3569d2378a627f21c5e4bff4c0f0833ee"
+      "sha256": "1fe75036d8f073f28b3417b26fa5c8d3569d2378a627f21c5e4bff4c0f0833ee",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wind100_mean_ERA5_2022.png",
       "bundled_as": "assets/interactive/layers/wind100_mean_ERA5_2022.png",
       "bytes": 6562,
       "title": "Vento médio a 100 m",
-      "sha256": "21afa2c29a8a24ed22c0bee705db9508e3ef604a25a50d405b83602c2ed5481d"
+      "sha256": "21afa2c29a8a24ed22c0bee705db9508e3ef604a25a50d405b83602c2ed5481d",
+      "optional": false
     },
     {
       "source": "results/interactive/values/wpd100_mean_ERA5_2022.js",
       "bundled_as": "assets/interactive/values/wpd100_mean_ERA5_2022.js",
       "bytes": 185245,
       "title": "Valores numéricos wpd100_mean_ERA5_2022",
-      "sha256": "f14a9f9fe5667a8822d26be4ec3f689ddcc3c7efdded738896849758e33401d3"
+      "sha256": "f14a9f9fe5667a8822d26be4ec3f689ddcc3c7efdded738896849758e33401d3",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/wpd100_mean_ERA5_2022.png",
       "bundled_as": "assets/interactive/layers/wpd100_mean_ERA5_2022.png",
       "bytes": 6262,
       "title": "Densidade de potência eólica a 100 m",
-      "sha256": "bd0642468ff26ede2d5d438d3945262d88493ab50b154fd0bc5c991b4c670d5b"
+      "sha256": "bd0642468ff26ede2d5d438d3945262d88493ab50b154fd0bc5c991b4c670d5b",
+      "optional": false
     },
     {
       "source": "results/interactive/values/constancy100_ERA5_2022.js",
       "bundled_as": "assets/interactive/values/constancy100_ERA5_2022.js",
       "bytes": 185246,
       "title": "Valores numéricos constancy100_ERA5_2022",
-      "sha256": "d4131edbc89a7e5f2592194c0e365659cc8009d18f33fa5ddefd33813d26621c"
+      "sha256": "d4131edbc89a7e5f2592194c0e365659cc8009d18f33fa5ddefd33813d26621c",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/constancy100_ERA5_2022.png",
       "bundled_as": "assets/interactive/layers/constancy100_ERA5_2022.png",
       "bytes": 4517,
       "title": "Constância direcional a 100 m",
-      "sha256": "385a9c8f35482b7740f2d6954d35a31a02661dd6cfabebf0b4fddc21174e810b"
+      "sha256": "385a9c8f35482b7740f2d6954d35a31a02661dd6cfabebf0b4fddc21174e810b",
+      "optional": false
     },
     {
       "source": "results/interactive/values/diurnal_amplitude100_ERA5_2022.js",
       "bundled_as": "assets/interactive/values/diurnal_amplitude100_ERA5_2022.js",
       "bytes": 185254,
       "title": "Valores numéricos diurnal_amplitude100_ERA5_2022",
-      "sha256": "266d37b1454cac640b510c73e3479dc021756d27316a2d6d584f83a380a5c5aa"
+      "sha256": "266d37b1454cac640b510c73e3479dc021756d27316a2d6d584f83a380a5c5aa",
+      "optional": false
     },
     {
       "source": "results/interactive/layers/diurnal_amplitude100_ERA5_2022.png",
       "bundled_as": "assets/interactive/layers/diurnal_amplitude100_ERA5_2022.png",
       "bytes": 6165,
       "title": "Amplitude diurna a 100 m",
-      "sha256": "af3910adad8d7fe14febe1388770b331adbbb25eb9b2a8221fce7d26e186f8bf"
+      "sha256": "af3910adad8d7fe14febe1388770b331adbbb25eb9b2a8221fce7d26e186f8bf",
+      "optional": false
     },
     {
       "source": "figures/animations/wind100_CTL_2021_20211101_3d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_CTL_2021_20211101_3d.mp4",
       "bytes": 3945638,
       "title": "Vento a 100 m — animação",
-      "sha256": "e6f9b25a3eb7e1d0b01b77a85eafafdf21eb5eb54d527dd649e2097d855fca2c"
+      "sha256": "e6f9b25a3eb7e1d0b01b77a85eafafdf21eb5eb54d527dd649e2097d855fca2c",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_CTL_2022_20221001_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_CTL_2022_20221001_5d.mp4",
       "bytes": 6120431,
       "title": "Vento a 100 m — animação",
-      "sha256": "e1a193938c1c20b791cd876b8324246ba6f5db92017be0e73f603a2b6fe660ef"
+      "sha256": "e1a193938c1c20b791cd876b8324246ba6f5db92017be0e73f603a2b6fe660ef",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP01_2021_20211101_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP01_2021_20211101_5d.mp4",
       "bytes": 6064535,
       "title": "Vento a 100 m — animação",
-      "sha256": "8fdb6e5c436fcb2458ca64e7da8cc5b764444ddc29cc4bb8dab12080b29c6d67"
+      "sha256": "8fdb6e5c436fcb2458ca64e7da8cc5b764444ddc29cc4bb8dab12080b29c6d67",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP01_2022_20221001_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP01_2022_20221001_5d.mp4",
       "bytes": 6122481,
       "title": "Vento a 100 m — animação",
-      "sha256": "53b1328541432577cef98d0f1dfe7f96c9654f9393e6dcd9b9ee4827fc6e53e8"
+      "sha256": "53b1328541432577cef98d0f1dfe7f96c9654f9393e6dcd9b9ee4827fc6e53e8",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP02_2021_20211101_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP02_2021_20211101_5d.mp4",
       "bytes": 6679590,
       "title": "Vento a 100 m — animação",
-      "sha256": "454ade0523b8bfc600ede6eacf67569d96e3394b77d3e4c9b06891c526ca2f08"
+      "sha256": "454ade0523b8bfc600ede6eacf67569d96e3394b77d3e4c9b06891c526ca2f08",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP02_2022_20221001_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP02_2022_20221001_5d.mp4",
       "bytes": 6655682,
       "title": "Vento a 100 m — animação",
-      "sha256": "813cfb4433d4662258ea13ca49e61a3e0c58cd6df23efc911df9959267438c23"
+      "sha256": "813cfb4433d4662258ea13ca49e61a3e0c58cd6df23efc911df9959267438c23",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP03_2021_20211101_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP03_2021_20211101_5d.mp4",
       "bytes": 6890932,
       "title": "Vento a 100 m — animação",
-      "sha256": "5e1562e335c52d3b814870ef8db1bee8070afe446ade0a5722baac575a77045b"
+      "sha256": "5e1562e335c52d3b814870ef8db1bee8070afe446ade0a5722baac575a77045b",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP03_2022_20221001_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP03_2022_20221001_5d.mp4",
       "bytes": 6849508,
       "title": "Vento a 100 m — animação",
-      "sha256": "068dcc78757b9d5697c0f256adb8e87932b9d861e94fdb5a0665411369a5d7f2"
+      "sha256": "068dcc78757b9d5697c0f256adb8e87932b9d861e94fdb5a0665411369a5d7f2",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP04_2021_20211101_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP04_2021_20211101_5d.mp4",
       "bytes": 6192300,
       "title": "Vento a 100 m — animação",
-      "sha256": "210a520b5d1a871ce6cb2d18704b32d569c8b50cae4de6492d69ce734e69551c"
+      "sha256": "210a520b5d1a871ce6cb2d18704b32d569c8b50cae4de6492d69ce734e69551c",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP04_2022_20221001_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP04_2022_20221001_5d.mp4",
       "bytes": 6156216,
       "title": "Vento a 100 m — animação",
-      "sha256": "f78aa618976009269f762be25e035e5e3e58c6eaaebbf9772c6b3d7607aa9e53"
+      "sha256": "f78aa618976009269f762be25e035e5e3e58c6eaaebbf9772c6b3d7607aa9e53",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP05_2021_20211101_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP05_2021_20211101_5d.mp4",
       "bytes": 6282218,
       "title": "Vento a 100 m — animação",
-      "sha256": "c90470ebd53219fac03d10b7fe4f46a4b2a953caebd868f6198e6689f32657da"
+      "sha256": "c90470ebd53219fac03d10b7fe4f46a4b2a953caebd868f6198e6689f32657da",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP05_2022_20221001_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP05_2022_20221001_5d.mp4",
       "bytes": 6201857,
       "title": "Vento a 100 m — animação",
-      "sha256": "bc87d5cdb03f8e7ed43a8feb0e56c4c76cecc987114566904f044d98bb22d356"
+      "sha256": "bc87d5cdb03f8e7ed43a8feb0e56c4c76cecc987114566904f044d98bb22d356",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP06_2021_20211101_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP06_2021_20211101_5d.mp4",
       "bytes": 6297515,
       "title": "Vento a 100 m — animação",
-      "sha256": "21959a1a807276fca5081f233f20c200426f1ed3c8ea221da22fa3a1c35762b8"
+      "sha256": "21959a1a807276fca5081f233f20c200426f1ed3c8ea221da22fa3a1c35762b8",
+      "optional": true
     },
     {
       "source": "figures/animations/wind100_EXP06_2022_20221001_5d.mp4",
       "bundled_as": "assets/interactive/animations/wind100_EXP06_2022_20221001_5d.mp4",
       "bytes": 6202873,
       "title": "Vento a 100 m — animação",
-      "sha256": "21c46fa6f76d0428902bfad471a9e855c7c8c6afb26301ee087801180c058e2b"
+      "sha256": "21c46fa6f76d0428902bfad471a9e855c7c8c6afb26301ee087801180c058e2b",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_LPI_CTL_2022_20221001_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_LPI_CTL_2022_20221001_3d.mp4",
       "bytes": 8315641,
       "title": "Seção vertical — animação",
-      "sha256": "f5f7303b082f79d87b4064daeb2f68c1cc4f72f4f9a2fcad53ce61333241691c"
+      "sha256": "f5f7303b082f79d87b4064daeb2f68c1cc4f72f4f9a2fcad53ce61333241691c",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_LPI_EXP01_2022_20221001_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_LPI_EXP01_2022_20221001_3d.mp4",
       "bytes": 8275114,
       "title": "Seção vertical — animação",
-      "sha256": "7b9ae4f467cb23a40550e39ebe1b10837376269f7685b6102b3ce356583c0074"
+      "sha256": "7b9ae4f467cb23a40550e39ebe1b10837376269f7685b6102b3ce356583c0074",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_LPI_EXP02_2022_20221001_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_LPI_EXP02_2022_20221001_3d.mp4",
       "bytes": 8956062,
       "title": "Seção vertical — animação",
-      "sha256": "b8e1d2d4eeb3a8994b76dde4f44844d1cb6fe041bffda716a75c9a668cb102dc"
+      "sha256": "b8e1d2d4eeb3a8994b76dde4f44844d1cb6fe041bffda716a75c9a668cb102dc",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_LPI_EXP03_2022_20221001_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_LPI_EXP03_2022_20221001_3d.mp4",
       "bytes": 8562250,
       "title": "Seção vertical — animação",
-      "sha256": "1922160c8f43256a7eae47d65e33bcdc54bfe296b7a04898a4472b69230ba845"
+      "sha256": "1922160c8f43256a7eae47d65e33bcdc54bfe296b7a04898a4472b69230ba845",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_LPI_EXP04_2022_20221001_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_LPI_EXP04_2022_20221001_3d.mp4",
       "bytes": 8493664,
       "title": "Seção vertical — animação",
-      "sha256": "d4315e8183480e3a9daa873505a8c26568d51f661eed8f2d833eda1caa5c54c0"
+      "sha256": "d4315e8183480e3a9daa873505a8c26568d51f661eed8f2d833eda1caa5c54c0",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_LPI_EXP05_2022_20221001_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_LPI_EXP05_2022_20221001_3d.mp4",
       "bytes": 8621558,
       "title": "Seção vertical — animação",
-      "sha256": "ca53623e1a696e34e2564e5765703f3447b44e9444588fceb3f16bf84b412e13"
+      "sha256": "ca53623e1a696e34e2564e5765703f3447b44e9444588fceb3f16bf84b412e13",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_LPI_EXP06_2022_20221001_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_LPI_EXP06_2022_20221001_3d.mp4",
       "bytes": 8654811,
       "title": "Seção vertical — animação",
-      "sha256": "9e66fb80bc941b106b845f558da080599a977dffdb36287290219888268603da"
+      "sha256": "9e66fb80bc941b106b845f558da080599a977dffdb36287290219888268603da",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_P0_CTL_2021_20211101_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_P0_CTL_2021_20211101_3d.mp4",
       "bytes": 8101912,
       "title": "Seção vertical — animação",
-      "sha256": "adfbe61593eff0e9fff5d14e36774aadbdb140e743520dd21d0980f22938319e"
+      "sha256": "adfbe61593eff0e9fff5d14e36774aadbdb140e743520dd21d0980f22938319e",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_P0_EXP01_2021_20211101_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_P0_EXP01_2021_20211101_3d.mp4",
       "bytes": 8213570,
       "title": "Seção vertical — animação",
-      "sha256": "ee1553acb2d7938afb6c70cf4da887a9be18bd3b031efdf7442889dc0980a808"
+      "sha256": "ee1553acb2d7938afb6c70cf4da887a9be18bd3b031efdf7442889dc0980a808",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_P0_EXP02_2021_20211101_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_P0_EXP02_2021_20211101_3d.mp4",
       "bytes": 7953186,
       "title": "Seção vertical — animação",
-      "sha256": "fde3dbee52e102b5fc028bc1327e8a544f744d68b3eb7eafb8ebac79264b4d30"
+      "sha256": "fde3dbee52e102b5fc028bc1327e8a544f744d68b3eb7eafb8ebac79264b4d30",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_P0_EXP03_2021_20211101_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_P0_EXP03_2021_20211101_3d.mp4",
       "bytes": 8029167,
       "title": "Seção vertical — animação",
-      "sha256": "a70554fd1aa8fbafa85c94b1fa573c8d4599dfa9cbc8d272f66d53ec8c77769e"
+      "sha256": "a70554fd1aa8fbafa85c94b1fa573c8d4599dfa9cbc8d272f66d53ec8c77769e",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_P0_EXP04_2021_20211101_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_P0_EXP04_2021_20211101_3d.mp4",
       "bytes": 8324891,
       "title": "Seção vertical — animação",
-      "sha256": "cbab4e76f88e100c88a5d66b53a7164983d4e17ce0971228cd186f57856f1fd2"
+      "sha256": "cbab4e76f88e100c88a5d66b53a7164983d4e17ce0971228cd186f57856f1fd2",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_P0_EXP05_2021_20211101_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_P0_EXP05_2021_20211101_3d.mp4",
       "bytes": 8992003,
       "title": "Seção vertical — animação",
-      "sha256": "4b8be7989ffb8578a314e7155bdb5c84f7b33f9ddddebc806053c271a14282ae"
+      "sha256": "4b8be7989ffb8578a314e7155bdb5c84f7b33f9ddddebc806053c271a14282ae",
+      "optional": true
     },
     {
       "source": "figures/animations/xsection_P0_EXP06_2021_20211101_3d.mp4",
       "bundled_as": "assets/interactive/animations/xsection_P0_EXP06_2021_20211101_3d.mp4",
       "bytes": 8837744,
       "title": "Seção vertical — animação",
-      "sha256": "5975a39693dabb47dc727f7f539bfc3693a3fede29cbb026659c79fbcdda7963"
+      "sha256": "5975a39693dabb47dc727f7f539bfc3693a3fede29cbb026659c79fbcdda7963",
+      "optional": true
     },
     {
       "source": "figures/exploration/xsection_LPI_CTL_2022_composite_15local.png",
       "bundled_as": "assets/interactive/exploration/xsection_LPI_CTL_2022_composite_15local.png",
       "bytes": 925776,
       "title": "Seção vertical — composto 15 h local",
-      "sha256": "db69bd7b10c8d205d9fb1bd8de9888914436a843a465502bfee4a17b3c35b5a1"
+      "sha256": "db69bd7b10c8d205d9fb1bd8de9888914436a843a465502bfee4a17b3c35b5a1",
+      "optional": false
     },
     {
       "source": "figures/exploration/xsection_LPI_EXP01_2022_composite_15local.png",
       "bundled_as": "assets/interactive/exploration/xsection_LPI_EXP01_2022_composite_15local.png",
       "bytes": 922095,
       "title": "Seção vertical — composto 15 h local",
-      "sha256": "8708b76e26383a78edce56133fc3b5aa094a14764bfe1f3a67b45f0e4b68ba21"
+      "sha256": "8708b76e26383a78edce56133fc3b5aa094a14764bfe1f3a67b45f0e4b68ba21",
+      "optional": false
     },
     {
       "source": "figures/exploration/xsection_LPI_EXP02_2022_composite_15local.png",
       "bundled_as": "assets/interactive/exploration/xsection_LPI_EXP02_2022_composite_15local.png",
       "bytes": 941806,
       "title": "Seção vertical — composto 15 h local",
-      "sha256": "e1905d1c9f5ed75735f0b7275ccb1de5188b7ed96b749c494ff676f4c68c48f9"
+      "sha256": "e1905d1c9f5ed75735f0b7275ccb1de5188b7ed96b749c494ff676f4c68c48f9",
+      "optional": false
     },
     {
       "source": "figures/exploration/xsection_LPI_EXP03_2022_composite_15local.png",
       "bundled_as": "assets/interactive/exploration/xsection_LPI_EXP03_2022_composite_15local.png",
       "bytes": 938569,
       "title": "Seção vertical — composto 15 h local",
-      "sha256": "0de091f2bc930f45aaf272bde814e579c635330b03023c8916def07f3ba2e996"
+      "sha256": "0de091f2bc930f45aaf272bde814e579c635330b03023c8916def07f3ba2e996",
+      "optional": false
     },
     {
       "source": "figures/exploration/xsection_P0_CTL_2021_composite_15local.png",
       "bundled_as": "assets/interactive/exploration/xsection_P0_CTL_2021_composite_15local.png",
       "bytes": 873639,
       "title": "Seção vertical — composto 15 h local",
-      "sha256": "fb9a5333fdde27314fac9b3965e7da4724ec7c3dee9d74fe5c5d70bd08fba851"
+      "sha256": "fb9a5333fdde27314fac9b3965e7da4724ec7c3dee9d74fe5c5d70bd08fba851",
+      "optional": false
     },
     {
       "source": "figures/exploration/xsection_P0_EXP01_2021_composite_15local.png",
       "bundled_as": "assets/interactive/exploration/xsection_P0_EXP01_2021_composite_15local.png",
       "bytes": 867353,
       "title": "Seção vertical — composto 15 h local",
-      "sha256": "eb89b2ab121d8cb8f50b1e2d24674f48cd361420c9da88989668c85d7e47d6e0"
+      "sha256": "eb89b2ab121d8cb8f50b1e2d24674f48cd361420c9da88989668c85d7e47d6e0",
+      "optional": false
     },
     {
       "source": "figures/exploration/xsection_P0_EXP02_2021_composite_15local.png",
       "bundled_as": "assets/interactive/exploration/xsection_P0_EXP02_2021_composite_15local.png",
       "bytes": 875382,
       "title": "Seção vertical — composto 15 h local",
-      "sha256": "d4ceceb56c97e4bb338bf9dcffc336e7ffd1f6efb67d2db9d6477978724f04cc"
+      "sha256": "d4ceceb56c97e4bb338bf9dcffc336e7ffd1f6efb67d2db9d6477978724f04cc",
+      "optional": false
     },
     {
       "source": "figures/exploration/xsection_P0_EXP03_2021_composite_15local.png",
       "bundled_as": "assets/interactive/exploration/xsection_P0_EXP03_2021_composite_15local.png",
       "bytes": 874183,
       "title": "Seção vertical — composto 15 h local",
-      "sha256": "bf2123544bec4ae39d141c6aade5f99e4b1cf02e38994ae97a39404f66606add"
+      "sha256": "bf2123544bec4ae39d141c6aade5f99e4b1cf02e38994ae97a39404f66606add",
+      "optional": false
     },
     {
       "source": "results/interactive/series/LiDAR_P0_2021.js",
       "bundled_as": "assets/series/LiDAR_P0_2021.js",
       "bytes": 108635,
       "title": "Série horária LiDAR_P0_2021",
-      "sha256": "d1d2440b36b195786a56ec29789c018fec239fa51e32354d0a313ed2f02caac5"
+      "sha256": "d1d2440b36b195786a56ec29789c018fec239fa51e32354d0a313ed2f02caac5",
+      "optional": false
     },
     {
       "source": "results/interactive/series/LiDAR_LPI_2022.js",
       "bundled_as": "assets/series/LiDAR_LPI_2022.js",
       "bytes": 136582,
       "title": "Série horária LiDAR_LPI_2022",
-      "sha256": "b12bb9e0e4566d6c136aa50ad34b7bd962e0931cd8c6c059ca8b7373b30591bf"
+      "sha256": "b12bb9e0e4566d6c136aa50ad34b7bd962e0931cd8c6c059ca8b7373b30591bf",
+      "optional": false
     },
     {
       "source": "results/interactive/series/INMET_81715099999_2021.js",
       "bundled_as": "assets/series/INMET_81715099999_2021.js",
       "bytes": 31537,
       "title": "Série horária INMET_81715099999_2021",
-      "sha256": "949bf76b94e0953f7bc74792ee51163cab1e1e637fe3709d253a202bbad702bc"
+      "sha256": "949bf76b94e0953f7bc74792ee51163cab1e1e637fe3709d253a202bbad702bc",
+      "optional": false
     },
     {
       "source": "results/interactive/series/INMET_81758099999_2021.js",
       "bundled_as": "assets/series/INMET_81758099999_2021.js",
       "bytes": 31704,
       "title": "Série horária INMET_81758099999_2021",
-      "sha256": "a21333a7e7fe3196b0feaedc672211577f0c887ca04ea70ecc7cb19c1bf47a95"
+      "sha256": "a21333a7e7fe3196b0feaedc672211577f0c887ca04ea70ecc7cb19c1bf47a95",
+      "optional": false
     },
     {
       "source": "results/interactive/series/INMET_81798099999_2021.js",
       "bundled_as": "assets/series/INMET_81798099999_2021.js",
       "bytes": 31498,
       "title": "Série horária INMET_81798099999_2021",
-      "sha256": "065dc33b61a24ff3b860a7894033083839748eb7ec6eaee6fa77d92c0faf161f"
+      "sha256": "065dc33b61a24ff3b860a7894033083839748eb7ec6eaee6fa77d92c0faf161f",
+      "optional": false
     },
     {
       "source": "results/interactive/series/INMET_81715099999_2022.js",
       "bundled_as": "assets/series/INMET_81715099999_2022.js",
       "bytes": 32610,
       "title": "Série horária INMET_81715099999_2022",
-      "sha256": "59c8773ed057677180d4878dc44c4c63d6cac82d61a9cfdb965c978deb0ad2c2"
+      "sha256": "59c8773ed057677180d4878dc44c4c63d6cac82d61a9cfdb965c978deb0ad2c2",
+      "optional": false
     },
     {
       "source": "results/interactive/series/INMET_81758099999_2022.js",
       "bundled_as": "assets/series/INMET_81758099999_2022.js",
       "bytes": 32594,
       "title": "Série horária INMET_81758099999_2022",
-      "sha256": "88700e75d498798cd0afea5c12b4cf4f868e048c80c3ff293be2359db12b172b"
+      "sha256": "88700e75d498798cd0afea5c12b4cf4f868e048c80c3ff293be2359db12b172b",
+      "optional": false
     },
     {
       "source": "results/interactive/series/INMET_81835099999_2022.js",
       "bundled_as": "assets/series/INMET_81835099999_2022.js",
       "bytes": 32597,
       "title": "Série horária INMET_81835099999_2022",
-      "sha256": "2d03cae754808edaf61978af526234d274d2b09fd081275152483088eddcaa87"
+      "sha256": "2d03cae754808edaf61978af526234d274d2b09fd081275152483088eddcaa87",
+      "optional": false
     },
     {
       "source": "docs/templates/vendor/leaflet.js",
       "bundled_as": "assets/vendor/leaflet.js",
       "bytes": 147171,
       "title": "Biblioteca leaflet.js",
-      "sha256": "5c9aecfc30e4564519dbdcddcc53a418227dcc7568e619e9762ddcec7609ed47"
+      "sha256": "5c9aecfc30e4564519dbdcddcc53a418227dcc7568e619e9762ddcec7609ed47",
+      "optional": false
     },
     {
       "source": "docs/templates/vendor/leaflet.css",
       "bundled_as": "assets/vendor/leaflet.css",
       "bytes": 10879,
       "title": "Biblioteca leaflet.css",
-      "sha256": "b570abbda963c60b4de4b4ff4b26f9326f53fb2ccf1461fdf0955ca094fb2539"
+      "sha256": "b570abbda963c60b4de4b4ff4b26f9326f53fb2ccf1461fdf0955ca094fb2539",
+      "optional": false
     },
     {
       "source": "docs/templates/vendor/plotly-basic.min.js",
       "bundled_as": "assets/vendor/plotly-basic.min.js",
       "bytes": 1071091,
       "title": "Biblioteca plotly-basic.min.js",
-      "sha256": "138c2e81014b979dc00867a93da55b7605a17495ee78dd7afb433b7f021dfcfa"
+      "sha256": "138c2e81014b979dc00867a93da55b7605a17495ee78dd7afb433b7f021dfcfa",
+      "optional": false
     }
   ],
   "interactive_data": [
@@ -1831,8 +2079,8 @@
   ],
   "index": {
     "path": "results/report/index.html",
-    "bytes": 1665398,
-    "sha256": "7af104cb155ed2611375b6ab40e3bf0d4f1e06a74920d750a9037652d5545bdd"
+    "bytes": 1666168,
+    "sha256": "bcc1d21aa9c91f5b1e9ede3f506cec949cffb800658fd9a4425a8d37b4031d51"
   },
   "builder": "scripts/06_report/build_technical_report.py",
   "editorial_schema_version": 2
