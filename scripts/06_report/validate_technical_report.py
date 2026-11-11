@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 import hashlib
 import json
@@ -18,10 +19,11 @@ from urllib.parse import unquote, urlsplit
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ERA5_LAYER_VARIABLES = {"wind100_mean", "wpd100_mean"}
+ERA5_LAYER_VARIABLES = {"wind100_mean", "wpd100_mean", "constancy100",
+                        "diurnal_amplitude100"}
 BUFFERED_MESHES = {"meqbr_05km_buf", "meqbr_05km_oval_meq02a"}
 REVIEW_IDS = ("mesh-view", "chart-mesh-profile", "res-map", "cost-mode",
-              "tradeoff-mode", "wins-drawer")
+              "tradeoff-mode", "wins-drawer", "f-mode")
 MAIN_SECTIONS = [
     "introducao",
     "resultados-modelo",
@@ -382,7 +384,7 @@ def validate_report(report_dir: Path) -> dict:
     assert {m["name"] for m in report_data.get("meshes", [])} == {
         "meqbr_05km", "meqbr_05km_buf", "meqbr_05km_oval_meq02a"}, "unexpected mesh set"
     assert {row["experiment"] for row in report_data["decision"]["rows"]} == EXPERIMENTS
-    review = validate_review_additions(html, meteo, report_data)
+    review = validate_review_additions(html, meteo, report_data, report_dir)
     validate_javascript(html)
 
     return {
@@ -410,7 +412,8 @@ def validate_report(report_dir: Path) -> dict:
     }
 
 
-def validate_review_additions(html: str, meteo: dict, report_data: dict) -> dict:
+def validate_review_additions(html: str, meteo: dict, report_data: dict,
+                              report_dir: Path) -> dict:
     """Checks added by the 2026-11 review (EXP03 parity, ERA5, meshes, synthesis)."""
     available = [e for e in meteo["entries"] if e.get("available", True)]
     # EXP03 must appear wherever CTL, EXP01 and EXP02 all do. Products that
@@ -439,6 +442,26 @@ def validate_review_additions(html: str, meteo: dict, report_data: dict) -> dict
         assert entry["native_resolution_deg"] == 0.25
         assert {"below_vmin", "above_vmax"} <= set(entry["saturation"])
 
+    # Numeric twin of every georaster (in-browser A - B mode).
+    rasters = [e for e in available if e["kind"] == "georaster"]
+    for entry in rasters:
+        values = entry.get("values") or {}
+        assert values.get("url"), f"missing numeric values: {entry['variable']}/{entry['experiment']}/{entry['period']}"
+        path = report_dir / values["url"]
+        assert path.is_file(), values["url"]
+        ny, nx = values["shape"]
+        text = path.read_text(encoding="ascii")
+        payload = text.split("] = ", 1)[1].strip().rstrip(";").strip('"')
+        assert len(base64.b64decode(payload)) == 2 * ny * nx, values["url"]
+    # Animations for all seven experiments; EXP03 difference maps against CTL.
+    for variable in ("wind100_animation", "xsection_animation"):
+        for period in PERIODS:
+            exps = groups.get((variable, period), set())
+            assert EXPERIMENTS <= exps, f"{variable}/{period} lacks {sorted(EXPERIMENTS - exps)}"
+    for period in PERIODS:
+        assert "EXP03" in groups.get(("difference_vs_ctl", period), set()), \
+            f"difference_vs_ctl/{period} lacks EXP03"
+
     # Spacing-decay profile for the two buffered meshes only.
     profile = report_data.get("mesh_profile", [])
     assert {r["mesh"] for r in profile} == BUFFERED_MESHES, "mesh_spacing_profile meshes"
@@ -458,6 +481,7 @@ def validate_review_additions(html: str, meteo: dict, report_data: dict) -> dict
     assert {r["experiment"] for r in tradeoff["rows"]} == EXPERIMENTS
     return {
         "era5_layers": len(era5),
+        "numeric_layers": len(rasters),
         "mesh_profile_rows": len(profile),
         "x_divider": tradeoff["x_divider"],
         "partition": [tradeoff["partition_lo"], tradeoff["partition_hi"]],

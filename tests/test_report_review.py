@@ -70,3 +70,35 @@ def test_mesh_profile_parses_generation_command(tmp_path):
     assert args["buffer_profile"] == "smoothstep"
     assert args["relax_pre_cells"] == 2 and args["relax_post_cells"] == 3
     assert args["tr"] == 600.0 and args["buffer"] is None
+
+
+def test_numeric_values_round_trip(tmp_path, monkeypatch):
+    import base64
+    import json
+
+    import numpy as np
+    pytest.importorskip("matplotlib")
+    layers = _load("export_interactive_layers",
+                   "scripts/05_exploration/export_interactive_layers.py")
+    monkeypatch.setattr(layers, "REPO_ROOT", tmp_path)
+    lat = np.array([-1.0, 0.0, 1.0])
+    lon = np.array([10.0, 11.0])
+    a = np.array([[1.0, 2.0], [3.0, np.nan], [5.0, 6.0]])     # row 0 = south
+    b = np.full_like(a, 4.0)
+    entries = [{"variable": "v", "experiment": "A", "period": "2021", "_grid": a},
+               {"variable": "v", "experiment": "B", "period": "2021", "_grid": b}]
+    layers.write_values(entries, lat, lon)
+    meta = entries[0]["values"]
+    assert "_grid" not in entries[0]
+    assert meta["shape"] == [3, 2] and meta["row_order"] == "north_first"
+    text = (tmp_path / meta["source"]).read_text()
+    payload = json.loads(text.split("] = ", 1)[1].rstrip().rstrip(";"))
+    q = np.frombuffer(base64.b64decode(payload), dtype="<u2").reshape(3, 2)
+    decoded = np.where(q == meta["nodata"], np.nan, meta["offset"] + q * meta["scale"])
+    expected = a[::-1]
+    assert np.isnan(decoded[1, 1]) and np.isnan(expected[1, 1])
+    ok = np.isfinite(expected)
+    assert np.abs(decoded[ok] - expected[ok]).max() <= meta["scale"] / 2 + 1e-12
+    # Both layers share one quantisation per variable, so A - B is exact up to it.
+    assert entries[1]["values"]["offset"] == meta["offset"]
+    assert entries[1]["values"]["scale"] == meta["scale"]
