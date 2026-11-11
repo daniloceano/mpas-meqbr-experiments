@@ -465,12 +465,6 @@ MEDIA_SPECS = [
     media("spatial_fields", "figures/exploration/mean_fields_CTL_2022.png",
           "Estado médio do controle — outubro de 2022",
           "Mesmas grandezas do painel anterior para o segundo período, permitindo separar diferenças de configuração de diferenças meteorológicas entre os meses."),
-    media("spatial_fields", "figures/exploration/diff_EXP01_vs_CTL_2021_common.png",
-          "Resposta espacial à SST diária corrigida",
-          "Diferenças EXP01 − CTL para vento, densidade de potência, amplitude diurna e SST, sobre a janela completa comum. A resposta combina atualização diária e mudança do estado médio da SST; não identifica isoladamente o efeito da frequência temporal."),
-    media("spatial_fields", "figures/exploration/diff_EXP02_vs_EXP01_2021_common.png",
-          "Resposta espacial ao tratamento de fronteira",
-          "Diferenças EXP02 − EXP01 na janela científica completa e comum de 2021. O uso de horas idênticas evita confundir a mudança de configuração com mudança do tempo meteorológico."),
     media("site_structure", "figures/exploration/xsection_P0_CTL_2021_composite_15local.png",
           "P0 — CTL, composto às 15 h locais",
           "Seção aproximadamente normal à costa em P0 no experimento de referência, mostrando a estrutura térmica e a circulação média às 15 h locais."),
@@ -582,12 +576,6 @@ MEDIA_SPECS = [
     media("added_value", "figures/era5/added_value.png",
           "Ganho ou perda de habilidade frente ao ERA5",
           "Calculado como 100 × [1 − MSE(MPAS)/MSE(ERA5)] usando o mesmo LiDAR e exatamente os mesmos horários. Barras acima de zero indicam que o MPAS remove parte do erro do ERA5; valores negativos indicam perda. As hastes são IC95% por bootstrap em blocos de 24 h; intervalos que cruzam zero não sustentam diferença detectável."),
-    media("added_value", "figures/era5/resource_comparison_CTL_2021.png",
-          "Estrutura espacial MPAS e ERA5 — 2021",
-          "Mapas do recurso eólico a 100 m no CTL e no ERA5, colocados na mesma grade para evidenciar estruturas costeiras adicionadas pelo downscaling."),
-    media("added_value", "figures/era5/resource_comparison_CTL_2022.png",
-          "Estrutura espacial MPAS e ERA5 — 2022",
-          "Comparação equivalente para outubro de 2022; descreve onde o MPAS intensifica ou reduz o recurso em relação à reanálise."),
     media("mechanisms", "figures/selection/sst_forcing_2021.png",
           "SST efetivamente vista pelo modelo",
           "Diagnóstico histórico das execuções anteriores à correção, no primeiro horário da janela de 2021. As células oceânicas muito frias são o valor de preenchimento terrestre que contaminava aquelas forçantes; não pertencem às execuções corrigidas usadas nos resultados atuais."),
@@ -976,6 +964,9 @@ def _enrich_validation(validation: dict | None, media_groups: dict[str, dict]) -
         )
 
 
+RETIRED_VIEWER_PRODUCTS = {"resource_vs_era5", "difference_vs_ctl"}
+
+
 def bundle_interactive_data(report_dir: Path, media_groups: dict[str, dict]) -> tuple[dict | None, dict | None, list[dict]]:
     """Embed panel data and copy every referenced local media asset."""
     validation_path = REPO_ROOT / "results" / "interactive" / "validation_panel.json"
@@ -987,6 +978,11 @@ def bundle_interactive_data(report_dir: Path, media_groups: dict[str, dict]) -> 
     copied = []
     _enrich_validation(validation, media_groups)
     if meteo:
+        # Static MPAS x ERA5 composites and difference-vs-CTL maps are superseded
+        # by the viewer (ERA5 on both sides, in-browser A - B mode); the media
+        # stay in figures/ but are no longer bundled.
+        meteo["entries"] = [e for e in meteo.get("entries", [])
+                            if e.get("variable") not in RETIRED_VIEWER_PRODUCTS]
         target_root = report_dir / "assets" / "interactive"
         for entry in meteo.get("entries", []):
             source_value = entry.get("source")
