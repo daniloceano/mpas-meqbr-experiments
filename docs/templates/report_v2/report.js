@@ -190,8 +190,46 @@
         '<div><b>' + m.experiments.map(function (x) { return '<span class="chip" style="--c:' + color(x) + '"><i></i>' + x + '</span>'; }).join(' ') + '</b>experimentos</div></div>' +
         (m.figure ? '<img src="' + m.figure + '" alt="Malha ' + esc(m.name) + '" loading="lazy">' : '<div class="empty">Figura da malha não produzida.</div>') +
         '<figcaption><code>' + esc(m.name) + '</code>: espaçamento equivalente entre centros de célula (batlow; azul-escuro = menor). Pontos escuros = zona de relaxação lateral; círculo/quadrado = LiDARs; triângulos = estações INMET.</figcaption>';
+      // Spacing-decay sub-view, only for meshes with a buffer (no CTL profile).
+      var prof = (D.mesh_profile || []).filter(function (r) { return r.mesh === m.name; });
+      $('mesh-view').hidden = !prof.length;
+      if (!prof.length) meshView = 'mesh';
+      Array.prototype.forEach.call($('mesh-view').querySelectorAll('button'), function (b) { b.classList.toggle('active', b.dataset.v === meshView); });
+      $('mesh-panel').classList.toggle('show-profile', meshView === 'profile');
+      $('mesh-profile-wrap').hidden = meshView !== 'profile';
+      if (meshView === 'profile') renderMeshProfile(m, prof);
     }
-    tabs.addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b) showMesh(Number(b.dataset.mesh)); });
+    var meshView = 'mesh', currentMesh = 0;
+    segment('mesh-view', function (d) { meshView = d.v; showMesh(currentMesh); });
+    function renderMeshProfile(m, rows) {
+      var c = color(m.experiments[m.experiments.length - 1]);
+      var inner = rows.filter(function (r) { return r.kind === 'interior'; }).sort(function (a, b) { return a.dist_km - b.dist_km; });
+      var relax = rows.filter(function (r) { return r.kind === 'relaxation'; });
+      var theory = rows.filter(function (r) { return r.kind === 'theory'; });
+      var marks = rows.filter(function (r) { return r.kind === 'marker'; });
+      var xs = inner.map(function (r) { return r.dist_km; });
+      var tr = [
+        { type: 'scatter', mode: 'lines', x: xs, y: inner.map(function (r) { return r.p10_km; }), line: { width: 0 }, hoverinfo: 'skip', showlegend: false },
+        { type: 'scatter', mode: 'lines', name: 'p10–p90', x: xs, y: inner.map(function (r) { return r.p90_km; }), fill: 'tonexty', fillcolor: 'rgba(120,120,120,0.22)', line: { width: 0 }, hoverinfo: 'skip' },
+        { type: 'scatter', mode: 'lines', name: 'mediana', x: xs, y: inner.map(function (r) { return r.median_km; }), line: { color: c, width: 1.8 },
+          customdata: inner.map(function (r) { return [r.n, r.p10_km, r.p90_km]; }),
+          hovertemplate: '%{x:.0f} km: mediana %{y:.1f} km (p10 %{customdata[1]:.1f}, p90 %{customdata[2]:.1f}; n = %{customdata[0]})<extra></extra>' },
+        { type: 'scatter', mode: 'markers', name: 'zona de relaxação', x: relax.map(function (r) { return r.dist_km; }), y: relax.map(function (r) { return r.median_km; }),
+          marker: { symbol: 'diamond-open', size: 7, color: '#1a1a1a', line: { width: 1.2 } },
+          customdata: relax.map(function (r) { return r.n; }), hovertemplate: 'relaxação, %{x:.0f} km: mediana %{y:.1f} km (n = %{customdata})<extra></extra>' },
+        { type: 'scatter', mode: 'lines', name: 'perfil pedido', x: theory.map(function (r) { return r.dist_km; }), y: theory.map(function (r) { return r.theory_km; }),
+          line: { color: '#1a1a1a', width: 1.1, dash: 'dash' }, hoverinfo: 'skip' }
+      ];
+      var LBL = { 'area of interest': 'borda da área de interesse', 'end of ramp': 'fim da rampa', 'LBC zone starts': 'início da zona de LBC', 'mesh edge': 'borda da malha' };
+      var shapes = marks.map(function (r) { return { type: 'line', xref: 'x', yref: 'paper', x0: r.dist_km, x1: r.dist_km, y0: 0, y1: 1, line: { color: '#7a7a7a', width: 0.8, dash: 'dot' } }; });
+      var ann = marks.map(function (r) { return { xref: 'x', yref: 'paper', x: r.dist_km, y: 1, text: LBL[r.marker] || r.marker, textangle: -90, xanchor: 'right', yanchor: 'top', showarrow: false, font: { size: 9, color: '#4a4a4a' } }; });
+      plot('chart-mesh-profile', tr, { showlegend: true, legend: { orientation: 'h', y: -0.22, x: 0 }, shapes: shapes, annotations: ann,
+        xaxis: { title: { text: 'distância à borda da área de interesse (km; negativa dentro)' } }, yaxis: { title: { text: 'espaçamento (km)' }, rangemode: 'tozero' } });
+      var r0 = (D.mesh_profile_meta || {})[m.name] || {};
+      $('mesh-profile-note').innerHTML = 'MPAS-Research <code>' + esc(String(r0.mpas_research_sha || '').slice(0, 8)) + '</code>.' +
+        (truthy(r0.theory_reconstructed) ? ' Malha gerada antes de o código ser versionado: o perfil pedido foi reconstruído a partir dos parâmetros registrados no <code>domain.txt</code>.' : '');
+    }
+    tabs.addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b) { currentMesh = Number(b.dataset.mesh); showMesh(currentMesh); } });
     showMesh(0);
 
     // Periods
@@ -210,16 +248,25 @@
 
     // Cost
     var rt = (D.runtime || []).filter(function (r) { return ORDER.indexOf(r.experiment) >= 0; });
-    var costTr = ['2021', '2022'].map(function (p, k) {
-      var rows = rt.filter(function (r) { return String(r.period) === p; });
-      return { type: 'scatter', mode: 'markers', name: PERIOD_LABEL[p],
-        x: rows.map(function (r) { return r.core_hours_per_sim_hour; }), y: rows.map(function (r) { return r.experiment; }),
-        marker: { symbol: k ? 'square-open' : 'circle', size: 8, color: rows.map(function (r) { return color(r.experiment); }), line: { width: 1.4, color: rows.map(function (r) { return color(r.experiment); }) } },
-        customdata: rows.map(function (r) { return [r.mpi_ranks, r.quality]; }),
-        hovertemplate: '%{y} ' + PERIOD_LABEL[p] + ': %{x:.2f} h-núcleo/h simulada<br>%{customdata[0]} ranks · %{customdata[1]}<extra></extra>' };
-    });
-    plot('chart-cost', costTr, { showlegend: true, legend: { orientation: 'h', y: 1.12, x: 0 }, xaxis: { title: { text: 'horas-núcleo por hora simulada' }, rangemode: 'tozero' },
-      yaxis: { categoryorder: 'array', categoryarray: ORDER.slice().reverse() }, margin: { l: 56, r: 12, t: 26, b: 40 } });
+    var ranks = rt.map(function (r) { return num(r.mpi_ranks); }).filter(isFinite);
+    if (ranks.length) $('cost-ranks').textContent = Math.min.apply(null, ranks) + ' a ' + Math.max.apply(null, ranks);
+    function drawCost(mode) {
+      var perCells = mode === 'cells';
+      var costTr = ['2021', '2022'].map(function (p, k) {
+        var rows = rt.filter(function (r) { return String(r.period) === p; });
+        return { type: 'scatter', mode: 'markers', name: PERIOD_LABEL[p],
+          x: rows.map(function (r) { return perCells ? r.core_hours_per_sim_hour / (r.n_cells / 1e5) : r.core_hours_per_sim_hour; }), y: rows.map(function (r) { return r.experiment; }),
+          marker: { symbol: k ? 'square-open' : 'circle', size: 8, color: rows.map(function (r) { return color(r.experiment); }), line: { width: 1.4, color: rows.map(function (r) { return color(r.experiment); }) } },
+          customdata: rows.map(function (r) { return [r.mpi_ranks, r.quality, Number(r.n_cells).toLocaleString('pt-BR')]; }),
+          hovertemplate: '%{y} ' + PERIOD_LABEL[p] + ': %{x:.2f} ' + (perCells ? 'h-núcleo/h simulada por 10⁵ células' : 'h-núcleo/h simulada') +
+            '<br>%{customdata[0]} ranks · %{customdata[2]} células · %{customdata[1]}<extra></extra>' };
+      });
+      plot('chart-cost', costTr, { showlegend: true, legend: { orientation: 'h', y: 1.12, x: 0 },
+        xaxis: { title: { text: perCells ? 'horas-núcleo por hora simulada e por 10⁵ células' : 'horas-núcleo por hora simulada' }, rangemode: 'tozero' },
+        yaxis: { categoryorder: 'array', categoryarray: ORDER.slice().reverse() }, margin: { l: 56, r: 12, t: 26, b: 40 } });
+    }
+    segment('cost-mode', function (d) { drawCost(d.c); });
+    drawCost('hour');
   }
 
   // ======================================================================
@@ -271,7 +318,9 @@
     var overlayA = null, overlayB = null, handle = null, handleX = null;
 
     function find(v, p, e) { return rasters.filter(function (r) { return r.variable === v && String(r.period) === p && r.experiment === e; })[0]; }
-    function experimentsFor(v, p) { return ORDER.filter(function (e) { return find(v, p, e); }); }
+    function experimentsFor(v, p) { return ORDER.concat(['ERA5']).filter(function (e) { return find(v, p, e); }); }
+    var mode = 'values', diffToken = 0;
+    segment('f-mode', function (d) { mode = d.m; render(); });
 
     function clip() {
       if (!overlayB || !handle) return;
@@ -310,6 +359,9 @@
       if (avail.indexOf(b) < 0 || b === a) b = avail.filter(function (x) { return x !== a; })[0] || a;
       select('f-exp-a', avail, a);
       select('f-exp-b', avail.filter(function (x) { return x !== a; }), b);
+      $('f-compare').disabled = mode === 'diff';
+      if (mode === 'diff') { $('f-exp-b').disabled = avail.length < 2; renderDiff(v, p, a, b); return; }
+      diffToken++;
       var compare = $('f-compare').checked && avail.length > 1;
       $('f-exp-b').disabled = !compare;
       var ea = find(v, p, a), eb = compare ? find(v, p, b) : null;
@@ -326,16 +378,56 @@
           '; média de ' + ea.n_hours + ' h (' + esc(ea.window_start) + ' a ' + esc(ea.window_end) + '). ' + esc(ea.limitation || '');
       }
     }
+    // ---- A − B from the numeric twins (assets/interactive/values/*.js) ----
+    function renderDiff(v, p, a, b) {
+      var ea = find(v, p, a), eb = find(v, p, b), token = ++diffToken;
+      if (overlayA) fieldMap.removeLayer(overlayA);
+      if (overlayB) fieldMap.removeLayer(overlayB);
+      overlayA = overlayB = null; ensureHandle(false);
+      $('field-labels').innerHTML = ea && eb ? '<span>' + esc(a) + ' − ' + esc(b) + '</span>' : '';
+      if (!ea || !eb || !ea.values || !eb.values || !ea.values.url || !eb.values.url) {
+        $('field-colorbar').innerHTML = ''; $('field-caption').textContent = 'Valores numéricos indisponíveis para esta combinação.'; return;
+      }
+      $('field-caption').textContent = 'Carregando valores…';
+      loadValues(ea.values, function (qa) {
+        loadValues(eb.values, function (qb) {
+          if (token !== diffToken) return;
+          if (!qa || !qb) { $('field-caption').textContent = 'Falha ao carregar os valores numéricos.'; return; }
+          var A = ea.values, B = eb.values, n = qa.length, d = new Float32Array(n), mags = [];
+          for (var i = 0; i < n; i++) {
+            if (qa[i] === A.nodata || qb[i] === B.nodata) { d[i] = NaN; continue; }
+            d[i] = (A.offset + qa[i] * A.scale) - (B.offset + qb[i] * B.scale);
+            mags.push(Math.abs(d[i]));
+          }
+          if (!mags.length) { $('field-caption').textContent = 'Sem área comum entre ' + a + ' e ' + b + '.'; return; }
+          mags.sort(function (x, y) { return x - y; });
+          var lim = mags[Math.min(mags.length - 1, Math.floor(0.99 * mags.length))] || 1e-6;
+          var ny = A.shape[0], nx = A.shape[1], cv = document.createElement('canvas');
+          cv.width = nx; cv.height = ny;
+          var ctx = cv.getContext('2d'), img = ctx.createImageData(nx, ny), lut = vikLut();
+          for (var k = 0; k < n; k++) {
+            if (!isFinite(d[k])) continue;
+            var t = Math.max(0, Math.min(255, Math.round(255 * (0.5 + 0.5 * d[k] / lim)))), c = lut[t];
+            img.data[4 * k] = c[0]; img.data[4 * k + 1] = c[1]; img.data[4 * k + 2] = c[2]; img.data[4 * k + 3] = 240;
+          }
+          ctx.putImageData(img, 0, 0);
+          overlayA = L.imageOverlay(cv.toDataURL('image/png'), bounds, { opacity: 1 }).addTo(fieldMap);
+          var dec = lim < 2 ? 2 : (lim < 20 ? 1 : 0);
+          $('field-colorbar').innerHTML = '<span>−' + fmt(lim, dec) + '</span><div class="bar" style="background:' + gradient((D.palettes || {}).vik || []) + '"></div><span>+' + fmt(lim, dec) + '</span><span>' + esc(ea.unit) + '</span>';
+          $('field-caption').innerHTML = '<b>' + esc(ea.variable_label) + ': ' + esc(a) + ' − ' + esc(b) + '</b>, ' + (PERIOD_LABEL[p] || p) +
+            '; médias de ' + ea.n_hours + ' h e ' + eb.n_hours + ' h (' + esc(ea.window_start) + ' a ' + esc(ea.window_end) + '). ' +
+            'Escala divergente simétrica em ±p99 de |A − B| (vermelho = A maior). Diferença calculada célula a célula na grade de 0,04°; ' +
+            (a === 'ERA5' || b === 'ERA5' ? 'o ERA5 (0,25°) entra pela célula ERA5 mais próxima, sem suavização. ' : '') +
+            'Quantização dos valores: ' + fmt(A.scale, 4) + ' ' + esc(ea.unit) + '.';
+        });
+      });
+    }
     ['f-var', 'f-period', 'f-exp-a', 'f-exp-b', 'f-compare'].forEach(function (id) { $(id).addEventListener('change', render); });
     render();
 
-    // Derived diagnostics (pre-rendered maps/sections)
-    var diag = entries.filter(function (e) { return e.kind === 'image' && e.variable !== 'resource_vs_era5'; });
-    var products = uniq(diag.map(function (e) { return e.variable; }));
-    select('d-product', products.map(function (k) { return { value: k, label: (vars[k] || {}).label || k }; }), products[0]);
+    // Derived diagnostics: vertical cross-sections (15 h local composites)
+    var rows = entries.filter(function (e) { return e.kind === 'image' && e.variable === 'xsection_composite'; });
     function renderDiag() {
-      var pr = $('d-product').value;
-      var rows = diag.filter(function (e) { return e.variable === pr; });
       var ps = uniq(rows.map(function (e) { return String(e.period); })).sort();
       var p = ps.indexOf($('d-period').value) >= 0 ? $('d-period').value : ps[0];
       select('d-period', ps.map(function (x) { return { value: x, label: PERIOD_LABEL[x] || x }; }), p);
@@ -348,14 +440,24 @@
         $('d-caption').innerHTML = '<b>' + esc(item.variable_label) + ' — ' + esc(e) + ', ' + (PERIOD_LABEL[p] || p) + '.</b> ' + esc(item.caption || item.description || '');
       }
     }
-    ['d-product', 'd-period', 'd-exp'].forEach(function (id) { $(id).addEventListener('change', renderDiag); });
-    if (products.length) renderDiag();
+    ['d-period', 'd-exp'].forEach(function (id) { $(id).addEventListener('change', renderDiag); });
+    if (rows.length) renderDiag();
 
     // Animations
     var anims = entries.filter(function (e) { return e.kind === 'animation'; });
     var aprods = uniq(anims.map(function (e) { return e.variable; }));
     select('a-product', aprods.map(function (k) { return { value: k, label: (vars[k] || {}).label || k }; }), aprods[0]);
     var va = $('a-video-a'), vb = $('a-video-b'), playing = false;
+    // Animations are optional in the bundle (*.mp4 are not versioned): when a
+    // video cannot be loaded, show a short note in its place.
+    [va, vb].forEach(function (v) {
+      var note = document.createElement('div');
+      note.className = 'video-missing'; note.hidden = true;
+      note.textContent = 'Vídeo disponível no pacote completo do relatório (Swell).';
+      v.parentNode.insertBefore(note, v.nextSibling);
+      v.addEventListener('error', function () { v.hidden = true; note.hidden = false; });
+      v.addEventListener('loadeddata', function () { v.hidden = false; note.hidden = true; });
+    });
     function renderAnim() {
       var pr = $('a-product').value;
       var rows = anims.filter(function (e) { return e.variable === pr; });
@@ -402,6 +504,32 @@
   // ======================================================================
   var seriesCache = {};
   var hiddenSources = {};
+  var valueCache = {};
+  function loadValues(v, cb) {
+    var have = window.MEQ_FIELDS && window.MEQ_FIELDS[v.key];
+    if (have) { cb(decodeValues(have)); return; }
+    if (valueCache[v.key]) { valueCache[v.key].push(cb); return; }
+    valueCache[v.key] = [cb];
+    var s = document.createElement('script'); s.src = v.url;
+    s.onload = function () { var raw = window.MEQ_FIELDS && window.MEQ_FIELDS[v.key]; var q = raw ? decodeValues(raw) : null; valueCache[v.key].forEach(function (f) { f(q); }); valueCache[v.key] = null; };
+    s.onerror = function () { valueCache[v.key].forEach(function (f) { f(null); }); valueCache[v.key] = null; };
+    document.head.appendChild(s);
+  }
+  function decodeValues(b64) {
+    var bin = atob(b64), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Uint16Array(bytes.buffer);       // little-endian, as written
+  }
+  var VIK_LUT = null;
+  function vikLut() {
+    if (VIK_LUT) return VIK_LUT;
+    VIK_LUT = [];
+    for (var i = 0; i < 256; i++) {
+      var c = paletteAt('vik', i / 255), m = /rgb\((\d+),(\d+),(\d+)\)/.exec(c);
+      VIK_LUT.push(m ? [+m[1], +m[2], +m[3]] : hexToRgb(c));
+    }
+    return VIK_LUT;
+  }
   function loadSeries(key, url, cb) {
     window.MEQ_SERIES = window.MEQ_SERIES || {};
     if (window.MEQ_SERIES[key]) { cb(window.MEQ_SERIES[key]); return; }
@@ -827,20 +955,6 @@
     plot('chart-resource', tr4, { barmode: 'group', bargap: 0.25, showlegend: true, legend: { orientation: 'h', y: 1.12, x: 0 }, margin: { l: 56, r: 12, t: 30, b: 36 },
       yaxis: { title: { text: 'Δ WPD relativa ao ERA5 (%)' }, zeroline: true, zerolinecolor: '#1a1a1a', zerolinewidth: 0.8 } });
 
-    // Resource maps
-    var maps = (METEO.entries || []).filter(function (e) { return e.variable === 'resource_vs_era5' && e.url && e.available !== false; });
-    function renderRes() {
-      var ex = ORDER.filter(function (e) { return maps.some(function (m) { return m.experiment === e; }); });
-      var e = ex.indexOf($('res-exp').value) >= 0 ? $('res-exp').value : ex[0];
-      select('res-exp', ex, e);
-      var ps = uniq(maps.filter(function (m) { return m.experiment === e; }).map(function (m) { return String(m.period); })).sort();
-      var p = ps.indexOf($('res-period').value) >= 0 ? $('res-period').value : ps[0];
-      select('res-period', ps.map(function (x) { return { value: x, label: PERIOD_LABEL[x] || x }; }), p);
-      var item = maps.filter(function (m) { return m.experiment === e && String(m.period) === p; })[0];
-      if (item) { $('res-img').src = item.url; $('res-img').alt = 'MPAS × ERA5 ' + e; $('res-caption').innerHTML = '<b>' + e + ' × ERA5, ' + (PERIOD_LABEL[p] || p) + '.</b> ' + esc(item.caption || 'Recurso eólico a 100 m na mesma grade.'); }
-    }
-    ['res-exp', 'res-period'].forEach(function (id) { $(id).addEventListener('change', renderRes); });
-    if (maps.length) renderRes();
   }
 
   // ======================================================================
@@ -959,10 +1073,46 @@
     ], { barmode: 'relative', xaxis: { title: { text: '← derrotas · vitórias →' }, zeroline: true, zerolinecolor: '#1a1a1a', zerolinewidth: 1 }, margin: { l: 56, r: 12, t: 8, b: 42 } });
 
     var pts = ORDER.filter(function (e) { return rows[e] && isFinite(num(rows[e].cost)) && isFinite(num(rows[e].lidar_rmse_100)); });
-    plot('chart-tradeoff', [{ type: 'scatter', mode: 'markers+text', x: pts.map(function (e) { return rows[e].cost; }), y: pts.map(function (e) { return rows[e].lidar_rmse_100; }),
-      text: pts, textposition: 'top center', textfont: { size: 10, color: pts.map(color) },
-      marker: { size: 11, color: pts.map(color) }, hovertemplate: '%{text}: %{x:.2f} h-núcleo/h · RMSE %{y:.2f} m s⁻¹<extra></extra>' }],
-      { xaxis: { title: { text: 'horas-núcleo por hora simulada' } }, yaxis: { title: { text: 'RMSE LiDAR médio a 100 m (m s⁻¹)' } } });
+    var TO = D.tradeoff || { rows: [] }, rel = {};
+    TO.rows.forEach(function (r) { rel[r.experiment] = r; });
+    function pct(v) { return (v >= 0 ? '+' : '') + fmt(100 * v, 0) + '%'; }
+    if (isFinite(num(TO.x_divider))) {
+      $('tradeoff-div').textContent = 'custo relativo ' + fmt(TO.x_divider, 2);
+      $('tradeoff-range').textContent = pct(TO.partition_lo - 1) + ' e ' + pct(TO.partition_hi - 1) + ' de custo em relação ao CTL';
+    }
+    function drawTradeoff(mode) {
+      if (mode !== 'rel') {
+        plot('chart-tradeoff', [{ type: 'scatter', mode: 'markers+text', x: pts.map(function (e) { return rows[e].cost; }), y: pts.map(function (e) { return rows[e].lidar_rmse_100; }),
+          text: pts, textposition: 'top center', textfont: { size: 10, color: pts.map(color) },
+          marker: { size: 11, color: pts.map(color) }, hovertemplate: '%{text}: %{x:.2f} h-núcleo/h · RMSE %{y:.2f} m s⁻¹<extra></extra>' }],
+          { xaxis: { title: { text: 'horas-núcleo por hora simulada' } }, yaxis: { title: { text: 'RMSE LiDAR médio a 100 m (m s⁻¹)' } } });
+        return;
+      }
+      var pr = ORDER.filter(function (e) { return rel[e]; });
+      var xs = pr.map(function (e) { return rel[e].cost_rel; }), ys = pr.map(function (e) { return rel[e].rmse_reduction_pct; });
+      var xmin = Math.min.apply(null, xs), xmax = Math.max.apply(null, xs), ymin = Math.min.apply(null, ys), ymax = Math.max.apply(null, ys);
+      var px = 0.08 * (xmax - xmin || 1), py = 0.15 * (ymax - ymin || 1);
+      var X0 = xmin - px, X1 = xmax + px, Y0 = Math.min(ymin, 0) - py, Y1 = Math.max(ymax, 0) + py, xd = TO.x_divider;
+      var q = function (x, y, t, xa, ya) { return { x: x, y: y, xref: 'x', yref: 'y', text: t, showarrow: false, xanchor: xa, yanchor: ya, font: { size: 10, color: '#7a7a7a' } }; };
+      plot('chart-tradeoff', [{ type: 'scatter', mode: 'markers+text', x: xs, y: ys, text: pr, textposition: 'top center', textfont: { size: 10, color: pr.map(color) },
+        marker: { size: 11, color: pr.map(color) }, hovertemplate: '%{text}: custo ×%{x:.2f} do CTL · RMSE %{y:+.1f}% vs CTL<extra></extra>' }],
+        { shapes: [
+            { type: 'line', x0: X0, x1: X1, y0: 0, y1: 0, line: { color: '#1a1a1a', width: 0.8 } },
+            { type: 'line', x0: xd, x1: xd, y0: Y0, y1: Y1, line: { color: '#1a1a1a', width: 0.8, dash: 'dot' } }],
+          annotations: [q(X0, Y1, 'bons e baratos', 'left', 'top'), q(X1, Y1, 'bons e caros', 'right', 'top'),
+            q(X0, Y0, 'ruins e baratos', 'left', 'bottom'), q(X1, Y0, 'ruins e caros', 'right', 'bottom')],
+          xaxis: { title: { text: 'custo relativo ao CTL (horas-núcleo por hora simulada)' }, range: [X0, X1] },
+          yaxis: { title: { text: 'redução do RMSE a 100 m vs CTL (%)' }, range: [Y0, Y1] } });
+    }
+    segment('tradeoff-mode', function (d) { drawTradeoff(d.t); });
+    drawTradeoff('abs');
+
+    // What counts as a win: totals always come from the decision matrix.
+    var wr = ORDER.filter(function (e) { return rows[e]; });
+    if (wr.length) {
+      $('wins-n').textContent = uniq(wr.map(function (e) { return rows[e].pairwise_total; })).join(', ');
+      $('wins-totals').textContent = wr.map(function (e) { return e + ' ' + rows[e].pairwise_wins + '/' + rows[e].pairwise_losses; }).join(' · ');
+    }
   }
 
   function safe(fn, name) {

@@ -465,12 +465,6 @@ MEDIA_SPECS = [
     media("spatial_fields", "figures/exploration/mean_fields_CTL_2022.png",
           "Estado médio do controle — outubro de 2022",
           "Mesmas grandezas do painel anterior para o segundo período, permitindo separar diferenças de configuração de diferenças meteorológicas entre os meses."),
-    media("spatial_fields", "figures/exploration/diff_EXP01_vs_CTL_2021_common.png",
-          "Resposta espacial à SST diária corrigida",
-          "Diferenças EXP01 − CTL para vento, densidade de potência, amplitude diurna e SST, sobre a janela completa comum. A resposta combina atualização diária e mudança do estado médio da SST; não identifica isoladamente o efeito da frequência temporal."),
-    media("spatial_fields", "figures/exploration/diff_EXP02_vs_EXP01_2021_common.png",
-          "Resposta espacial ao tratamento de fronteira",
-          "Diferenças EXP02 − EXP01 na janela científica completa e comum de 2021. O uso de horas idênticas evita confundir a mudança de configuração com mudança do tempo meteorológico."),
     media("site_structure", "figures/exploration/xsection_P0_CTL_2021_composite_15local.png",
           "P0 — CTL, composto às 15 h locais",
           "Seção aproximadamente normal à costa em P0 no experimento de referência, mostrando a estrutura térmica e a circulação média às 15 h locais."),
@@ -582,12 +576,6 @@ MEDIA_SPECS = [
     media("added_value", "figures/era5/added_value.png",
           "Ganho ou perda de habilidade frente ao ERA5",
           "Calculado como 100 × [1 − MSE(MPAS)/MSE(ERA5)] usando o mesmo LiDAR e exatamente os mesmos horários. Barras acima de zero indicam que o MPAS remove parte do erro do ERA5; valores negativos indicam perda. As hastes são IC95% por bootstrap em blocos de 24 h; intervalos que cruzam zero não sustentam diferença detectável."),
-    media("added_value", "figures/era5/resource_comparison_CTL_2021.png",
-          "Estrutura espacial MPAS e ERA5 — 2021",
-          "Mapas do recurso eólico a 100 m no CTL e no ERA5, colocados na mesma grade para evidenciar estruturas costeiras adicionadas pelo downscaling."),
-    media("added_value", "figures/era5/resource_comparison_CTL_2022.png",
-          "Estrutura espacial MPAS e ERA5 — 2022",
-          "Comparação equivalente para outubro de 2022; descreve onde o MPAS intensifica ou reduz o recurso em relação à reanálise."),
     media("mechanisms", "figures/selection/sst_forcing_2021.png",
           "SST efetivamente vista pelo modelo",
           "Diagnóstico histórico das execuções anteriores à correção, no primeiro horário da janela de 2021. As células oceânicas muito frias são o valor de preenchimento terrestre que contaminava aquelas forçantes; não pertencem às execuções corrigidas usadas nos resultados atuais."),
@@ -976,6 +964,9 @@ def _enrich_validation(validation: dict | None, media_groups: dict[str, dict]) -
         )
 
 
+RETIRED_VIEWER_PRODUCTS = {"resource_vs_era5", "difference_vs_ctl"}
+
+
 def bundle_interactive_data(report_dir: Path, media_groups: dict[str, dict]) -> tuple[dict | None, dict | None, list[dict]]:
     """Embed panel data and copy every referenced local media asset."""
     validation_path = REPO_ROOT / "results" / "interactive" / "validation_panel.json"
@@ -987,6 +978,11 @@ def bundle_interactive_data(report_dir: Path, media_groups: dict[str, dict]) -> 
     copied = []
     _enrich_validation(validation, media_groups)
     if meteo:
+        # Static MPAS x ERA5 composites and difference-vs-CTL maps are superseded
+        # by the viewer (ERA5 on both sides, in-browser A - B mode); the media
+        # stay in figures/ but are no longer bundled.
+        meteo["entries"] = [e for e in meteo.get("entries", [])
+                            if e.get("variable") not in RETIRED_VIEWER_PRODUCTS]
         target_root = report_dir / "assets" / "interactive"
         for entry in meteo.get("entries", []):
             source_value = entry.get("source")
@@ -1002,6 +998,19 @@ def bundle_interactive_data(report_dir: Path, media_groups: dict[str, dict]) -> 
             shutil.copy2(source, target)
             entry["url"] = target.relative_to(report_dir).as_posix()
             entry["available"] = True
+            values = entry.get("values")
+            if values:
+                vsource = REPO_ROOT / values["source"]
+                if vsource.exists():
+                    vtarget = target_root / "values" / vsource.name
+                    vtarget.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(vsource, vtarget)
+                    values["url"] = vtarget.relative_to(report_dir).as_posix()
+                    copied.append({
+                        "source": values["source"], "bundled_as": values["url"],
+                        "bytes": vsource.stat().st_size,
+                        "title": f"Valores numéricos {values['key']}",
+                    })
             copied.append({
                 "source": source_value,
                 "bundled_as": entry["url"],
@@ -1219,6 +1228,7 @@ V2_TABLES = {
     "cell_sensitivity": "results/tables/cell_sensitivity.csv",
     "runtime": "results/tables/runtime_metrics.csv",
     "inventory": "results/tables/experiment_inventory.csv",
+    "mesh_profile": "results/tables/mesh_spacing_profile.csv",
 }
 
 MESH_FIGURES = {
@@ -1307,6 +1317,37 @@ def _decision_matrix(data: dict) -> dict:
     ]}
 
 
+def _tradeoff(decision: dict) -> dict:
+    """Error x cost relative to CTL, with the quadrant dividers.
+
+    x = cost / cost(CTL); y = RMSE reduction at 100 m relative to CTL (%).
+    The vertical divider is the midpoint between the smallest and largest
+    relative cost; ``partition_lo``/``partition_hi`` bound the divider
+    positions that leave every experiment in the same quadrant. Descriptive
+    only: no significance is attached to the position.
+    """
+    rows = {r["experiment"]: r for r in decision["rows"]}
+    ctl = rows.get("CTL")
+    if not ctl or not ctl.get("cost") or not ctl.get("lidar_rmse_100"):
+        return {"rows": []}
+    out = []
+    for exp, r in rows.items():
+        if r.get("cost") is None or r.get("lidar_rmse_100") is None:
+            continue
+        out.append({"experiment": exp,
+                    "cost_rel": r["cost"] / ctl["cost"],
+                    "rmse_reduction_pct": 100.0 * (ctl["lidar_rmse_100"] - r["lidar_rmse_100"])
+                    / ctl["lidar_rmse_100"]})
+    xs = sorted(r["cost_rel"] for r in out)
+    divider = 0.5 * (xs[0] + xs[-1])
+    below = [x for x in xs if x < divider]
+    above = [x for x in xs if x > divider]
+    return {"rows": out, "x_divider": divider, "y_divider": 0.0,
+            "cost_rel_min": xs[0], "cost_rel_max": xs[-1],
+            "partition_lo": max(below) if below else xs[0],
+            "partition_hi": min(above) if above else xs[-1]}
+
+
 def build_v2_payload(cfg, report_dir: Path, superseded: set[str],
                      experiments: list[dict], periods: list[dict],
                      media_groups: dict, meteo: dict | None,
@@ -1322,6 +1363,19 @@ def build_v2_payload(cfg, report_dir: Path, superseded: set[str],
             continue
         frame = drop_superseded(pd.read_csv(path), superseded)
         data[key] = _records(frame)
+
+    # Spacing profile: provenance once per mesh, slim numeric rows for the page.
+    keep = ("mesh", "kind", "marker", "dist_km", "n", "median_km", "p10_km",
+            "p90_km", "theory_km")
+    meta_cols = ("mpas_research_sha", "theory_reconstructed", "note", "source",
+                 "grid_path")
+    profile_meta = {}
+    for row in data.get("mesh_profile", []):
+        profile_meta.setdefault(row["mesh"], {k: row.get(k) for k in meta_cols})
+    data["mesh_profile"] = [
+        {k: row[k] for k in keep if row.get(k) is not None}
+        for row in data.get("mesh_profile", [])]
+    data["mesh_profile_meta"] = profile_meta
 
     # Meshes: one card per distinct mesh, listing every experiment on it.
     design_items = {Path(i["url"]).name: i["url"]
@@ -1409,6 +1463,7 @@ def build_v2_payload(cfg, report_dir: Path, superseded: set[str],
         **data,
     }
     payload["decision"] = _decision_matrix(payload)
+    payload["tradeoff"] = _tradeoff(payload["decision"])
     return payload, copied, vendor
 
 
@@ -1515,6 +1570,10 @@ def main() -> int:
     for asset in assets:
         bundled = report_dir / asset["bundled_as"]
         asset["sha256"] = hashlib.sha256(bundled.read_bytes()).hexdigest()
+        # Animations are not versioned (results/report/**/*.mp4 is ignored):
+        # a clone may lack them, so the validator only warns when they are
+        # absent and still checks size and hash when they are present.
+        asset["optional"] = bundled.suffix.lower() == ".mp4"
 
     manifest = {
         "generated_utc": generated,

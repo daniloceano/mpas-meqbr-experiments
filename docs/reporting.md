@@ -38,7 +38,9 @@ interactive view; detail is one click away.
    distinct meshes (not one per experiment), integration windows and cost.
 2. **Simulated fields** — separate tabs for static mean fields (Leaflet map,
    EPSG:4326, coastline and state boundaries, A|B swipe comparison on a shared
-   colour scale), derived diagnostics, and synchronised side-by-side animations.
+   colour scale with ERA5 selectable, and an in-browser A − B difference mode),
+   vertical cross-sections (15 h local composites), and synchronised side-by-side
+   animations.
 3. **Observation network** — map of LiDARs and INMET stations; clicking a point
    loads its paired hourly series (observation, ERA5, seven experiments), the
    mean diurnal cycle, the speed distribution and its metrics.
@@ -46,7 +48,8 @@ interactive view; detail is one click away.
    metric switch), confidence-interval chart and pairwise-test matrix for the
    selected unit, LiDAR vertical profiles, and per-network summary.
 5. **Added value vs ERA5** — Murphy skill with CIs (LiDAR and INMET), month
-   representativeness, domain resource difference and MPAS × ERA5 maps.
+   representativeness and domain resource difference (MPAS × ERA5 maps live in
+   chapter 2's field viewer).
 6. **Physical coherence** — hypothesis → evidence → verdict blocks (SST chain,
    boundary influence, EXP04–06 contrast matrix, EXP06 skin SST, cell sensitivity).
 7. **Synthesis** — criteria × experiment matrix without weights, pairwise

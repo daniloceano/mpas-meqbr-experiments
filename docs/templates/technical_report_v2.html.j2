@@ -62,7 +62,19 @@
     <p>CTL, EXP01, EXP04, EXP05 e EXP06 compartilham a mesma malha; somente
       EXP02 e EXP03 alteram a geometria.</p>
     <div class="tabs" id="mesh-tabs" role="tablist"></div>
+    <div class="seg" id="mesh-view" role="radiogroup" aria-label="Vista da malha" hidden>
+      <button type="button" data-v="mesh" class="active">Malha</button><button type="button" data-v="profile">Decaimento da resolução</button>
+    </div>
     <figure class="panel" id="mesh-panel"></figure>
+    <div id="mesh-profile-wrap" hidden>
+      <div class="chart" id="chart-mesh-profile" style="height:320px"></div>
+      <p class="caption">Espaçamento entre centros de célula, √(2·área/√3), contra a
+        distância geodésica à borda da área de interesse (negativa dentro, positiva
+        fora). Linha cheia = mediana por faixa de 10 km; faixa sombreada = p10–p90;
+        losangos = células da zona de relaxação; tracejado preto = perfil pedido na
+        geração da malha. Convenção de <code>create_regional_grid.py</code>
+        (MPAS-Research/usp-utils); <span id="mesh-profile-note"></span></p>
+    </div>
 
     <div class="grid-2">
       <div>
@@ -74,9 +86,16 @@
       </div>
       <div>
         <h3>Custo computacional</h3>
+        <div class="seg" id="cost-mode" role="radiogroup" aria-label="Normalização do custo">
+          <button type="button" data-c="hour" class="active">por hora simulada</button><button type="button" data-c="cells">por 10⁵ células</button>
+        </div>
         <div class="chart" id="chart-cost" style="height:190px"></div>
-        <p class="caption"><b>b</b> Horas-núcleo por hora simulada. Mede custo
-          normalizado, não escalabilidade nem tempo de fila.</p>
+        <p class="caption"><b>b</b> Horas-núcleo por hora simulada, ou o mesmo valor
+          dividido pelo número de células da malha (em 10⁵). Mede custo normalizado,
+          não escalabilidade nem tempo de fila. Os ranks MPI variam de
+          <span id="cost-ranks">—</span> entre as execuções, de modo que a
+          normalização mistura eficiência de paralelismo e tamanho da malha; separar
+          os dois efeitos é tema do benchmark MEQ-05.</p>
       </div>
     </div>
 
@@ -109,6 +128,9 @@
     </div>
 
     <div class="tabpane active" id="fields-static">
+      <div class="seg" id="f-mode" role="radiogroup" aria-label="Modo do mapa">
+        <button type="button" data-m="values" class="active">Valores</button><button type="button" data-m="diff">Diferença A − B</button>
+      </div>
       <div class="controls">
         <label>Variável <select id="f-var"></select></label>
         <label>Período <select id="f-period"></select></label>
@@ -124,12 +146,16 @@
       <p class="caption" id="field-caption"></p>
       <p class="caption small">WPD = ½ ρ ⟨U³⟩ com ρ = 1,15 kg m⁻³, cubo calculado
         hora a hora antes da média. No modo comparação, arraste a barra vertical
-        sobre o mapa para revelar cada experimento (mesma escala de cores).</p>
+        sobre o mapa para revelar cada experimento (mesma escala de cores). O ERA5
+        está disponível nos dois lados para vento, densidade de potência, constância e
+        amplitude diurna a 100 m (célula ERA5 de 0,25° mais próxima, na escala dos campos
+        MPAS); não há equivalente ERA5 para a SST. No modo diferença, A − B é calculado
+        a partir dos valores numéricos de cada camada, em escala divergente.</p>
     </div>
 
     <div class="tabpane" id="fields-diag">
+      <h3>Seções verticais</h3>
       <div class="controls">
-        <label>Produto <select id="d-product"></select></label>
         <label>Período <select id="d-period"></select></label>
         <label>Experimento <select id="d-exp"></select></label>
       </div>
@@ -306,15 +332,12 @@
         <h3>Recurso no domínio: MPAS − ERA5</h3>
         <div class="chart" id="chart-resource" style="height:300px"></div>
         <p class="caption">Diferença relativa da densidade de potência média no
-          domínio (MPAS − ERA5)/ERA5, na mesma grade e horas.</p>
+          domínio (MPAS − ERA5)/ERA5, na mesma grade e horas. Os mapas de MPAS e
+          ERA5, lado a lado ou como diferença, estão em
+          <a href="#resultados-modelo">Campos simulados</a> (ERA5 selecionável e modo
+          diferença A − B).</p>
       </div>
     </div>
-    <h3>Mapas MPAS × ERA5</h3>
-    <div class="controls compact">
-      <label>Experimento <select id="res-exp"></select></label>
-      <label>Período <select id="res-period"></select></label>
-    </div>
-    <figure class="panel"><img id="res-img" alt=""><figcaption id="res-caption"></figcaption></figure>
     <nav class="pager"><a href="#validacao">← Validação</a><a href="#mecanismos">Física →</a></nav>
   </section>
 
@@ -411,6 +434,9 @@
       </div>
       <div>
         <h3>Erro × custo</h3>
+        <div class="seg" id="tradeoff-mode" role="radiogroup" aria-label="Escala do gráfico erro × custo">
+          <button type="button" data-t="abs" class="active">absoluto</button><button type="button" data-t="rel">normalizado</button>
+        </div>
         <div class="chart" id="chart-tradeoff" style="height:280px"></div>
       </div>
     </div>
@@ -419,8 +445,29 @@
       Cada vitória indica menor MSE com IC95% da diferença excluindo zero;
       o saldo não é probabilidade de superioridade nem reúne testes independentes.
       As comparações são exploratórias, sem ajuste global para multiplicidade.
-      <b>b</b> RMSE LiDAR médio a 100 m contra horas-núcleo por hora simulada;
-      canto inferior esquerdo é preferível.</p>
+      <b>b</b> Absoluto: RMSE LiDAR médio a 100 m contra horas-núcleo por hora
+      simulada; canto inferior esquerdo é preferível. Normalizado: custo relativo
+      ao CTL contra a redução do RMSE a 100 m em relação ao CTL (%). Divisores:
+      redução nula (horizontal) e ponto médio entre o menor e o maior custo
+      relativo (vertical, <span id="tradeoff-div">—</span>). A posição é descritiva,
+      sem significância estatística; a partição atual se mantém para divisores
+      entre <span id="tradeoff-range">—</span>.</p>
+    <details class="drawer" id="wins-drawer">
+      <summary>O que conta como vitória</summary>
+      <ul>
+        <li>Só LiDAR: P0 (nov 2021) e LPI (out 2022); as estações INMET não entram.</li>
+        <li>Alturas de 50 a 200 m; P0/250 m é descritivo e fica fora.</li>
+        <li>Para cada par, ΔMSE = MSE(A) − MSE(B) nas horas comuns.</li>
+        <li>IC95% por bootstrap em blocos de 24 h que não atravessam lacunas
+          observacionais, 2000 reamostragens; vitória quando o IC exclui zero.</li>
+        <li>Sem ajuste de multiplicidade; cada experimento entra em
+          <span id="wins-n">—</span> testes (6 oponentes × 8 unidades sítio–altura).</li>
+        <li>Totais (vitórias / derrotas): <span id="wins-totals">—</span>.</li>
+      </ul>
+      <p>A mudança de EXP01 × EXP02 de 8/8 sem diferença para 6/1/1 vem da troca
+        para o bootstrap que respeita lacunas (b8515c6, publicado em 37d2f56): mesmo
+        n e mesmas estimativas pontuais; só os intervalos de confiança mudaram.</p>
+    </details>
 
     <div class="conclusion">
       <h3>Conclusão</h3>
@@ -434,9 +481,12 @@
           EXP05 degrada em P0; EXP06 não se distingue de EXP05 nos oito contrastes.</li>
         <li><b>O tratamento de fronteira (EXP02) atua</b>, mas longe dos instrumentos.</li>
       </ol>
-      <p class="verdict">Nenhuma configuração é ratificada para a climatologia por
-        este relatório: a evidência cobre um mês por sítio, e novembro de 2021 foi
-        atípico em P0.</p>
+      <p class="verdict">A EXP03 (malha oval MEQ-02A) foi
+        adotada pelo pesquisador e pelo supervisor como melhor candidata para a
+        etapa seguinte (DEC-MEQ-001, 10/11/2026). A escolha não demonstra superioridade universal nem ratifica
+        configuração alguma para a climatologia: a evidência cobre um mês por sítio,
+        novembro de 2021 foi atípico em P0 e os contrastes pareados não têm ajuste
+        global de multiplicidade.</p>
     </div>
     <details class="drawer">
       <summary>O que ainda não é possível concluir</summary>

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 import hashlib
 import json
@@ -11,6 +12,7 @@ import math
 import re
 import shutil
 import subprocess
+import sys
 from collections import Counter, defaultdict
 from html.parser import HTMLParser
 from pathlib import Path
@@ -18,6 +20,13 @@ from urllib.parse import unquote, urlsplit
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+ERA5_LAYER_VARIABLES = {"wind100_mean", "wpd100_mean", "constancy100",
+                        "diurnal_amplitude100"}
+BUFFERED_MESHES = {"meqbr_05km_buf", "meqbr_05km_oval_meq02a"}
+REVIEW_IDS = ("mesh-view", "chart-mesh-profile", "chart-resource", "cost-mode",
+              "tradeoff-mode", "wins-drawer", "f-mode")
+RETIRED_IDS = ("res-map", "res-var", "res-exp", "res-period", "d-product")
+RETIRED_PRODUCTS = {"resource_vs_era5", "difference_vs_ctl"}
 MAIN_SECTIONS = [
     "introducao",
     "resultados-modelo",
@@ -161,8 +170,14 @@ def validate_report(report_dir: Path) -> dict:
         validate_record(record, REPO_ROOT)
     for record in manifest.get("interactive_data", []):
         validate_record(record, REPO_ROOT)
+    warnings: list[str] = []
+    optional_missing: set[str] = set()
     for asset in manifest.get("assets", []):
         bundled = report_dir / asset["bundled_as"]
+        if asset.get("optional") and not bundled.is_file():
+            warnings.append(f"optional asset absent: {asset['bundled_as']}")
+            optional_missing.add(asset["bundled_as"])
+            continue
         assert bundled.is_file(), f"missing asset: {asset['bundled_as']}"
         assert bundled.stat().st_size == asset["bytes"], asset["bundled_as"]
         assert sha256(bundled) == asset["sha256"], asset["bundled_as"]
@@ -312,9 +327,15 @@ def validate_report(report_dir: Path) -> dict:
     available = [entry for entry in meteo["entries"] if entry.get("available", True)]
     assert available, "no available meteorological entries"
     for entry in available:
-        assert entry["experiment"] in EXPERIMENTS
+        if entry.get("reference"):
+            # ERA5 layers ride on the MPAS colour scale (checked below).
+            assert entry["experiment"] == "ERA5", entry["experiment"]
+            assert entry["variable"] in ERA5_LAYER_VARIABLES, entry["variable"]
+        else:
+            assert entry["experiment"] in EXPERIMENTS
         assert entry["period"] in PERIODS
-        assert (report_dir / entry["url"]).is_file(), entry["url"]
+        assert (entry["url"] in optional_missing
+                or (report_dir / entry["url"]).is_file()), entry["url"]
         coverage[entry["variable"]].add((entry["experiment"], entry["period"]))
         if entry["kind"] == "georaster":
             scales[entry["variable"]].add((entry["vmin"], entry["vmax"]))
@@ -347,7 +368,9 @@ def validate_report(report_dir: Path) -> dict:
         "0,41 significa redução de 41% do MSE",
         "P0/250 m é descritivo",
         "As sete configurações estão completas",
-        "Nenhuma configuração é ratificada para a climatologia",
+        "adotada pelo pesquisador e pelo supervisor",
+        "DEC-MEQ-001",
+        "não demonstra superioridade universal",
         "EXP06 não se distingue de EXP05 nos oito contrastes",
         "landmask == 0",
     ):
@@ -371,9 +394,14 @@ def validate_report(report_dir: Path) -> dict:
     assert {m["name"] for m in report_data.get("meshes", [])} == {
         "meqbr_05km", "meqbr_05km_buf", "meqbr_05km_oval_meq02a"}, "unexpected mesh set"
     assert {row["experiment"] for row in report_data["decision"]["rows"]} == EXPERIMENTS
+    review = validate_review_additions(html, meteo, report_data, report_dir)
     validate_javascript(html)
 
+    for warning in warnings:
+        print(f"WARNING: {warning}", file=sys.stderr)
     return {
+        "warnings": warnings,
+        "review_checks": review,
         "sections": len(parser.section_ids),
         "ids": len(parser.ids),
         "local_references": len(parser.references),
@@ -394,6 +422,88 @@ def validate_report(report_dir: Path) -> dict:
         "meteorological_variables": len(meteo["variables"]),
         "shorter_animation_windows": shorter_windows,
         "index_sha256": manifest["index"]["sha256"],
+    }
+
+
+def validate_review_additions(html: str, meteo: dict, report_data: dict,
+                              report_dir: Path) -> dict:
+    """Checks added by the 2026-11 review (EXP03 parity, ERA5, meshes, synthesis)."""
+    available = [e for e in meteo["entries"] if e.get("available", True)]
+    # EXP03 must appear wherever CTL, EXP01 and EXP02 all do. Products that
+    # are themselves differences against CTL (difference_vs_ctl) never list CTL
+    # and are therefore outside this rule.
+    groups: dict[tuple[str, str], set[str]] = defaultdict(set)
+    for entry in available:
+        groups[(entry["variable"], str(entry["period"]))].add(entry["experiment"])
+    for (variable, period), exps in groups.items():
+        if {"CTL", "EXP01", "EXP02"} <= exps:
+            assert "EXP03" in exps, f"EXP03 missing from {variable}/{period}: {sorted(exps)}"
+    resource = {(r["experiment"], str(r["period"])) for r in report_data["resource"]}
+    for period in PERIODS:
+        for exp in ("CTL", "EXP01", "EXP02", "EXP03"):
+            assert (exp, period) in resource, f"resource_comparison lacks {exp}/{period}"
+
+    # ERA5 layers: both variables and periods, on the MPAS scale, documented.
+    era5 = [e for e in available if e.get("reference")]
+    assert {(e["variable"], str(e["period"])) for e in era5} == {
+        (v, p) for v in ERA5_LAYER_VARIABLES for p in PERIODS}, "incomplete ERA5 layers"
+    for entry in era5:
+        mpas = {(e["vmin"], e["vmax"]) for e in available
+                if e["variable"] == entry["variable"] and e["kind"] == "georaster"
+                and not e.get("reference")}
+        assert mpas == {(entry["vmin"], entry["vmax"])}, f"ERA5 off the MPAS scale: {entry['variable']}"
+        assert entry["native_resolution_deg"] == 0.25
+        assert {"below_vmin", "above_vmax"} <= set(entry["saturation"])
+
+    # Numeric twin of every georaster (in-browser A - B mode).
+    rasters = [e for e in available if e["kind"] == "georaster"]
+    for entry in rasters:
+        values = entry.get("values") or {}
+        assert values.get("url"), f"missing numeric values: {entry['variable']}/{entry['experiment']}/{entry['period']}"
+        path = report_dir / values["url"]
+        assert path.is_file(), values["url"]
+        ny, nx = values["shape"]
+        text = path.read_text(encoding="ascii")
+        payload = text.split("] = ", 1)[1].strip().rstrip(";").strip('"')
+        assert len(base64.b64decode(payload)) == 2 * ny * nx, values["url"]
+    # Animations for all seven experiments; EXP03 difference maps against CTL.
+    for variable in ("wind100_animation", "xsection_animation"):
+        for period in PERIODS:
+            exps = groups.get((variable, period), set())
+            assert EXPERIMENTS <= exps, f"{variable}/{period} lacks {sorted(EXPERIMENTS - exps)}"
+    # Sections retired on 2026-11-11: static MPAS x ERA5 maps and the
+    # difference-vs-CTL tab (both superseded by the field viewer).
+    for required_id in RETIRED_IDS:
+        assert f'id="{required_id}"' not in html, f"retired component still present: {required_id}"
+    assert "Mapas MPAS × ERA5" not in html
+    assert not {e["variable"] for e in meteo["entries"]} & RETIRED_PRODUCTS, "retired viewer product bundled"
+    assert "Recurso no domínio" in html
+    assert 'href="#resultados-modelo">Campos simulados</a> (ERA5 selecionável' in html, \
+        "missing pointer from the resource chart to Campos simulados"
+
+    # Spacing-decay profile for the two buffered meshes only.
+    profile = report_data.get("mesh_profile", [])
+    assert {r["mesh"] for r in profile} == BUFFERED_MESHES, "mesh_spacing_profile meshes"
+    for mesh_name in BUFFERED_MESHES:
+        kinds = Counter(r["kind"] for r in profile if r["mesh"] == mesh_name)
+        assert kinds["interior"] and kinds["relaxation"] and kinds["theory"], mesh_name
+        assert kinds["marker"] == 4, mesh_name
+
+    for required_id in REVIEW_IDS:
+        assert f'id="{required_id}"' in html, f"missing interactive component: {required_id}"
+    assert "O que conta como vitória" in html
+
+    # Cost divider of the normalised error x cost chart inside the observed range.
+    tradeoff = report_data["tradeoff"]
+    assert tradeoff["cost_rel_min"] <= tradeoff["x_divider"] <= tradeoff["cost_rel_max"]
+    assert tradeoff["partition_lo"] < tradeoff["x_divider"] < tradeoff["partition_hi"]
+    assert {r["experiment"] for r in tradeoff["rows"]} == EXPERIMENTS
+    return {
+        "era5_layers": len(era5),
+        "numeric_layers": len(rasters),
+        "mesh_profile_rows": len(profile),
+        "x_divider": tradeoff["x_divider"],
+        "partition": [tradeoff["partition_lo"], tradeoff["partition_hi"]],
     }
 
 

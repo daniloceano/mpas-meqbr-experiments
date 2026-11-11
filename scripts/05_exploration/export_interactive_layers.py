@@ -14,6 +14,7 @@ Output: results/interactive/meteorological_viewer.json
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import re
 import sys
@@ -24,10 +25,11 @@ matplotlib.use("Agg")
 import matplotlib.colors as mcolors                       # noqa: E402
 import matplotlib.pyplot as plt                            # noqa: E402
 import numpy as np                                         # noqa: E402
+import pandas as pd                                        # noqa: E402
 import xarray as xr                                        # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
-from mpas_meqbr import fields, mesh, plotting              # noqa: E402
+from mpas_meqbr import era5, fields, mesh, metrics, plotting  # noqa: E402
 from mpas_meqbr.config import REPO_ROOT, load_config       # noqa: E402
 
 
@@ -63,6 +65,152 @@ VARIABLES = {
         "mask": "ocean",
     },
 }
+
+
+ERA5_VARIABLES = ("wind100_mean", "wpd100_mean", "constancy100",
+                  "diurnal_amplitude100")
+ERA5_NATIVE_DEG = 0.25
+
+
+def era5_layers(cfg, loaded, scales, lat_grid, lon_grid, layer_dir) -> list[dict]:
+    """ERA5 100 m layers on the viewer lattice, on the MPAS colour scale.
+
+    Same hourly window as the MPAS caches of each period (taken from their
+    attributes) and the same definitions as the MPAS caches
+    (mpas_meqbr.fields): mean speed; WPD = 0.5 * rho * mean(U^3) as in
+    scripts/04_era5/resource_comparison.py; directional constancy
+    |vector mean| / scalar mean; diurnal amplitude = max - min of the
+    local-hour (UTC-3) mean speed. Nearest ERA5 cell onto the 0.04 deg
+    lattice, no smoothing. ERA5 has no SST equivalent here and is not
+    exported for sst_mean. vmin/vmax come from the MPAS layers only, so ERA5 values
+    outside that range saturate; the fraction that does is recorded.
+    """
+    entries = []
+    for period in sorted({p for _, p in loaded}):
+        refs = [ds for (e, p), ds in loaded.items() if p == period]
+        windows = {(ds.attrs["window_start"], ds.attrs["window_end"]) for ds in refs}
+        if len(windows) != 1:
+            print(f"WARNING: [ERA5 {period}] MPAS caches disagree on the window "
+                  f"{sorted(windows)} — ERA5 layer skipped", file=sys.stderr)
+            continue
+        start, end = windows.pop()
+        try:
+            ds = era5.open_periods(cfg.era5_periods_dir, period)
+        except FileNotFoundError as exc:
+            print(f"WARNING: [ERA5 {period}] {exc} — ERA5 layer skipped",
+                  file=sys.stderr)
+            continue
+        ds = ds.sel(time=slice(start, end))
+        ds = era5.subset_box(ds, EXTENT[2] - 0.5, EXTENT[3] + 0.5,
+                             EXTENT[0] - 0.5, EXTENT[1] + 0.5)
+        u100, v100 = ds["u100"].values, ds["v100"].values
+        speed = np.hypot(u100, v100)
+        n_hours = int(speed.shape[0])
+        local_hour = (pd.DatetimeIndex(ds["time"].values).hour
+                      + fields.TZ_OFFSET_HOURS) % 24
+        diurnal = np.stack([speed[local_hour == h].mean(axis=0) for h in range(24)])
+        values = {
+            "wind100_mean": speed.mean(axis=0),
+            "wpd100_mean": 0.5 * metrics.AIR_DENSITY * (speed ** 3).mean(axis=0),
+            "constancy100": np.hypot(u100.mean(axis=0), v100.mean(axis=0))
+            / np.maximum(speed.mean(axis=0), 1e-9),
+            "diurnal_amplitude100": diurnal.max(axis=0) - diurnal.min(axis=0),
+        }
+        lat_e = ds["latitude"].values
+        lon_e = ds["longitude"].values
+        ds.close()
+        # Nearest ERA5 cell centre for every lattice point (regular grid).
+        iy = np.abs(lat_grid[:, None] - lat_e[None, :]).argmin(axis=1)
+        ix = np.abs(lon_grid[:, None] - lon_e[None, :]).argmin(axis=1)
+        # Ocean mask for WPD: the MPAS landmask of this period's first cache,
+        # nearest cell on the same lattice, so both sides of the swipe hide
+        # the same land.
+        ref = refs[0]
+        land = mesh.regrid_to_latlon(
+            ref["landmask"].values.astype(float), ref["lat"].values,
+            ref["lon"].values, lat_grid, lon_grid, max_distance_km=8.0)
+        for variable in ERA5_VARIABLES:
+            spec = VARIABLES[variable]
+            grid = values[variable][np.ix_(iy, ix)].astype(float)
+            if spec["mask"] == "ocean":
+                grid = np.where(land == 0, grid, np.nan)
+            vmin, vmax = scales[variable]
+            finite = grid[np.isfinite(grid)]
+            below = float((finite < vmin).mean()) if finite.size else 0.0
+            above = float((finite > vmax).mean()) if finite.size else 0.0
+            normal = mcolors.Normalize(vmin=vmin, vmax=vmax, clip=True)
+            rgba = plotting.get_cmap(spec["cmap"])(normal(grid))
+            rgba[..., 3] = np.where(np.isfinite(grid), 0.94, 0.0)
+            output = layer_dir / f"{variable}_ERA5_{period}.png"
+            plt.imsave(output, rgba, origin="lower")
+            entries.append({
+                "experiment": "ERA5", "period": period,
+                "variable": variable, "variable_label": spec["label"],
+                "kind": "georaster", "source": output.relative_to(REPO_ROOT).as_posix(),
+                "unit": spec["unit"], "vmin": float(vmin), "vmax": float(vmax),
+                "colour_stops": colour_stops(spec["cmap"]),
+                "window_start": start, "window_end": end, "n_hours": n_hours,
+                "projection": "EPSG:4326 / Plate Carrée", "extent": EXTENT,
+                "georeferenced": True, "reference": True,
+                "native_resolution_deg": ERA5_NATIVE_DEG,
+                "scale_source": "MPAS (CTL–EXP06) only",
+                "_grid": grid,
+                "saturation": {"below_vmin": below, "above_vmax": above},
+                "limitation": (
+                    "ERA5 0.25° shown by nearest ERA5 cell on the 0.04° lattice "
+                    "(no smoothing); colour scale from the MPAS layers only, so "
+                    f"{100 * below:.1f}% of cells saturate low and "
+                    f"{100 * above:.1f}% saturate high."
+                    + (" Land masked with the MPAS landmask." if spec["mask"] == "ocean" else "")),
+            })
+    return entries
+
+
+VALUES_NODATA = 65535
+
+
+def write_values(entries: list[dict], lat_grid, lon_grid) -> None:
+    """Numeric twin of every georaster, for the in-browser A - B mode.
+
+    The PNG layers carry colours only. Each lattice is also written as a
+    lazily loaded script (works on file://, where canvas pixel reads of
+    images are blocked): uint16 little-endian, north row first, quantised
+    linearly between the variable's global min and max over all layers
+    (MPAS and ERA5), NaN -> 65535. The quantisation step is recorded.
+    """
+    out_dir = REPO_ROOT / "results" / "interactive" / "values"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    rasters = [e for e in entries if "_grid" in e]
+    bounds = {}
+    for entry in rasters:
+        finite = entry["_grid"][np.isfinite(entry["_grid"])]
+        if finite.size:
+            lo, hi = bounds.get(entry["variable"], (np.inf, -np.inf))
+            bounds[entry["variable"]] = (min(lo, float(finite.min())),
+                                         max(hi, float(finite.max())))
+    for entry in rasters:
+        grid = entry.pop("_grid")
+        lo, hi = bounds[entry["variable"]]
+        span = (hi - lo) or 1.0
+        q = np.full(grid.shape, VALUES_NODATA, dtype="<u2")
+        ok = np.isfinite(grid)
+        q[ok] = np.rint((grid[ok] - lo) / span * (VALUES_NODATA - 1)).astype("<u2")
+        q = q[::-1]                                   # north row first
+        key = f"{entry['variable']}_{entry['experiment']}_{entry['period']}"
+        payload = base64.b64encode(np.ascontiguousarray(q).tobytes()).decode("ascii")
+        path = out_dir / f"{key}.js"
+        path.write_text(
+            "(window.MEQ_FIELDS = window.MEQ_FIELDS || {})[" + json.dumps(key)
+            + "] = " + json.dumps(payload) + ";\n", encoding="ascii")
+        entry["values"] = {
+            "source": path.relative_to(REPO_ROOT).as_posix(), "key": key,
+            "encoding": "uint16-le-base64", "row_order": "north_first",
+            "shape": [int(q.shape[0]), int(q.shape[1])],
+            "lat": [float(lat_grid[0]), float(lat_grid[-1])],
+            "lon": [float(lon_grid[0]), float(lon_grid[-1])],
+            "offset": lo, "scale": span / (VALUES_NODATA - 1),
+            "nodata": VALUES_NODATA,
+        }
 
 
 def colour_stops(cmap_name: str) -> list[dict]:
@@ -156,6 +304,12 @@ def main() -> int:
             path = REPO_ROOT / "results" / "fields" / f"{experiment}_{period}_fields.nc"
             if path.exists():
                 loaded[(experiment, period)] = xr.open_dataset(path).load()
+            else:
+                # Never drop an experiment silently: a missing cache once removed
+                # EXP03 from every map of the published report (commit 37d2f56).
+                print(f"WARNING: [{experiment} {period}] {path.relative_to(REPO_ROOT)} "
+                      "not found — experiment/period skipped in the viewer",
+                      file=sys.stderr)
     if not loaded:
         print("no field caches found", file=sys.stderr)
         return 1
@@ -207,12 +361,14 @@ def main() -> int:
                 "window_end": dataset.attrs["window_end"],
                 "n_hours": int(dataset.attrs["n_hours"]),
                 "projection": "EPSG:4326 / Plate Carrée", "extent": EXTENT,
-                "georeferenced": True,
+                "georeferenced": True, "_grid": grid,
                 "limitation": (
                     "Nearest-cell display on a 0.04° lattice; blank beyond 8 km "
                     "from a model cell; no temporal interpolation."),
             })
 
+    entries.extend(era5_layers(cfg, loaded, scales, lat_grid, lon_grid, layer_dir))
+    write_values(entries, lat_grid, lon_grid)
     discover_diagnostic_media(entries)
     # Old untagged difference figures may coexist with the rigorously matched
     # ``_common`` products.  Keep one product per selector combination and
@@ -237,6 +393,7 @@ def main() -> int:
         "extent": EXTENT,
         "projection": "EPSG:4326 / Plate Carrée",
         "experiments": args.experiments,
+        "references": sorted({e["experiment"] for e in entries if e.get("reference")}),
         "periods": {
             key: {"label": cfg.periods[key]["label"],
                   "start": cfg.periods[key]["analysis_start"],
