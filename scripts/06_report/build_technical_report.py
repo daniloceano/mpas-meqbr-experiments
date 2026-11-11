@@ -1002,6 +1002,19 @@ def bundle_interactive_data(report_dir: Path, media_groups: dict[str, dict]) -> 
             shutil.copy2(source, target)
             entry["url"] = target.relative_to(report_dir).as_posix()
             entry["available"] = True
+            values = entry.get("values")
+            if values:
+                vsource = REPO_ROOT / values["source"]
+                if vsource.exists():
+                    vtarget = target_root / "values" / vsource.name
+                    vtarget.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(vsource, vtarget)
+                    values["url"] = vtarget.relative_to(report_dir).as_posix()
+                    copied.append({
+                        "source": values["source"], "bundled_as": values["url"],
+                        "bytes": vsource.stat().st_size,
+                        "title": f"Valores numéricos {values['key']}",
+                    })
             copied.append({
                 "source": source_value,
                 "bundled_as": entry["url"],
