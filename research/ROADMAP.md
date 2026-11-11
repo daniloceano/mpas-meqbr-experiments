@@ -77,7 +77,7 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 - **Registro da decisão e ressalvas:** `research/MEQ-03-selection-decision.md`.
 - **Evidências:** `results/tables/pairwise_tests_current.csv`, `results/tables/selection_summary_current.md`, `results/tables/site_metrics.csv`, `results/tables/era5_added_value_current.csv`, `results/tables/cell_sensitivity.csv`, `results/tables/runtime_metrics.csv` e relatório HTML v2.
 - **Escopo da ratificação:** escolha científica para prosseguir com EXP03; não comprova superioridade universal/climatológica, não encerra a MEQ-04 e não substitui o benchmark operacional MEQ-05.
-- **Próxima dependência:** MEQ-05 deve medir a eficiência paralela e fundamentar o custo das integrações multianuais na configuração selecionada. A síntese narrativa do HTML ainda deve ser atualizada para refletir a decisão humana, sem recalcular resultados.
+- **Próxima dependência:** MEQ-05 deve medir a eficiência paralela e fundamentar o custo das integrações multianuais na configuração selecionada. A síntese narrativa do HTML foi atualizada para refletir a decisão humana, sem recalcular resultados (atendido em 11/11/2026, PR #9, merge `784e9bc`).
 - **Dependências:** MEQ-02.
 - **Critério de encerramento:** escolha registrada e ratificada pelo pesquisador, com evidências e ressalvas versionadas.
 - **Decisões pendentes:** nenhuma para a seleção; a atualização editorial do HTML segue na seção 8.
