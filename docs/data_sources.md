@@ -75,6 +75,15 @@ expected shape and period.
   with P0 is real and is carried into the caveats rather than papered over.
 - 875 991 QC-passed height-records.
 
+### SODAR P1 (EOSOLAR) — evaluated and excluded
+
+The MFAS/Scintec SODAR at EOSOLAR station P1 (2.724877 °S, 42.575182 °W) was
+evaluated on 2026-11-12 and excluded from validation and selection: it falls in
+the same MPAS cell as P0 on the CTL and oval meshes, is redundant with P0, and
+covers only part of both analysis windows. See
+[`DEC-MEQ-003`](../research/MEQ-03-selection-decision.md#registro-de-decisão-dec-meq-003).
+No SODAR data are linked into this repository.
+
 ---
 
 ## 3. INMET automatic stations — primary surface validation
