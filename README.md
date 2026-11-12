@@ -27,6 +27,12 @@ for what each experiment *is*. This repository holds only the analysis.
 > validation periods, not proof of universal superiority. `EXP01` remains the
 > cheaper alternative with robust gains over `CTL`. Decision and caveats:
 > [`research/MEQ-03-selection-decision.md`](research/MEQ-03-selection-decision.md).
+>
+> **Re-evaluation in progress (since 11 Nov 2026):** the selection is being
+> re-evaluated with the EOSOLAR P1 SODAR (~4.1 km from P0, 30–280 m) added to
+> the full pipeline at the same weight as the LiDARs (`DEC-MEQ-002`). `EXP03`
+> stays the recorded selection until a new decision is jointly ratified by the
+> researcher and supervisor. Status: [`research/ROADMAP.md`](research/ROADMAP.md), MEQ-03.
 
 ## What is being compared
 
@@ -40,6 +46,9 @@ for what each experiment *is*. This repository holds only the analysis.
 | SST forcing | frozen ERA5 skin | **clean** | **clean** | **clean** | **clean** | **clean** | **clean** + diurnal skin | contaminated | contaminated |
 
 Definitions are restated from [`config/experiments.yaml`](config/experiments.yaml).
+The parent of `EXP03` is recorded as `EXP02` here and in the config but as
+`EXP01` in roadmap v1.1; it is pending a check against `EXPERIMENTS.md` in the
+simulation directory, and this table is left unchanged until then.
 Every experiment is registered `complete` in both periods there; the generated
 [`docs/run_status.md`](docs/run_status.md) does not yet list `EXP04`–`EXP06`.
 Relative cost is the cell-count ratio to `CTL`, not measured wall-clock: ranks
@@ -54,7 +63,8 @@ LiDAR**. Current disk status: [`docs/run_status.md`](docs/run_status.md)
 
 The design is **cumulative**: `EXP02 = EXP01 + boundary treatment`, so
 `EXP02 − EXP01` is the *incremental* effect of the boundary treatment given the
-SST update is already on. Likewise `EXP03` builds on `EXP02`, and
+SST update is already on. Likewise `EXP03` builds on `EXP02` (parent pending
+confirmation, see above), and
 `EXP04` → `EXP05` → `EXP06` build on `EXP01`.
 
 Current paired result for `EXP02` vs `EXP01`
