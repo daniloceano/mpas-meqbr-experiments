@@ -80,7 +80,7 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 - **Escopo da ratificação anterior:** a `DEC-MEQ-001` foi escolha científica para prosseguir com `EXP03`; não comprovou superioridade universal/climatológica, não encerrou a MEQ-04 e não substitui o benchmark operacional MEQ-05. A síntese narrativa do HTML foi atualizada para refletir essa decisão, sem recalcular resultados (11/11/2026, PR #9, merge `784e9bc`).
 - **Entregas da reavaliação:** a reavaliação com SODAR foi encerrada pela `DEC-MEQ-003` (12/11/2026), sem alteração da seleção; as entregas ligadas ao SODAR deixaram de ser necessárias e não serão implementadas. Permanece registrada, não implementada, a explicitação no HTML da resolução temporal de cada comparação.
 - **Próxima dependência:** a recomendação final da MEQ-05 (eficiência paralela e custo das integrações multianuais) depende da configuração que resultar desta reavaliação.
-- **Dependências:** MEQ-02; ratificação conjunta da nova seleção.
+- **Dependências:** MEQ-02.
 - **Critério de encerramento:** decisão do responsável sobre a divergência do `to_hourly` (corrigir e recalcular ou registrar como limitação) e confirmação da manutenção da `DEC-MEQ-001`.
 - **Decisões pendentes:** (1) tratamento da divergência de `to_hourly` (`round("h")`: 7 amostras nas horas pares e 5 nas ímpares, contra a janela documentada de 6) — corrigir e recalcular, ou registrar como limitação; (2) encerramento da reabertura mantendo a `DEC-MEQ-001`.
 
