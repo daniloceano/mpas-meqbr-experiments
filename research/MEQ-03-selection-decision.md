@@ -77,3 +77,27 @@ Reabertura da seleção registrada na `DEC-MEQ-001`. Entrada no formato da seç�
 - **Limitações:** nenhuma análise com SODAR existe ainda; os resultados da `DEC-MEQ-001` não foram recalculados. Pelas datas informadas, a série do SODAR (10/11/2021–09/10/2022) cobre apenas parte das janelas de análise atuais (01/11–01/12/2021 e 01/10–01/11/2022), o que deve ser verificado na implementação. As cinco limitações da `DEC-MEQ-001` continuam válidas para as evidências existentes.
 - **Consequências:** MEQ-03 passa a **em andamento — reavaliação com SODAR (DEC-MEQ-002)**; MEQ-05 passa a depender da conclusão da reavaliação; MEQ-04 será atualizada para a configuração resultante. Entregas da reavaliação, **registradas e não implementadas nesta decisão:** síntese do HTML principal em três visões (LiDAR/SODAR, INMET e geral) e explicitação da resolução temporal das comparações. **Decisão pendente da reavaliação:** renomeação de sítios proposta (P0 → ML, SODAR P1 → MS, LPI inalterado), não aplicada. Nenhuma autorização implícita para simulações, alterações no código do MPAS ou nos dados.
 - **Condição de revisão:** encerra-se com nova entrada `DEC-MEQ-NNN` que registre a seleção final ratificada conjuntamente pelo pesquisador e pelo supervisor e referencie esta e a `DEC-MEQ-001`. Esta entrada não é apagada.
+
+## Registro de decisão `DEC-MEQ-003`
+
+Exclusão do SODAR P1 da reavaliação aberta pela `DEC-MEQ-002`. Entrada no formato da seção 7 do [ROADMAP](ROADMAP.md); a `DEC-MEQ-001` e a `DEC-MEQ-002` acima não são apagadas nem alteradas.
+
+- **Identificador:** `DEC-MEQ-003`
+- **Data:** 12/11/2026
+- **Frente:** MEQ-03 — Validação e seleção científica da configuração
+- **Referencia:** `DEC-MEQ-002` (retira o SODAR do escopo da reavaliação); `DEC-MEQ-001` (permanece a seleção vigente).
+- **Enunciado:** o SODAR MFAS/Scintec da estação EOSOLAR P1 (lat −2,724877, lon −42,575182; arquivo `P1_SODAR.mat`, MD5 `dfb33de066d7778e3397bdb0da969bb7`; apenas cópias locais, sem cópia no Swell) **não entra** na validação nem na seleção da configuração.
+- **Responsável pela aprovação:** o pesquisador responsável, em 12/11/2026.
+- **Alternativas consideradas:** incorporar o SODAR ao pipeline completo com peso igual ao LiDAR, como previsto na `DEC-MEQ-002`.
+- **Justificativa** (diagnóstico somente leitura feito pelo Claude Code em 12/11/2026, sem alteração de código ou dados):
+  - **Mesma célula MPAS que o LiDAR P0** nas malhas `meqbr_05km` (CTL; célula 11711) e `meqbr_05km_oval_meq02a` (EXP03; célula 12266). **Exceção:** na malha `meqbr_05km_buf` (EXP02) as células diferem — SODAR na célula 68064 (`ocean_only=True`; 3,40 km) e P0 na 44747.
+  - **Redundância com o P0:** correlação horária da velocidade a 100 m r = 0,87 (n = 771), com pico na defasagem 0; ~4,1 km de distância; mesmo período em 2021.
+  - **Amostra curta:** a 100 m, 478 de 721 h válidas na janela de 2021 (a série começa em 10/11/2021 17:20) e 201 de 745 h na de 2022 (termina em 09/10/2022 08:30).
+- **Fontes:** decisão comunicada pelo responsável em 12/11/2026; relatório de diagnóstico do Claude Code de 12/11/2026 (origin/main `20c048c`; malhas e proveniência lidas no Swell, somente leitura).
+- **Limitações:** o diagnóstico não verificou o fuso absoluto do SODAR (só o alinhamento com o P0), o significado dos campos `error`/`bck` nem a posição do instrumento em relação à costa. Essas questões ficam encerradas por não serem mais necessárias.
+- **Consequências:** `DEC-MEQ-001` inalterada e vigente (EXP03); a renomeação de sítios proposta na `DEC-MEQ-002` (P0 → ML, SODAR P1 → MS) não é aplicada; as entregas da reavaliação ligadas ao SODAR deixam de ser necessárias. Nenhuma alteração de código, configuração, dados ou resultados.
+- **Pendências independentes do SODAR** (registradas, não corrigidas):
+  1. `src/mpas_meqbr/obs.py`, `to_hourly`: usa `round("h")`, que arredonda as meias-horas para a hora par. As horas pares recebem 7 amostras de 10 min e as ímpares 5, divergindo da docstring `[t − 30 min, t + 30 min)` (6 amostras). O `window_minutes` de `config/sites.yaml` não é usado (`src/mpas_meqbr/pairing.py:87`). Afeta P0 e LPI na base da `DEC-MEQ-001`; efeito nas métricas não medido.
+  2. Origem da EXP03: a proveniência no Swell (`runs/meqbr_05km_oval_meq02a/provenance/MEQ-02B_execution_record.txt`: `configuration_reference=EXP01 corrected`; `run_oval_2021.sh:2`) diverge de `parent: EXP02` em `config/experiments.yaml`. O `runs/meqbr_05km/EXPERIMENTS.md` não registra a EXP03.
+  3. Fusos não documentados para o P0 e para as janelas de `config/experiments.yaml` (o LPI está documentado como convertido de UTC−03 para UTC).
+- **Condição de revisão:** encerramento da reabertura com nova entrada `DEC-MEQ-NNN` que mantenha (ou substitua) a `DEC-MEQ-001`, após decidir o tratamento da pendência 1. Esta entrada não é apagada.
