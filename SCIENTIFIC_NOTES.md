@@ -11,11 +11,17 @@ edited by hand). Method detail: `docs/validation_protocol.md`.
 
 ## Research Questions
 
-1. **Which configuration (`CTL`, `EXP01`, `EXP02`) should carry the
+1. **Which configuration (`CTL`, `EXP01`–`EXP06`) should carry the
    climatological runs?** Specifically: does the daily SST update (`EXP01`) or
    the buffered-mesh boundary treatment (`EXP02`) improve near-surface and
    hub-height wind (50-250 m) at the two offshore LiDAR sites, by enough to
    justify its cost, and consistently across two independent site-periods?
+   The question was first posed for `CTL`/`EXP01`/`EXP02`; the candidate set
+   was extended in MEQ-02 with `EXP03` (Oval MEQ-02A geometry) and the physics
+   branch `EXP04`–`EXP06` (definitions in `config/experiments.yaml`). Since
+   2026-11-11 the answer is under re-evaluation with the EOSOLAR P1 SODAR as an
+   additional wind profiler (`DEC-MEQ-002`; entry of that date
+   below).
 
 2. **Does the 5 km MPAS hindcast add skill over the ERA5 reanalysis that drives
    it?** ERA5 supplies the initial and lateral boundary conditions, so any skill
@@ -104,6 +110,15 @@ simulation repository (`runs/meqbr_05km/README.md` and `EXPERIMENTS.md`);
 | Relative cost | 1.00 | 1.00 | 1.24 |
 | MPI ranks | 80 | 90 | 90 |
 | Status | complete | complete | complete |
+
+The table above describes the original three-experiment design. `EXP03`
+(Oval MEQ-02A mesh `meqbr_05km_oval_meq02a`, 102 968 cells, corrected daily
+OISST, wider ERA5 box) and the physics branch `EXP04`–`EXP06` (MYNN; +
+Grell–Freitas; + diurnal SST skin cycle) were added in MEQ-02; their mesh,
+physics, ranks and relative cost are in `config/experiments.yaml` and the
+README table. The parent of `EXP03` is recorded inconsistently (`EXP02` in
+`config/experiments.yaml` and the README, `EXP01` in roadmap v1.1) and is
+pending a check against `runs/meqbr_05km/EXPERIMENTS.md`.
 
 `EXP01` and `EXP02` were first run with a contaminated OISST surface file and
 repeated once the converter was fixed. Those first attempts are retained,
@@ -215,7 +230,28 @@ In brief:
 
 ## Results and Interpretation
 
-### 2026-11-10 — MEQ-03 decision: `EXP03` selected — **[current conclusion]**
+### 2026-11-11 — MEQ-03 selection re-opened with the EOSOLAR P1 SODAR — **[decision record; no new result]**
+
+On 2026-11-11 the researcher decided to re-evaluate the MEQ-03 selection
+(`DEC-MEQ-001`) including the MFAS/Scintec SODAR of the EOSOLAR P1 station
+(Maranhão; lat −2.7249, lon −42.5752; ~4.1 km from P0; 2021-11-10 to
+2022-10-09; 10 min; 30–280 m). The SODAR enters the full pipeline with the same
+weight as the LiDARs, even if that changes the conclusion. The new final
+selection requires joint ratification by the researcher and the supervisor.
+Record: `DEC-MEQ-002` in
+[`research/MEQ-03-selection-decision.md`](research/MEQ-03-selection-decision.md).
+
+This entry adds no result and no new interpretation. Until a new decision is
+ratified, `EXP03` remains the recorded selection, under re-evaluation. From the
+stated dates, the SODAR record covers only part of the current analysis windows
+(2021-11-01 to 2021-12-01 and 2022-10-01 to 2022-11-01); the actual overlap is
+to be checked when the data are processed **[UNCERTAIN]**. Planned outputs of
+the re-evaluation (not yet produced): a three-view synthesis in the HTML
+report (LiDAR/SODAR, INMET, overall) and an explicit statement of the temporal
+resolution of each comparison. A site renaming (P0 → ML, SODAR P1 → MS, LPI
+unchanged) is proposed and pending; names here are unchanged.
+
+### 2026-11-10 — MEQ-03 decision: `EXP03` selected — **[current conclusion; under re-evaluation since 2026-11-11 → `DEC-MEQ-002`]**
 
 On 2026-11-10 the researcher and supervisor selected `EXP03` (Oval MEQ-02A mesh
 `meqbr_05km_oval_meq02a`, corrected daily OISST, wider ERA5 box) as the
@@ -611,6 +647,13 @@ a property of this comparison, not of the site.
 
 ## Next Steps
 
+**Current (2026-11-11, `DEC-MEQ-002`):** re-evaluate the MEQ-03 selection
+with the EOSOLAR P1 SODAR in the full pipeline, at the same weight as the
+LiDARs; the new selection needs joint ratification by researcher and
+supervisor. Planning and status: `research/ROADMAP.md`, MEQ-03. The numbered
+list below is the 2026-10-07 list, with status notes added where items were
+later resolved.
+
 **Done (2026-10-07):**
 
 1. ~~Regenerate `sfc_update.nc` with the OISST land mask honoured.~~ Fixed in the
@@ -628,12 +671,16 @@ a property of this comparison, not of the site.
 
 **Blocking, before the fix stops costing other people time:**
 
-4. **Submit the converter fix upstream.** It lives on the local branch
+4. **[done — status updated 2026-11-12]** CGFD-USP/MPAS-Research PR #19
+   (branch `fix/oisst-coastal-land-fill`) carrying the converter fix was merged
+   into `develop` on 2026-10-09 (read-only check on 2026-11-12). The text
+   below is the original 2026-10-07 wording, kept for the record.
+   ~~**Submit the converter fix upstream.** It lives on the local branch
    `codex/fix-oisst-coastal-fill-audit` of CGFD-USP/MPAS-Research and has not
    been pushed; `develop` still writes the constant 273.15 K over land, so every
    other user of `oisst_to_intermediate.py` and `oisst_clim_to_intermediate.py`
    still produces contaminated coastal SST. The four commits touch only
-   `usp-utils/pre_proc/real_data/` and cherry-pick cleanly onto `develop`.
+   `usp-utils/pre_proc/real_data/` and cherry-pick cleanly onto `develop`.~~
 
 **Scientifically valuable next:**
 
@@ -648,9 +695,14 @@ a property of this comparison, not of the site.
    weakest November in three decades.
 8. **Check the pairing-tolerance and bootstrap-block assumptions** with a short
    sensitivity sweep, now that the machinery exists.
-9. **Consider `config_sstdiurn_update`.** For the offshore diurnal wind cycle a
+9. **[done — tested as `EXP06`]** `EXP06` = `EXP05` +
+   `config_sstdiurn_update = true` (`config/experiments.yaml`); in MEQ-02 the
+   cumulative `EXP05`/`EXP06` branch showed no consistent benefit
+   (`research/MEQ-03-selection-decision.md`, "Base da decisão"). Original
+   wording kept for the record:
+   ~~**Consider `config_sstdiurn_update`.** For the offshore diurnal wind cycle a
    diurnal SST cycle may matter more than the daily update does — and it is now
-   testable, since the daily-update forcing is fixed.
+   testable, since the daily-update forcing is fixed.~~
 
 ---
 
