@@ -101,3 +101,20 @@ Exclusão do SODAR P1 da reavaliação aberta pela `DEC-MEQ-002`. Entrada no for
   2. Origem da EXP03: a proveniência no Swell (`runs/meqbr_05km_oval_meq02a/provenance/MEQ-02B_execution_record.txt`: `configuration_reference=EXP01 corrected`; `run_oval_2021.sh:2`) diverge de `parent: EXP02` em `config/experiments.yaml`. O `runs/meqbr_05km/EXPERIMENTS.md` não registra a EXP03.
   3. Fusos não documentados para o P0 e para as janelas de `config/experiments.yaml` (o LPI está documentado como convertido de UTC−03 para UTC).
 - **Condição de revisão:** encerramento da reabertura com nova entrada `DEC-MEQ-NNN` que mantenha (ou substitua) a `DEC-MEQ-001`, após decidir o tratamento da pendência 1. Esta entrada não é apagada.
+
+## Registro de decisão `DEC-MEQ-004`
+
+Tratamento da divergência de `to_hourly` (pendência 1 da `DEC-MEQ-003`) e encerramento da reabertura da MEQ-03. Entrada no formato da seção 7 do [ROADMAP](ROADMAP.md); a `DEC-MEQ-001`, a `DEC-MEQ-002` e a `DEC-MEQ-003` acima não são apagadas nem alteradas.
+
+- **Identificador:** `DEC-MEQ-004`
+- **Data:** 12/11/2026
+- **Frente:** MEQ-03 — Validação e seleção científica da configuração
+- **Referencia:** `DEC-MEQ-003` (resolve a pendência 1 e atende à condição de revisão); `DEC-MEQ-002` (encerra a reabertura); `DEC-MEQ-001` (mantida).
+- **Enunciado:** a divergência de `to_hourly` é registrada como **limitação**; código e resultados não são alterados.
+- **Responsável pela aprovação:** o pesquisador responsável, em 12/11/2026.
+- **Alternativas consideradas:** corrigir `to_hourly` e recalcular as métricas de P0 e LPI.
+- **Descrição da divergência:** `src/mpas_meqbr/obs.py::to_hourly` atribui cada amostra à hora com `round("h")`. Amostras exatamente em :30 vão para a hora par (arredondamento do pandas), de modo que as horas pares agregam 7 amostras de 10 min (t − 30 a t + 30 min) e as ímpares 5 (t − 20 a t + 20 min), em vez das 6 de `[t − 30 min, t + 30 min)` descritas na docstring. O `window_minutes` de `config/sites.yaml` não é usado (`src/mpas_meqbr/pairing.py:87`). As janelas permanecem centradas na hora; o efeito nas métricas não foi medido. Afeta P0 e LPI, base da `DEC-MEQ-001`.
+- **Fontes:** decisão comunicada pelo responsável em 12/11/2026; pendência 1 da `DEC-MEQ-003`.
+- **Limitações:** o efeito da divergência nas métricas e na seleção não foi quantificado. A docstring de `to_hourly` e a descrição do pareamento em `docs/validation_protocol.md` continuam descrevendo a janela de 6 amostras; esta última passa a remeter a esta entrada.
+- **Consequências:** `DEC-MEQ-001` mantida (`EXP03`, malha oval `meqbr_05km_oval_meq02a`); MEQ-03 **encerrada**. Nenhuma alteração de código, configuração, dados ou resultados. Uma correção futura de `to_hourly` exige decisão própria e recálculo com trilha de proveniência. As pendências 2 e 3 da `DEC-MEQ-003` (origem da `EXP03`; fusos não documentados de P0 e `config/experiments.yaml`) seguem registradas como não bloqueantes.
+- **Condição de revisão:** nova entrada `DEC-MEQ-NNN` que autorize a correção de `to_hourly` ou substitua a `DEC-MEQ-001`. Esta entrada não é apagada.
