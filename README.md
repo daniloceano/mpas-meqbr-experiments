@@ -38,7 +38,7 @@ for what each experiment *is*. This repository holds only the analysis.
 
 | | `CTL` | `EXP01` | `EXP02` | `EXP03` | `EXP04` | `EXP05` | `EXP06` | `EXP01_BADSST` | `EXP02_BADSST` |
 |---|---|---|---|---|---|---|---|---|---|
-| Parent | — | `CTL` | `EXP01` | `EXP02` | `EXP01` | `EXP04` | `EXP05` | `CTL` | `EXP01_BADSST` |
+| Parent | — | `CTL` | `EXP01` | `EXP01` (model config) + `EXP02` (preprocessing) | `EXP01` | `EXP04` | `EXP05` | `CTL` | `EXP01_BADSST` |
 | Delta vs parent | baseline | daily NOAA OISST SST update | buffered mesh (5 → 32 km ramp) + wider ERA5 box | Oval MEQ-02A mesh; SST update and wider ERA5 box retained | MYNN PBL + MYNN surface layer | + Grell–Freitas convection | + diurnal SST skin cycle | superseded `EXP01` | superseded `EXP02` |
 | Mesh | `meqbr_05km` (76 813) | same | `meqbr_05km_buf` (95 138) | `meqbr_05km_oval_meq02a` (102 968) | `meqbr_05km` | `meqbr_05km` | `meqbr_05km` | `meqbr_05km` | `meqbr_05km_buf` |
 | Relative cost (cells) | 1.00 | 1.00 | 1.24 | 1.34 | 1.00 | 1.00 | 1.00 | 1.00 | 1.24 |
@@ -46,9 +46,16 @@ for what each experiment *is*. This repository holds only the analysis.
 | SST forcing | frozen ERA5 skin | **clean** | **clean** | **clean** | **clean** | **clean** | **clean** + diurnal skin | contaminated | contaminated |
 
 Definitions are restated from [`config/experiments.yaml`](config/experiments.yaml).
-The parent of `EXP03` is recorded as `EXP02` here and in the config but as
-`EXP01` in roadmap v1.1; it is pending a check against `EXPERIMENTS.md` in the
-simulation directory, and this table is left unchanged until then.
+`EXP03` has a **dual lineage** (researcher decision, 13 Nov 2026): its model
+configuration comes from `EXP01` (the archived `namelist.atmosphere` and
+`streams.atmosphere` differ from `EXP01`'s only in the mesh file names: same
+physics, dynamics, daily SST update and 41-day run without restart), and its
+preprocessing comes from `EXP02` (ERA5 initial and lateral conditions over the
+wider box `15/-64/-16/-24`). The corrected daily OISST is common to both; the
+Oval mesh is its own. Evidence:
+[`docs/provenance/MEQ-02D-experimental-configurations.md`](docs/provenance/MEQ-02D-experimental-configurations.md).
+Earlier versions attributed `EXP03` only to `EXP02` (README/config) or only to
+`EXP01` (HTML report).
 Every experiment is registered `complete` in both periods there; the generated
 [`docs/run_status.md`](docs/run_status.md) does not yet list `EXP04`–`EXP06`.
 Relative cost is the cell-count ratio to `CTL`, not measured wall-clock: ranks
@@ -63,8 +70,8 @@ LiDAR**. Current disk status: [`docs/run_status.md`](docs/run_status.md)
 
 The design is **cumulative**: `EXP02 = EXP01 + boundary treatment`, so
 `EXP02 − EXP01` is the *incremental* effect of the boundary treatment given the
-SST update is already on. Likewise `EXP03` builds on `EXP02` (parent pending
-confirmation, see above), and
+SST update is already on. `EXP03` has a dual lineage (`EXP01` model
+configuration, `EXP02` preprocessing; see above), and
 `EXP04` → `EXP05` → `EXP06` build on `EXP01`.
 
 Current paired result for `EXP02` vs `EXP01`
