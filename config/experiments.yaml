@@ -203,7 +203,17 @@ experiments:
   EXP03:
     label: "EXP03"
     long_label: "EXP03 — Oval MEQ-02A geometry with corrected daily SST"
-    parent: EXP02
+    # Dual lineage (researcher decision, 2026-11-13): no single parent. Model
+    # configuration from EXP01 (namelist/streams identical except mesh file
+    # names); preprocessing from EXP02 (ERA5 ICs/LBCs over the wider box
+    # 15/-64/-16/-24). Earlier versions recorded `parent: EXP02` here.
+    # `parent` and `lineage` are not read by any script, module or template
+    # (static check, 2026-11-13); the HTML report uses its own
+    # EXPERIMENT_PARENT mapping in scripts/06_report/build_technical_report.py.
+    parent: [EXP01, EXP02]
+    lineage:
+      model_configuration: EXP01
+      preprocessing: EXP02
     delta: "geometry candidate meqbr_05km_oval_meq02a; corrected daily OISST and the wider ERA5 forcing box are retained"
     mesh: meqbr_05km_oval_meq02a
     # Relative to runs_root, avoiding a machine-specific absolute path. The

@@ -31,7 +31,7 @@ O HTML principal existente cobre desenho experimental, andamento e custo, campos
 | `CTL` | Controle: SST inicial do ERA5 mantida fixa; malha `meqbr_05km`. | Comparação de referência. |
 | `EXP01` | Atualização diária NOAA OISST v2.1, com tratamento costeiro corrigido; malha `meqbr_05km`. | Ganho robusto sobre `CTL`; alternativa de menor domínio e custo. |
 | `EXP02` | Herda `EXP01` e altera conjuntamente a malha para `meqbr_05km_buf` **e** a caixa ERA5 de fronteira. | Testa o efeito **incremental do tratamento de fronteira**, não o buffer isolado. |
-| `EXP03` | Malha Oval `meqbr_05km_oval_meq02a` (102.968 células), com OISST corrigida e caixa ERA5 ampla. **Pai pendente de conferência:** a v1.1 deste roadmap registrava `EXP01`; `config/experiments.yaml` e o `README.md` registram `EXP02`; a fonte prioritária (`runs/meqbr_05km/EXPERIMENTS.md`, no Swell) ainda não foi conferida. | **Selecionado na MEQ-03 (`DEC-MEQ-001`, 10/11/2026)**; seleção **em reavaliação com SODAR** (`DEC-MEQ-002`, 11/11/2026). Não demonstra superioridade universal. |
+| `EXP03` | Malha Oval `meqbr_05km_oval_meq02a` (102.968 células), com OISST corrigida e caixa ERA5 ampla. **Linhagem dupla** (decisão do pesquisador, 13/11/2026): configuração do modelo herdada de `EXP01` (namelist e streams idênticos, exceto os nomes de arquivos da malha) e pré-processamento herdado de `EXP02` (caixa ERA5 ampla `15/-64/-16/-24`). Versões anteriores atribuíam a `EXP03` apenas à `EXP02` (README/config) ou à `EXP01` (relatório HTML; também a v1.1 deste roadmap). | **Selecionado na MEQ-03 (`DEC-MEQ-001`, 10/11/2026)**; seleção **em reavaliação com SODAR** (`DEC-MEQ-002`, 11/11/2026). Não demonstra superioridade universal. |
 | `EXP04`–`EXP06` | Ramo de física sobre `EXP01`: MYNN; + Grell–Freitas; + ciclo diurno da SST de pele. | Sem ganho detectável sobre `EXP01` (EXP04) ou sem benefício consistente (EXP05/EXP06). |
 | `EXP01_BADSST`, `EXP02_BADSST` | Integrações históricas com OISST costeiro contaminado por valor de preenchimento sobre terra. | Preservadas como evidência da falha; **excluídas da seleção científica atual**. |
 
@@ -82,7 +82,7 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 - **Próxima dependência:** a recomendação final da MEQ-05 (eficiência paralela e custo das integrações multianuais) — configuração selecionada: `EXP03` (`DEC-MEQ-001`, mantida pelas `DEC-MEQ-003` e `DEC-MEQ-004`).
 - **Dependências:** MEQ-02.
 - **Critério de encerramento:** decisão do responsável sobre a divergência do `to_hourly` (corrigir e recalcular ou registrar como limitação) e confirmação da manutenção da `DEC-MEQ-001`.
-- **Decisões pendentes:** nenhuma bloqueante. Pendências não bloqueantes registradas na `DEC-MEQ-003`: (1) origem da `EXP03` — `EXP01` corrigida segundo a proveniência no Swell vs. `EXP02` em `config/experiments.yaml`; (2) fusos não documentados para o P0 e para as janelas de `config/experiments.yaml`.
+- **Decisões pendentes:** nenhuma bloqueante. Pendências não bloqueantes registradas na `DEC-MEQ-003`: (1) origem da `EXP03` — resolvida em 13/11/2026 por decisão do pesquisador: linhagem dupla (configuração do modelo da `EXP01`, pré-processamento da `EXP02`; seção 3); (2) fusos não documentados para o P0 e para as janelas de `config/experiments.yaml`.
 
 ### MEQ-04 — Valor agregado sobre ERA5
 
@@ -154,7 +154,7 @@ Mudanças no roadmap devem indicar o que mudou, por quê, quem aprovou e em que 
 Situação em 12/11/2026 (v1.2); os textos da v1.0 (`fe16f0b`) e da v1.1 (`c2e15cd`) desta seção estão preservados no histórico do repositório.
 
 - **MEQ-03 — reavaliação com SODAR (`DEC-MEQ-002`):** incorporar o SODAR P1 ao pipeline completo, com peso igual ao LiDAR; preparar as entregas registradas na frente (síntese do HTML em três visões e explicitação da resolução temporal); decidir a renomeação de sítios proposta (P0 → ML, SODAR P1 → MS, LPI inalterado); a nova seleção final exige ratificação conjunta do pesquisador e do supervisor. Cada etapa técnica requer autorização própria.
-- **Pai da `EXP03`:** conferir `runs/meqbr_05km/EXPERIMENTS.md` no Swell e alinhar roadmap, `config/experiments.yaml` e `README.md` ao resultado (seção 3).
+- **Pai da `EXP03`:** conferir `runs/meqbr_05km/EXPERIMENTS.md` no Swell e alinhar roadmap, `config/experiments.yaml` e `README.md` ao resultado (seção 3) — **atendida em 13/11/2026** por decisão do pesquisador: linhagem dupla (configuração do modelo da `EXP01`, pré-processamento da `EXP02`); o `EXPERIMENTS.md` não registra a `EXP03`.
 - **MEQ-05:** próxima frente operacional prevista; requer plano concreto e autorização explícita antes de qualquer execução; a recomendação definitiva aguarda a conclusão da reavaliação da MEQ-03.
 - **MEQ-04:** síntese do valor agregado a ratificar pelo pesquisador para a configuração que resultar da reavaliação.
 - **Revisão editorial do HTML principal para a `DEC-MEQ-001`:** refletir a seleção da EXP03 no template `docs/templates/technical_report_v2.html.j2`, ajustar o validador `scripts/06_report/validate_technical_report.py` e regenerar o relatório, sem recalcular resultados — **atendida em 11/11/2026, PR #9, merge `784e9bc`**.

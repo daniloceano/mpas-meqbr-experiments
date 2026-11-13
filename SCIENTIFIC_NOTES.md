@@ -116,9 +116,13 @@ The table above describes the original three-experiment design. `EXP03`
 OISST, wider ERA5 box) and the physics branch `EXP04`–`EXP06` (MYNN; +
 Grell–Freitas; + diurnal SST skin cycle) were added in MEQ-02; their mesh,
 physics, ranks and relative cost are in `config/experiments.yaml` and the
-README table. The parent of `EXP03` is recorded inconsistently (`EXP02` in
-`config/experiments.yaml` and the README, `EXP01` in roadmap v1.1) and is
-pending a check against `runs/meqbr_05km/EXPERIMENTS.md`.
+README table. `EXP03` has a dual lineage (researcher decision, 2026-11-13):
+the model configuration is inherited from `EXP01` (runtime namelist and streams
+identical except for the mesh file names) and the preprocessing from `EXP02`
+(ERA5 initial and lateral conditions over the wider box `15/-64/-16/-24`); the
+corrected daily OISST is common to both; there is no single parent. Earlier
+versions attributed `EXP03` only to `EXP02` (README/config) or only to `EXP01`
+(HTML report).
 
 `EXP01` and `EXP02` were first run with a contaminated OISST surface file and
 repeated once the converter was fixed. Those first attempts are retained,
