@@ -68,6 +68,18 @@ speed standard deviation, but does not explicitly document the internal speed
 statistic. This remaining metadata uncertainty is reported; it is not silently
 resolved by assuming a different aggregation.
 
+**Time reference (audited 2026-11-13).** Pairing is done on naive UTC
+timestamps. MPAS, ERA5, LPI (converted from UTC-3 upstream) and the ISD/INMET
+stations are UTC; the evidence for each is in
+[`data_sources.md`, section 7](data_sources.md#7-time-reference-by-source).
+**P0 is the exception that could not be closed:** its file carries no time-zone
+metadata and is read as UTC without conversion. A lag check against ERA5 100 m
+peaks at +2 h rather than 0 h (weak, broad peak; LPI recovers 0 h with the same
+check), so a UTC-3 offset in P0 is possible but not demonstrated **[UNCERTAIN]**.
+Until the operator confirms the time base, P0 hourly pairs and the P0
+diurnal-phase metric carry this caveat. Local-time (UTC-3) shifts in the code
+apply only to diurnal composites, after pairing.
+
 **Heights.** Model layer centres are matched to LiDAR channels within 1 m, and
 the match is asserted, not assumed. The one exception is P0's 250 m model level,
 which has no channel; it is compared against the mean of the 240 m and 260 m

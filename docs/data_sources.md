@@ -64,11 +64,14 @@ expected shape and period.
   96 314 QC-passed height-records.
 - The met sensor (`temp`/`press`/`humid`) fails after ~140 records and reports
   exact zeros; only the wind channels are read.
+- **Time reference: not documented.** `mtime` is read as UTC, but neither the
+  file nor its provenance states a time zone. See section 7.
 
 ### LPI — fixed LiDAR, Porto-Ilha terminal
 
 - 4.8789425 °S, 37.1478801 °W; offshore terminal, ~9 km from the modelled coast.
-- `data/obs/LPI_processed.csv.gz`, already UTC, 10 min.
+- `data/obs/LPI_processed.csv.gz`, already UTC, 10 min (converted from the
+  operator's `Timestamp (UTC-03)` upstream; see section 7).
 - 2022-06-23 → 2025-06-06; only the `2022` window overlaps.
 - Heights 10, 26, 50, 100, 150, 200 m. Heights used: 50, 100, 150, 200.
 - **QC**: physical range only — there is no availability flag. This asymmetry
@@ -190,3 +193,44 @@ Used for exactly two things, both in `scripts/04_era5/climatological_context.py`
 Nothing large or regenerable is committed. Every figure carries a footer naming
 the script, the window and the processing choices that produced it, so a figure
 found loose in a slide deck can still be traced back.
+
+---
+
+## 7. Time reference by source
+
+Audited 2026-11-13 (read-only; Swell files read in place, nothing modified). The
+pipeline holds every timestamp as a **naive UTC** value: no reader attaches a
+time zone, and `io.validate_time_index` (`src/mpas_meqbr/io.py:44-45`) converts
+any tz-aware index to UTC before dropping the zone. Hourly pairing therefore
+assumes that every source below is already UTC when it is read.
+
+| Source | Time reference | Evidence | Status |
+|---|---|---|---|
+| MPAS histories (all experiments) | UTC | `xtime` is "Model valid time" with no zone; the model clock starts from the ERA5 analysis it was initialised from (EXP03/2021 record `MEQ-02B_execution_record.txt`: `era5_records=165;interval=6h;start=2021-10-21T00Z`; ungrib intermediates `ERA5:2021-10-21_00`), and `config_start_time = '2021-10-21_00:00:00'` / `'2022-09-21_00:00:00'` in `config/namelists/*/namelist.atmosphere`. | confirmed by construction |
+| `config/experiments.yaml` windows | UTC | `analysis_start`, `integration_start` etc. carry no zone label, but match the MPAS history file names and the namelist start times above, and the expected record counts (721 / 745 hourly) assume the model clock. `docs/provenance/MEQ-02D-experimental-configurations.md` states "Todos os horários desta seção são UTC". | confirmed by consistency; the file itself does not say "UTC" |
+| ERA5 periods (`data/era5/era5_wind_<period>.nc`) and site series | UTC | `valid_time:units = "seconds since 1970-01-01"` with no zone (CF default UTC); ERA5 is distributed in UTC by ECMWF. Read without conversion (`src/mpas_meqbr/era5.py:92`). | confirmed |
+| ERA5 1990-2020 archive | UTC (assumed) | Same product family; files were not opened in this audit. Used for monthly statistics, where an hour-level offset is immaterial, except the local-hour ERA5 layer in `scripts/05_exploration/export_interactive_layers.py`, which applies UTC-3 to UTC input. | not verified |
+| LPI fixed LiDAR (`LPI_processed.csv.gz`) | UTC | Raw workbook column `Timestamp (UTC-03)`; converted by `+3 h` in the sibling repo, `scripts/exploratory/preprocess_lpi_lidar.py:114` (`df["time"] = pd.to_datetime(df["time_local"]) + pd.Timedelta(hours=3)`), documented in its `data/README.md:63-64`. Read here without conversion (`src/mpas_meqbr/obs.py:78-84`). A lag check against ERA5 100 m at the site (Oct 2022) peaks at 0 h shift (r = 0.847; +1 h: 0.846; −1 h: 0.789). | confirmed |
+| P0 floating LiDAR (`P0_LIDAR_matrix.mat`) | **unknown; read as UTC** | Struct `L` has no zone field or attribute (fields `mtime`, `press`, …, `Pt_VE8`); the MAT header only records the export date (2022-10-21). The sibling repo's `data/README.md` describes `mtime` as a MATLAB datenum without a zone. Read without conversion (`src/mpas_meqbr/obs.py:52-56`). | **not confirmed — see note** |
+| INMET / airport stations (NOAA ISD `global-hourly`) | UTC | ISD `DATE` is UTC per the NCEI ISD format documentation; parsed without conversion (`src/mpas_meqbr/obs.py:208`). | documented by the provider; not cross-checked against data here |
+
+**Local time in the code.** Only diurnal-cycle composites and their phase
+metric shift to local time, always as a fixed UTC-3 applied to UTC input:
+`src/mpas_meqbr/fields.py:40` (`TZ_OFFSET_HOURS = -3`),
+`src/mpas_meqbr/metrics.py:205-209`, `scripts/02_validation/plot_diurnal_cycle.py`,
+`scripts/06_audit/audit_exp06_sst.py`, `scripts/06_audit/compare_corrected_lidar.py`
+and the animation/cross-section scripts in `scripts/05_exploration/`. These shifts
+are applied to observation and model alike after pairing; they do not move the
+pairing itself.
+
+**P0 note [UNCERTAIN].** The P0 time zone cannot be established from the file
+or its provenance. A read-only lag check (hourly P0 at 100 m with the same QC
+and centred binning as the pipeline, against the ERA5 100 m site series,
+2021-11-09 → 2021-12-01, n ≈ 505, P0 timestamps shifted by −6 … +6 h) peaks at
+**+2 h** (r = 0.546; 0 h: 0.531; +3 h: 0.531; 24 h high-passed: 0.189 at +2 h,
+0.145 at 0 h, 0.167 at +3 h). The same check recovers 0 h at LPI. A positive
+peak is the direction expected if P0 were stored in UTC-3 and read as UTC, but
+the P0 correlation is weak and the peak broad, and ERA5 phase errors at this
+site are not known, so this is an indication, not a determination. The pipeline
+continues to read P0 as UTC; resolving it requires the instrument operator's
+metadata. If P0 were UTC-3, every P0 pair would be offset by 3 h.
