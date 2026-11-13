@@ -64,8 +64,10 @@ expected shape and period.
   96 314 QC-passed height-records.
 - The met sensor (`temp`/`press`/`humid`) fails after ~140 records and reports
   exact zeros; only the wind channels are read.
-- **Time reference: not documented.** `mtime` is read as UTC, but neither the
-  file nor its provenance states a time zone. See section 7.
+- **Time reference: UTC**, confirmed by the instrument operator (communication
+  to the researcher, 2026-11-13). The file itself carries no zone; `mtime` is
+  read without conversion. Whether a stamp marks the start or the end of its
+  10-min interval is not verified. See section 7.
 
 ### LPI — fixed LiDAR, Porto-Ilha terminal
 
@@ -86,6 +88,13 @@ the same MPAS cell as P0 on the CTL and oval meshes, is redundant with P0, and
 covers only part of both analysis windows. See
 [`DEC-MEQ-003`](../research/MEQ-03-selection-decision.md#registro-de-decisão-dec-meq-003).
 No SODAR data are linked into this repository.
+
+Time reference: **UTC by inference** — no zone is declared in `P1_SODAR.mat` or
+in the operator's notebook, but the hourly 100 m speed correlation with P0
+(UTC) peaks at 0 h lag (resolution ~1 h). Whether a stamp marks the start or the
+end of its 10-min interval is not verified. Overlap with P0: 2021-11-10 →
+2021-12-13 (771 simultaneous hours at 100 m), checked by
+`scripts/06_audit/verify_sodar_p0_overlap.py`; see section 7.
 
 ---
 
@@ -211,7 +220,8 @@ assumes that every source below is already UTC when it is read.
 | ERA5 periods (`data/era5/era5_wind_<period>.nc`) and site series | UTC | `valid_time:units = "seconds since 1970-01-01"` with no zone (CF default UTC); ERA5 is distributed in UTC by ECMWF. Read without conversion (`src/mpas_meqbr/era5.py:92`). | confirmed |
 | ERA5 1990-2020 archive | UTC (assumed) | Same product family; files were not opened in this audit. Used for monthly statistics, where an hour-level offset is immaterial, except the local-hour ERA5 layer in `scripts/05_exploration/export_interactive_layers.py`, which applies UTC-3 to UTC input. | not verified |
 | LPI fixed LiDAR (`LPI_processed.csv.gz`) | UTC | Raw workbook column `Timestamp (UTC-03)`; converted by `+3 h` in the sibling repo, `scripts/exploratory/preprocess_lpi_lidar.py:114` (`df["time"] = pd.to_datetime(df["time_local"]) + pd.Timedelta(hours=3)`), documented in its `data/README.md:63-64`. Read here without conversion (`src/mpas_meqbr/obs.py:78-84`). A lag check against ERA5 100 m at the site (Oct 2022) peaks at 0 h shift (r = 0.847; +1 h: 0.846; −1 h: 0.789). | confirmed |
-| P0 floating LiDAR (`P0_LIDAR_matrix.mat`) | **unknown; read as UTC** | Struct `L` has no zone field or attribute (fields `mtime`, `press`, …, `Pt_VE8`); the MAT header only records the export date (2022-10-21). The sibling repo's `data/README.md` describes `mtime` as a MATLAB datenum without a zone. Read without conversion (`src/mpas_meqbr/obs.py:52-56`). | **not confirmed — see note** |
+| P0 floating LiDAR (`P0_LIDAR_matrix.mat`) | UTC | Confirmed by the instrument operator (communication to the researcher, 2026-11-13). Struct `L` has no zone field or attribute (fields `mtime`, `press`, …, `Pt_VE8`); the MAT header only records the export date (2022-10-21). Read without conversion (`src/mpas_meqbr/obs.py:52-56`). Start/end-of-interval stamp convention not verified. | confirmed by the operator — see note |
+| SODAR P1 (`P1_SODAR.mat`; excluded, `DEC-MEQ-003`) | UTC (inferred) | No zone in the struct `SD` or in the operator's `P1_Sodar_export.ipynb`. Hourly 100 m speed against P0 (UTC), 2021-11-10 → 2021-12-13, n = 771: r = 0.869 at 0 h; −1 h 0.737, +1 h 0.774; −24 h 0.338, +24 h 0.290 (`scripts/06_audit/verify_sodar_p0_overlap.py`). Alignment with P0 resolved to ~1 h. Start/end-of-interval stamp convention not verified. | inferred; not used by the pipeline |
 | INMET / airport stations (NOAA ISD `global-hourly`) | UTC | ISD `DATE` is UTC per the NCEI ISD format documentation; parsed without conversion (`src/mpas_meqbr/obs.py:208`). | documented by the provider; not cross-checked against data here |
 
 **Local time in the code.** Only diurnal-cycle composites and their phase
@@ -223,8 +233,15 @@ and the animation/cross-section scripts in `scripts/05_exploration/`. These shif
 are applied to observation and model alike after pairing; they do not move the
 pairing itself.
 
-**P0 note [UNCERTAIN].** The P0 time zone cannot be established from the file
-or its provenance. A read-only lag check (hourly P0 at 100 m with the same QC
+**P0 note — UTC, confirmed by the instrument operator (communication to the
+researcher, 2026-11-13).** The pipeline already read P0 as UTC, so no pairing
+changes. The text below is the earlier assessment, kept as history: the lag
+check against ERA5 was only an indication and is superseded by the operator's
+confirmation. Whether a P0 stamp marks the start or the end of its 10-min
+interval is still not verified.
+
+*Earlier assessment (2026-11-13, before the confirmation).* The P0 time zone
+cannot be established from the file or its provenance. A read-only lag check (hourly P0 at 100 m with the same QC
 and centred binning as the pipeline, against the ERA5 100 m site series,
 2021-11-09 → 2021-12-01, n ≈ 505, P0 timestamps shifted by −6 … +6 h) peaks at
 **+2 h** (r = 0.546; 0 h: 0.531; +3 h: 0.531; 24 h high-passed: 0.189 at +2 h,
