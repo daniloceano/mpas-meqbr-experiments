@@ -51,6 +51,13 @@ in averaging scale appears as scatter and is charged to the model. Hourly
 averaging removes the part of it that can be removed; the spatial part is
 irreducible and is stated as a caveat rather than hidden.
 
+> **Known limitation ([`DEC-MEQ-004`](../research/MEQ-03-selection-decision.md#registro-de-decisão-dec-meq-004), 2026-11-12):**
+> `to_hourly` bins with `round("h")`, so samples exactly at :30 go to the even
+> hour: even hours average 7 ten-minute samples and odd hours 5, instead of the 6
+> of `[t-30 min, t+30 min)` stated above; `window_minutes` in
+> `config/sites.yaml` is not used. Windows remain centred on the hour; the effect
+> on the metrics was not measured. Recorded as a limitation, not corrected.
+
 **P0/LPI temporal audit (2026-09-03).** Both source files are on a 10-minute
 time grid and both pass through the same `to_hourly` function described above.
 The LPI preprocessing script only converts UTC-3 to UTC and selects the
