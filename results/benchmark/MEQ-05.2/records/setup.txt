@@ -1,0 +1,3 @@
+setup_start_utc=2026-11-13T15:57:35Z
+4362d47d78da1bdb67411bc260040c8c090d59ce21f00ef1bff55c4f16aaca75  /p1-swell/danilocs/MPAS-Research/grids/meqbr_05km_oval_meq02a/meqbr_05km_oval_meq02a.graph.info
+setup_end_utc=2026-11-13T15:57:36Z

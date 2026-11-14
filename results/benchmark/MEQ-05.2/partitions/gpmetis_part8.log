@@ -1,0 +1,36 @@
+******************************************************************************
+METIS 5.2.1 Copyright 1998-22, Regents of the University of Minnesota
+ (HEAD: unknown, Built on: Jan 26 2026, 16:11:30)
+ size of idx_t: 32bits, real_t: 32bits, idx_t *: 64bits
+
+Graph Information -----------------------------------------------------------
+ Name: meqbr_05km_oval_meq02a.graph.info, #Vertices: 102968, #Edges: 308568, #Parts: 8
+
+Options ---------------------------------------------------------------------
+ ptype=kway, objtype=cut, ctype=shem, rtype=greedy, iptype=metisrb
+ dbglvl=0, ufactor=1.030, no2hop=NO, minconn=YES, contig=YES
+ ondisk=NO, nooutput=NO
+ seed=-1, niparts=-1, niter=200, ncuts=1
+
+Direct k-way Partitioning ---------------------------------------------------
+ - Edgecut: 2888, communication volume: 2901.
+
+ - Balance:
+     constraint #0:  1.000 out of 0.000
+
+ - Most overweight partition:
+     pid: 1, actual: 12872, desired: 12871, ratio: 1.00.
+
+ - Subdomain connectivity: max: 5, min: 2, avg: 3.25
+
+ - Each partition is contiguous.
+
+Timing Information ----------------------------------------------------------
+  I/O:          		   0.025 sec
+  Partitioning: 		   0.071 sec   (METIS time)
+  Reporting:    		   0.011 sec
+
+Memory Information ----------------------------------------------------------
+  Max memory used:		  11.277 MB
+  rusage.ru_maxrss:		  16.406 MB
+******************************************************************************
