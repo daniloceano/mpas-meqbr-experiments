@@ -96,8 +96,8 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 ### MEQ-05 — Benchmark de paralelismo e viabilidade computacional
 
 - **Objetivo:** determinar a faixa eficiente de núcleos/processos para a malha selecionada e estimar o custo de simulações multianuais.
-- **Situação:** **planejada**. Os custos históricos documentados não constituem uma curva de saturação confiável, pois usam números diferentes de ranks e incluem tempos estimados/reconstruídos.
-- **Evidências:** seção de andamento/custo e limitações do HTML; `results/tables/runtime_metrics.csv`; configurações e registros operacionais preservados.
+- **Situação:** em andamento
+- **Evidências:** seção de andamento/custo e limitações do HTML; `results/tables/runtime_metrics.csv`; configurações e registros operacionais preservados; Os custos históricos documentados não constituem uma curva de saturação confiável, pois usam números diferentes de ranks e incluem tempos estimados/reconstruídos; Benchmark MEQ-05.2 autorizado em 13/11/2026: 1 nó (56 núcleos físicos), ensaios de 3 h a partir de restart; resultados em `results/tables/meq05_parallel_benchmark.csv`.
 - **Dependências:** infraestrutura de execução estável, configuração controlada, métricas mensuráveis e, para a recomendação definitiva, conclusão da reavaliação da MEQ-03 (`DEC-MEQ-002`) e a malha/configuração dela resultante. Ensaios exploratórios podem começar antes, se aprovados.
 - **Método proposto:** série de integrações curtas e comparáveis com números crescentes de núcleos/processos; **um dia simulado é hipótese inicial, não duração já aprovada**. Separar tempo de inicialização do regime representativo, manter constantes condições/saídas/ambiente, repetir medições quando viável e registrar tempo de parede, núcleo-horas, aceleração, eficiência paralela e efeitos de I/O. A curva deve apoiar uma decisão de compromisso entre prazo e consumo de recursos, e não simplesmente maximizar núcleos.
 - **Critério de encerramento:** curva de saturação reproduzível, faixa de paralelismo recomendada para a malha definitiva e estimativa fundamentada do custo da MEQ-06.

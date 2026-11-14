@@ -1,0 +1,1 @@
+mpiexec -n 8 -bind-to user:0,1,2,3,28,29,30,31 ./atmosphere_model

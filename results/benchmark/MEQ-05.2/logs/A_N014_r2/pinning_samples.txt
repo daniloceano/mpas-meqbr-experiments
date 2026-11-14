@@ -1,0 +1,48 @@
+### sample 1 at 2026-11-13T18:03:38Z
+pid=627975 psr=0 affinity=0
+pid=627976 psr=1 affinity=1
+pid=627977 psr=2 affinity=2
+pid=627978 psr=3 affinity=3
+pid=627979 psr=4 affinity=4
+pid=627980 psr=5 affinity=5
+pid=627981 psr=6 affinity=6
+pid=627982 psr=28 affinity=28
+pid=627983 psr=29 affinity=29
+pid=627984 psr=30 affinity=30
+pid=627985 psr=31 affinity=31
+pid=627986 psr=32 affinity=32
+pid=627987 psr=33 affinity=33
+pid=627988 psr=34 affinity=34
+other_user_busy=
+### sample 2 at 2026-11-13T18:05:39Z
+pid=627975 psr=0 affinity=0
+pid=627976 psr=1 affinity=1
+pid=627977 psr=2 affinity=2
+pid=627978 psr=3 affinity=3
+pid=627979 psr=4 affinity=4
+pid=627980 psr=5 affinity=5
+pid=627981 psr=6 affinity=6
+pid=627982 psr=28 affinity=28
+pid=627983 psr=29 affinity=29
+pid=627984 psr=30 affinity=30
+pid=627985 psr=31 affinity=31
+pid=627986 psr=32 affinity=32
+pid=627987 psr=33 affinity=33
+pid=627988 psr=34 affinity=34
+other_user_busy=
+### sample 3 at 2026-11-13T18:07:39Z
+pid=627975 psr=0 affinity=0
+pid=627976 psr=1 affinity=1
+pid=627977 psr=2 affinity=2
+pid=627978 psr=3 affinity=3
+pid=627979 psr=4 affinity=4
+pid=627980 psr=5 affinity=5
+pid=627981 psr=6 affinity=6
+pid=627982 psr=28 affinity=28
+pid=627983 psr=29 affinity=29
+pid=627984 psr=30 affinity=30
+pid=627985 psr=31 affinity=31
+pid=627986 psr=32 affinity=32
+pid=627987 psr=33 affinity=33
+pid=627988 psr=34 affinity=34
+other_user_busy=
