@@ -94,6 +94,13 @@ PROJ_YEARS = (1, 5, 10, 20)            # columns of the duration table
 DAYS_PER_MONTH = 30.4                  # months = days / 30.4
 PLAUSIBLE_MARGIN = "±10–15 %"          # plausible margin of the projection
 INTERP_LO, INTERP_HI = "A_N042", "A_N056"   # linear interpolation to 45 cores
+# Planning hypothesis (MEQ-05.3 revision 2): spin-up per continuous run, in
+# simulated days. The adequate spin-up length is a MEQ-06 decision.
+SPINUP_DAYS = 10
+EXAMPLE_YEARS = 2                      # worked example: 2000–2002
+EXAMPLE_LABEL = "2000–2002"
+EXAMPLE_BLOCKS = ("2000–2001", "2001–2002")
+UNCERTAINTY_DIFF = 0.10                # differences below ~10 % are within uncertainty
 
 
 # ---------------------------------------------------------------- helpers
@@ -373,48 +380,66 @@ def project(r: dict) -> dict:
     def days_per_run_year(x: float, c: float = corr) -> float:
         return DAYS_PER_YEAR * spd * x * c / SECONDS_PER_DAY
 
+    def days_for(x: float, years: float, c: float = corr) -> float:
+        """Wall days for one continuous run of `years` simulated years + spin-up."""
+        return (years * DAYS_PER_YEAR + SPINUP_DAYS) * spd * x * c / SECONDS_PER_DAY
+
     rows_def = [
-        ("90c", f"{PROJ_RANKS} compacto", False, None, n_phys - n_compact,
+        ("90c", f"{PROJ_RANKS} compacto", False, n_phys - n_compact, n_compact,
          f"{PROJ_RANKS} processos em {n_compact} núcleos físicos, com as duas tarefas de cada núcleo"),
-        ("90e", f"{PROJ_RANKS} espalhado", False, None, 0,
+        ("90e", f"{PROJ_RANKS} espalhado", False, 0, n_phys,
          f"{PROJ_RANKS} processos nos {n_phys} núcleos: {n_extra} núcleos com duas tarefas, "
          f"{n_phys - n_extra} com uma"),
-        ("4545", f"{pair_small}/{pair_small}", True, "90c", 0,
-         f"duas rodadas simultâneas, cada uma num soquete com {pair_small} processos "
+        ("4545", f"{pair_small}/{pair_small}", True, 0, n_phys,
+         f"dois blocos contínuos simultâneos, cada um num soquete com {pair_small} processos "
          f"({n_extra_sock} dos {per_socket} núcleos com duas tarefas)"),
-        ("112", f"{r['n_logical']} (referência)", False, None, 0,
+        ("112", f"{r['n_logical']} (referência)", False, 0, n_phys,
          f"{r['n_logical']} processos, um por tarefa, em todos os {n_phys} núcleos (como a B112 medida)"),
-        ("5656", f"{pair_big}/{pair_big} (referência)", True, "112", 0,
-         f"duas rodadas simultâneas, cada uma num soquete com {per_socket} núcleos × 2 tarefas"),
+        ("5656", f"{pair_big}/{pair_big} (referência)", True, 0, n_phys,
+         f"dois blocos contínuos simultâneos, cada um num soquete com {per_socket} núcleos × 2 tarefas"),
     ]
     rows = []
-    for key, label, double, fallback, free, desc in rows_def:
-        dpy = days_per_run_year(sps[key])
-        dpy_raw = days_per_run_year(sps[key], 1.0)
-        rows.append({"key": key, "label": label, "double": double,
-                     "fallback": fallback, "free_cores": free, "desc": desc,
-                     "s": sps[key], "days_run_year": dpy,
-                     "days_run_year_raw": dpy_raw})
+    for key, label, double, free, cores, desc in rows_def:
+        blocks = 2 if double else 1
+        rows.append({
+            "key": key, "label": label, "double": double, "blocks": blocks,
+            "free_cores": free, "cores_used": cores, "desc": desc, "s": sps[key],
+            "days_run_year": days_per_run_year(sps[key]),
+            "days_run_year_raw": days_per_run_year(sps[key], 1.0),
+            "durations": [days_for(sps[key], n / blocks) for n in PROJ_YEARS],
+            "durations_raw": [days_for(sps[key], n / blocks, 1.0) for n in PROJ_YEARS],
+        })
     by_key = {x["key"]: x for x in rows}
-    for x in rows:
-        dur = []
-        for n in PROJ_YEARS:
-            if not x["double"]:
-                dur.append(n * x["days_run_year"])
-            elif n == 1:
-                dur.append(None)
-            else:
-                rest = by_key[x["fallback"]]["days_run_year"] if n % 2 else 0.0
-                dur.append((n // 2) * x["days_run_year"] + rest)
-        x["durations"] = dur
-        # effective days per simulated year (two years per pair)
-        x["days_per_year_eff"] = x["days_run_year"] / (2 if x["double"] else 1)
+
+    # Worked example: EXAMPLE_YEARS years, continuous vs two simultaneous blocks.
+    example = []
+    for key, how in (("90e", f"uma rodada contínua de {EXAMPLE_LABEL}"),
+                     ("4545", f"dois blocos ao mesmo tempo: {EXAMPLE_BLOCKS[0]} e "
+                              f"{EXAMPLE_BLOCKS[1]}, cada um com seu spin-up"),
+                     ("90c", f"uma rodada contínua de {EXAMPLE_LABEL}")):
+        x = by_key[key]
+        example.append({"key": key, "label": x["label"], "how": how,
+                        "days": days_for(x["s"], EXAMPLE_YEARS / x["blocks"])})
+    ex_ref = example[0]["days"]
+    for e in example:
+        e["vs_first"] = e["days"] / ex_ref - 1.0
+
+    # Estimated 90-process points for the saturation figure (same formulas).
+    s8, base_cores = r["s8"], r["base_cores"]
+    est = []
+    for key in ("90c", "90e"):
+        x = by_key[key]
+        sp = s8 / x["s"]
+        est.append({"key": key, "label": f"{x['label']} (estimado)",
+                    "x": x["cores_used"], "sp": sp,
+                    "eff": sp / (x["cores_used"] / base_cores)})
 
     return {
         "f": f, "s_a45": s_a45, "k": k, "c": corr, "w": w,
         "n_compact": n_compact, "n_extra": n_extra, "pair_small": pair_small,
         "pair_big": pair_big, "n_extra_sock": n_extra_sock,
         "rows": rows, "by_key": by_key, "drop_without_c": 1.0 - 1.0 / corr,
+        "example": example, "est": est,
     }
 
 
@@ -495,6 +520,8 @@ def chart_payload(r: dict) -> dict:
                                                    b["reps_eff_phys"]))],
         "b_mean": {"x": b["physical_cores"], "sp": b["speedup"],
                    "eff": b["eff_phys"], "ranks": b["ranks"]},
+        "est": [{"label": e["label"], "x": e["x"], "sp": e["sp"], "eff": e["eff"]}
+                for e in r["proj"]["est"]],
         "options": [{"key": o["key"], "label": o["label"], "tp": o["throughput"],
                      "reps": o["reps_throughput"], "eff": o["eff_phys"],
                      "cost_a": o["cost_a"], "cost_b": o["cost_b"]}
@@ -650,9 +677,7 @@ def build_html(r: dict, meta: dict) -> str:
     # --- projection table
     def dur_cell(x, i, n):
         v = x["durations"][i]
-        if v is None:
-            return "<td>—<sup>1</sup></td>"
-        txt = f"{br(v, 1 if n == 1 else 0)} dias"
+        txt = f"{br(v, 1)} dias"
         if n >= 10:
             txt += f"<br><span class='sub'>{br(v / DAYS_PER_MONTH, 1)} meses</span>"
         return f"<td>{txt}</td>"
@@ -676,6 +701,20 @@ def build_html(r: dict, meta: dict) -> str:
         f"<td>{br(x['days_run_year_raw'], 1)}</td></tr>"
         for x in p["rows"])
     lo, hi = cfg[INTERP_LO], cfg[INTERP_HI]
+    ex_rows = "".join(
+        f"<tr><th>{esc(e['label'])}</th><td style='text-align:left'>{esc(e['how'])}</td>"
+        f"<td>{br(e['days'], 1)} dias</td>"
+        f"<td>{'—' if i == 0 else ('+' if e['vs_first'] >= 0 else '') + pct(e['vs_first'], 0)}</td></tr>"
+        for i, e in enumerate(p["example"]))
+    ex = {e["key"]: e for e in p["example"]}
+    compact_vs_spread = (
+        f"<p><b>{PROJ_RANKS} compacto × {PROJ_RANKS} espalhado.</b> {PROJ_RANKS} espalhado usa os "
+        f"{n_phys} núcleos físicos ({p['n_extra']} com duas tarefas, {n_phys - p['n_extra']} com uma) "
+        f"e por isso é mais rápido; {PROJ_RANKS} compacto usa só {p['n_compact']} núcleos e deixa "
+        f"{pk['90c']['free_cores']} inteiros livres para outros usuários — é mais lento por rodada, "
+        f"mas ocupa menos a máquina. Os dois têm {PROJ_RANKS} processos, mas não a mesma quantidade "
+        f"de hardware.</p>")
+    i1 = PROJ_YEARS.index(1)
 
     # --- core map
     core_map_rows = "".join(
@@ -821,19 +860,26 @@ def build_html(r: dict, meta: dict) -> str:
       ({pct(b112['eff_phys'])} por núcleo físico).</p>
     <div class="grid-2">
       <div>
-        <div class="chart" id="chart-speedup" style="height:320px"></div>
+        <div class="chart" id="chart-speedup" style="height:430px"></div>
         <p class="caption"><b>a</b> Aceleração em relação à rodada com {r['base_cores']} núcleos, em
           função do número de núcleos físicos. Pontos: repetições. Linha cheia: média da série A.
           Tracejado: aceleração ideal (dobrar os núcleos = dobrar a velocidade). Losango vazado: série B
           ({b112['ranks']} processos com SMT), fora da curva A.</p>
       </div>
       <div>
-        <div class="chart" id="chart-efficiency" style="height:320px"></div>
+        <div class="chart" id="chart-efficiency" style="height:430px"></div>
         <p class="caption"><b>b</b> Eficiência por núcleo físico: fração do ganho ideal obtida
           (aceleração ÷ núcleos/{r['base_cores']}). Tracejado horizontal: critério de
           {pct(EFFICIENCY_CRITERION, 0)} aprovado pelo pesquisador. Pontos acima da linha cumprem o critério.</p>
       </div>
     </div>
+    <p class="caption">Círculo e quadrado cinza vazados: <b>{PROJ_RANKS} compacto (estimado)</b> e
+      <b>{PROJ_RANKS} espalhado (estimado)</b> — estimado a partir dos pontos medidos, não medido. O eixo
+      usa os núcleos físicos efetivamente usados ({p['est'][0]['x']} e {p['est'][1]['x']}). O s/passo vem
+      das mesmas fórmulas do capítulo 7 (sem a correção c), e daí aceleração e eficiência são calculadas
+      como para os pontos medidos: {p['est'][0]['label']}, aceleração {br(p['est'][0]['sp'], 2)} e
+      eficiência {pct(p['est'][0]['eff'])}; {p['est'][1]['label']}, aceleração {br(p['est'][1]['sp'], 2)}
+      e eficiência {pct(p['est'][1]['eff'])}.</p>
     {means(f"Até {a42['physical_cores']} núcleos, cada núcleo extra ainda rende bem. De {a42['physical_cores']} para {a56['physical_cores']} núcleos ({pct(a42_to_a56_cores, 0)} a mais), o passo fica só {pct(a42_to_a56_time, 0)} mais rápido. Usar a segunda tarefa de cada núcleo ainda tira mais {pct(smt_gain, 0)} do tempo por passo em relação à A{a56['ranks']}.")}
     <nav class="pager"><a href="#metodo">← Método</a><a href="#vazao">Produção do nó →</a></nav>
   </section>
@@ -911,36 +957,63 @@ def build_html(r: dict, meta: dict) -> str:
   <section id="duracao" class="chapter">
     <p class="chapter-no">Capítulo 7</p>
     <h2>Quanto tempo levaria a MEQ-06</h2>
-    {shows(f"Uma projeção do prazo da MEQ-06 para 1, 5, 10 e 20 anos simulados, em configurações com {PROJ_RANKS} processos que deixam parte do nó para outros usuários, comparadas às de {n_log}. Nenhuma simulação nova foi feita: tudo vem dos ensaios medidos, com as hipóteses declaradas abaixo.")}
+    {shows(f"Uma projeção do prazo da MEQ-06 para 1, 5, 10 e 20 anos simulados, em configurações com {PROJ_RANKS} processos que deixam parte do nó para outros usuários, comparadas às de {n_log}, incluindo rodadas divididas em dois blocos simultâneos. Nenhuma simulação nova foi feita: tudo vem dos ensaios medidos, com as hipóteses declaradas abaixo.")}
     <p><b>Nenhuma destas configurações foi medida diretamente.</b> Os prazos combinam ensaios medidos
       com hipóteses simples; a margem plausível é de {PLAUSIBLE_MARGIN}. Os valores já incluem a correção
       pela produção (c = {br(p['c'], 3)}, capítulo 6). Sem essa correção, todos cairiam
-      {pct(p['drop_without_c'], 1)} (por exemplo, {PROJ_RANKS} compacto: de
-      {br(pk['90c']['days_run_year'], 1)} para {br(pk['90c']['days_run_year_raw'], 1)} dias por ano).</p>
+      {pct(p['drop_without_c'], 1)} (por exemplo, {PROJ_RANKS} compacto com 1 ano: de
+      {br(pk['90c']['durations'][i1], 1)} para {br(pk['90c']['durations_raw'][i1], 1)} dias).</p>
+    <p><b>Spin-up.</b> Cada rodada contínua começa com {SPINUP_DAYS} dias simulados de spin-up
+      (período inicial em que o modelo se ajusta e que não entra na análise). <i>Hipótese de
+      planejamento; a duração adequada do spin-up é decisão da MEQ-06.</i></p>
+    <p><b>Rodadas duplas como dois blocos.</b> Nas linhas {pk['4545']['label']} e
+      {pk['5656']['label'].split(' ')[0]}, o período é dividido em dois blocos contínuos de N/2 anos,
+      simulados ao mesmo tempo, um em cada soquete, cada um com o seu spin-up. Isso vale também para
+      1 ano (dois semestres) e para N ímpar.</p>
     <div class="scorecard-wrap"><table class="decision proj">
       <thead><tr><th>Configuração</th><th style="text-align:left">Como o nó é ocupado</th><th>Núcleos inteiros livres</th>{proj_head}</tr></thead>
       <tbody>{proj_rows}</tbody></table></div>
-    <p class="caption">Dias de relógio para simular N anos (projeção, variante corrigida). Para 10 e 20
-      anos, também em meses (dias ÷ {br(DAYS_PER_MONTH, 1)}). Nas rodadas duplas, cada rodada simula um
-      ano diferente: N anos = ⌊N/2⌋ pares; se N for ímpar, o ano restante roda sozinho na configuração
-      única com o mesmo limite de processos ({pk['4545']['label']} → {pk['90c']['label']};
-      {pk['5656']['label'].split(' ')[0]} → {pk['112']['label'].split(' ')[0]}).
-      <sup>1</sup> Uma rodada dupla precisa de dois anos diferentes; com 1 ano não há par, e o prazo é o
-      da configuração única correspondente.</p>
-    <p><b>{PROJ_RANKS} compacto ou {PROJ_RANKS} espalhado?</b> Os dois usam {PROJ_RANKS} processos. O
-      compacto põe dois processos em cada um de {p['n_compact']} núcleos e deixa
-      <b>{pk['90c']['free_cores']} núcleos inteiros livres</b> para outros usuários; o espalhado ocupa os
-      {n_phys} núcleos e <b>não deixa nenhum livre</b>. O espalhado é mais rápido
-      ({br(pk['90e']['days_run_year'], 1)} contra {br(pk['90c']['days_run_year'], 1)} dias por ano), mas,
-      na prática, impede que outra pessoa use a máquina sem atrasar as duas rodadas.</p>
+    <p class="caption">Dias de relógio para simular N anos (projeção, variante corrigida, com
+      {SPINUP_DAYS} dias de spin-up por rodada contínua). Para 10 e 20 anos, também em meses
+      (dias ÷ {br(DAYS_PER_MONTH, 1)}). Rodada única: dias = (N × {DAYS_PER_YEAR} + {SPINUP_DAYS}) ×
+      {br(r['steps_per_day'], 0)} × s × c ÷ {br(SECONDS_PER_DAY, 0)}. Rodadas duplas: dois blocos de
+      N/2 anos ao mesmo tempo, dias = (N/2 × {DAYS_PER_YEAR} + {SPINUP_DAYS}) × {br(r['steps_per_day'], 0)}
+      × s<sub>rodada</sub> × c ÷ {br(SECONDS_PER_DAY, 0)}.</p>
+    {compact_vs_spread}
+    <p>Na prática, o espalhado impede que outra pessoa use a máquina sem atrasar a rodada; o compacto
+      custa {pct(pk['90c']['durations'][i1] / pk['90e']['durations'][i1] - 1, 0)} a mais de prazo.</p>
+    <h3>Exemplo resolvido: simular {EXAMPLE_LABEL} ({EXAMPLE_YEARS} anos)</h3>
+    <p>Rodar o período inteiro de uma vez em {ex['90e']['label']} leva cerca de
+      {br(ex['90e']['days'], 1)} dias. Dividir em dois blocos simultâneos ({ex['4545']['label']}:
+      {EXAMPLE_BLOCKS[0]} e {EXAMPLE_BLOCKS[1]} ao mesmo tempo, um em cada soquete) leva cerca de
+      {br(ex['4545']['days'], 1)} dias, e uma rodada contínua em {ex['90c']['label']}, cerca de
+      {br(ex['90c']['days'], 1)} dias. Diferenças menores que ~{pct(UNCERTAINTY_DIFF, 0)} estão dentro
+      da incerteza da projeção.</p>
+    <div class="scorecard-wrap"><table class="decision">
+      <thead><tr><th>Configuração</th><th style="text-align:left">Como o período é rodado</th><th>Dias de relógio</th><th>Diferença para a 1.ª linha</th></tr></thead>
+      <tbody>{ex_rows}</tbody></table></div>
+    <p class="caption">Projeção com as mesmas hipóteses da tabela acima (c = {br(p['c'], 3)};
+      {SPINUP_DAYS} dias de spin-up por rodada contínua).</p>
+    <p><b>Por que rodar dois blocos juntos não compensa.</b> As duas rodadas simultâneas disputam o
+      nó: na série D, cada uma ficou cerca de {pct(p['k'] - 1, 0)} mais lenta que a mesma rodada de
+      {per_socket} processos sozinha (k = {br(p['k'], 3)}), o que anula a vantagem de dividir o período.
+      A causa provável é a disputa pela memória, cuja banda não foi medida.</p>
+    <p><b>Ressalva científica.</b> Dividir o período em blocos interrompe a continuidade da simulação:
+      por exemplo, a umidade do solo recomeça em cada bloco. Se isso é aceitável, e com qual spin-up,
+      é decisão da MEQ-06.</p>
     <p>Se uma configuração de {PROJ_RANKS} processos compactos for adotada, um ensaio curto com ela
       (o mesmo trecho de {br(r['window_h'], 0)} h) confirmaria o número antes de uma rodada longa.</p>
     <details class="drawer">
       <summary>Método da projeção: hipóteses e fórmulas</summary>
       <p>Notação: s(X) = s/passo médio da configuração X medida; {br(r['steps_per_day'], 0)} passos por dia
-        simulado; {DAYS_PER_YEAR} dias por ano. Dias por ano de uma rodada =
-        {DAYS_PER_YEAR} × {br(r['steps_per_day'], 0)} × s × c ÷ {br(SECONDS_PER_DAY, 0)}.</p>
+        simulado; {DAYS_PER_YEAR} dias por ano; S = {SPINUP_DAYS} dias de spin-up por rodada contínua.
+        Rodada única com N anos: dias = (N × {DAYS_PER_YEAR} + S) × {br(r['steps_per_day'], 0)} × s × c ÷
+        {br(SECONDS_PER_DAY, 0)}. Rodadas duplas: dois blocos contínuos de N/2 anos ao mesmo tempo, dias =
+        (N/2 × {DAYS_PER_YEAR} + S) × {br(r['steps_per_day'], 0)} × s<sub>rodada</sub> × c ÷
+        {br(SECONDS_PER_DAY, 0)}.</p>
       <ul>
+        <li><b>S = {SPINUP_DAYS} dias simulados</b> — spin-up de cada rodada contínua. Hipótese de
+          planejamento; a duração adequada do spin-up é decisão da MEQ-06.</li>
         <li><b>f = s(B{n_log}) / s(A{n_phys}) = {br(p['f'], 4)}</b> — ganho do SMT: com a segunda tarefa
           de cada núcleo, o passo leva {br(p['f'], 3)} vez o tempo.</li>
         <li><b>s(A{p['n_compact']}) = {br(p['s_a45'], 4)} s/passo</b> — interpolação linear entre
@@ -959,8 +1032,8 @@ def build_html(r: dict, meta: dict) -> str:
       <div class="scorecard-wrap"><table class="mini">
         <thead><tr><th>Configuração</th><th style="text-align:left">s/passo projetado</th><th>s/passo</th><th>Dias por ano de rodada (com c)</th><th>Dias por ano de rodada (sem c)</th></tr></thead>
         <tbody>{proj_method_rows}</tbody></table></div>
-      <p class="caption">Nas rodadas duplas, "dias por ano de rodada" é o tempo de um par, que produz
-        dois anos simulados ao mesmo tempo.</p>
+      <p class="caption">"Dias por ano de rodada" = tempo de relógio para uma rodada avançar um ano
+        simulado, sem spin-up. Nas rodadas duplas, os dois blocos avançam ao mesmo tempo, cada um nesse ritmo.</p>
     </details>
     {means(f"Com {PROJ_RANKS} processos compactos, 10 anos simulados levariam cerca de {br(pk['90c']['durations'][PROJ_YEARS.index(10)] / DAYS_PER_MONTH, 1)} meses, deixando {pk['90c']['free_cores']} núcleos livres; usando a máquina inteira ({pk['112']['label'].split(' ')[0]}), cerca de {br(pk['112']['durations'][PROJ_YEARS.index(10)] / DAYS_PER_MONTH, 1)} meses. São projeções com margem de {PLAUSIBLE_MARGIN}; nenhuma configuração foi decidida.")}
     <nav class="pager"><a href="#custo">← Custo por ano simulado</a><a href="#opcoes">Opções →</a></nav>
@@ -978,7 +1051,10 @@ def build_html(r: dict, meta: dict) -> str:
       <tbody>{dec_rows}</tbody></table></div>
     <p class="caption">Vazão e custos com o s/passo médio de cada configuração; custos são estimativas
       (capítulo 6). Eficiência relativa a A{r['base_cores']}. Na D, a eficiência é a do par:
-      vazão somada ÷ (vazão de A{r['base_cores']} × {n_phys}/{r['base_cores']}).</p>
+      vazão somada ÷ (vazão de A{r['base_cores']} × {n_phys}/{r['base_cores']}).
+      <b>(a)</b> custo calculado pelo trecho de {br(r['window_h'], 0)} h medido; <b>(b)</b> o mesmo custo
+      corrigido pela média da produção da EXP03, que foi cerca de {pct(r['corr'] - 1, 0)} mais lenta que
+      esse trecho.</p>
     <div class="conclusion">
       <h3>Situação da decisão</h3>
       <p class="verdict">A B112 aparece como <b>{esc(PROPOSED_LABEL)}</b>. Nenhuma configuração foi
@@ -1001,6 +1077,7 @@ def build_html(r: dict, meta: dict) -> str:
       fixada ({br(c60['s_per_step'], 4)} contra {br(a56['s_per_step'], 4)} s/passo). Com {PROJ_RANKS}
       processos soltos, mais processos do que núcleos, todos os {n_phys} núcleos ficam ocupados e
       nenhum núcleo inteiro fica livre para outros usuários.</p>
+    {compact_vs_spread}
     <p><b>Processos fixados.</b> Fixar é dizer ao <code>mpiexec</code>, com a opção
       <code>-bind-to user:&lt;lista&gt;</code> do MPICH (versão {esc(hw['mpich_version'])} no Swell),
       a lista de CPUs: o primeiro processo vai para a primeira CPU da lista, o segundo para a segunda,
@@ -1069,7 +1146,12 @@ def build_html(r: dict, meta: dict) -> str:
       <li><b>Projeção da MEQ-06 (capítulo 7).</b> Nenhuma das configurações projetadas foi medida. As
         fórmulas supõem interpolação linear entre A{lo['physical_cores']} e A{hi['physical_cores']},
         ganho do SMT proporcional à fração de núcleos com duas tarefas, e a perda por rodadas simultâneas
-        medida com {per_socket} processos por soquete. Margem plausível: {PLAUSIBLE_MARGIN}.</li>
+        medida com {per_socket} processos por soquete. O spin-up de {SPINUP_DAYS} dias por rodada contínua
+        é uma hipótese de planejamento. Margem plausível: {PLAUSIBLE_MARGIN}. Os pontos de {PROJ_RANKS}
+        processos no capítulo 3 usam as mesmas fórmulas e também não foram medidos.</li>
+      <li><b>Rodadas em blocos.</b> Dividir o período em blocos interrompe a continuidade da simulação
+        (por exemplo, a umidade do solo recomeça em cada bloco). Se isso é aceitável, e com qual spin-up,
+        é decisão da MEQ-06.</li>
       <li><b>Comando de exemplo "{PROJ_RANKS} compacto"</b> (capítulo 9) não foi executado no benchmark.</li>
     </ul>
     {means("Os números deste relatório servem para escolher a configuração e estimar prazos, não para garantir prazos exatos. Antes de uma rodada longa numa configuração não medida, um ensaio curto confirma a velocidade e a fixação.")}
@@ -1172,6 +1254,17 @@ REPORT_JS = r"""
     onScroll();
   }
 
+  // Estimated (not measured) 90-process points: open grey markers.
+  var EST_SYMBOLS = ['circle-open', 'square-open'];
+  function estTraces(key, f) {
+    return D.est.map(function (e, i) {
+      return { type: 'scatter', mode: 'markers', x: [e.x], y: [e[key]], name: e.label,
+        legendgroup: 'est', legendgrouptitle: { text: 'estimado a partir dos pontos medidos, não medido', font: { size: 10 } },
+        marker: { symbol: EST_SYMBOLS[i % EST_SYMBOLS.length], color: '#7a7a7a', size: 10, line: { width: 1.6 } },
+        hovertemplate: e.label + ': %{y:' + f + '}<br>estimado a partir dos pontos medidos, não medido<extra></extra>' };
+    });
+  }
+
   function initSaturation() {
     var b0 = D.base_cores, xmax = D.n_phys;
     var xs = [b0, xmax];
@@ -1192,7 +1285,7 @@ REPORT_JS = r"""
         name: 'série B (' + D.b_mean.ranks + ' processos, SMT)',
         marker: { symbol: 'diamond-open', color: '#1a1a1a', size: 9, line: { width: 1.4 } },
         customdata: pick(D.b_pts, 'rep'), hovertemplate: 'B r%{customdata}: %{y:.3f}<extra></extra>' }
-    ];
+    ].concat(estTraces('sp', '.3f'));
     plot('chart-speedup', spTr, Object.assign({}, common, {
       yaxis: { title: { text: 'aceleração em relação a ' + b0 + ' núcleos' }, rangemode: 'tozero' } }));
 
@@ -1209,7 +1302,7 @@ REPORT_JS = r"""
         name: 'série B (' + D.b_mean.ranks + ' processos, SMT)',
         marker: { symbol: 'diamond-open', color: '#1a1a1a', size: 9, line: { width: 1.4 } },
         customdata: pick(D.b_pts, 'rep'), hovertemplate: 'B r%{customdata}: %{y:.1%}<extra></extra>' }
-    ];
+    ].concat(estTraces('eff', '.1%'));
     plot('chart-efficiency', efTr, Object.assign({}, common, {
       yaxis: { title: { text: 'eficiência por núcleo físico' }, tickformat: '.0%', range: [0, 1.08] } }));
   }
