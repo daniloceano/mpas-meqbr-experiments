@@ -1,11 +1,22 @@
 #!/usr/bin/env python3
 """MEQ-05.3 — self-contained HTML report of the MEQ-05.2 parallel benchmark.
 
-Inputs (consolidated tables only; nothing else is read for results):
-    results/tables/meq05_parallel_benchmark.csv   one row per trial (MEQ-05.2)
+Audience: a meteorology researcher without a computing background. Every
+technical term is explained in plain words the first time it appears, and each
+chapter opens with "O que esta seção mostra" and closes with "O que isso
+significa na prática".
+
+Inputs (consolidated tables and benchmark records only):
+    results/tables/meq05_parallel_benchmark.csv   one row per trial (MEQ-05.2),
+                                                  including the real mpiexec
+                                                  command and the pinning check
     results/tables/runtime_metrics.csv            production costs (EXP03 rows
                                                   for the cost correction; all
                                                   rows for the context table)
+    results/benchmark/MEQ-05.2/records/hardware_snapshot.txt
+                                                  CPU numbering per socket and
+                                                  MPICH/Hydra version (lscpu,
+                                                  numactl, mpiexec -info)
 
 Output (one file; CSS, Plotly basic, data and JavaScript are inlined):
     results/report/meq05_parallel_benchmark.html
@@ -18,11 +29,14 @@ Style is reused from the technical report v2 without modifying it:
     with panel letters, tables and drawers use the existing CSS classes.
 
 No result is typed by hand: every number in the page is computed below from
-the two CSVs. The fixed constants in "Run metadata" are run settings
-documented in docs/provenance/MEQ-05.2-benchmark-record.md, or the efficiency
-criterion approved by the PI; they are not measurements.
+the inputs. The fixed constants in "Run metadata" and "Projection settings"
+are run settings documented in docs/provenance/MEQ-05.2-benchmark-record.md,
+or assumptions stated by the PI in the MEQ-05.3 briefs; they are not
+measurements.
 
-The report presents options; it does not decide the MEQ-06 configuration.
+The MEQ-06 duration chapter is a projection: none of the projected
+configurations was measured. The report presents options; it does not decide
+the MEQ-06 configuration.
 
 Run:
     python scripts/06_report/build_benchmark_report.py [--output PATH]
@@ -34,6 +48,7 @@ import argparse
 import hashlib
 import html
 import json
+import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -45,6 +60,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 BENCH_CSV = REPO_ROOT / "results/tables/meq05_parallel_benchmark.csv"
 RUNTIME_CSV = REPO_ROOT / "results/tables/runtime_metrics.csv"
+HW_SNAPSHOT = REPO_ROOT / "results/benchmark/MEQ-05.2/records/hardware_snapshot.txt"
 RECORD_MD = REPO_ROOT / "docs/provenance/MEQ-05.2-benchmark-record.md"
 REPORT_CSS = REPO_ROOT / "docs/templates/report_v2/report.css"
 PLOTLY_JS = REPO_ROOT / "docs/templates/vendor/plotly-basic.min.js"
@@ -68,6 +84,16 @@ OPTIONS = ["A_N056", "B_N112", "C_N060", "D"]   # decision options, this order
 PROPOSED = "B_N112"
 PROPOSED_LABEL = "recomendação proposta — aguardando decisão do pesquisador"
 D_CASES = ("D_N028x2_s0", "D_N028x2_s1")
+UNPINNED_CFG = "C_N060"                # production-like launch (no pinning)
+PINNED_CFG = "A_N056"                  # pinned comparison for the run chapter
+
+# ---------------------------------------------------------- projection settings
+# Assumptions stated by the PI in the MEQ-05.3 revision brief (not measured).
+PROJ_RANKS = 90                        # processes of the projected single run
+PROJ_YEARS = (1, 5, 10, 20)            # columns of the duration table
+DAYS_PER_MONTH = 30.4                  # months = days / 30.4
+PLAUSIBLE_MARGIN = "±10–15 %"          # plausible margin of the projection
+INTERP_LO, INTERP_HI = "A_N042", "A_N056"   # linear interpolation to 45 cores
 
 
 # ---------------------------------------------------------------- helpers
@@ -90,11 +116,11 @@ def br(value: float, decimals: int = 2) -> str:
     if value is None or not np.isfinite(value):
         return "—"
     text = f"{float(value):,.{decimals}f}"
-    return text.replace(",", " ").replace(".", ",").replace(" ", ".")
+    return text.replace(",", " ").replace(".", ",").replace(" ", ".")
 
 
 def pct(value: float, decimals: int = 1) -> str:
-    return br(100.0 * value, decimals) + " %"
+    return br(100.0 * value, decimals) + " %"
 
 
 def esc(text) -> str:
@@ -104,6 +130,49 @@ def esc(text) -> str:
 def throughput(s_per_step: float, steps_per_day: int) -> float:
     """Simulated days per wall day of the node for one run."""
     return SECONDS_PER_DAY / (s_per_step * steps_per_day)
+
+
+def parse_ranges(text: str) -> list[list[int]]:
+    """'0-27,56-83' -> [[0..27], [56..83]]."""
+    out = []
+    for part in text.split(","):
+        a, _, b = part.partition("-")
+        out.append(list(range(int(a), int(b or a) + 1)))
+    return out
+
+
+def compress(cpus: list[int]) -> str:
+    """[0,1,2,5] -> '0–2, 5' (display only)."""
+    spans, start, prev = [], None, None
+    for c in cpus:
+        if start is None:
+            start = prev = c
+        elif c == prev + 1:
+            prev = c
+        else:
+            spans.append((start, prev))
+            start = prev = c
+    if start is not None:
+        spans.append((start, prev))
+    return ", ".join(f"{a}–{b}" if a != b else f"{a}" for a, b in spans)
+
+
+def read_hardware(n_phys: int, per_socket: int) -> dict:
+    """CPU numbering per socket and MPICH version from the benchmark snapshot."""
+    text = HW_SNAPSHOT.read_text(encoding="utf-8")
+    sockets = []
+    for node, cpus in re.findall(r"NUMA node(\d+) CPU\(s\):\s+(\S+)", text):
+        ranges = parse_ranges(cpus)
+        if len(ranges) != 2:
+            raise SystemExit(f"unexpected CPU list for NUMA node {node}: {cpus}")
+        phys, sib = ranges
+        if len(phys) != per_socket or [c - n_phys for c in sib] != phys:
+            raise SystemExit(f"NUMA node {node}: SMT numbering is not i / i+{n_phys}")
+        sockets.append({"node": int(node), "phys": phys, "sib": sib})
+    if len(sockets) * per_socket != n_phys:
+        raise SystemExit("socket count in hardware snapshot inconsistent with CSV")
+    ver = re.search(r"HYDRA build details:\s*\n\s*Version:\s+(\S+)", text)
+    return {"sockets": sockets, "mpich_version": ver.group(1) if ver else "?"}
 
 
 # ---------------------------------------------------------------- computation
@@ -150,6 +219,8 @@ def compute() -> dict:
             "throughput": throughput(mean_sps, steps_per_day),
             "reps_throughput": [throughput(s, steps_per_day)
                                 for s in grp["s_per_step"].astype(float)],
+            "mpiexec_cmd": str(row["mpiexec_cmd"]),
+            "pinning_check": [str(v) for v in grp["pinning_check"]],
         }
 
     base = cfg[BASE_CONFIG]
@@ -245,7 +316,7 @@ def compute() -> dict:
     a_meeting = [c for c in a_series if c["eff_phys"] >= EFFICIENCY_CRITERION]
 
     exp03_cells = int(exp03["n_cells"].iloc[0])
-    return {
+    r = {
         "bench": bench, "runtime": runtime, "cfg": cfg, "steps": steps,
         "window_h": window_h, "steps_per_day": steps_per_day,
         "n_phys": n_phys, "n_logical": n_logical, "per_socket": per_socket,
@@ -259,6 +330,142 @@ def compute() -> dict:
         "max_spread": spreads[max_spread_cfg], "a_series": a_series,
         "a_meeting": a_meeting, "exp03_cells": exp03_cells,
         "trial_count": len(bench),
+    }
+    r["hw"] = read_hardware(n_phys, per_socket)
+    r["proj"] = project(r)
+    r["run"] = run_practice(r)
+    return r
+
+
+def project(r: dict) -> dict:
+    """MEQ-06 duration projection (PI's formulas; no configuration measured)."""
+    cfg = r["cfg"]
+
+    def s(key: str) -> float:
+        return cfg[key]["s_per_step"]
+
+    n_phys, per_socket = r["n_phys"], r["per_socket"]
+    corr, spd = r["corr"], r["steps_per_day"]
+
+    f = s("B_N112") / s("A_N056")                      # SMT gain
+    lo, hi = cfg[INTERP_LO], cfg[INTERP_HI]
+    n_compact = PROJ_RANKS // SMT_THREADS              # 45 physical cores
+    w = (n_compact - lo["physical_cores"]) / (hi["physical_cores"] - lo["physical_cores"])
+    s_a45 = lo["s_per_step"] + w * (hi["s_per_step"] - lo["s_per_step"])
+    n_extra = PROJ_RANKS - n_phys                      # cores with 2 tasks, spread
+    k = np.mean([s(d) for d in D_CASES]) / s("A_N028")  # two simultaneous runs
+    a28 = "A_N%03d" % per_socket
+    if a28 != "A_N028":
+        raise SystemExit("per-socket core count no longer matches A_N028")
+    pair_small = PROJ_RANKS // 2                       # 45 processes per socket
+    pair_big = r["n_logical"] // 2                     # 56 processes per socket
+    n_extra_sock = pair_small - per_socket             # 17 cores with 2 tasks
+
+    sps = {
+        "90c": s_a45 * f,
+        "90e": s("A_N056") - (n_extra / n_phys) * (s("A_N056") - s("B_N112")),
+        "4545": (s("A_N028") - (n_extra_sock / per_socket)
+                 * (s("A_N028") - s("A_N028") * f)) * k,
+        "112": s("B_N112"),
+        "5656": s("A_N028") * f * k,
+    }
+
+    def days_per_run_year(x: float, c: float = corr) -> float:
+        return DAYS_PER_YEAR * spd * x * c / SECONDS_PER_DAY
+
+    rows_def = [
+        ("90c", f"{PROJ_RANKS} compacto", False, None, n_phys - n_compact,
+         f"{PROJ_RANKS} processos em {n_compact} núcleos físicos, com as duas tarefas de cada núcleo"),
+        ("90e", f"{PROJ_RANKS} espalhado", False, None, 0,
+         f"{PROJ_RANKS} processos nos {n_phys} núcleos: {n_extra} núcleos com duas tarefas, "
+         f"{n_phys - n_extra} com uma"),
+        ("4545", f"{pair_small}/{pair_small}", True, "90c", 0,
+         f"duas rodadas simultâneas, cada uma num soquete com {pair_small} processos "
+         f"({n_extra_sock} dos {per_socket} núcleos com duas tarefas)"),
+        ("112", f"{r['n_logical']} (referência)", False, None, 0,
+         f"{r['n_logical']} processos, um por tarefa, em todos os {n_phys} núcleos (como a B112 medida)"),
+        ("5656", f"{pair_big}/{pair_big} (referência)", True, "112", 0,
+         f"duas rodadas simultâneas, cada uma num soquete com {per_socket} núcleos × 2 tarefas"),
+    ]
+    rows = []
+    for key, label, double, fallback, free, desc in rows_def:
+        dpy = days_per_run_year(sps[key])
+        dpy_raw = days_per_run_year(sps[key], 1.0)
+        rows.append({"key": key, "label": label, "double": double,
+                     "fallback": fallback, "free_cores": free, "desc": desc,
+                     "s": sps[key], "days_run_year": dpy,
+                     "days_run_year_raw": dpy_raw})
+    by_key = {x["key"]: x for x in rows}
+    for x in rows:
+        dur = []
+        for n in PROJ_YEARS:
+            if not x["double"]:
+                dur.append(n * x["days_run_year"])
+            elif n == 1:
+                dur.append(None)
+            else:
+                rest = by_key[x["fallback"]]["days_run_year"] if n % 2 else 0.0
+                dur.append((n // 2) * x["days_run_year"] + rest)
+        x["durations"] = dur
+        # effective days per simulated year (two years per pair)
+        x["days_per_year_eff"] = x["days_run_year"] / (2 if x["double"] else 1)
+
+    return {
+        "f": f, "s_a45": s_a45, "k": k, "c": corr, "w": w,
+        "n_compact": n_compact, "n_extra": n_extra, "pair_small": pair_small,
+        "pair_big": pair_big, "n_extra_sock": n_extra_sock,
+        "rows": rows, "by_key": by_key, "drop_without_c": 1.0 - 1.0 / corr,
+    }
+
+
+def run_practice(r: dict) -> dict:
+    """Facts for the "Como rodar na prática" chapter (from CSV and snapshot)."""
+    cfg, hw = r["cfg"], r["hw"]
+    unp, pin = cfg[UNPINNED_CFG], cfg[PINNED_CFG]
+    shared, occupied = set(), set()
+    for chk in unp["pinning_check"]:
+        m = re.search(r"ranks_on_shared_physical_core_per_sample=([\d/]+)", chk)
+        o = re.search(r"physical_cores_occupied_per_sample=([\d/]+)", chk)
+        a = re.search(r"affinity=([\d-]+)", chk)
+        if not (m and o and a):
+            raise SystemExit(f"unexpected pinning_check for {UNPINNED_CFG}: {chk}")
+        shared.update(int(v) for v in m.group(1).split("/"))
+        occupied.update(int(v) for v in o.group(1).split("/"))
+        affinity = a.group(1)
+    if len(shared) != 1 or len(occupied) != 1:
+        raise SystemExit("series C sharing varied between samples; update text")
+
+    # Example "90 compacto": n_compact physical cores with both tasks, split as
+    # evenly as possible between sockets, same order as the validated B112 list
+    # (socket 0 physical, socket 0 siblings, socket 1 physical, socket 1 siblings).
+    n_compact = r["proj"]["n_compact"]
+    socks = hw["sockets"]
+    per = [n_compact // len(socks) + (1 if i < n_compact % len(socks) else 0)
+           for i in range(len(socks))]
+    cpus, free = [], []
+    for sk, n in zip(socks, per):
+        cpus += sk["phys"][:n] + sk["sib"][:n]
+        free += sk["phys"][n:]
+    if len(cpus) != PROJ_RANKS or len(set(cpus)) != PROJ_RANKS:
+        raise SystemExit("example CPU list is not 90 distinct CPUs")
+    b_cmd = cfg["B_N112"]["mpiexec_cmd"]
+    b_list = re.search(r"user:([\d,]+)", b_cmd).group(1).split(",")
+    full_b = [int(v) for v in b_list]
+    expect_b = sum((sk["phys"] + sk["sib"] for sk in socks), [])
+    if full_b != expect_b:
+        raise SystemExit("B112 list order differs from the snapshot numbering")
+    example = (f"mpiexec -n {PROJ_RANKS} -bind-to user:"
+               + ",".join(str(c) for c in cpus) + " ./atmosphere_model")
+    return {
+        "unpinned_cmd": unp["mpiexec_cmd"], "pinned_cmd": pin["mpiexec_cmd"],
+        "unpinned_ranks": unp["ranks"], "pinned_ranks": pin["ranks"],
+        "shared": shared.pop(), "occupied": occupied.pop(),
+        "affinity": affinity,
+        "slowdown": unp["s_per_step"] / pin["s_per_step"] - 1.0,
+        "example_cmd": example, "per_socket_alloc": per,
+        "example_blocks": [compress(sk["phys"][:n]) + " + " + compress(sk["sib"][:n])
+                           for sk, n in zip(socks, per)],
+        "free_cores": free, "free_txt": compress(free),
     }
 
 
@@ -295,10 +502,19 @@ def chart_payload(r: dict) -> dict:
     }
 
 
+def shows(text: str) -> str:
+    return f'<p class="lead"><b>O que esta seção mostra.</b> {text}</p>'
+
+
+def means(text: str) -> str:
+    return f'<div class="note practice"><b>O que isso significa na prática.</b> {text}</div>'
+
+
 def build_html(r: dict, meta: dict) -> str:
     cfg = r["cfg"]
     o = {x["key"]: x for x in r["options"]}
     a56, b112, c60 = cfg["A_N056"], cfg["B_N112"], cfg["C_N060"]
+    a42 = cfg["A_N042"]
     s0, s1 = cfg[D_CASES[0]], cfg[D_CASES[1]]
     hist = r["hist"]
     ranks_hist = sorted(hist["mpi_ranks"].unique())
@@ -310,6 +526,45 @@ def build_html(r: dict, meta: dict) -> str:
     b_vs_a56 = b112["throughput"] / a56["throughput"] - 1.0
     a56_vs_c = a56["throughput"] / c60["throughput"] - 1.0
     io_share = r["io_extrap_mean"] / r["a56_compute_day"]
+    a42_to_a56_time = 1.0 - a56["s_per_step"] / a42["s_per_step"]
+    a42_to_a56_cores = a56["physical_cores"] / a42["physical_cores"] - 1.0
+    smt_gain = 1.0 - b112["s_per_step"] / a56["s_per_step"]
+    cost_b_vals = [x["cost_b"] for x in r["options"]]
+    p, run, hw = r["proj"], r["run"], r["hw"]
+    pk = p["by_key"]
+    n_phys, n_log, per_socket = r["n_phys"], r["n_logical"], r["per_socket"]
+
+    # --- glossary
+    gloss = [
+        ("Nó", f"Um computador completo. O Swell é um único nó; tudo neste relatório roda dentro dele."),
+        ("Soquete", f"Cada um dos {r['n_sockets']} processadores (chips) do nó. Cada soquete tem "
+                    f"{per_socket} núcleos e sua própria memória."),
+        ("Núcleo físico", f"Uma unidade de cálculo real do processador. O Swell tem {n_phys}."),
+        ("SMT", f"Cada núcleo alterna entre duas tarefas; o sistema mostra {n_log}, mas só {n_phys} "
+                f"são reais. A segunda tarefa aproveita os momentos em que o núcleo ficaria parado, "
+                f"por isso rende bem menos que um núcleo a mais."),
+        ("Processo (rank)", "Fatia da malha calculada por um núcleo. Com N processos, o MPAS divide "
+                            "as células em N pedaços que são calculados ao mesmo tempo e trocam "
+                            "informação nas bordas a cada passo."),
+        ("Decomposição / partição", "O corte da malha em N pedaços de tamanho parecido, feito antes "
+                                    "da rodada (programa METIS). O MPAS precisa de um arquivo de "
+                                    "partição para cada N (<code>graph.info.part.N</code>)."),
+        ("Fixação de processos", "Dizer ao sistema em qual núcleo cada processo deve ficar, para que "
+                                 "ele não seja movido durante a rodada. Sem fixação, o sistema decide "
+                                 "e pode mudar de ideia."),
+        ("s/passo", f"Segundos de relógio que o modelo leva para avançar um passo de tempo "
+                    f"({DT_S} s de tempo de modelo). Quanto menor, mais rápido."),
+        ("Aceleração", f"Quantas vezes a rodada fica mais rápida que a rodada de referência com "
+                       f"{r['base_cores']} núcleos. Aceleração 4 = quatro vezes mais rápida."),
+        ("Eficiência paralela", "Quanto do ganho ideal se obtém. Dobrar os núcleos e ficar duas vezes "
+                                "mais rápido é 100 %; ficar 1,4 vez mais rápido é 70 %."),
+        ("Vazão", "Quanto tempo de modelo a máquina produz por dia de relógio. Aqui, em dias simulados "
+                  "por dia de máquina; dividindo 365 pela vazão obtém-se quantos dias de máquina "
+                  "custa um ano simulado."),
+        ("I/O", "Leitura e gravação de arquivos (do inglês <i>input/output</i>). Neste relatório, o "
+                "tempo gasto gravando os arquivos de saída e de reinício."),
+    ]
+    gloss_rows = "".join(f"<tr><th>{t}</th><td>{d}</td></tr>" for t, d in gloss)
 
     # --- historical table (drawer)
     hist_rows = "".join(
@@ -327,26 +582,26 @@ def build_html(r: dict, meta: dict) -> str:
 
     a_ns = "/".join(str(c["physical_cores"]) for c in reversed(r["a_series"]))
     series_rows = [
-        ("A", f"Curva de saturação com núcleos físicos: N = {a_ns} ranks, "
-              f"metade em cada soquete, uma rank por núcleo físico.",
+        ("A", f"Quanto o modelo acelera com mais núcleos: {a_ns} processos, metade em cada "
+              f"soquete, um processo por núcleo físico.",
          cfg_list("A"), "fixada, só núcleos físicos"),
-        ("B", f"Efeito do SMT: {b112['ranks']} ranks, uma por CPU lógica, nos "
+        ("B", f"Se vale usar a segunda tarefa de cada núcleo (SMT): {b112['ranks']} processos nos "
               f"mesmos {b112['physical_cores']} núcleos físicos.",
-         cfg_list("B"), "fixada, uma rank por CPU lógica"),
-        ("C", f"Referência de produção: {c60['ranks']} ranks sem fixação, como a "
-              f"EXP03 foi rodada; liga o benchmark aos custos de produção.",
+         cfg_list("B"), "fixada, um processo por tarefa"),
+        ("C", f"Como a produção foi rodada: {c60['ranks']} processos sem fixação, como na EXP03. "
+              f"Liga o benchmark aos tempos reais de produção.",
          cfg_list("C"), "sem fixação"),
-        ("D", f"Vazão do nó com duas integrações independentes e simultâneas de "
-              f"{s0['ranks']} ranks, uma em cada soquete.",
-         cfg_list("D"), "fixada, um soquete por caso"),
-        ("E", f"Custo de I/O: igual a A{a56['ranks']}, mas com a saída da produção "
-              f"(<i>history</i> horário e um <i>restart</i> na janela).",
+        ("D", f"Duas rodadas independentes ao mesmo tempo, de {s0['ranks']} processos cada, "
+              f"uma em cada soquete.",
+         cfg_list("D"), "fixada, um soquete por rodada"),
+        ("E", f"Quanto custa gravar arquivos: igual à A{a56['ranks']}, mas gravando a saída da "
+              f"produção (arquivos horários e um arquivo de reinício).",
          cfg_list("E"), "fixada, como A56"),
     ]
     series_html = "".join(
         f"<tr><th>{s}</th><td style='text-align:left'>{t}</td>"
-        f"<td style='text-align:left'>{c}</td><td>{p}</td></tr>"
-        for s, t, c, p in series_rows)
+        f"<td style='text-align:left'>{c}</td><td>{pp}</td></tr>"
+        for s, t, c, pp in series_rows)
 
     # --- measured table (all configurations)
     meas_rows = "".join(
@@ -380,10 +635,10 @@ def build_html(r: dict, meta: dict) -> str:
     dec_rows = "".join(dec_row(x) for x in r["options"])
 
     prod_txt = "média das rodadas " + "; ".join(
-        f"{p['period']}: {br(p['wall_seconds_per_timestep'], 4)} s/passo, "
-        f"{p['mpi_ranks']} ranks, "
-        f"{'medido' if p['quality'] == 'measured' else 'estimado'}"
-        for p in r["prod_rows"])
+        f"{pr['period']}: {br(pr['wall_seconds_per_timestep'], 4)} s/passo, "
+        f"{pr['mpi_ranks']} processos, "
+        f"{'medido' if pr['quality'] == 'measured' else 'estimado'}"
+        for pr in r["prod_rows"])
 
     sha_rows = "".join(
         f"<tr><th><code>{esc(k)}</code></th><td><code>{esc(v)}</code></td></tr>"
@@ -391,6 +646,49 @@ def build_html(r: dict, meta: dict) -> str:
 
     a_eff_txt = "; ".join(f"A{c['physical_cores']}: {pct(c['eff_phys'])}"
                           for c in r["a_series"])
+
+    # --- projection table
+    def dur_cell(x, i, n):
+        v = x["durations"][i]
+        if v is None:
+            return "<td>—<sup>1</sup></td>"
+        txt = f"{br(v, 1 if n == 1 else 0)} dias"
+        if n >= 10:
+            txt += f"<br><span class='sub'>{br(v / DAYS_PER_MONTH, 1)} meses</span>"
+        return f"<td>{txt}</td>"
+    proj_rows = "".join(
+        f"<tr><th>{esc(x['label'])}</th><td class='desc' style='text-align:left'>{esc(x['desc'])}</td>"
+        f"<td>{x['free_cores']}</td>"
+        + "".join(dur_cell(x, i, n) for i, n in enumerate(PROJ_YEARS)) + "</tr>"
+        for x in p["rows"])
+    proj_head = "".join(f"<th>{n} {'ano' if n == 1 else 'anos'}</th>" for n in PROJ_YEARS)
+
+    formula = {
+        "90c": f"s(A{p['n_compact']}) × f",
+        "90e": f"s(A{n_phys}) − ({p['n_extra']}/{n_phys}) × [s(A{n_phys}) − s(B{n_log})]",
+        "4545": f"[s(A{per_socket}) − ({p['n_extra_sock']}/{per_socket}) × (s(A{per_socket}) − s(A{per_socket}) × f)] × k",
+        "112": f"s(B{n_log})",
+        "5656": f"s(A{per_socket}) × f × k",
+    }
+    proj_method_rows = "".join(
+        f"<tr><th>{esc(x['label'])}</th><td style='text-align:left'>{formula[x['key']]}</td>"
+        f"<td>{br(x['s'], 4)}</td><td>{br(x['days_run_year'], 1)}</td>"
+        f"<td>{br(x['days_run_year_raw'], 1)}</td></tr>"
+        for x in p["rows"])
+    lo, hi = cfg[INTERP_LO], cfg[INTERP_HI]
+
+    # --- core map
+    core_map_rows = "".join(
+        f"<tr><th>Soquete {sk['node']}</th><td>{compress(sk['phys'])}</td>"
+        f"<td>{compress(sk['sib'])}</td></tr>" for sk in hw["sockets"])
+    sk0 = hw["sockets"][0]
+
+    pin_check_cmd = (
+        "for pid in $(pgrep '^atmosphere_mod'); do\n"
+        "  printf \"pid=%s psr=%s %s\\n\" \"$pid\" \"$(ps -o psr= -p \"$pid\" | tr -d ' ')\" "
+        "\"$(taskset -cp \"$pid\" | sed 's/.*: /affinity=/')\"\n"
+        "done")
+    count_cmd = "pgrep -c '^atmosphere_mod'"
 
     body = f"""
 <header class="masthead">
@@ -404,232 +702,385 @@ def build_html(r: dict, meta: dict) -> str:
 <nav class="chapters" id="chapter-nav" aria-label="Capítulos">
   <div class="progress"><span id="progress-bar"></span></div>
   <ol>
+    <li><a href="#termos"><span>0</span>Termos</a></li>
     <li><a href="#contexto"><span>1</span>Contexto</a></li>
     <li><a href="#metodo"><span>2</span>Método</a></li>
-    <li><a href="#saturacao"><span>3</span>Curva de saturação</a></li>
-    <li><a href="#vazao"><span>4</span>Vazão do nó</a></li>
-    <li><a href="#io"><span>5</span>I/O</a></li>
-    <li><a href="#custo"><span>6</span>Custo da MEQ-06</a></li>
-    <li><a href="#opcoes"><span>7</span>Opções</a></li>
-    <li><a href="#limitacoes"><span>8</span>Limitações</a></li>
+    <li><a href="#saturacao"><span>3</span>Ganho com mais núcleos</a></li>
+    <li><a href="#vazao"><span>4</span>Produção do nó</a></li>
+    <li><a href="#io"><span>5</span>Gravação de arquivos</a></li>
+    <li><a href="#custo"><span>6</span>Custo por ano simulado</a></li>
+    <li><a href="#duracao"><span>7</span>Duração da MEQ-06</a></li>
+    <li><a href="#opcoes"><span>8</span>Opções</a></li>
+    <li><a href="#como-rodar"><span>9</span>Como rodar</a></li>
+    <li><a href="#limitacoes"><span>10</span>Limitações</a></li>
   </ol>
 </nav>
 
 <main>
-  <div class="status"><strong>Status:</strong> tempos medidos no benchmark MEQ-05.2. Os custos da MEQ-06 são
-    estimativas. A configuração para a MEQ-06 ainda não foi decidida: este relatório apresenta opções.</div>
+  <div class="status"><strong>Status:</strong> tempos medidos no benchmark MEQ-05.2. Os custos e as
+    durações da MEQ-06 são estimativas, e as configurações do capítulo 7 não foram medidas. A
+    configuração para a MEQ-06 ainda não foi decidida: este relatório apresenta opções.</div>
+
+  <section id="termos" class="chapter">
+    <h2>Termos usados neste relatório</h2>
+    <p>Uma linha por termo. Os termos voltam a ser explicados, em poucas palavras, na primeira vez
+      em que aparecem no texto.</p>
+    <div class="scorecard-wrap"><table class="mini glossary"><tbody>{gloss_rows}</tbody></table></div>
+  </section>
 
   <section id="contexto" class="chapter">
     <p class="chapter-no">Capítulo 1</p>
     <h2>Contexto</h2>
-    <p class="lead">A MEQ-06 vai integrar a EXP03 (malha Oval MEQ-02A, {br(r['exp03_cells'], 0)} células)
-      por vários anos. Antes disso é preciso escolher quantos processos MPI usar e como distribuí-los
-      no nó. A escolha é um compromisso entre prazo (dias simulados por dia) e uso do nó. Usar o
-      maior número possível de núcleos não é, por si só, o objetivo.</p>
+    {shows("Por que foi preciso medir de novo, em que máquina e com que pergunta.")}
+    <p>A MEQ-06 vai integrar a EXP03 (malha Oval MEQ-02A, {br(r['exp03_cells'], 0)} células) por
+      vários anos. Antes disso é preciso escolher em quantos pedaços dividir a malha (o número de
+      processos) e em quais núcleos da máquina colocar cada pedaço. É um compromisso entre prazo e uso
+      da máquina, que é compartilhada. Usar todos os núcleos não é, por si só, o objetivo.</p>
     <div class="questions">
-      <div><b>O nó.</b> O Swell é um nó único com {r['n_sockets']} soquetes ({esc(CPU_MODEL)}),
-        {r['per_socket']} núcleos físicos por soquete, {r['n_phys']} no total. Com SMT, cada núcleo
-        executa {SMT_THREADS} threads, o que dá {r['n_logical']} CPUs lógicas. Todo o benchmark roda
-        dentro desse nó, sem comunicação entre nós.</div>
-      <div><b>A pergunta.</b> Até onde o tempo por passo cai quando se acrescentam núcleos? Vale usar o
-        SMT? Rende mais uma integração grande ou duas menores lado a lado? Quanto pesa a escrita de saída?</div>
-      <div><b>Por que medir de novo.</b> Os custos das rodadas de produção não formam uma curva de
-        saturação. Mudam ao mesmo tempo o número de ranks, a malha e a física, e parte deles é estimada.</div>
+      <div><b>A máquina.</b> O Swell é um nó único (um só computador) com {r['n_sockets']} soquetes
+        ({esc(CPU_MODEL)}), cada um com {per_socket} núcleos físicos, {n_phys} no total. Com o SMT,
+        cada núcleo alterna entre duas tarefas e o sistema mostra {n_log} "CPUs", mas só {n_phys} são
+        núcleos reais.</div>
+      <div><b>As perguntas.</b> Quanto o modelo acelera com mais núcleos? Vale usar a segunda tarefa
+        de cada núcleo? Rende mais uma rodada grande ou duas menores lado a lado? Quanto tempo se perde
+        gravando arquivos?</div>
+      <div><b>Por que medir de novo.</b> Os tempos das rodadas de produção não respondem a essas
+        perguntas: entre uma rodada e outra mudaram ao mesmo tempo o número de processos, a malha e a
+        física, e parte dos tempos é estimada.</div>
     </div>
     <p>A tabela <code>runtime_metrics.csv</code> registra {len(hist)} rodadas de produção. Elas usaram
-      de {ranks_hist[0]} a {ranks_hist[-1]} ranks, em {len(cells_hist)} malhas diferentes
+      de {ranks_hist[0]} a {ranks_hist[-1]} processos, em {len(cells_hist)} malhas diferentes
       ({', '.join(br(c, 0) for c in cells_hist)} células). {n_est} desses tempos foram reconstruídos
       ou estimados, não medidos. Alguns experimentos ({', '.join(multi_rank)}) rodaram com números de
-      ranks diferentes em cada período. Uma diferença de s/passo entre essas rodadas mistura, portanto,
-      paralelismo, tamanho de malha, física e estado da máquina. Para isolar o efeito do paralelismo,
-      a MEQ-05.2 repetiu o mesmo trecho da EXP03 variando apenas o número e a distribuição dos processos.</p>
+      processos diferentes em cada período. Comparar essas rodadas mistura número de processos,
+      tamanho de malha, física e estado da máquina. Por isso a MEQ-05.2 repetiu o mesmo trecho da EXP03
+      mudando apenas o número de processos e a forma de distribuí-los.</p>
     <details class="drawer">
-      <summary>Custos históricos de produção (runtime_metrics.csv)</summary>
+      <summary>Detalhes: tempos históricos de produção (runtime_metrics.csv)</summary>
       <div class="scorecard-wrap"><table class="mini">
-        <thead><tr><th>Experimento</th><th>Período</th><th>Ranks</th><th>Células</th><th>s/passo (parede)</th><th>Qualidade</th></tr></thead>
+        <thead><tr><th>Experimento</th><th>Período</th><th>Processos</th><th>Células</th><th>s/passo (relógio)</th><th>Qualidade</th></tr></thead>
         <tbody>{hist_rows}</tbody></table></div>
-      <p class="caption">s/passo = tempo de parede da rodada inteira dividido pelo número de passos
-        (inclui inicialização e I/O). As rodadas não são comparáveis entre si como medida de paralelismo.</p>
+      <p class="caption">s/passo = tempo de relógio da rodada inteira dividido pelo número de passos
+        (inclui a preparação e a gravação de arquivos). Essas rodadas não servem para comparar números
+        de processos entre si.</p>
     </details>
-    <nav class="pager"><span></span><a href="#metodo">Método →</a></nav>
+    {means("Os tempos antigos não servem para escolher quantos processos usar. Todos os números a seguir vêm de um mesmo trecho da EXP03, rodado de formas diferentes na mesma máquina.")}
+    <nav class="pager"><a href="#termos">← Termos</a><a href="#metodo">Método →</a></nav>
   </section>
 
   <section id="metodo" class="chapter">
     <p class="chapter-no">Capítulo 2</p>
     <h2>Método</h2>
-    <p class="lead">Cada ensaio integra {br(r['window_h'], 0)} h ({r['steps']} passos de {DT_S} s) a partir do
-      <i>restart</i> de {RESTART_LABEL} da EXP03 de produção. Física, passo de tempo e malha são os da
-      produção. Só mudam o número de processos e a forma de distribuí-los.</p>
+    {shows("Como os ensaios foram feitos e o que cada série de ensaios testa.")}
+    <p>Cada ensaio integra {br(r['window_h'], 0)} h ({r['steps']} passos de {DT_S} s) a partir do
+      arquivo de reinício (<i>restart</i>) de {RESTART_LABEL} da EXP03 de produção. Física, passo de
+      tempo e malha são os da produção. Só mudam o número de processos e os núcleos onde eles ficam.</p>
     <ul>
-      <li><b>Repetições.</b> {cfg[BASE_CONFIG]['n_reps']} por configuração. Uma terceira repetição seria
-        feita se as duas diferissem em mais de {pct(REP_RULE, 0)}. Isso não ocorreu: a maior diferença foi
-        {br(r['max_spread'], 2)}&nbsp;% (<code>{esc(r['max_spread_cfg'])}</code>).</li>
-      <li><b>Fixação de processos.</b> Nas séries A, B, D e E, cada rank foi presa a uma CPU específica
-        (<code>mpiexec -bind-to user:&lt;lista&gt;</code>). A fixação foi conferida três vezes durante cada
-        ensaio. A série C roda sem fixação, como na produção, e o sistema operacional distribui as ranks.</li>
-      <li><b>Tempo usado.</b> O timer <i>time integration</i> do MPAS, que exclui a inicialização.
-        s/passo = <i>time integration</i> / {r['steps']}.</li>
+      <li><b>Repetições.</b> Cada configuração rodou {cfg[BASE_CONFIG]['n_reps']} vezes. Uma terceira
+        rodada seria feita se as duas diferissem em mais de {pct(REP_RULE, 0)}. Isso não ocorreu: a maior
+        diferença foi {br(r['max_spread'], 2)}&nbsp;% (<code>{esc(r['max_spread_cfg'])}</code>).</li>
+      <li><b>Fixação de processos</b> (dizer ao sistema em qual núcleo cada processo fica). Nas séries
+        A, B, D e E, cada processo foi preso a uma CPU com <code>mpiexec -bind-to user:&lt;lista&gt;</code>,
+        e isso foi conferido três vezes durante cada ensaio. A série C roda sem fixação, como na
+        produção: o sistema decide onde cada processo fica.</li>
+      <li><b>Tempo usado.</b> O cronômetro interno do MPAS chamado <i>time integration</i>, que mede só
+        a integração e deixa de fora a preparação inicial. s/passo = <i>time integration</i> /
+        {r['steps']}.</li>
       <li><b>Métricas.</b> Aceleração = s/passo de A{r['base_cores']} ÷ s/passo da configuração.
         Eficiência por núcleo físico = aceleração ÷ (núcleos físicos / {r['base_cores']}). Vazão =
         {br(SECONDS_PER_DAY, 0)} ÷ (s/passo × {br(r['steps_per_day'], 0)} passos por dia simulado), em dias
-        simulados por dia de nó. A referência é A{r['base_cores']}, não um núcleo, porque um ensaio
-        serial seria longo demais. A eficiência é, portanto, relativa a {r['base_cores']} núcleos.</li>
+        simulados por dia de máquina. A referência é a rodada com {r['base_cores']} núcleos, não com um,
+        porque uma rodada num só núcleo seria longa demais; a eficiência é, portanto, relativa a
+        {r['base_cores']} núcleos.</li>
     </ul>
     <div class="scorecard-wrap"><table class="decision">
       <thead><tr><th>Série</th><th style="text-align:left">O que testa</th><th style="text-align:left">Configurações</th><th>Fixação</th></tr></thead>
       <tbody>{series_html}</tbody></table></div>
     <details class="drawer">
-      <summary>Valores medidos por configuração (médias das repetições)</summary>
+      <summary>Detalhes: valores medidos por configuração (médias das repetições)</summary>
       <div class="scorecard-wrap"><table class="mini">
-        <thead><tr><th>Configuração</th><th>Ranks</th><th>Núcleos físicos</th><th>s/passo</th><th>Diferença entre rep. (%)</th><th>Aceleração</th><th>Efic. por núcleo físico</th><th>Vazão (dias sim./dia)</th></tr></thead>
+        <thead><tr><th>Configuração</th><th>Processos</th><th>Núcleos físicos</th><th>s/passo</th><th>Diferença entre rep. (%)</th><th>Aceleração</th><th>Efic. por núcleo físico</th><th>Vazão (dias sim./dia)</th></tr></thead>
         <tbody>{meas_rows}</tbody></table></div>
       <p class="caption">Fonte: <code>results/tables/meq05_parallel_benchmark.csv</code>. Os casos D
         aparecem separados (cada um ocupa um soquete). A vazão de cada caso D isolado não é a vazão do nó.</p>
     </details>
-    <nav class="pager"><a href="#contexto">← Contexto</a><a href="#saturacao">Curva de saturação →</a></nav>
+    {means(f"As repetições diferiram no máximo {br(r['max_spread'], 2)}&nbsp;%. Diferenças entre configurações maiores que isso são reais, não ruído da máquina.")}
+    <nav class="pager"><a href="#contexto">← Contexto</a><a href="#saturacao">Ganho com mais núcleos →</a></nav>
   </section>
 
   <section id="saturacao" class="chapter">
     <p class="chapter-no">Capítulo 3</p>
-    <h2>Curva de saturação</h2>
-    <p class="lead">Na série A, o tempo por passo continua caindo até {r['n_phys']} núcleos, mas cada
-      núcleo acrescentado rende menos. A eficiência fica em {a_eff_txt}.
+    <h2>Quanto o modelo acelera com mais núcleos</h2>
+    {shows("Quantas vezes o modelo fica mais rápido (aceleração) ao usar mais núcleos, e quanto do ganho ideal isso representa (eficiência paralela).")}
+    <p>Na série A, o tempo por passo continua caindo até {n_phys} núcleos, mas cada núcleo
+      acrescentado rende menos, porque os pedaços da malha ficam menores e a troca de informação entre
+      eles pesa mais. A eficiência fica em {a_eff_txt}.
       {f"A maior configuração da série A que cumpre o critério de {pct(EFFICIENCY_CRITERION, 0)} é A{best_a['physical_cores']}." if best_a else ""}
-      A B{b112['ranks']}, com SMT, chega a uma aceleração de {br(b112['speedup'], 2)} nos mesmos
-      {b112['physical_cores']} núcleos físicos ({pct(b112['eff_phys'])} por núcleo físico).</p>
+      A B{b112['ranks']}, que usa a segunda tarefa de cada núcleo (SMT), chega a uma aceleração de
+      {br(b112['speedup'], 2)} nos mesmos {b112['physical_cores']} núcleos físicos
+      ({pct(b112['eff_phys'])} por núcleo físico).</p>
     <div class="grid-2">
       <div>
         <div class="chart" id="chart-speedup" style="height:320px"></div>
-        <p class="caption"><b>a</b> Aceleração em relação a A{r['base_cores']} em função dos núcleos
-          físicos. Pontos: repetições. Linha cheia: média da série A. Tracejado: aceleração ideal
-          (proporcional aos núcleos). Losango vazado: série B ({b112['ranks']} ranks com SMT), fora
-          da curva A.</p>
+        <p class="caption"><b>a</b> Aceleração em relação à rodada com {r['base_cores']} núcleos, em
+          função do número de núcleos físicos. Pontos: repetições. Linha cheia: média da série A.
+          Tracejado: aceleração ideal (dobrar os núcleos = dobrar a velocidade). Losango vazado: série B
+          ({b112['ranks']} processos com SMT), fora da curva A.</p>
       </div>
       <div>
         <div class="chart" id="chart-efficiency" style="height:320px"></div>
-        <p class="caption"><b>b</b> Eficiência por núcleo físico (aceleração ÷ núcleos/{r['base_cores']}).
-          Tracejado horizontal: critério de {pct(EFFICIENCY_CRITERION, 0)} aprovado pelo pesquisador.
-          Pontos acima da linha cumprem o critério.</p>
+        <p class="caption"><b>b</b> Eficiência por núcleo físico: fração do ganho ideal obtida
+          (aceleração ÷ núcleos/{r['base_cores']}). Tracejado horizontal: critério de
+          {pct(EFFICIENCY_CRITERION, 0)} aprovado pelo pesquisador. Pontos acima da linha cumprem o critério.</p>
       </div>
     </div>
-    <nav class="pager"><a href="#metodo">← Método</a><a href="#vazao">Vazão do nó →</a></nav>
+    {means(f"Até {a42['physical_cores']} núcleos, cada núcleo extra ainda rende bem. De {a42['physical_cores']} para {a56['physical_cores']} núcleos ({pct(a42_to_a56_cores, 0)} a mais), o passo fica só {pct(a42_to_a56_time, 0)} mais rápido. Usar a segunda tarefa de cada núcleo ainda tira mais {pct(smt_gain, 0)} do tempo por passo em relação à A{a56['ranks']}.")}
+    <nav class="pager"><a href="#metodo">← Método</a><a href="#vazao">Produção do nó →</a></nav>
   </section>
 
   <section id="vazao" class="chapter">
     <p class="chapter-no">Capítulo 4</p>
-    <h2>Vazão do nó</h2>
-    <p class="lead">Para a MEQ-06, importa quantos dias simulados o nó inteiro produz por dia. A B112
-      produz {br(b112['throughput'], 1)} dias simulados por dia de nó, {pct(b_vs_a56)} a mais que a A56
+    <h2>Quanto tempo de modelo o nó produz por dia</h2>
+    {shows("A vazão: quantos dias simulados a máquina inteira produz em um dia de relógio, em cada forma de ocupá-la.")}
+    <p>Para a MEQ-06 importa o que a máquina inteira entrega por dia. A B112 produz
+      {br(b112['throughput'], 1)} dias simulados por dia de máquina, {pct(b_vs_a56)} a mais que a A56
       ({br(a56['throughput'], 1)}). A C60, que reproduz a forma como a produção foi rodada, produz
-      {br(c60['throughput'], 1)}, e a A56 rende {pct(a56_vs_c)} a mais que ela. As duas integrações
+      {br(c60['throughput'], 1)}; a A56 rende {pct(a56_vs_c)} a mais que ela. As duas rodadas
       simultâneas da série D somam {br(o['D']['throughput'], 1)}.</p>
     <div class="chart" id="chart-throughput" style="height:280px"></div>
-    <p class="caption">Dias simulados por dia de nó = {br(SECONDS_PER_DAY, 0)} ÷ (s/passo × {br(r['steps_per_day'], 0)}).
+    <p class="caption">Dias simulados por dia de máquina = {br(SECONDS_PER_DAY, 0)} ÷ (s/passo × {br(r['steps_per_day'], 0)}).
       Barras cinza: valor calculado com o s/passo médio de cada configuração. Pontos pretos: repetições. Na série D,
-      a vazão é a soma dos dois casos simultâneos ({br(s0['throughput'], 2)} no soquete 0 e
-      {br(s1['throughput'], 2)} no soquete 1). O tempo de escrita de saída não está incluído (ver
-      capítulo 5).</p>
-    <nav class="pager"><a href="#saturacao">← Curva de saturação</a><a href="#io">I/O →</a></nav>
+      a vazão é a soma das duas rodadas simultâneas ({br(s0['throughput'], 2)} no soquete 0 e
+      {br(s1['throughput'], 2)} no soquete 1). O tempo de gravação de arquivos não está incluído (capítulo 5).</p>
+    {means(f"Em um dia de relógio, a B112 simula cerca de {br(b112['throughput'], 0)} dias de modelo; o modo usado na produção (C60), cerca de {br(c60['throughput'], 0)}. A forma de ocupar a máquina muda o prazo em cerca de {pct(b112['throughput'] / c60['throughput'] - 1, 0)}, sem mudar nada no modelo.")}
+    <nav class="pager"><a href="#saturacao">← Ganho com mais núcleos</a><a href="#io">Gravação de arquivos →</a></nav>
   </section>
 
   <section id="io" class="chapter">
     <p class="chapter-no">Capítulo 5</p>
-    <h2>I/O</h2>
-    <p class="lead">A série E repete a A56 com a saída da produção. Em cada repetição foram escritos
-      {r['io'][0]['n_hist']} <i>history</i> e {r['io'][0]['n_rst']} <i>restart</i>. Extrapolado para um
-      dia simulado, o custo de escrita fica em torno de {br(r['io_extrap_mean'], 1)} s, cerca de
-      {pct(io_share, 2)} do tempo de cálculo de um dia simulado na A56
-      ({br(r['a56_compute_day'], 0)} s). <b>Esse valor é uma extrapolação, não uma medida.</b></p>
-    <div class="scorecard-wrap"><table class="mini">
-      <thead><tr><th>Rep.</th><th>stream_output (s)</th><th>Δ time integration vs A56 (s)</th><th>Δ parede vs A56 (s)</th><th><i>history</i> (n × s)</th><th><i>restart</i> (n × s)</th><th>EXTRAPOLAÇÃO: s por dia simulado</th></tr></thead>
-      <tbody>{io_rows}</tbody></table></div>
-    <p class="caption">Medido: timer <code>stream_output</code> do MPAS e diferenças em relação à média
-      da A56 (mesmas ranks e fixação, sem saída). Duração de escrita de cada arquivo = do nascimento à
-      última modificação (ext4). Extrapolação = 24 × <i>history</i> médio + 1 × <i>restart</i>, supondo
-      custo constante por arquivo. O timer e as durações por arquivo não foram reconciliados.</p>
-    <nav class="pager"><a href="#vazao">← Vazão do nó</a><a href="#custo">Custo da MEQ-06 →</a></nav>
+    <h2>Gravação de arquivos (I/O)</h2>
+    {shows("Quanto tempo o modelo gasta gravando arquivos, e se o disco pode atrasar a MEQ-06.")}
+    <p>I/O, aqui, é o tempo que o modelo gasta gravando os arquivos de saída (os campos horários,
+      <i>history</i>) e os arquivos de reinício (<i>restart</i>), dos quais uma rodada pode continuar.
+      A série E repetiu a A56 gravando exatamente a saída da produção e comparou com a A56 sem saída.</p>
+    <p>O resultado: gravar os arquivos de um dia simulado leva cerca de <b>{br(r['io_extrap_mean'], 0)} s</b>,
+      contra cerca de {br(r['a56_compute_day'], 0)} s de cálculo para o mesmo dia na A56, ou seja,
+      {pct(io_share, 2)} do tempo. Esse valor é uma <b>extrapolação</b>: o ensaio de {br(r['window_h'], 0)} h
+      gravou {r['io'][0]['n_hist']} arquivos horários e {r['io'][0]['n_rst']} de reinício, e o custo foi
+      estendido para um dia inteiro (24 horários + 1 de reinício).</p>
+    <details class="drawer">
+      <summary>Detalhes técnicos da série E</summary>
+      <div class="scorecard-wrap"><table class="mini">
+        <thead><tr><th>Rep.</th><th>stream_output (s)</th><th>Δ time integration vs A56 (s)</th><th>Δ relógio vs A56 (s)</th><th><i>history</i> (n × s)</th><th><i>restart</i> (n × s)</th><th>EXTRAPOLAÇÃO: s por dia simulado</th></tr></thead>
+        <tbody>{io_rows}</tbody></table></div>
+      <p class="caption">Medido: cronômetro <code>stream_output</code> do MPAS e diferenças em relação à
+        média da A56 (mesmos processos e fixação, sem saída). Duração de gravação de cada arquivo = da
+        criação à última modificação (ext4). Extrapolação = 24 × <i>history</i> médio + 1 × <i>restart</i>,
+        supondo custo constante por arquivo. O cronômetro e as durações por arquivo não foram reconciliados.</p>
+    </details>
+    {means("A gravação de arquivos é desprezível: cerca de " + br(r['io_extrap_mean'], 0) + " s por dia simulado (extrapolado). O disco não limita a MEQ-06; o prazo depende do cálculo.")}
+    <nav class="pager"><a href="#vazao">← Produção do nó</a><a href="#custo">Custo por ano simulado →</a></nav>
   </section>
 
   <section id="custo" class="chapter">
     <p class="chapter-no">Capítulo 6</p>
-    <h2>Custo da MEQ-06</h2>
-    <p class="lead">Custo em dias de nó por ano simulado ({DAYS_PER_YEAR} dias) = {DAYS_PER_YEAR} ÷ vazão.
+    <h2>Custo por ano simulado</h2>
+    {shows("Quantos dias de máquina custa cada ano simulado nas quatro formas medidas de ocupar o nó.")}
+    <p>Custo em dias de máquina por ano simulado ({DAYS_PER_YEAR} dias) = {DAYS_PER_YEAR} ÷ vazão.
       Há duas variantes, e as duas são <b>estimativas</b>.</p>
     <ol>
-      <li><b>(a) Pelo trecho medido.</b> Usa a vazão das 3 h de benchmark, sem inicialização e sem I/O.</li>
+      <li><b>(a) Pelo trecho medido.</b> Usa a vazão das {br(r['window_h'], 0)} h de benchmark, sem
+        preparação inicial e sem gravação de arquivos.</li>
       <li><b>(b) Corrigida pela produção.</b> A produção da EXP03 levou {br(r['prod_sps'], 4)} s/passo
-        ({prod_txt}). O tempo de parede da produção inclui inicialização, leitura de fronteiras,
-        escrita de saída e o mês inteiro de meteorologia. A série C reproduz a mesma configuração
-        ({c60['ranks']} ranks, sem fixação) e mede {br(r['c_sps'], 4)} s/passo no trecho de 3 h. A razão
-        {br(r['prod_sps'], 4)} ÷ {br(r['c_sps'], 4)} = <b>{br(r['corr'], 3)}</b> resume o que o trecho medido
-        não captura. A variante (b) multiplica (a) por essa razão. A hipótese é que a razão vale para as
-        demais configurações, e isso não foi verificado.</li>
+        ({prod_txt}). Esse tempo de relógio inclui preparação, leitura das condições de fronteira,
+        gravação de saída e um mês inteiro de meteorologia. A série C repete a mesma forma de rodar
+        ({c60['ranks']} processos, sem fixação) e mede {br(r['c_sps'], 4)} s/passo no trecho de
+        {br(r['window_h'], 0)} h. A razão {br(r['prod_sps'], 4)} ÷ {br(r['c_sps'], 4)} =
+        <b>{br(r['corr'], 3)}</b> resume o que o trecho medido não captura. A variante (b) multiplica (a)
+        por essa razão, supondo que ela vale para as outras configurações; isso não foi verificado.</li>
     </ol>
     <div class="chart" id="chart-cost" style="height:280px"></div>
-    <p class="caption">Estimativas de dias de nó por ano simulado. Barras cinza: variante (a), pelo
+    <p class="caption">Estimativas de dias de máquina por ano simulado. Barras cinza: variante (a), pelo
       trecho medido. Barras pretas: variante (b), corrigida pela razão produção/série C
-      ({br(r['corr'], 3)}). Na série D, o custo supõe duas integrações independentes (por exemplo, dois anos)
-      rodando ao mesmo tempo, uma em cada soquete.</p>
-    <nav class="pager"><a href="#io">← I/O</a><a href="#opcoes">Opções →</a></nav>
+      ({br(r['corr'], 3)}). Na série D, o custo supõe duas rodadas independentes (por exemplo, dois anos)
+      ao mesmo tempo, uma em cada soquete.</p>
+    {means(f"Pela estimativa corrigida (b), um ano simulado custa de {br(min(cost_b_vals), 1)} a {br(max(cost_b_vals), 1)} dias de máquina, conforme a forma de ocupar o nó. O capítulo 7 transforma isso em prazos para 1 a 20 anos.")}
+    <nav class="pager"><a href="#io">← Gravação de arquivos</a><a href="#duracao">Duração da MEQ-06 →</a></nav>
+  </section>
+
+  <section id="duracao" class="chapter">
+    <p class="chapter-no">Capítulo 7</p>
+    <h2>Quanto tempo levaria a MEQ-06</h2>
+    {shows(f"Uma projeção do prazo da MEQ-06 para 1, 5, 10 e 20 anos simulados, em configurações com {PROJ_RANKS} processos que deixam parte do nó para outros usuários, comparadas às de {n_log}. Nenhuma simulação nova foi feita: tudo vem dos ensaios medidos, com as hipóteses declaradas abaixo.")}
+    <p><b>Nenhuma destas configurações foi medida diretamente.</b> Os prazos combinam ensaios medidos
+      com hipóteses simples; a margem plausível é de {PLAUSIBLE_MARGIN}. Os valores já incluem a correção
+      pela produção (c = {br(p['c'], 3)}, capítulo 6). Sem essa correção, todos cairiam
+      {pct(p['drop_without_c'], 1)} (por exemplo, {PROJ_RANKS} compacto: de
+      {br(pk['90c']['days_run_year'], 1)} para {br(pk['90c']['days_run_year_raw'], 1)} dias por ano).</p>
+    <div class="scorecard-wrap"><table class="decision proj">
+      <thead><tr><th>Configuração</th><th style="text-align:left">Como o nó é ocupado</th><th>Núcleos inteiros livres</th>{proj_head}</tr></thead>
+      <tbody>{proj_rows}</tbody></table></div>
+    <p class="caption">Dias de relógio para simular N anos (projeção, variante corrigida). Para 10 e 20
+      anos, também em meses (dias ÷ {br(DAYS_PER_MONTH, 1)}). Nas rodadas duplas, cada rodada simula um
+      ano diferente: N anos = ⌊N/2⌋ pares; se N for ímpar, o ano restante roda sozinho na configuração
+      única com o mesmo limite de processos ({pk['4545']['label']} → {pk['90c']['label']};
+      {pk['5656']['label'].split(' ')[0]} → {pk['112']['label'].split(' ')[0]}).
+      <sup>1</sup> Uma rodada dupla precisa de dois anos diferentes; com 1 ano não há par, e o prazo é o
+      da configuração única correspondente.</p>
+    <p><b>{PROJ_RANKS} compacto ou {PROJ_RANKS} espalhado?</b> Os dois usam {PROJ_RANKS} processos. O
+      compacto põe dois processos em cada um de {p['n_compact']} núcleos e deixa
+      <b>{pk['90c']['free_cores']} núcleos inteiros livres</b> para outros usuários; o espalhado ocupa os
+      {n_phys} núcleos e <b>não deixa nenhum livre</b>. O espalhado é mais rápido
+      ({br(pk['90e']['days_run_year'], 1)} contra {br(pk['90c']['days_run_year'], 1)} dias por ano), mas,
+      na prática, impede que outra pessoa use a máquina sem atrasar as duas rodadas.</p>
+    <p>Se uma configuração de {PROJ_RANKS} processos compactos for adotada, um ensaio curto com ela
+      (o mesmo trecho de {br(r['window_h'], 0)} h) confirmaria o número antes de uma rodada longa.</p>
+    <details class="drawer">
+      <summary>Método da projeção: hipóteses e fórmulas</summary>
+      <p>Notação: s(X) = s/passo médio da configuração X medida; {br(r['steps_per_day'], 0)} passos por dia
+        simulado; {DAYS_PER_YEAR} dias por ano. Dias por ano de uma rodada =
+        {DAYS_PER_YEAR} × {br(r['steps_per_day'], 0)} × s × c ÷ {br(SECONDS_PER_DAY, 0)}.</p>
+      <ul>
+        <li><b>f = s(B{n_log}) / s(A{n_phys}) = {br(p['f'], 4)}</b> — ganho do SMT: com a segunda tarefa
+          de cada núcleo, o passo leva {br(p['f'], 3)} vez o tempo.</li>
+        <li><b>s(A{p['n_compact']}) = {br(p['s_a45'], 4)} s/passo</b> — interpolação linear entre
+          {esc(INTERP_LO)} ({br(lo['s_per_step'], 4)}) e {esc(INTERP_HI)} ({br(hi['s_per_step'], 4)}) em
+          {p['n_compact']} processos. A curva real é levemente curva; a interpolação pode errar por pouco.</li>
+        <li><b>k = média(s(D_s0), s(D_s1)) / s(A{per_socket}) = {br(p['k'], 4)}</b> — perda por duas
+          rodadas simultâneas, uma em cada soquete. Inclui a diferença de posição (A{per_socket} usa
+          metade de cada soquete; cada rodada D usa um soquete inteiro) e a assimetria entre soquetes
+          da série D.</li>
+        <li><b>c = {br(r['prod_sps'], 4)} / {br(r['c_sps'], 4)} = {br(p['c'], 4)}</b> — correção pela
+          produção (capítulo 6), aplicada igualmente a todas as linhas.</li>
+        <li><b>Ganho parcial do SMT.</b> Quando só parte dos núcleos recebe duas tarefas
+          ({PROJ_RANKS} espalhado: {p['n_extra']} de {n_phys}; {pk['4545']['label']}: {p['n_extra_sock']}
+          de {per_socket} por soquete), supõe-se que o ganho do SMT é proporcional a essa fração.</li>
+      </ul>
+      <div class="scorecard-wrap"><table class="mini">
+        <thead><tr><th>Configuração</th><th style="text-align:left">s/passo projetado</th><th>s/passo</th><th>Dias por ano de rodada (com c)</th><th>Dias por ano de rodada (sem c)</th></tr></thead>
+        <tbody>{proj_method_rows}</tbody></table></div>
+      <p class="caption">Nas rodadas duplas, "dias por ano de rodada" é o tempo de um par, que produz
+        dois anos simulados ao mesmo tempo.</p>
+    </details>
+    {means(f"Com {PROJ_RANKS} processos compactos, 10 anos simulados levariam cerca de {br(pk['90c']['durations'][PROJ_YEARS.index(10)] / DAYS_PER_MONTH, 1)} meses, deixando {pk['90c']['free_cores']} núcleos livres; usando a máquina inteira ({pk['112']['label'].split(' ')[0]}), cerca de {br(pk['112']['durations'][PROJ_YEARS.index(10)] / DAYS_PER_MONTH, 1)} meses. São projeções com margem de {PLAUSIBLE_MARGIN}; nenhuma configuração foi decidida.")}
+    <nav class="pager"><a href="#custo">← Custo por ano simulado</a><a href="#opcoes">Opções →</a></nav>
   </section>
 
   <section id="opcoes" class="chapter">
-    <p class="chapter-no">Capítulo 7</p>
+    <p class="chapter-no">Capítulo 8</p>
     <h2>Opções para decisão</h2>
-    <p class="lead">Quatro formas de ocupar o nó. A tabela reúne vazão, eficiência por núcleo físico,
-      o critério de {pct(EFFICIENCY_CRITERION, 0)} e o custo estimado da MEQ-06. Não há pesos nem nota
-      composta.</p>
+    {shows("As quatro formas medidas de ocupar o nó, lado a lado, com o critério de eficiência e o custo estimado.")}
+    <p>A tabela reúne vazão, eficiência por núcleo físico, o critério de {pct(EFFICIENCY_CRITERION, 0)}
+      e o custo estimado da MEQ-06. Não há pesos nem nota composta. As configurações com
+      {PROJ_RANKS} processos do capítulo 7 não estão aqui porque não foram medidas.</p>
     <div class="scorecard-wrap"><table class="decision">
-      <thead><tr><th>Opção</th><th>Ranks / núcleos físicos</th><th>Vazão (dias sim. por dia de nó)</th><th>Efic. por núcleo físico</th><th>Cumpre {pct(EFFICIENCY_CRITERION, 0)}?</th><th>Custo MEQ-06 (a), dias de nó/ano</th><th>Custo MEQ-06 (b), dias de nó/ano</th><th style="text-align:left">Situação</th></tr></thead>
+      <thead><tr><th>Opção</th><th>Processos / núcleos físicos</th><th>Vazão (dias sim. por dia de máquina)</th><th>Efic. por núcleo físico</th><th>Cumpre {pct(EFFICIENCY_CRITERION, 0)}?</th><th>Custo MEQ-06 (a), dias de máquina/ano</th><th>Custo MEQ-06 (b), dias de máquina/ano</th><th style="text-align:left">Situação</th></tr></thead>
       <tbody>{dec_rows}</tbody></table></div>
     <p class="caption">Vazão e custos com o s/passo médio de cada configuração; custos são estimativas
       (capítulo 6). Eficiência relativa a A{r['base_cores']}. Na D, a eficiência é a do par:
-      vazão somada ÷ (vazão de A{r['base_cores']} × {r['n_phys']}/{r['base_cores']}).</p>
+      vazão somada ÷ (vazão de A{r['base_cores']} × {n_phys}/{r['base_cores']}).</p>
     <div class="conclusion">
       <h3>Situação da decisão</h3>
       <p class="verdict">A B112 aparece como <b>{esc(PROPOSED_LABEL)}</b>. Nenhuma configuração foi
         decidida neste relatório. A escolha cabe ao pesquisador, considerando também as limitações
         abaixo, em especial a igualdade numérica entre números de processos, que não foi verificada.</p>
     </div>
-    <nav class="pager"><a href="#custo">← Custo da MEQ-06</a><a href="#limitacoes">Limitações →</a></nav>
+    {means(f"Entre as opções medidas, só a B112 cumpre o critério de {pct(EFFICIENCY_CRITERION, 0)} e é também a de menor custo, mas ocupa a máquina inteira. Se for importante deixar núcleos para outros usuários, o capítulo 7 mostra quanto isso custa em prazo.")}
+    <nav class="pager"><a href="#duracao">← Duração da MEQ-06</a><a href="#como-rodar">Como rodar →</a></nav>
+  </section>
+
+  <section id="como-rodar" class="chapter">
+    <p class="chapter-no">Capítulo 9</p>
+    <h2>Como rodar na prática</h2>
+    {shows("A diferença entre rodar com os processos soltos, como sempre foi feito, e rodar com os processos fixados, e como fazer e conferir isso no Swell.")}
+    <p><b>Processos soltos.</b> O comando usado até agora, <code>mpiexec -n N ./atmosphere_model</code>,
+      sem opções, deixa os processos sem fixação: o sistema decide em qual núcleo cada um fica e pode
+      movê-los durante a rodada. Na série C, rodada exatamente assim, os {run['unpinned_ranks']} processos
+      se espalharam pelos {run['occupied']} núcleos físicos, {run['shared']} deles dividiram núcleo com
+      outro processo, e a rodada foi <b>{pct(run['slowdown'], 0)} mais lenta</b> que a A{run['pinned_ranks']}
+      fixada ({br(c60['s_per_step'], 4)} contra {br(a56['s_per_step'], 4)} s/passo). Com {PROJ_RANKS}
+      processos soltos, mais processos do que núcleos, todos os {n_phys} núcleos ficam ocupados e
+      nenhum núcleo inteiro fica livre para outros usuários.</p>
+    <p><b>Processos fixados.</b> Fixar é dizer ao <code>mpiexec</code>, com a opção
+      <code>-bind-to user:&lt;lista&gt;</code> do MPICH (versão {esc(hw['mpich_version'])} no Swell),
+      a lista de CPUs: o primeiro processo vai para a primeira CPU da lista, o segundo para a segunda,
+      e assim por diante. Cada processo fica na sua CPU até o fim da rodada.</p>
+    <p>Comandos reais usados no benchmark (coluna <code>mpiexec_cmd</code> do CSV):</p>
+    <p class="cmd-label">Série C, soltos ({run['unpinned_ranks']} processos):</p>
+    <pre class="cmd">{esc(run['unpinned_cmd'])}</pre>
+    <p class="cmd-label">Série A{run['pinned_ranks']}, fixados ({run['pinned_ranks']} processos, um por núcleo físico):</p>
+    <pre class="cmd">{esc(run['pinned_cmd'])}</pre>
+    <h3>Numeração das CPUs do Swell</h3>
+    <div class="scorecard-wrap"><table class="mini cpu-map">
+      <thead><tr><th>Soquete</th><th>Núcleos físicos (1.ª tarefa)</th><th>2.ª tarefa dos mesmos núcleos (SMT)</th></tr></thead>
+      <tbody>{core_map_rows}</tbody></table></div>
+    <p class="caption">Fonte: <code>hardware_snapshot.txt</code> do benchmark (<code>lscpu</code> e
+      <code>numactl --hardware</code>). A CPU {sk0['sib'][0]} é a segunda tarefa do núcleo
+      {sk0['phys'][0]}, a {sk0['sib'][1]} do núcleo {sk0['phys'][1]}, e assim por diante (núcleo + {n_phys}).</p>
+    <h3>Exemplo para "{PROJ_RANKS} compacto"</h3>
+    <p>{p['n_compact']} núcleos físicos com as duas tarefas, divididos de forma equilibrada entre os
+      soquetes: soquete 0 com {run['per_socket_alloc'][0]} núcleos (CPUs {run['example_blocks'][0]}) e
+      soquete 1 com {run['per_socket_alloc'][1]} núcleos (CPUs {run['example_blocks'][1]}), na mesma ordem
+      da B112 medida. Ficam livres os núcleos {run['free_txt']} ({len(run['free_cores'])} núcleos inteiros).
+      Como para qualquer N, o MPAS precisa do arquivo de partição para {PROJ_RANKS} processos.</p>
+    <div class="status critical"><strong>Não testado no benchmark; confira a fixação antes de uma rodada longa.</strong>
+      Este comando é para o Swell, com a numeração de CPUs acima. Em outra máquina, a lista muda.</div>
+    <pre class="cmd">{esc(run['example_cmd'])}</pre>
+    <h3>Como conferir a fixação durante uma rodada</h3>
+    <p>Os mesmos comandos usados na verificação do benchmark, rodados no Swell em outro terminal,
+      enquanto o modelo roda:</p>
+    <pre class="cmd">{esc(count_cmd)}</pre>
+    <p>deve mostrar o número de processos ({PROJ_RANKS} no exemplo). E</p>
+    <pre class="cmd">{esc(pin_check_cmd)}</pre>
+    <p>mostra uma linha por processo. Numa rodada fixada, cada linha tem <code>affinity=</code> com um
+      único número, igual ao <code>psr</code> (a CPU onde o processo está), e o conjunto desses números é
+      exatamente a lista do comando. Numa rodada solta aparece <code>affinity={esc(run['affinity'])}</code>
+      (qualquer CPU).</p>
+    {means(f"Sem fixação, a rodada do benchmark ficou cerca de {pct(run['slowdown'], 0)} mais lenta, mesmo com {run['unpinned_ranks'] - run['pinned_ranks']} processos a mais. Fixar também permite escolher quais núcleos ficam livres. Basta acrescentar <code>-bind-to user:&lt;lista&gt;</code> ao comando de sempre; a lista acima vale só para o Swell e o exemplo de {PROJ_RANKS} processos ainda precisa ser conferido numa rodada curta.")}
+    <nav class="pager"><a href="#opcoes">← Opções</a><a href="#limitacoes">Limitações →</a></nav>
   </section>
 
   <section id="limitacoes" class="chapter">
-    <p class="chapter-no">Capítulo 8</p>
+    <p class="chapter-no">Capítulo 10</p>
     <h2>Limitações</h2>
-    <p class="lead">Limitações registradas em <code>docs/provenance/MEQ-05.2-benchmark-record.md</code>
-      ("O que não foi verificado"), mais as que decorrem das escolhas deste relatório.</p>
+    {shows("O que não foi verificado no benchmark (registro <code>docs/provenance/MEQ-05.2-benchmark-record.md</code>, seção “O que não foi verificado”) e o que decorre das escolhas deste relatório.")}
     <ul>
       <li><b>Igualdade numérica não verificada.</b> Não se verificou se o resultado numérico muda com o
         número de processos. Os campos de saída não foram comparados, e os ensaios sem saída não geram arquivos.</li>
       <li><b>Janela única de {br(r['window_h'], 0)} h</b> ({RESTART_LABEL}). Não se verificou se ela
-        reproduz, na mesma proporção de um dia completo, a frequência de chamadas periódicas, como a radiação.</li>
-      <li><b>Assimetria entre soquetes na série D.</b> Com os dois casos simultâneos, o soquete 1 levou
-        {br(s1['s_per_step'], 4)} s/passo e o soquete 0, {br(s0['s_per_step'], 4)} s/passo
-        ({pct(r['d_asym'])} mais lento). A causa não foi investigada. Numa produção em D, a metade mais lenta
-        determina quando o nó fica livre, salvo se a carga for redistribuída.</li>
-      <li><b>Frequência de CPU</b> (governor, turbo, temperatura) não foi registrada nem controlada.</li>
-      <li><b>Uso e banda de memória</b> não foram medidos.</li>
-      <li><b>Fixação amostrada</b> só três vezes por ensaio, até 330 s. Nos ensaios mais longos (A28, A14,
-        A8, D), o restante da execução não foi amostrado.</li>
-      <li><b>Cache de páginas</b> não foi controlado. O <i>restart</i> de entrada é relido a cada ensaio.</li>
+        reproduz, na mesma proporção de um dia completo, a frequência de cálculos periódicos, como a radiação.</li>
+      <li><b>Assimetria entre soquetes na série D.</b> Com as duas rodadas simultâneas, a do soquete 1 levou
+        {br(s1['s_per_step'], 4)} s/passo e a do soquete 0, {br(s0['s_per_step'], 4)} s/passo
+        ({pct(r['d_asym'])} mais lenta). A causa não foi investigada. Numa produção em pares, a rodada mais
+        lenta determina quando o nó fica livre, salvo se a carga for redistribuída.</li>
+      <li><b>Frequência do processador</b> (modo de energia, turbo, temperatura) não foi registrada nem controlada.</li>
+      <li><b>Uso e velocidade da memória</b> não foram medidos.</li>
+      <li><b>Fixação conferida</b> só três vezes por ensaio, até 330 s. Nos ensaios mais longos (A28, A14,
+        A8, D), o restante da execução não foi conferido.</li>
+      <li><b>Cache de arquivos</b> do sistema não foi controlado. O <i>restart</i> de entrada é relido a cada ensaio.</li>
       <li><b>Extrapolação de I/O</b> supõe custo constante por arquivo e não inclui operações anteriores à
-        criação do arquivo. O timer <code>stream_output</code> e as durações por arquivo não foram reconciliados.
-        O conteúdo dos arquivos escritos na série E não foi inspecionado.</li>
+        criação do arquivo. O cronômetro <code>stream_output</code> e as durações por arquivo não foram reconciliados.
+        O conteúdo dos arquivos gravados na série E não foi inspecionado.</li>
       <li><b>Correção de custo (variante b).</b> A razão produção/série C ({br(r['corr'], 3)}) foi obtida
-        com {c60['ranks']} ranks sem fixação. Supõe-se que ela vale para as demais configurações, o que
+        com {c60['ranks']} processos sem fixação. Supõe-se que ela vale para as demais configurações, o que
         não foi verificado.</li>
       <li><b>Eficiência relativa a A{r['base_cores']}</b>, não a um núcleo. A perda de eficiência de 1 a
         {r['base_cores']} núcleos não está medida.</li>
+      <li><b>Projeção da MEQ-06 (capítulo 7).</b> Nenhuma das configurações projetadas foi medida. As
+        fórmulas supõem interpolação linear entre A{lo['physical_cores']} e A{hi['physical_cores']},
+        ganho do SMT proporcional à fração de núcleos com duas tarefas, e a perda por rodadas simultâneas
+        medida com {per_socket} processos por soquete. Margem plausível: {PLAUSIBLE_MARGIN}.</li>
+      <li><b>Comando de exemplo "{PROJ_RANKS} compacto"</b> (capítulo 9) não foi executado no benchmark.</li>
     </ul>
-    <nav class="pager"><a href="#opcoes">← Opções</a><a href="#contexto">Início ↑</a></nav>
+    {means("Os números deste relatório servem para escolher a configuração e estimar prazos, não para garantir prazos exatos. Antes de uma rodada longa numa configuração não medida, um ensaio curto confirma a velocidade e a fixação.")}
+    <nav class="pager"><a href="#como-rodar">← Como rodar</a><a href="#termos">Início ↑</a></nav>
   </section>
 
   <footer class="footer">
     <p>Gerado por <code>scripts/06_report/build_benchmark_report.py</code> (MEQ-05.3) a partir de tabelas
-      consolidadas; não edite à mão. Estilo: <code>docs/templates/report_v2/report.css</code>, sem
-      modificação; gráficos: Plotly basic {esc(meta['plotly_version'])}, embutido. Paleta: Crameri (2018),
-      doi:10.5281/zenodo.1243862. Registro de proveniência:
+      consolidadas e registros do benchmark; não edite à mão. Estilo:
+      <code>docs/templates/report_v2/report.css</code>, sem modificação; gráficos: Plotly basic
+      {esc(meta['plotly_version'])}, embutido. Registro de proveniência:
       <code>docs/provenance/MEQ-05.2-benchmark-record.md</code>.</p>
     <table class="kv"><tbody>{sha_rows}</tbody></table>
   </footer>
@@ -644,6 +1095,17 @@ EXTRA_CSS = """
 .chapter ul li { margin: 4px 0; }
 table.decision tr.proposed th { font-weight: 700; }
 table.decision td, table.decision th { border-bottom: 1px solid var(--rule); }
+table.proj td .sub { color: var(--muted); font-size: .78rem; }
+table.proj td, table.proj thead th { white-space: nowrap; }
+table.proj td.desc { white-space: normal; min-width: 220px; }
+table.glossary th, table.glossary td { text-align: left; vertical-align: top; }
+table.glossary th { white-space: nowrap; padding-right: 14px; }
+table.cpu-map td, table.cpu-map th { text-align: left; }
+.note.practice { max-width: 880px; }
+.cmd-label { margin: 10px 0 2px; font-size: .86rem; }
+pre.cmd { background: var(--bg-soft); border-left: 2px solid var(--rule-strong); padding: 6px 10px;
+  margin: 4px 0 12px; font-size: .8rem; white-space: pre-wrap; overflow-wrap: anywhere;
+  word-break: break-all; max-width: 880px; }
 .pager span { flex: 1; }
 .footer table.kv { margin-top: 8px; }
 .footer table.kv th { width: auto; }
@@ -727,7 +1189,7 @@ REPORT_JS = r"""
         marker: { color: '#1a1a1a', size: 6 }, customdata: D.a_pts.map(function (p) { return [p.cfg, p.rep]; }),
         hovertemplate: '%{customdata[0]} r%{customdata[1]}: %{y:.3f}<extra></extra>' },
       { type: 'scatter', mode: 'markers', x: pick(D.b_pts, 'x'), y: pick(D.b_pts, 'sp'),
-        name: 'série B (' + D.b_mean.ranks + ' ranks, SMT)',
+        name: 'série B (' + D.b_mean.ranks + ' processos, SMT)',
         marker: { symbol: 'diamond-open', color: '#1a1a1a', size: 9, line: { width: 1.4 } },
         customdata: pick(D.b_pts, 'rep'), hovertemplate: 'B r%{customdata}: %{y:.3f}<extra></extra>' }
     ];
@@ -744,7 +1206,7 @@ REPORT_JS = r"""
         marker: { color: '#1a1a1a', size: 6 }, customdata: D.a_pts.map(function (p) { return [p.cfg, p.rep]; }),
         hovertemplate: '%{customdata[0]} r%{customdata[1]}: %{y:.1%}<extra></extra>' },
       { type: 'scatter', mode: 'markers', x: pick(D.b_pts, 'x'), y: pick(D.b_pts, 'eff'),
-        name: 'série B (' + D.b_mean.ranks + ' ranks, SMT)',
+        name: 'série B (' + D.b_mean.ranks + ' processos, SMT)',
         marker: { symbol: 'diamond-open', color: '#1a1a1a', size: 9, line: { width: 1.4 } },
         customdata: pick(D.b_pts, 'rep'), hovertemplate: 'B r%{customdata}: %{y:.1%}<extra></extra>' }
     ];
@@ -756,14 +1218,14 @@ REPORT_JS = r"""
     var O = D.options, labels = pick(O, 'label');
     var tr = [
       { type: 'bar', x: labels, y: pick(O, 'tp'), marker: { color: '#8c8c8c' }, width: 0.55,
-        name: 'média', hovertemplate: '%{x}: %{y:.2f} dias simulados por dia de nó<extra></extra>' }
+        name: 'média', hovertemplate: '%{x}: %{y:.2f} dias simulados por dia de máquina<extra></extra>' }
     ];
     var px = [], py = [];
     O.forEach(function (o) { o.reps.forEach(function (v) { px.push(o.label); py.push(v); }); });
     tr.push({ type: 'scatter', mode: 'markers', x: px, y: py, name: 'repetições',
       marker: { color: '#1a1a1a', size: 6 },
       hovertemplate: '%{x} (repetição): %{y:.2f}<extra></extra>' });
-    plot('chart-throughput', tr, { yaxis: { title: { text: 'dias simulados por dia de nó' }, rangemode: 'tozero' },
+    plot('chart-throughput', tr, { yaxis: { title: { text: 'dias simulados por dia de máquina' }, rangemode: 'tozero' },
       xaxis: { type: 'category' } });
   }
 
@@ -772,13 +1234,13 @@ REPORT_JS = r"""
     var tr = [
       { type: 'bar', orientation: 'h', y: labels, x: pick(O, 'cost_a'), name: '(a) pelo trecho medido — estimativa',
         marker: { color: '#b8b8b8' },
-        hovertemplate: '%{y} (a): %{x:.1f} dias de nó por ano simulado<extra></extra>' },
+        hovertemplate: '%{y} (a): %{x:.1f} dias de máquina por ano simulado<extra></extra>' },
       { type: 'bar', orientation: 'h', y: labels, x: pick(O, 'cost_b'), name: '(b) corrigida pela produção — estimativa',
         marker: { color: '#1a1a1a' },
-        hovertemplate: '%{y} (b): %{x:.1f} dias de nó por ano simulado<extra></extra>' }
+        hovertemplate: '%{y} (b): %{x:.1f} dias de máquina por ano simulado<extra></extra>' }
     ];
     plot('chart-cost', tr, { barmode: 'group', showlegend: true, legend: { orientation: 'h', y: 1.16, x: 0 },
-      xaxis: { title: { text: 'dias de nó por ano simulado (estimativa)' }, rangemode: 'tozero' },
+      xaxis: { title: { text: 'dias de máquina por ano simulado (estimativa)' }, rangemode: 'tozero' },
       yaxis: { type: 'category', autorange: 'reversed' }, margin: { l: 80, r: 12, t: 34, b: 42 } });
   }
 
@@ -831,7 +1293,7 @@ def main() -> int:
         "dirty": bool(git_value("status", "--porcelain")),
         "plotly_version": plotly_version,
         "inputs": {str(p.relative_to(REPO_ROOT)) + " (sha256)": sha256(p)
-                   for p in (BENCH_CSV, RUNTIME_CSV, RECORD_MD)},
+                   for p in (BENCH_CSV, RUNTIME_CSV, HW_SNAPSHOT, RECORD_MD)},
     }
     page = assemble(build_html(results, meta), chart_payload(results))
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -841,6 +1303,14 @@ def main() -> int:
         print(f"  {o['label']:<11} tp={o['throughput']:.3f} eff={o['eff_phys']:.4f} "
               f"meets={o['meets']} cost_a={o['cost_a']:.2f} cost_b={o['cost_b']:.2f}")
     print(f"  correction ratio = {results['corr']:.4f}")
+    p = results["proj"]
+    print(f"  projection: f={p['f']:.4f} s(A45)={p['s_a45']:.4f} k={p['k']:.4f} c={p['c']:.4f}")
+    for x in p["rows"]:
+        durs = ", ".join("—" if v is None else f"{v:.1f}" for v in x["durations"])
+        print(f"  {x['label']:<20} s={x['s']:.4f} days/run-year={x['days_run_year']:.2f} "
+              f"[{durs}]")
+    print(f"  run: C slowdown vs A56 = {results['run']['slowdown']:.4f}; "
+          f"free cores (90 compact) = {results['run']['free_txt']}")
     return 0
 
 
