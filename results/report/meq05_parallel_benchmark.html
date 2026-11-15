@@ -216,6 +216,17 @@ input[type=range] { width: 100%; accent-color: var(--ink); }
 .chapter ul li { margin: 4px 0; }
 table.decision tr.proposed th { font-weight: 700; }
 table.decision td, table.decision th { border-bottom: 1px solid var(--rule); }
+table.proj td .sub { color: var(--muted); font-size: .78rem; }
+table.proj td, table.proj thead th { white-space: nowrap; }
+table.proj td.desc { white-space: normal; min-width: 220px; }
+table.glossary th, table.glossary td { text-align: left; vertical-align: top; }
+table.glossary th { white-space: nowrap; padding-right: 14px; }
+table.cpu-map td, table.cpu-map th { text-align: left; }
+.note.practice { max-width: 880px; }
+.cmd-label { margin: 10px 0 2px; font-size: .86rem; }
+pre.cmd { background: var(--bg-soft); border-left: 2px solid var(--rule-strong); padding: 6px 10px;
+  margin: 4px 0 12px; font-size: .8rem; white-space: pre-wrap; overflow-wrap: anywhere;
+  word-break: break-all; max-width: 880px; }
 .pager span { flex: 1; }
 .footer table.kv { margin-top: 8px; }
 .footer table.kv th { width: auto; }
@@ -229,191 +240,287 @@ table.decision td, table.decision th { border-bottom: 1px solid var(--rule); }
   <div class="masthead-inner">
     <p class="kicker">MPAS-Atmosphere · Margem Equatorial Brasileira · MEQ-05 · benchmark de paralelismo</p>
     <h1>Quantos processos usar no Swell para as integrações da MEQ-06?</h1>
-    <p class="meta">Relatório gerado em 2026-11-15T13:51:59+00:00 · análise <code>5455fe4</code> · dados do benchmark MEQ-05.2 (20 ensaios)</p>
+    <p class="meta">Relatório gerado em 2026-11-15T20:39:27+00:00 · análise <code>5b30bc0</code> · dados do benchmark MEQ-05.2 (20 ensaios)</p>
   </div>
 </header>
 
 <nav class="chapters" id="chapter-nav" aria-label="Capítulos">
   <div class="progress"><span id="progress-bar"></span></div>
   <ol>
+    <li><a href="#termos"><span>0</span>Termos</a></li>
     <li><a href="#contexto"><span>1</span>Contexto</a></li>
     <li><a href="#metodo"><span>2</span>Método</a></li>
-    <li><a href="#saturacao"><span>3</span>Curva de saturação</a></li>
-    <li><a href="#vazao"><span>4</span>Vazão do nó</a></li>
-    <li><a href="#io"><span>5</span>I/O</a></li>
-    <li><a href="#custo"><span>6</span>Custo da MEQ-06</a></li>
-    <li><a href="#opcoes"><span>7</span>Opções</a></li>
-    <li><a href="#limitacoes"><span>8</span>Limitações</a></li>
+    <li><a href="#saturacao"><span>3</span>Ganho com mais núcleos</a></li>
+    <li><a href="#vazao"><span>4</span>Produção do nó</a></li>
+    <li><a href="#io"><span>5</span>Gravação de arquivos</a></li>
+    <li><a href="#custo"><span>6</span>Custo por ano simulado</a></li>
+    <li><a href="#duracao"><span>7</span>Duração da MEQ-06</a></li>
+    <li><a href="#opcoes"><span>8</span>Opções</a></li>
+    <li><a href="#como-rodar"><span>9</span>Como rodar</a></li>
+    <li><a href="#limitacoes"><span>10</span>Limitações</a></li>
   </ol>
 </nav>
 
 <main>
-  <div class="status"><strong>Status:</strong> tempos medidos no benchmark MEQ-05.2. Os custos da MEQ-06 são
-    estimativas. A configuração para a MEQ-06 ainda não foi decidida: este relatório apresenta opções.</div>
+  <div class="status"><strong>Status:</strong> tempos medidos no benchmark MEQ-05.2. Os custos e as
+    durações da MEQ-06 são estimativas, e as configurações do capítulo 7 não foram medidas. A
+    configuração para a MEQ-06 ainda não foi decidida: este relatório apresenta opções.</div>
+
+  <section id="termos" class="chapter">
+    <h2>Termos usados neste relatório</h2>
+    <p>Uma linha por termo. Os termos voltam a ser explicados, em poucas palavras, na primeira vez
+      em que aparecem no texto.</p>
+    <div class="scorecard-wrap"><table class="mini glossary"><tbody><tr><th>Nó</th><td>Um computador completo. O Swell é um único nó; tudo neste relatório roda dentro dele.</td></tr><tr><th>Soquete</th><td>Cada um dos 2 processadores (chips) do nó. Cada soquete tem 28 núcleos e sua própria memória.</td></tr><tr><th>Núcleo físico</th><td>Uma unidade de cálculo real do processador. O Swell tem 56.</td></tr><tr><th>SMT</th><td>Cada núcleo alterna entre duas tarefas; o sistema mostra 112, mas só 56 são reais. A segunda tarefa aproveita os momentos em que o núcleo ficaria parado, por isso rende bem menos que um núcleo a mais.</td></tr><tr><th>Processo (rank)</th><td>Fatia da malha calculada por um núcleo. Com N processos, o MPAS divide as células em N pedaços que são calculados ao mesmo tempo e trocam informação nas bordas a cada passo.</td></tr><tr><th>Decomposição / partição</th><td>O corte da malha em N pedaços de tamanho parecido, feito antes da rodada (programa METIS). O MPAS precisa de um arquivo de partição para cada N (<code>graph.info.part.N</code>).</td></tr><tr><th>Fixação de processos</th><td>Dizer ao sistema em qual núcleo cada processo deve ficar, para que ele não seja movido durante a rodada. Sem fixação, o sistema decide e pode mudar de ideia.</td></tr><tr><th>s/passo</th><td>Segundos de relógio que o modelo leva para avançar um passo de tempo (30 s de tempo de modelo). Quanto menor, mais rápido.</td></tr><tr><th>Aceleração</th><td>Quantas vezes a rodada fica mais rápida que a rodada de referência com 8 núcleos. Aceleração 4 = quatro vezes mais rápida.</td></tr><tr><th>Eficiência paralela</th><td>Quanto do ganho ideal se obtém. Dobrar os núcleos e ficar duas vezes mais rápido é 100 %; ficar 1,4 vez mais rápido é 70 %.</td></tr><tr><th>Vazão</th><td>Quanto tempo de modelo a máquina produz por dia de relógio. Aqui, em dias simulados por dia de máquina; dividindo 365 pela vazão obtém-se quantos dias de máquina custa um ano simulado.</td></tr><tr><th>I/O</th><td>Leitura e gravação de arquivos (do inglês <i>input/output</i>). Neste relatório, o tempo gasto gravando os arquivos de saída e de reinício.</td></tr></tbody></table></div>
+  </section>
 
   <section id="contexto" class="chapter">
     <p class="chapter-no">Capítulo 1</p>
     <h2>Contexto</h2>
-    <p class="lead">A MEQ-06 vai integrar a EXP03 (malha Oval MEQ-02A, 102.968 células)
-      por vários anos. Antes disso é preciso escolher quantos processos MPI usar e como distribuí-los
-      no nó. A escolha é um compromisso entre prazo (dias simulados por dia) e uso do nó. Usar o
-      maior número possível de núcleos não é, por si só, o objetivo.</p>
+    <p class="lead"><b>O que esta seção mostra.</b> Por que foi preciso medir de novo, em que máquina e com que pergunta.</p>
+    <p>A MEQ-06 vai integrar a EXP03 (malha Oval MEQ-02A, 102.968 células) por
+      vários anos. Antes disso é preciso escolher em quantos pedaços dividir a malha (o número de
+      processos) e em quais núcleos da máquina colocar cada pedaço. É um compromisso entre prazo e uso
+      da máquina, que é compartilhada. Usar todos os núcleos não é, por si só, o objetivo.</p>
     <div class="questions">
-      <div><b>O nó.</b> O Swell é um nó único com 2 soquetes (2× Intel Xeon Gold 5420+),
-        28 núcleos físicos por soquete, 56 no total. Com SMT, cada núcleo
-        executa 2 threads, o que dá 112 CPUs lógicas. Todo o benchmark roda
-        dentro desse nó, sem comunicação entre nós.</div>
-      <div><b>A pergunta.</b> Até onde o tempo por passo cai quando se acrescentam núcleos? Vale usar o
-        SMT? Rende mais uma integração grande ou duas menores lado a lado? Quanto pesa a escrita de saída?</div>
-      <div><b>Por que medir de novo.</b> Os custos das rodadas de produção não formam uma curva de
-        saturação. Mudam ao mesmo tempo o número de ranks, a malha e a física, e parte deles é estimada.</div>
+      <div><b>A máquina.</b> O Swell é um nó único (um só computador) com 2 soquetes
+        (2× Intel Xeon Gold 5420+), cada um com 28 núcleos físicos, 56 no total. Com o SMT,
+        cada núcleo alterna entre duas tarefas e o sistema mostra 112 "CPUs", mas só 56 são
+        núcleos reais.</div>
+      <div><b>As perguntas.</b> Quanto o modelo acelera com mais núcleos? Vale usar a segunda tarefa
+        de cada núcleo? Rende mais uma rodada grande ou duas menores lado a lado? Quanto tempo se perde
+        gravando arquivos?</div>
+      <div><b>Por que medir de novo.</b> Os tempos das rodadas de produção não respondem a essas
+        perguntas: entre uma rodada e outra mudaram ao mesmo tempo o número de processos, a malha e a
+        física, e parte dos tempos é estimada.</div>
     </div>
     <p>A tabela <code>runtime_metrics.csv</code> registra 18 rodadas de produção. Elas usaram
-      de 22 a 90 ranks, em 3 malhas diferentes
+      de 22 a 90 processos, em 3 malhas diferentes
       (76.813, 95.138, 102.968 células). 3 desses tempos foram reconstruídos
       ou estimados, não medidos. Alguns experimentos (EXP04) rodaram com números de
-      ranks diferentes em cada período. Uma diferença de s/passo entre essas rodadas mistura, portanto,
-      paralelismo, tamanho de malha, física e estado da máquina. Para isolar o efeito do paralelismo,
-      a MEQ-05.2 repetiu o mesmo trecho da EXP03 variando apenas o número e a distribuição dos processos.</p>
+      processos diferentes em cada período. Comparar essas rodadas mistura número de processos,
+      tamanho de malha, física e estado da máquina. Por isso a MEQ-05.2 repetiu o mesmo trecho da EXP03
+      mudando apenas o número de processos e a forma de distribuí-los.</p>
     <details class="drawer">
-      <summary>Custos históricos de produção (runtime_metrics.csv)</summary>
+      <summary>Detalhes: tempos históricos de produção (runtime_metrics.csv)</summary>
       <div class="scorecard-wrap"><table class="mini">
-        <thead><tr><th>Experimento</th><th>Período</th><th>Ranks</th><th>Células</th><th>s/passo (parede)</th><th>Qualidade</th></tr></thead>
+        <thead><tr><th>Experimento</th><th>Período</th><th>Processos</th><th>Células</th><th>s/passo (relógio)</th><th>Qualidade</th></tr></thead>
         <tbody><tr><td>CTL</td><td>2021</td><td>80</td><td>76.813</td><td>1,195</td><td>estimado</td></tr><tr><td>CTL</td><td>2022</td><td>80</td><td>76.813</td><td>1,042</td><td>estimado</td></tr><tr><td>EXP01</td><td>2021</td><td>90</td><td>76.813</td><td>1,075</td><td>medido</td></tr><tr><td>EXP01</td><td>2022</td><td>90</td><td>76.813</td><td>1,034</td><td>medido</td></tr><tr><td>EXP02</td><td>2021</td><td>90</td><td>95.138</td><td>1,263</td><td>medido</td></tr><tr><td>EXP02</td><td>2022</td><td>90</td><td>95.138</td><td>1,763</td><td>estimado</td></tr><tr><td>EXP03</td><td>2021</td><td>60</td><td>102.968</td><td>1,771</td><td>medido</td></tr><tr><td>EXP03</td><td>2022</td><td>60</td><td>102.968</td><td>1,776</td><td>medido</td></tr><tr><td>EXP04</td><td>2021</td><td>90</td><td>76.813</td><td>1,206</td><td>medido</td></tr><tr><td>EXP04</td><td>2022</td><td>22</td><td>76.813</td><td>7,169</td><td>medido</td></tr><tr><td>EXP05</td><td>2021</td><td>22</td><td>76.813</td><td>7,154</td><td>medido</td></tr><tr><td>EXP05</td><td>2022</td><td>22</td><td>76.813</td><td>7,057</td><td>medido</td></tr><tr><td>EXP06</td><td>2021</td><td>22</td><td>76.813</td><td>7,045</td><td>medido</td></tr><tr><td>EXP06</td><td>2022</td><td>22</td><td>76.813</td><td>7,350</td><td>medido</td></tr><tr><td>EXP01_BADSST</td><td>2021</td><td>60</td><td>76.813</td><td>1,270</td><td>medido</td></tr><tr><td>EXP01_BADSST</td><td>2022</td><td>60</td><td>76.813</td><td>1,282</td><td>medido</td></tr><tr><td>EXP02_BADSST</td><td>2021</td><td>60</td><td>95.138</td><td>1,627</td><td>medido</td></tr><tr><td>EXP02_BADSST</td><td>2022</td><td>60</td><td>95.138</td><td>1,574</td><td>medido</td></tr></tbody></table></div>
-      <p class="caption">s/passo = tempo de parede da rodada inteira dividido pelo número de passos
-        (inclui inicialização e I/O). As rodadas não são comparáveis entre si como medida de paralelismo.</p>
+      <p class="caption">s/passo = tempo de relógio da rodada inteira dividido pelo número de passos
+        (inclui a preparação e a gravação de arquivos). Essas rodadas não servem para comparar números
+        de processos entre si.</p>
     </details>
-    <nav class="pager"><span></span><a href="#metodo">Método →</a></nav>
+    <div class="note practice"><b>O que isso significa na prática.</b> Os tempos antigos não servem para escolher quantos processos usar. Todos os números a seguir vêm de um mesmo trecho da EXP03, rodado de formas diferentes na mesma máquina.</div>
+    <nav class="pager"><a href="#termos">← Termos</a><a href="#metodo">Método →</a></nav>
   </section>
 
   <section id="metodo" class="chapter">
     <p class="chapter-no">Capítulo 2</p>
     <h2>Método</h2>
-    <p class="lead">Cada ensaio integra 3 h (360 passos de 30 s) a partir do
-      <i>restart</i> de 2021-11-15 00 UTC da EXP03 de produção. Física, passo de tempo e malha são os da
-      produção. Só mudam o número de processos e a forma de distribuí-los.</p>
+    <p class="lead"><b>O que esta seção mostra.</b> Como os ensaios foram feitos e o que cada série de ensaios testa.</p>
+    <p>Cada ensaio integra 3 h (360 passos de 30 s) a partir do
+      arquivo de reinício (<i>restart</i>) de 2021-11-15 00 UTC da EXP03 de produção. Física, passo de
+      tempo e malha são os da produção. Só mudam o número de processos e os núcleos onde eles ficam.</p>
     <ul>
-      <li><b>Repetições.</b> 2 por configuração. Uma terceira repetição seria
-        feita se as duas diferissem em mais de 3 %. Isso não ocorreu: a maior diferença foi
-        1,97&nbsp;% (<code>B_N112</code>).</li>
-      <li><b>Fixação de processos.</b> Nas séries A, B, D e E, cada rank foi presa a uma CPU específica
-        (<code>mpiexec -bind-to user:&lt;lista&gt;</code>). A fixação foi conferida três vezes durante cada
-        ensaio. A série C roda sem fixação, como na produção, e o sistema operacional distribui as ranks.</li>
-      <li><b>Tempo usado.</b> O timer <i>time integration</i> do MPAS, que exclui a inicialização.
-        s/passo = <i>time integration</i> / 360.</li>
+      <li><b>Repetições.</b> Cada configuração rodou 2 vezes. Uma terceira
+        rodada seria feita se as duas diferissem em mais de 3 %. Isso não ocorreu: a maior
+        diferença foi 1,97&nbsp;% (<code>B_N112</code>).</li>
+      <li><b>Fixação de processos</b> (dizer ao sistema em qual núcleo cada processo fica). Nas séries
+        A, B, D e E, cada processo foi preso a uma CPU com <code>mpiexec -bind-to user:&lt;lista&gt;</code>,
+        e isso foi conferido três vezes durante cada ensaio. A série C roda sem fixação, como na
+        produção: o sistema decide onde cada processo fica.</li>
+      <li><b>Tempo usado.</b> O cronômetro interno do MPAS chamado <i>time integration</i>, que mede só
+        a integração e deixa de fora a preparação inicial. s/passo = <i>time integration</i> /
+        360.</li>
       <li><b>Métricas.</b> Aceleração = s/passo de A8 ÷ s/passo da configuração.
         Eficiência por núcleo físico = aceleração ÷ (núcleos físicos / 8). Vazão =
         86.400 ÷ (s/passo × 2.880 passos por dia simulado), em dias
-        simulados por dia de nó. A referência é A8, não um núcleo, porque um ensaio
-        serial seria longo demais. A eficiência é, portanto, relativa a 8 núcleos.</li>
+        simulados por dia de máquina. A referência é a rodada com 8 núcleos, não com um,
+        porque uma rodada num só núcleo seria longa demais; a eficiência é, portanto, relativa a
+        8 núcleos.</li>
     </ul>
     <div class="scorecard-wrap"><table class="decision">
       <thead><tr><th>Série</th><th style="text-align:left">O que testa</th><th style="text-align:left">Configurações</th><th>Fixação</th></tr></thead>
-      <tbody><tr><th>A</th><td style='text-align:left'>Curva de saturação com núcleos físicos: N = 56/42/28/14/8 ranks, metade em cada soquete, uma rank por núcleo físico.</td><td style='text-align:left'><code>A_N056</code>, <code>A_N042</code>, <code>A_N028</code>, <code>A_N014</code>, <code>A_N008</code></td><td>fixada, só núcleos físicos</td></tr><tr><th>B</th><td style='text-align:left'>Efeito do SMT: 112 ranks, uma por CPU lógica, nos mesmos 56 núcleos físicos.</td><td style='text-align:left'><code>B_N112</code></td><td>fixada, uma rank por CPU lógica</td></tr><tr><th>C</th><td style='text-align:left'>Referência de produção: 60 ranks sem fixação, como a EXP03 foi rodada; liga o benchmark aos custos de produção.</td><td style='text-align:left'><code>C_N060</code></td><td>sem fixação</td></tr><tr><th>D</th><td style='text-align:left'>Vazão do nó com duas integrações independentes e simultâneas de 28 ranks, uma em cada soquete.</td><td style='text-align:left'><code>D_N028x2_s0</code>, <code>D_N028x2_s1</code></td><td>fixada, um soquete por caso</td></tr><tr><th>E</th><td style='text-align:left'>Custo de I/O: igual a A56, mas com a saída da produção (<i>history</i> horário e um <i>restart</i> na janela).</td><td style='text-align:left'><code>E_N056</code></td><td>fixada, como A56</td></tr></tbody></table></div>
+      <tbody><tr><th>A</th><td style='text-align:left'>Quanto o modelo acelera com mais núcleos: 56/42/28/14/8 processos, metade em cada soquete, um processo por núcleo físico.</td><td style='text-align:left'><code>A_N056</code>, <code>A_N042</code>, <code>A_N028</code>, <code>A_N014</code>, <code>A_N008</code></td><td>fixada, só núcleos físicos</td></tr><tr><th>B</th><td style='text-align:left'>Se vale usar a segunda tarefa de cada núcleo (SMT): 112 processos nos mesmos 56 núcleos físicos.</td><td style='text-align:left'><code>B_N112</code></td><td>fixada, um processo por tarefa</td></tr><tr><th>C</th><td style='text-align:left'>Como a produção foi rodada: 60 processos sem fixação, como na EXP03. Liga o benchmark aos tempos reais de produção.</td><td style='text-align:left'><code>C_N060</code></td><td>sem fixação</td></tr><tr><th>D</th><td style='text-align:left'>Duas rodadas independentes ao mesmo tempo, de 28 processos cada, uma em cada soquete.</td><td style='text-align:left'><code>D_N028x2_s0</code>, <code>D_N028x2_s1</code></td><td>fixada, um soquete por rodada</td></tr><tr><th>E</th><td style='text-align:left'>Quanto custa gravar arquivos: igual à A56, mas gravando a saída da produção (arquivos horários e um arquivo de reinício).</td><td style='text-align:left'><code>E_N056</code></td><td>fixada, como A56</td></tr></tbody></table></div>
     <details class="drawer">
-      <summary>Valores medidos por configuração (médias das repetições)</summary>
+      <summary>Detalhes: valores medidos por configuração (médias das repetições)</summary>
       <div class="scorecard-wrap"><table class="mini">
-        <thead><tr><th>Configuração</th><th>Ranks</th><th>Núcleos físicos</th><th>s/passo</th><th>Diferença entre rep. (%)</th><th>Aceleração</th><th>Efic. por núcleo físico</th><th>Vazão (dias sim./dia)</th></tr></thead>
-        <tbody><tr><td>C_N060</td><td>60</td><td>56</td><td>1,5507</td><td>0,99</td><td>3,538</td><td>50,5 %</td><td>19,35</td></tr><tr><td>A_N056</td><td>56</td><td>56</td><td>1,2233</td><td>0,53</td><td>4,485</td><td>64,1 %</td><td>24,52</td></tr><tr><td>A_N042</td><td>42</td><td>42</td><td>1,4500</td><td>0,34</td><td>3,783</td><td>72,1 %</td><td>20,69</td></tr><tr><td>A_N028</td><td>28</td><td>28</td><td>1,9160</td><td>0,03</td><td>2,863</td><td>81,8 %</td><td>15,66</td></tr><tr><td>A_N014</td><td>14</td><td>14</td><td>3,2198</td><td>0,41</td><td>1,704</td><td>97,4 %</td><td>9,32</td></tr><tr><td>A_N008</td><td>8</td><td>8</td><td>5,4860</td><td>0,01</td><td>1,000</td><td>100,0 %</td><td>5,47</td></tr><tr><td>B_N112</td><td>112</td><td>56</td><td>1,1072</td><td>1,97</td><td>4,955</td><td>70,8 %</td><td>27,10</td></tr><tr><td>D_N028x2_s0</td><td>28</td><td>28</td><td>2,4009</td><td>0,00</td><td>2,285</td><td>65,3 %</td><td>12,50</td></tr><tr><td>D_N028x2_s1</td><td>28</td><td>28</td><td>2,7985</td><td>0,04</td><td>1,960</td><td>56,0 %</td><td>10,72</td></tr><tr><td>E_N056</td><td>56</td><td>56</td><td>1,2358</td><td>0,54</td><td>4,439</td><td>63,4 %</td><td>24,28</td></tr></tbody></table></div>
+        <thead><tr><th>Configuração</th><th>Processos</th><th>Núcleos físicos</th><th>s/passo</th><th>Diferença entre rep. (%)</th><th>Aceleração</th><th>Efic. por núcleo físico</th><th>Vazão (dias sim./dia)</th></tr></thead>
+        <tbody><tr><td>C_N060</td><td>60</td><td>56</td><td>1,5507</td><td>0,99</td><td>3,538</td><td>50,5 %</td><td>19,35</td></tr><tr><td>A_N056</td><td>56</td><td>56</td><td>1,2233</td><td>0,53</td><td>4,485</td><td>64,1 %</td><td>24,52</td></tr><tr><td>A_N042</td><td>42</td><td>42</td><td>1,4500</td><td>0,34</td><td>3,783</td><td>72,1 %</td><td>20,69</td></tr><tr><td>A_N028</td><td>28</td><td>28</td><td>1,9160</td><td>0,03</td><td>2,863</td><td>81,8 %</td><td>15,66</td></tr><tr><td>A_N014</td><td>14</td><td>14</td><td>3,2198</td><td>0,41</td><td>1,704</td><td>97,4 %</td><td>9,32</td></tr><tr><td>A_N008</td><td>8</td><td>8</td><td>5,4860</td><td>0,01</td><td>1,000</td><td>100,0 %</td><td>5,47</td></tr><tr><td>B_N112</td><td>112</td><td>56</td><td>1,1072</td><td>1,97</td><td>4,955</td><td>70,8 %</td><td>27,10</td></tr><tr><td>D_N028x2_s0</td><td>28</td><td>28</td><td>2,4009</td><td>0,00</td><td>2,285</td><td>65,3 %</td><td>12,50</td></tr><tr><td>D_N028x2_s1</td><td>28</td><td>28</td><td>2,7985</td><td>0,04</td><td>1,960</td><td>56,0 %</td><td>10,72</td></tr><tr><td>E_N056</td><td>56</td><td>56</td><td>1,2358</td><td>0,54</td><td>4,439</td><td>63,4 %</td><td>24,28</td></tr></tbody></table></div>
       <p class="caption">Fonte: <code>results/tables/meq05_parallel_benchmark.csv</code>. Os casos D
         aparecem separados (cada um ocupa um soquete). A vazão de cada caso D isolado não é a vazão do nó.</p>
     </details>
-    <nav class="pager"><a href="#contexto">← Contexto</a><a href="#saturacao">Curva de saturação →</a></nav>
+    <div class="note practice"><b>O que isso significa na prática.</b> As repetições diferiram no máximo 1,97&nbsp;%. Diferenças entre configurações maiores que isso são reais, não ruído da máquina.</div>
+    <nav class="pager"><a href="#contexto">← Contexto</a><a href="#saturacao">Ganho com mais núcleos →</a></nav>
   </section>
 
   <section id="saturacao" class="chapter">
     <p class="chapter-no">Capítulo 3</p>
-    <h2>Curva de saturação</h2>
-    <p class="lead">Na série A, o tempo por passo continua caindo até 56 núcleos, mas cada
-      núcleo acrescentado rende menos. A eficiência fica em A8: 100,0 %; A14: 97,4 %; A28: 81,8 %; A42: 72,1 %; A56: 64,1 %.
-      A maior configuração da série A que cumpre o critério de 70 % é A42.
-      A B112, com SMT, chega a uma aceleração de 4,96 nos mesmos
-      56 núcleos físicos (70,8 % por núcleo físico).</p>
+    <h2>Quanto o modelo acelera com mais núcleos</h2>
+    <p class="lead"><b>O que esta seção mostra.</b> Quantas vezes o modelo fica mais rápido (aceleração) ao usar mais núcleos, e quanto do ganho ideal isso representa (eficiência paralela).</p>
+    <p>Na série A, o tempo por passo continua caindo até 56 núcleos, mas cada núcleo
+      acrescentado rende menos, porque os pedaços da malha ficam menores e a troca de informação entre
+      eles pesa mais. A eficiência fica em A8: 100,0 %; A14: 97,4 %; A28: 81,8 %; A42: 72,1 %; A56: 64,1 %.
+      A maior configuração da série A que cumpre o critério de 70 % é A42.
+      A B112, que usa a segunda tarefa de cada núcleo (SMT), chega a uma aceleração de
+      4,96 nos mesmos 56 núcleos físicos
+      (70,8 % por núcleo físico).</p>
     <div class="grid-2">
       <div>
         <div class="chart" id="chart-speedup" style="height:320px"></div>
-        <p class="caption"><b>a</b> Aceleração em relação a A8 em função dos núcleos
-          físicos. Pontos: repetições. Linha cheia: média da série A. Tracejado: aceleração ideal
-          (proporcional aos núcleos). Losango vazado: série B (112 ranks com SMT), fora
-          da curva A.</p>
+        <p class="caption"><b>a</b> Aceleração em relação à rodada com 8 núcleos, em
+          função do número de núcleos físicos. Pontos: repetições. Linha cheia: média da série A.
+          Tracejado: aceleração ideal (dobrar os núcleos = dobrar a velocidade). Losango vazado: série B
+          (112 processos com SMT), fora da curva A.</p>
       </div>
       <div>
         <div class="chart" id="chart-efficiency" style="height:320px"></div>
-        <p class="caption"><b>b</b> Eficiência por núcleo físico (aceleração ÷ núcleos/8).
-          Tracejado horizontal: critério de 70 % aprovado pelo pesquisador.
-          Pontos acima da linha cumprem o critério.</p>
+        <p class="caption"><b>b</b> Eficiência por núcleo físico: fração do ganho ideal obtida
+          (aceleração ÷ núcleos/8). Tracejado horizontal: critério de
+          70 % aprovado pelo pesquisador. Pontos acima da linha cumprem o critério.</p>
       </div>
     </div>
-    <nav class="pager"><a href="#metodo">← Método</a><a href="#vazao">Vazão do nó →</a></nav>
+    <div class="note practice"><b>O que isso significa na prática.</b> Até 42 núcleos, cada núcleo extra ainda rende bem. De 42 para 56 núcleos (33 % a mais), o passo fica só 16 % mais rápido. Usar a segunda tarefa de cada núcleo ainda tira mais 9 % do tempo por passo em relação à A56.</div>
+    <nav class="pager"><a href="#metodo">← Método</a><a href="#vazao">Produção do nó →</a></nav>
   </section>
 
   <section id="vazao" class="chapter">
     <p class="chapter-no">Capítulo 4</p>
-    <h2>Vazão do nó</h2>
-    <p class="lead">Para a MEQ-06, importa quantos dias simulados o nó inteiro produz por dia. A B112
-      produz 27,1 dias simulados por dia de nó, 10,5 % a mais que a A56
+    <h2>Quanto tempo de modelo o nó produz por dia</h2>
+    <p class="lead"><b>O que esta seção mostra.</b> A vazão: quantos dias simulados a máquina inteira produz em um dia de relógio, em cada forma de ocupá-la.</p>
+    <p>Para a MEQ-06 importa o que a máquina inteira entrega por dia. A B112 produz
+      27,1 dias simulados por dia de máquina, 10,5 % a mais que a A56
       (24,5). A C60, que reproduz a forma como a produção foi rodada, produz
-      19,3, e a A56 rende 26,8 % a mais que ela. As duas integrações
+      19,3; a A56 rende 26,8 % a mais que ela. As duas rodadas
       simultâneas da série D somam 23,2.</p>
     <div class="chart" id="chart-throughput" style="height:280px"></div>
-    <p class="caption">Dias simulados por dia de nó = 86.400 ÷ (s/passo × 2.880).
+    <p class="caption">Dias simulados por dia de máquina = 86.400 ÷ (s/passo × 2.880).
       Barras cinza: valor calculado com o s/passo médio de cada configuração. Pontos pretos: repetições. Na série D,
-      a vazão é a soma dos dois casos simultâneos (12,50 no soquete 0 e
-      10,72 no soquete 1). O tempo de escrita de saída não está incluído (ver
-      capítulo 5).</p>
-    <nav class="pager"><a href="#saturacao">← Curva de saturação</a><a href="#io">I/O →</a></nav>
+      a vazão é a soma das duas rodadas simultâneas (12,50 no soquete 0 e
+      10,72 no soquete 1). O tempo de gravação de arquivos não está incluído (capítulo 5).</p>
+    <div class="note practice"><b>O que isso significa na prática.</b> Em um dia de relógio, a B112 simula cerca de 27 dias de modelo; o modo usado na produção (C60), cerca de 19. A forma de ocupar a máquina muda o prazo em cerca de 40 %, sem mudar nada no modelo.</div>
+    <nav class="pager"><a href="#saturacao">← Ganho com mais núcleos</a><a href="#io">Gravação de arquivos →</a></nav>
   </section>
 
   <section id="io" class="chapter">
     <p class="chapter-no">Capítulo 5</p>
-    <h2>I/O</h2>
-    <p class="lead">A série E repete a A56 com a saída da produção. Em cada repetição foram escritos
-      3 <i>history</i> e 1 <i>restart</i>. Extrapolado para um
-      dia simulado, o custo de escrita fica em torno de 8,0 s, cerca de
-      0,23 % do tempo de cálculo de um dia simulado na A56
-      (3.523 s). <b>Esse valor é uma extrapolação, não uma medida.</b></p>
-    <div class="scorecard-wrap"><table class="mini">
-      <thead><tr><th>Rep.</th><th>stream_output (s)</th><th>Δ time integration vs A56 (s)</th><th>Δ parede vs A56 (s)</th><th><i>history</i> (n × s)</th><th><i>restart</i> (n × s)</th><th>EXTRAPOLAÇÃO: s por dia simulado</th></tr></thead>
-      <tbody><tr><td>r1</td><td>5,06</td><td>3,29</td><td>8</td><td>3 × 0,215</td><td>1 × 2,79</td><td><b>7,96</b></td></tr><tr><td>r2</td><td>4,98</td><td>5,70</td><td>11</td><td>3 × 0,220</td><td>1 × 2,80</td><td><b>8,08</b></td></tr></tbody></table></div>
-    <p class="caption">Medido: timer <code>stream_output</code> do MPAS e diferenças em relação à média
-      da A56 (mesmas ranks e fixação, sem saída). Duração de escrita de cada arquivo = do nascimento à
-      última modificação (ext4). Extrapolação = 24 × <i>history</i> médio + 1 × <i>restart</i>, supondo
-      custo constante por arquivo. O timer e as durações por arquivo não foram reconciliados.</p>
-    <nav class="pager"><a href="#vazao">← Vazão do nó</a><a href="#custo">Custo da MEQ-06 →</a></nav>
+    <h2>Gravação de arquivos (I/O)</h2>
+    <p class="lead"><b>O que esta seção mostra.</b> Quanto tempo o modelo gasta gravando arquivos, e se o disco pode atrasar a MEQ-06.</p>
+    <p>I/O, aqui, é o tempo que o modelo gasta gravando os arquivos de saída (os campos horários,
+      <i>history</i>) e os arquivos de reinício (<i>restart</i>), dos quais uma rodada pode continuar.
+      A série E repetiu a A56 gravando exatamente a saída da produção e comparou com a A56 sem saída.</p>
+    <p>O resultado: gravar os arquivos de um dia simulado leva cerca de <b>8 s</b>,
+      contra cerca de 3.523 s de cálculo para o mesmo dia na A56, ou seja,
+      0,23 % do tempo. Esse valor é uma <b>extrapolação</b>: o ensaio de 3 h
+      gravou 3 arquivos horários e 1 de reinício, e o custo foi
+      estendido para um dia inteiro (24 horários + 1 de reinício).</p>
+    <details class="drawer">
+      <summary>Detalhes técnicos da série E</summary>
+      <div class="scorecard-wrap"><table class="mini">
+        <thead><tr><th>Rep.</th><th>stream_output (s)</th><th>Δ time integration vs A56 (s)</th><th>Δ relógio vs A56 (s)</th><th><i>history</i> (n × s)</th><th><i>restart</i> (n × s)</th><th>EXTRAPOLAÇÃO: s por dia simulado</th></tr></thead>
+        <tbody><tr><td>r1</td><td>5,06</td><td>3,29</td><td>8</td><td>3 × 0,215</td><td>1 × 2,79</td><td><b>7,96</b></td></tr><tr><td>r2</td><td>4,98</td><td>5,70</td><td>11</td><td>3 × 0,220</td><td>1 × 2,80</td><td><b>8,08</b></td></tr></tbody></table></div>
+      <p class="caption">Medido: cronômetro <code>stream_output</code> do MPAS e diferenças em relação à
+        média da A56 (mesmos processos e fixação, sem saída). Duração de gravação de cada arquivo = da
+        criação à última modificação (ext4). Extrapolação = 24 × <i>history</i> médio + 1 × <i>restart</i>,
+        supondo custo constante por arquivo. O cronômetro e as durações por arquivo não foram reconciliados.</p>
+    </details>
+    <div class="note practice"><b>O que isso significa na prática.</b> A gravação de arquivos é desprezível: cerca de 8 s por dia simulado (extrapolado). O disco não limita a MEQ-06; o prazo depende do cálculo.</div>
+    <nav class="pager"><a href="#vazao">← Produção do nó</a><a href="#custo">Custo por ano simulado →</a></nav>
   </section>
 
   <section id="custo" class="chapter">
     <p class="chapter-no">Capítulo 6</p>
-    <h2>Custo da MEQ-06</h2>
-    <p class="lead">Custo em dias de nó por ano simulado (365 dias) = 365 ÷ vazão.
+    <h2>Custo por ano simulado</h2>
+    <p class="lead"><b>O que esta seção mostra.</b> Quantos dias de máquina custa cada ano simulado nas quatro formas medidas de ocupar o nó.</p>
+    <p>Custo em dias de máquina por ano simulado (365 dias) = 365 ÷ vazão.
       Há duas variantes, e as duas são <b>estimativas</b>.</p>
     <ol>
-      <li><b>(a) Pelo trecho medido.</b> Usa a vazão das 3 h de benchmark, sem inicialização e sem I/O.</li>
+      <li><b>(a) Pelo trecho medido.</b> Usa a vazão das 3 h de benchmark, sem
+        preparação inicial e sem gravação de arquivos.</li>
       <li><b>(b) Corrigida pela produção.</b> A produção da EXP03 levou 1,7731 s/passo
-        (média das rodadas 2021: 1,7706 s/passo, 60 ranks, medido; 2022: 1,7755 s/passo, 60 ranks, medido). O tempo de parede da produção inclui inicialização, leitura de fronteiras,
-        escrita de saída e o mês inteiro de meteorologia. A série C reproduz a mesma configuração
-        (60 ranks, sem fixação) e mede 1,5507 s/passo no trecho de 3 h. A razão
-        1,7731 ÷ 1,5507 = <b>1,143</b> resume o que o trecho medido
-        não captura. A variante (b) multiplica (a) por essa razão. A hipótese é que a razão vale para as
-        demais configurações, e isso não foi verificado.</li>
+        (média das rodadas 2021: 1,7706 s/passo, 60 processos, medido; 2022: 1,7755 s/passo, 60 processos, medido). Esse tempo de relógio inclui preparação, leitura das condições de fronteira,
+        gravação de saída e um mês inteiro de meteorologia. A série C repete a mesma forma de rodar
+        (60 processos, sem fixação) e mede 1,5507 s/passo no trecho de
+        3 h. A razão 1,7731 ÷ 1,5507 =
+        <b>1,143</b> resume o que o trecho medido não captura. A variante (b) multiplica (a)
+        por essa razão, supondo que ela vale para as outras configurações; isso não foi verificado.</li>
     </ol>
     <div class="chart" id="chart-cost" style="height:280px"></div>
-    <p class="caption">Estimativas de dias de nó por ano simulado. Barras cinza: variante (a), pelo
+    <p class="caption">Estimativas de dias de máquina por ano simulado. Barras cinza: variante (a), pelo
       trecho medido. Barras pretas: variante (b), corrigida pela razão produção/série C
-      (1,143). Na série D, o custo supõe duas integrações independentes (por exemplo, dois anos)
-      rodando ao mesmo tempo, uma em cada soquete.</p>
-    <nav class="pager"><a href="#io">← I/O</a><a href="#opcoes">Opções →</a></nav>
+      (1,143). Na série D, o custo supõe duas rodadas independentes (por exemplo, dois anos)
+      ao mesmo tempo, uma em cada soquete.</p>
+    <div class="note practice"><b>O que isso significa na prática.</b> Pela estimativa corrigida (b), um ano simulado custa de 15,4 a 21,6 dias de máquina, conforme a forma de ocupar o nó. O capítulo 7 transforma isso em prazos para 1 a 20 anos.</div>
+    <nav class="pager"><a href="#io">← Gravação de arquivos</a><a href="#duracao">Duração da MEQ-06 →</a></nav>
+  </section>
+
+  <section id="duracao" class="chapter">
+    <p class="chapter-no">Capítulo 7</p>
+    <h2>Quanto tempo levaria a MEQ-06</h2>
+    <p class="lead"><b>O que esta seção mostra.</b> Uma projeção do prazo da MEQ-06 para 1, 5, 10 e 20 anos simulados, em configurações com 90 processos que deixam parte do nó para outros usuários, comparadas às de 112. Nenhuma simulação nova foi feita: tudo vem dos ensaios medidos, com as hipóteses declaradas abaixo.</p>
+    <p><b>Nenhuma destas configurações foi medida diretamente.</b> Os prazos combinam ensaios medidos
+      com hipóteses simples; a margem plausível é de ±10–15 %. Os valores já incluem a correção
+      pela produção (c = 1,143, capítulo 6). Sem essa correção, todos cairiam
+      12,5 % (por exemplo, 90 compacto: de
+      17,6 para 15,4 dias por ano).</p>
+    <div class="scorecard-wrap"><table class="decision proj">
+      <thead><tr><th>Configuração</th><th style="text-align:left">Como o nó é ocupado</th><th>Núcleos inteiros livres</th><th>1 ano</th><th>5 anos</th><th>10 anos</th><th>20 anos</th></tr></thead>
+      <tbody><tr><th>90 compacto</th><td class='desc' style='text-align:left'>90 processos em 45 núcleos físicos, com as duas tarefas de cada núcleo</td><td>11</td><td>17,6 dias</td><td>88 dias</td><td>176 dias<br><span class='sub'>5,8 meses</span></td><td>353 dias<br><span class='sub'>11,6 meses</span></td></tr><tr><th>90 espalhado</th><td class='desc' style='text-align:left'>90 processos nos 56 núcleos: 34 núcleos com duas tarefas, 22 com uma</td><td>0</td><td>16,0 dias</td><td>80 dias</td><td>160 dias<br><span class='sub'>5,3 meses</span></td><td>321 dias<br><span class='sub'>10,6 meses</span></td></tr><tr><th>45/45</th><td class='desc' style='text-align:left'>duas rodadas simultâneas, cada uma num soquete com 45 processos (17 dos 28 núcleos com duas tarefas)</td><td>0</td><td>—<sup>1</sup></td><td>86 dias</td><td>170 dias<br><span class='sub'>5,6 meses</span></td><td>341 dias<br><span class='sub'>11,2 meses</span></td></tr><tr><th>112 (referência)</th><td class='desc' style='text-align:left'>112 processos, um por tarefa, em todos os 56 núcleos (como a B112 medida)</td><td>0</td><td>15,4 dias</td><td>77 dias</td><td>154 dias<br><span class='sub'>5,1 meses</span></td><td>308 dias<br><span class='sub'>10,1 meses</span></td></tr><tr><th>56/56 (referência)</th><td class='desc' style='text-align:left'>duas rodadas simultâneas, cada uma num soquete com 28 núcleos × 2 tarefas</td><td>0</td><td>—<sup>1</sup></td><td>81 dias</td><td>164 dias<br><span class='sub'>5,4 meses</span></td><td>327 dias<br><span class='sub'>10,8 meses</span></td></tr></tbody></table></div>
+    <p class="caption">Dias de relógio para simular N anos (projeção, variante corrigida). Para 10 e 20
+      anos, também em meses (dias ÷ 30,4). Nas rodadas duplas, cada rodada simula um
+      ano diferente: N anos = ⌊N/2⌋ pares; se N for ímpar, o ano restante roda sozinho na configuração
+      única com o mesmo limite de processos (45/45 → 90 compacto;
+      56/56 → 112).
+      <sup>1</sup> Uma rodada dupla precisa de dois anos diferentes; com 1 ano não há par, e o prazo é o
+      da configuração única correspondente.</p>
+    <p><b>90 compacto ou 90 espalhado?</b> Os dois usam 90 processos. O
+      compacto põe dois processos em cada um de 45 núcleos e deixa
+      <b>11 núcleos inteiros livres</b> para outros usuários; o espalhado ocupa os
+      56 núcleos e <b>não deixa nenhum livre</b>. O espalhado é mais rápido
+      (16,0 contra 17,6 dias por ano), mas,
+      na prática, impede que outra pessoa use a máquina sem atrasar as duas rodadas.</p>
+    <p>Se uma configuração de 90 processos compactos for adotada, um ensaio curto com ela
+      (o mesmo trecho de 3 h) confirmaria o número antes de uma rodada longa.</p>
+    <details class="drawer">
+      <summary>Método da projeção: hipóteses e fórmulas</summary>
+      <p>Notação: s(X) = s/passo médio da configuração X medida; 2.880 passos por dia
+        simulado; 365 dias por ano. Dias por ano de uma rodada =
+        365 × 2.880 × s × c ÷ 86.400.</p>
+      <ul>
+        <li><b>f = s(B112) / s(A56) = 0,9051</b> — ganho do SMT: com a segunda tarefa
+          de cada núcleo, o passo leva 0,905 vez o tempo.</li>
+        <li><b>s(A45) = 1,4014 s/passo</b> — interpolação linear entre
+          A_N042 (1,4500) e A_N056 (1,2233) em
+          45 processos. A curva real é levemente curva; a interpolação pode errar por pouco.</li>
+        <li><b>k = média(s(D_s0), s(D_s1)) / s(A28) = 1,3568</b> — perda por duas
+          rodadas simultâneas, uma em cada soquete. Inclui a diferença de posição (A28 usa
+          metade de cada soquete; cada rodada D usa um soquete inteiro) e a assimetria entre soquetes
+          da série D.</li>
+        <li><b>c = 1,7731 / 1,5507 = 1,1434</b> — correção pela
+          produção (capítulo 6), aplicada igualmente a todas as linhas.</li>
+        <li><b>Ganho parcial do SMT.</b> Quando só parte dos núcleos recebe duas tarefas
+          (90 espalhado: 34 de 56; 45/45: 17
+          de 28 por soquete), supõe-se que o ganho do SMT é proporcional a essa fração.</li>
+      </ul>
+      <div class="scorecard-wrap"><table class="mini">
+        <thead><tr><th>Configuração</th><th style="text-align:left">s/passo projetado</th><th>s/passo</th><th>Dias por ano de rodada (com c)</th><th>Dias por ano de rodada (sem c)</th></tr></thead>
+        <tbody><tr><th>90 compacto</th><td style='text-align:left'>s(A45) × f</td><td>1,2684</td><td>17,6</td><td>15,4</td></tr><tr><th>90 espalhado</th><td style='text-align:left'>s(A56) − (34/56) × [s(A56) − s(B112)]</td><td>1,1528</td><td>16,0</td><td>14,0</td></tr><tr><th>45/45</th><td style='text-align:left'>[s(A28) − (17/28) × (s(A28) − s(A28) × f)] × k</td><td>2,4499</td><td>34,1</td><td>29,8</td></tr><tr><th>112 (referência)</th><td style='text-align:left'>s(B112)</td><td>1,1072</td><td>15,4</td><td>13,5</td></tr><tr><th>56/56 (referência)</th><td style='text-align:left'>s(A28) × f × k</td><td>2,3530</td><td>32,7</td><td>28,6</td></tr></tbody></table></div>
+      <p class="caption">Nas rodadas duplas, "dias por ano de rodada" é o tempo de um par, que produz
+        dois anos simulados ao mesmo tempo.</p>
+    </details>
+    <div class="note practice"><b>O que isso significa na prática.</b> Com 90 processos compactos, 10 anos simulados levariam cerca de 5,8 meses, deixando 11 núcleos livres; usando a máquina inteira (112), cerca de 5,1 meses. São projeções com margem de ±10–15 %; nenhuma configuração foi decidida.</div>
+    <nav class="pager"><a href="#custo">← Custo por ano simulado</a><a href="#opcoes">Opções →</a></nav>
   </section>
 
   <section id="opcoes" class="chapter">
-    <p class="chapter-no">Capítulo 7</p>
+    <p class="chapter-no">Capítulo 8</p>
     <h2>Opções para decisão</h2>
-    <p class="lead">Quatro formas de ocupar o nó. A tabela reúne vazão, eficiência por núcleo físico,
-      o critério de 70 % e o custo estimado da MEQ-06. Não há pesos nem nota
-      composta.</p>
+    <p class="lead"><b>O que esta seção mostra.</b> As quatro formas medidas de ocupar o nó, lado a lado, com o critério de eficiência e o custo estimado.</p>
+    <p>A tabela reúne vazão, eficiência por núcleo físico, o critério de 70 %
+      e o custo estimado da MEQ-06. Não há pesos nem nota composta. As configurações com
+      90 processos do capítulo 7 não estão aqui porque não foram medidas.</p>
     <div class="scorecard-wrap"><table class="decision">
-      <thead><tr><th>Opção</th><th>Ranks / núcleos físicos</th><th>Vazão (dias sim. por dia de nó)</th><th>Efic. por núcleo físico</th><th>Cumpre 70 %?</th><th>Custo MEQ-06 (a), dias de nó/ano</th><th>Custo MEQ-06 (b), dias de nó/ano</th><th style="text-align:left">Situação</th></tr></thead>
-      <tbody><tr><th>A56</th><td>56 / 56</td><td>24,52</td><td>64,1 %</td><td>não</td><td>14,9</td><td>17,0</td><td style='text-align:left'>—</td></tr><tr class=proposed><th>B112</th><td>112 / 56</td><td>27,10</td><td>70,8 %</td><td>sim</td><td>13,5</td><td>15,4</td><td style='text-align:left'><span class='pill gain'>recomendação proposta — aguardando decisão do pesquisador</span></td></tr><tr><th>C60</th><td>60 / 56</td><td>19,35</td><td>50,5 %</td><td>não</td><td>18,9</td><td>21,6</td><td style='text-align:left'>—</td></tr><tr><th>D (2 × 28)</th><td>56 / 56</td><td>23,22</td><td>60,6 %</td><td>não</td><td>15,7</td><td>18,0</td><td style='text-align:left'>—</td></tr></tbody></table></div>
+      <thead><tr><th>Opção</th><th>Processos / núcleos físicos</th><th>Vazão (dias sim. por dia de máquina)</th><th>Efic. por núcleo físico</th><th>Cumpre 70 %?</th><th>Custo MEQ-06 (a), dias de máquina/ano</th><th>Custo MEQ-06 (b), dias de máquina/ano</th><th style="text-align:left">Situação</th></tr></thead>
+      <tbody><tr><th>A56</th><td>56 / 56</td><td>24,52</td><td>64,1 %</td><td>não</td><td>14,9</td><td>17,0</td><td style='text-align:left'>—</td></tr><tr class=proposed><th>B112</th><td>112 / 56</td><td>27,10</td><td>70,8 %</td><td>sim</td><td>13,5</td><td>15,4</td><td style='text-align:left'><span class='pill gain'>recomendação proposta — aguardando decisão do pesquisador</span></td></tr><tr><th>C60</th><td>60 / 56</td><td>19,35</td><td>50,5 %</td><td>não</td><td>18,9</td><td>21,6</td><td style='text-align:left'>—</td></tr><tr><th>D (2 × 28)</th><td>56 / 56</td><td>23,22</td><td>60,6 %</td><td>não</td><td>15,7</td><td>18,0</td><td style='text-align:left'>—</td></tr></tbody></table></div>
     <p class="caption">Vazão e custos com o s/passo médio de cada configuração; custos são estimativas
       (capítulo 6). Eficiência relativa a A8. Na D, a eficiência é a do par:
       vazão somada ÷ (vazão de A8 × 56/8).</p>
@@ -423,47 +530,106 @@ table.decision td, table.decision th { border-bottom: 1px solid var(--rule); }
         decidida neste relatório. A escolha cabe ao pesquisador, considerando também as limitações
         abaixo, em especial a igualdade numérica entre números de processos, que não foi verificada.</p>
     </div>
-    <nav class="pager"><a href="#custo">← Custo da MEQ-06</a><a href="#limitacoes">Limitações →</a></nav>
+    <div class="note practice"><b>O que isso significa na prática.</b> Entre as opções medidas, só a B112 cumpre o critério de 70 % e é também a de menor custo, mas ocupa a máquina inteira. Se for importante deixar núcleos para outros usuários, o capítulo 7 mostra quanto isso custa em prazo.</div>
+    <nav class="pager"><a href="#duracao">← Duração da MEQ-06</a><a href="#como-rodar">Como rodar →</a></nav>
+  </section>
+
+  <section id="como-rodar" class="chapter">
+    <p class="chapter-no">Capítulo 9</p>
+    <h2>Como rodar na prática</h2>
+    <p class="lead"><b>O que esta seção mostra.</b> A diferença entre rodar com os processos soltos, como sempre foi feito, e rodar com os processos fixados, e como fazer e conferir isso no Swell.</p>
+    <p><b>Processos soltos.</b> O comando usado até agora, <code>mpiexec -n N ./atmosphere_model</code>,
+      sem opções, deixa os processos sem fixação: o sistema decide em qual núcleo cada um fica e pode
+      movê-los durante a rodada. Na série C, rodada exatamente assim, os 60 processos
+      se espalharam pelos 56 núcleos físicos, 4 deles dividiram núcleo com
+      outro processo, e a rodada foi <b>27 % mais lenta</b> que a A56
+      fixada (1,5507 contra 1,2233 s/passo). Com 90
+      processos soltos, mais processos do que núcleos, todos os 56 núcleos ficam ocupados e
+      nenhum núcleo inteiro fica livre para outros usuários.</p>
+    <p><b>Processos fixados.</b> Fixar é dizer ao <code>mpiexec</code>, com a opção
+      <code>-bind-to user:&lt;lista&gt;</code> do MPICH (versão 4.2.3 no Swell),
+      a lista de CPUs: o primeiro processo vai para a primeira CPU da lista, o segundo para a segunda,
+      e assim por diante. Cada processo fica na sua CPU até o fim da rodada.</p>
+    <p>Comandos reais usados no benchmark (coluna <code>mpiexec_cmd</code> do CSV):</p>
+    <p class="cmd-label">Série C, soltos (60 processos):</p>
+    <pre class="cmd">mpiexec -n 60 ./atmosphere_model</pre>
+    <p class="cmd-label">Série A56, fixados (56 processos, um por núcleo físico):</p>
+    <pre class="cmd">mpiexec -n 56 -bind-to user:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55 ./atmosphere_model</pre>
+    <h3>Numeração das CPUs do Swell</h3>
+    <div class="scorecard-wrap"><table class="mini cpu-map">
+      <thead><tr><th>Soquete</th><th>Núcleos físicos (1.ª tarefa)</th><th>2.ª tarefa dos mesmos núcleos (SMT)</th></tr></thead>
+      <tbody><tr><th>Soquete 0</th><td>0–27</td><td>56–83</td></tr><tr><th>Soquete 1</th><td>28–55</td><td>84–111</td></tr></tbody></table></div>
+    <p class="caption">Fonte: <code>hardware_snapshot.txt</code> do benchmark (<code>lscpu</code> e
+      <code>numactl --hardware</code>). A CPU 56 é a segunda tarefa do núcleo
+      0, a 57 do núcleo 1, e assim por diante (núcleo + 56).</p>
+    <h3>Exemplo para "90 compacto"</h3>
+    <p>45 núcleos físicos com as duas tarefas, divididos de forma equilibrada entre os
+      soquetes: soquete 0 com 23 núcleos (CPUs 0–22 + 56–78) e
+      soquete 1 com 22 núcleos (CPUs 28–49 + 84–105), na mesma ordem
+      da B112 medida. Ficam livres os núcleos 23–27, 50–55 (11 núcleos inteiros).
+      Como para qualquer N, o MPAS precisa do arquivo de partição para 90 processos.</p>
+    <div class="status critical"><strong>Não testado no benchmark; confira a fixação antes de uma rodada longa.</strong>
+      Este comando é para o Swell, com a numeração de CPUs acima. Em outra máquina, a lista muda.</div>
+    <pre class="cmd">mpiexec -n 90 -bind-to user:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105 ./atmosphere_model</pre>
+    <h3>Como conferir a fixação durante uma rodada</h3>
+    <p>Os mesmos comandos usados na verificação do benchmark, rodados no Swell em outro terminal,
+      enquanto o modelo roda:</p>
+    <pre class="cmd">pgrep -c &#x27;^atmosphere_mod&#x27;</pre>
+    <p>deve mostrar o número de processos (90 no exemplo). E</p>
+    <pre class="cmd">for pid in $(pgrep &#x27;^atmosphere_mod&#x27;); do
+  printf &quot;pid=%s psr=%s %s\n&quot; &quot;$pid&quot; &quot;$(ps -o psr= -p &quot;$pid&quot; | tr -d &#x27; &#x27;)&quot; &quot;$(taskset -cp &quot;$pid&quot; | sed &#x27;s/.*: /affinity=/&#x27;)&quot;
+done</pre>
+    <p>mostra uma linha por processo. Numa rodada fixada, cada linha tem <code>affinity=</code> com um
+      único número, igual ao <code>psr</code> (a CPU onde o processo está), e o conjunto desses números é
+      exatamente a lista do comando. Numa rodada solta aparece <code>affinity=0-111</code>
+      (qualquer CPU).</p>
+    <div class="note practice"><b>O que isso significa na prática.</b> Sem fixação, a rodada do benchmark ficou cerca de 27 % mais lenta, mesmo com 4 processos a mais. Fixar também permite escolher quais núcleos ficam livres. Basta acrescentar <code>-bind-to user:&lt;lista&gt;</code> ao comando de sempre; a lista acima vale só para o Swell e o exemplo de 90 processos ainda precisa ser conferido numa rodada curta.</div>
+    <nav class="pager"><a href="#opcoes">← Opções</a><a href="#limitacoes">Limitações →</a></nav>
   </section>
 
   <section id="limitacoes" class="chapter">
-    <p class="chapter-no">Capítulo 8</p>
+    <p class="chapter-no">Capítulo 10</p>
     <h2>Limitações</h2>
-    <p class="lead">Limitações registradas em <code>docs/provenance/MEQ-05.2-benchmark-record.md</code>
-      ("O que não foi verificado"), mais as que decorrem das escolhas deste relatório.</p>
+    <p class="lead"><b>O que esta seção mostra.</b> O que não foi verificado no benchmark (registro <code>docs/provenance/MEQ-05.2-benchmark-record.md</code>, seção “O que não foi verificado”) e o que decorre das escolhas deste relatório.</p>
     <ul>
       <li><b>Igualdade numérica não verificada.</b> Não se verificou se o resultado numérico muda com o
         número de processos. Os campos de saída não foram comparados, e os ensaios sem saída não geram arquivos.</li>
       <li><b>Janela única de 3 h</b> (2021-11-15 00 UTC). Não se verificou se ela
-        reproduz, na mesma proporção de um dia completo, a frequência de chamadas periódicas, como a radiação.</li>
-      <li><b>Assimetria entre soquetes na série D.</b> Com os dois casos simultâneos, o soquete 1 levou
-        2,7985 s/passo e o soquete 0, 2,4009 s/passo
-        (16,6 % mais lento). A causa não foi investigada. Numa produção em D, a metade mais lenta
-        determina quando o nó fica livre, salvo se a carga for redistribuída.</li>
-      <li><b>Frequência de CPU</b> (governor, turbo, temperatura) não foi registrada nem controlada.</li>
-      <li><b>Uso e banda de memória</b> não foram medidos.</li>
-      <li><b>Fixação amostrada</b> só três vezes por ensaio, até 330 s. Nos ensaios mais longos (A28, A14,
-        A8, D), o restante da execução não foi amostrado.</li>
-      <li><b>Cache de páginas</b> não foi controlado. O <i>restart</i> de entrada é relido a cada ensaio.</li>
+        reproduz, na mesma proporção de um dia completo, a frequência de cálculos periódicos, como a radiação.</li>
+      <li><b>Assimetria entre soquetes na série D.</b> Com as duas rodadas simultâneas, a do soquete 1 levou
+        2,7985 s/passo e a do soquete 0, 2,4009 s/passo
+        (16,6 % mais lenta). A causa não foi investigada. Numa produção em pares, a rodada mais
+        lenta determina quando o nó fica livre, salvo se a carga for redistribuída.</li>
+      <li><b>Frequência do processador</b> (modo de energia, turbo, temperatura) não foi registrada nem controlada.</li>
+      <li><b>Uso e velocidade da memória</b> não foram medidos.</li>
+      <li><b>Fixação conferida</b> só três vezes por ensaio, até 330 s. Nos ensaios mais longos (A28, A14,
+        A8, D), o restante da execução não foi conferido.</li>
+      <li><b>Cache de arquivos</b> do sistema não foi controlado. O <i>restart</i> de entrada é relido a cada ensaio.</li>
       <li><b>Extrapolação de I/O</b> supõe custo constante por arquivo e não inclui operações anteriores à
-        criação do arquivo. O timer <code>stream_output</code> e as durações por arquivo não foram reconciliados.
-        O conteúdo dos arquivos escritos na série E não foi inspecionado.</li>
+        criação do arquivo. O cronômetro <code>stream_output</code> e as durações por arquivo não foram reconciliados.
+        O conteúdo dos arquivos gravados na série E não foi inspecionado.</li>
       <li><b>Correção de custo (variante b).</b> A razão produção/série C (1,143) foi obtida
-        com 60 ranks sem fixação. Supõe-se que ela vale para as demais configurações, o que
+        com 60 processos sem fixação. Supõe-se que ela vale para as demais configurações, o que
         não foi verificado.</li>
       <li><b>Eficiência relativa a A8</b>, não a um núcleo. A perda de eficiência de 1 a
         8 núcleos não está medida.</li>
+      <li><b>Projeção da MEQ-06 (capítulo 7).</b> Nenhuma das configurações projetadas foi medida. As
+        fórmulas supõem interpolação linear entre A42 e A56,
+        ganho do SMT proporcional à fração de núcleos com duas tarefas, e a perda por rodadas simultâneas
+        medida com 28 processos por soquete. Margem plausível: ±10–15 %.</li>
+      <li><b>Comando de exemplo "90 compacto"</b> (capítulo 9) não foi executado no benchmark.</li>
     </ul>
-    <nav class="pager"><a href="#opcoes">← Opções</a><a href="#contexto">Início ↑</a></nav>
+    <div class="note practice"><b>O que isso significa na prática.</b> Os números deste relatório servem para escolher a configuração e estimar prazos, não para garantir prazos exatos. Antes de uma rodada longa numa configuração não medida, um ensaio curto confirma a velocidade e a fixação.</div>
+    <nav class="pager"><a href="#como-rodar">← Como rodar</a><a href="#termos">Início ↑</a></nav>
   </section>
 
   <footer class="footer">
     <p>Gerado por <code>scripts/06_report/build_benchmark_report.py</code> (MEQ-05.3) a partir de tabelas
-      consolidadas; não edite à mão. Estilo: <code>docs/templates/report_v2/report.css</code>, sem
-      modificação; gráficos: Plotly basic v2.35.2, embutido. Paleta: Crameri (2018),
-      doi:10.5281/zenodo.1243862. Registro de proveniência:
+      consolidadas e registros do benchmark; não edite à mão. Estilo:
+      <code>docs/templates/report_v2/report.css</code>, sem modificação; gráficos: Plotly basic
+      v2.35.2, embutido. Registro de proveniência:
       <code>docs/provenance/MEQ-05.2-benchmark-record.md</code>.</p>
-    <table class="kv"><tbody><tr><th><code>results/tables/meq05_parallel_benchmark.csv (sha256)</code></th><td><code>f35a979fd55f53ccc7ee1757caa8b1241f36e6d70dd49f182f3c3f132326510b</code></td></tr><tr><th><code>results/tables/runtime_metrics.csv (sha256)</code></th><td><code>25dd84f47934c34d6a8b12796e99e680d7faaf1bbfa8dc99ffa9bcc496ffd8c4</code></td></tr><tr><th><code>docs/provenance/MEQ-05.2-benchmark-record.md (sha256)</code></th><td><code>ed6ce532429c23ddc4a963965566be585f5f39bd30d517a280551e251841b0e1</code></td></tr></tbody></table>
+    <table class="kv"><tbody><tr><th><code>results/tables/meq05_parallel_benchmark.csv (sha256)</code></th><td><code>f35a979fd55f53ccc7ee1757caa8b1241f36e6d70dd49f182f3c3f132326510b</code></td></tr><tr><th><code>results/tables/runtime_metrics.csv (sha256)</code></th><td><code>25dd84f47934c34d6a8b12796e99e680d7faaf1bbfa8dc99ffa9bcc496ffd8c4</code></td></tr><tr><th><code>results/benchmark/MEQ-05.2/records/hardware_snapshot.txt (sha256)</code></th><td><code>8b3ba6ca68d473aae53bb29fe63f69ed4718c97435bd12a3935baf4db7b7ee67</code></td></tr><tr><th><code>docs/provenance/MEQ-05.2-benchmark-record.md (sha256)</code></th><td><code>ed6ce532429c23ddc4a963965566be585f5f39bd30d517a280551e251841b0e1</code></td></tr></tbody></table>
   </footer>
 </main>
 
@@ -554,7 +720,7 @@ table.decision td, table.decision th { border-bottom: 1px solid var(--rule); }
         marker: { color: '#1a1a1a', size: 6 }, customdata: D.a_pts.map(function (p) { return [p.cfg, p.rep]; }),
         hovertemplate: '%{customdata[0]} r%{customdata[1]}: %{y:.3f}<extra></extra>' },
       { type: 'scatter', mode: 'markers', x: pick(D.b_pts, 'x'), y: pick(D.b_pts, 'sp'),
-        name: 'série B (' + D.b_mean.ranks + ' ranks, SMT)',
+        name: 'série B (' + D.b_mean.ranks + ' processos, SMT)',
         marker: { symbol: 'diamond-open', color: '#1a1a1a', size: 9, line: { width: 1.4 } },
         customdata: pick(D.b_pts, 'rep'), hovertemplate: 'B r%{customdata}: %{y:.3f}<extra></extra>' }
     ];
@@ -571,7 +737,7 @@ table.decision td, table.decision th { border-bottom: 1px solid var(--rule); }
         marker: { color: '#1a1a1a', size: 6 }, customdata: D.a_pts.map(function (p) { return [p.cfg, p.rep]; }),
         hovertemplate: '%{customdata[0]} r%{customdata[1]}: %{y:.1%}<extra></extra>' },
       { type: 'scatter', mode: 'markers', x: pick(D.b_pts, 'x'), y: pick(D.b_pts, 'eff'),
-        name: 'série B (' + D.b_mean.ranks + ' ranks, SMT)',
+        name: 'série B (' + D.b_mean.ranks + ' processos, SMT)',
         marker: { symbol: 'diamond-open', color: '#1a1a1a', size: 9, line: { width: 1.4 } },
         customdata: pick(D.b_pts, 'rep'), hovertemplate: 'B r%{customdata}: %{y:.1%}<extra></extra>' }
     ];
@@ -583,14 +749,14 @@ table.decision td, table.decision th { border-bottom: 1px solid var(--rule); }
     var O = D.options, labels = pick(O, 'label');
     var tr = [
       { type: 'bar', x: labels, y: pick(O, 'tp'), marker: { color: '#8c8c8c' }, width: 0.55,
-        name: 'média', hovertemplate: '%{x}: %{y:.2f} dias simulados por dia de nó<extra></extra>' }
+        name: 'média', hovertemplate: '%{x}: %{y:.2f} dias simulados por dia de máquina<extra></extra>' }
     ];
     var px = [], py = [];
     O.forEach(function (o) { o.reps.forEach(function (v) { px.push(o.label); py.push(v); }); });
     tr.push({ type: 'scatter', mode: 'markers', x: px, y: py, name: 'repetições',
       marker: { color: '#1a1a1a', size: 6 },
       hovertemplate: '%{x} (repetição): %{y:.2f}<extra></extra>' });
-    plot('chart-throughput', tr, { yaxis: { title: { text: 'dias simulados por dia de nó' }, rangemode: 'tozero' },
+    plot('chart-throughput', tr, { yaxis: { title: { text: 'dias simulados por dia de máquina' }, rangemode: 'tozero' },
       xaxis: { type: 'category' } });
   }
 
@@ -599,13 +765,13 @@ table.decision td, table.decision th { border-bottom: 1px solid var(--rule); }
     var tr = [
       { type: 'bar', orientation: 'h', y: labels, x: pick(O, 'cost_a'), name: '(a) pelo trecho medido — estimativa',
         marker: { color: '#b8b8b8' },
-        hovertemplate: '%{y} (a): %{x:.1f} dias de nó por ano simulado<extra></extra>' },
+        hovertemplate: '%{y} (a): %{x:.1f} dias de máquina por ano simulado<extra></extra>' },
       { type: 'bar', orientation: 'h', y: labels, x: pick(O, 'cost_b'), name: '(b) corrigida pela produção — estimativa',
         marker: { color: '#1a1a1a' },
-        hovertemplate: '%{y} (b): %{x:.1f} dias de nó por ano simulado<extra></extra>' }
+        hovertemplate: '%{y} (b): %{x:.1f} dias de máquina por ano simulado<extra></extra>' }
     ];
     plot('chart-cost', tr, { barmode: 'group', showlegend: true, legend: { orientation: 'h', y: 1.16, x: 0 },
-      xaxis: { title: { text: 'dias de nó por ano simulado (estimativa)' }, rangemode: 'tozero' },
+      xaxis: { title: { text: 'dias de máquina por ano simulado (estimativa)' }, rangemode: 'tozero' },
       yaxis: { type: 'category', autorange: 'reversed' }, margin: { l: 80, r: 12, t: 34, b: 42 } });
   }
 
