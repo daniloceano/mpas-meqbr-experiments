@@ -499,6 +499,16 @@ def label_of(key: str) -> str:
             "D": "D (2 × 28)"}.get(key, key)
 
 
+# Plain-language x-axis labels for the throughput chart (chapter 4): what each
+# bar is, then the question it answers. Codes stay in hover and caption.
+THROUGHPUT_TICKS = {
+    "A_N056": ("1 rodada, 56 núcleos", "Referência: 1 processo por núcleo"),
+    "B_N112": ("1 rodada, 112 tarefas (SMT)", "Vale usar as 2 tarefas de cada núcleo?"),
+    "C_N060": ("1 rodada, mpiexec simples", "Quanto se perde sem fixar os processos?"),
+    "D": ("2 rodadas ao mesmo tempo", "Vale dividir a máquina em duas simulações?"),
+}
+
+
 # ---------------------------------------------------------------- page text
 def chart_payload(r: dict) -> dict:
     cfg = r["cfg"]
@@ -522,7 +532,8 @@ def chart_payload(r: dict) -> dict:
                    "eff": b["eff_phys"], "ranks": b["ranks"]},
         "est": [{"label": e["label"], "x": e["x"], "sp": e["sp"], "eff": e["eff"]}
                 for e in r["proj"]["est"]],
-        "options": [{"key": o["key"], "label": o["label"], "tp": o["throughput"],
+        "options": [{"key": o["key"], "label": o["label"],
+                     "tick": list(THROUGHPUT_TICKS[o["key"]]), "tp": o["throughput"],
                      "reps": o["reps_throughput"], "eff": o["eff_phys"],
                      "cost_a": o["cost_a"], "cost_b": o["cost_b"]}
                     for o in r["options"]],
@@ -893,8 +904,9 @@ def build_html(r: dict, meta: dict) -> str:
       ({br(a56['throughput'], 1)}). A C60, que reproduz a forma como a produção foi rodada, produz
       {br(c60['throughput'], 1)}; a A56 rende {pct(a56_vs_c)} a mais que ela. As duas rodadas
       simultâneas da série D somam {br(o['D']['throughput'], 1)}.</p>
-    <div class="chart" id="chart-throughput" style="height:280px"></div>
+    <div class="chart" id="chart-throughput" style="height:360px"></div>
     <p class="caption">Dias simulados por dia de máquina = {br(SECONDS_PER_DAY, 0)} ÷ (s/passo × {br(r['steps_per_day'], 0)}).
+      Barras, da esquerda para a direita: {'; '.join(f"<b>{esc(label_of(k))}</b> — {esc(THROUGHPUT_TICKS[k][0])}" for k in OPTIONS)}.
       Barras cinza: valor calculado com o s/passo médio de cada configuração. Pontos pretos: repetições. Na série D,
       a vazão é a soma das duas rodadas simultâneas ({br(s0['throughput'], 2)} no soquete 0 e
       {br(s1['throughput'], 2)} no soquete 1). O tempo de gravação de arquivos não está incluído (capítulo 5).</p>
@@ -1318,8 +1330,28 @@ REPORT_JS = r"""
     tr.push({ type: 'scatter', mode: 'markers', x: px, y: py, name: 'repetições',
       marker: { color: '#1a1a1a', size: 6 },
       hovertemplate: '%{x} (repetição): %{y:.2f}<extra></extra>' });
+    // Two-line plain-language tick labels; on narrow screens each line is
+    // wrapped again so neighbouring labels do not overlap.
+    var node = $('chart-throughput');
+    var narrow = node && node.clientWidth < 760;
+    var maxc = node ? Math.max(14, Math.floor(node.clientWidth / O.length / 6.2)) : 40;
+    function wrap(line) {
+      if (!narrow) return line;
+      var out = [], cur = '';
+      line.split(' ').forEach(function (w) {
+        if (cur && (cur + ' ' + w).length > maxc) { out.push(cur); cur = w; } else { cur = cur ? cur + ' ' + w : w; }
+      });
+      if (cur) out.push(cur);
+      return out.join('<br>');
+    }
+    var ticktext = O.map(function (o) {
+      return '<b>' + wrap(o.tick[0]) + '</b><br>' + wrap(o.tick[1]);
+    });
+    var nlines = Math.max.apply(null, ticktext.map(function (t) { return t.split('<br>').length; }));
+    if (narrow && node) node.style.height = (300 + 14 * nlines) + 'px';
     plot('chart-throughput', tr, { yaxis: { title: { text: 'dias simulados por dia de máquina' }, rangemode: 'tozero' },
-      xaxis: { type: 'category' } });
+      xaxis: { type: 'category', tickmode: 'array', tickvals: labels, ticktext: ticktext, tickfont: { size: 10 } },
+      margin: { l: 56, r: 12, t: 12, b: 16 + 14 * nlines } });
   }
 
   function initCost() {
