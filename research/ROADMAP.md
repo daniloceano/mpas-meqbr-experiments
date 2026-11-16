@@ -1,7 +1,8 @@
 # Meq-BR — Roadmap científico e operacional
 
-> **Versão:** 1.2 — 12/11/2026, reconciliação documental após a reabertura da seleção da MEQ-03 (`DEC-MEQ-002`, 11/11/2026); base `main@3b1eb79`.
-> **Mudanças da v1.2:** MEQ-03 reaberta (em andamento — reavaliação com SODAR, `DEC-MEQ-002`; `DEC-MEQ-001` preservada); MEQ-04 e MEQ-05 passam a depender da conclusão da reavaliação; manifesto do HTML atualizado (seção 2); divergência sobre o pai da `EXP03` registrada como pendente (seção 3); datas da MEQ-01 esclarecidas; contagem de decisões `DEC-MEQ-NNN` corrigida; pendência do `SCIENTIFIC_NOTES.md` marcada como atendida; situação do PR #19 do repositório do modelo atualizada; seção 8 refeita. Motivo: decisão do responsável de 11/11/2026 e divergências documentais apontadas na conferência de `origin/main@3b1eb79`. Publicação por branch `docs/meq-03-reopening-sodar` e PR, sujeita à aprovação do pesquisador.
+> **Versão:** 1.3 — 15/11/2026, atualização documental (GOV.3); base `main@bffe13f`.
+> **Mudanças da v1.3:** reencerramento da MEQ-03 (`DEC-MEQ-003`/`DEC-MEQ-004`) refletido nas seções 3 e 5; dependência da MEQ-05 passa a ser a MEQ-03 concluída (`DEC-MEQ-004`); decisões pendentes da MEQ-05 reduzidas à configuração de produção da MEQ-06; seção 8 reescrita como fila curta de pendências; governança sem CI e sem proteção da `main` registrada. Motivo: decisão do pesquisador de 15/11/2026. Publicação por branch `docs/gov-3-roadmap-queue` e PR.
+> **Mudanças da v1.2 (12/11/2026, base `main@3b1eb79`):** MEQ-03 reaberta (em andamento — reavaliação com SODAR, `DEC-MEQ-002`; `DEC-MEQ-001` preservada); MEQ-04 e MEQ-05 passam a depender da conclusão da reavaliação; manifesto do HTML atualizado (seção 2); divergência sobre o pai da `EXP03` registrada como pendente (seção 3); datas da MEQ-01 esclarecidas; contagem de decisões `DEC-MEQ-NNN` corrigida; pendência do `SCIENTIFIC_NOTES.md` marcada como atendida; situação do PR #19 do repositório do modelo atualizada; seção 8 refeita. Motivo: decisão do responsável de 11/11/2026 e divergências documentais apontadas na conferência de `origin/main@3b1eb79`. Publicação por branch `docs/meq-03-reopening-sodar` e PR, sujeita à aprovação do pesquisador.
 > **Histórico:** v1.1 — 10/11/2026, base `main@085f96c` (MEQ-01 concluída; MEQ-04 em andamento com números da EXP03; campos-padrão em MEQ-00 a MEQ-03; seções 3 e 8 atualizadas; os commits `8394fbb` e `085f96c` foram integrados diretamente na `main`, sem PR; reconciliação publicada pelo PR #7, merge `c2e15cd`). v1.0 aprovada pelo pesquisador em 08/10/2026 e publicada pelo PR #3 (commit `fe16f0b`, merge `6fef1bb`, 09/10/2026).
 
 ## 1. Propósito e alcance
@@ -31,11 +32,11 @@ O HTML principal existente cobre desenho experimental, andamento e custo, campos
 | `CTL` | Controle: SST inicial do ERA5 mantida fixa; malha `meqbr_05km`. | Comparação de referência. |
 | `EXP01` | Atualização diária NOAA OISST v2.1, com tratamento costeiro corrigido; malha `meqbr_05km`. | Ganho robusto sobre `CTL`; alternativa de menor domínio e custo. |
 | `EXP02` | Herda `EXP01` e altera conjuntamente a malha para `meqbr_05km_buf` **e** a caixa ERA5 de fronteira. | Testa o efeito **incremental do tratamento de fronteira**, não o buffer isolado. |
-| `EXP03` | Malha Oval `meqbr_05km_oval_meq02a` (102.968 células), com OISST corrigida e caixa ERA5 ampla. **Linhagem dupla** (decisão do pesquisador, 13/11/2026): configuração do modelo herdada de `EXP01` (namelist e streams idênticos, exceto os nomes de arquivos da malha) e pré-processamento herdado de `EXP02` (caixa ERA5 ampla `15/-64/-16/-24`). Versões anteriores atribuíam a `EXP03` apenas à `EXP02` (README/config) ou à `EXP01` (relatório HTML; também a v1.1 deste roadmap). | **Selecionado na MEQ-03 (`DEC-MEQ-001`, 10/11/2026)**; seleção **em reavaliação com SODAR** (`DEC-MEQ-002`, 11/11/2026). Não demonstra superioridade universal. |
+| `EXP03` | Malha Oval `meqbr_05km_oval_meq02a` (102.968 células), com OISST corrigida e caixa ERA5 ampla. **Linhagem dupla** (decisão do pesquisador, 13/11/2026): configuração do modelo herdada de `EXP01` (namelist e streams idênticos, exceto os nomes de arquivos da malha) e pré-processamento herdado de `EXP02` (caixa ERA5 ampla `15/-64/-16/-24`). Versões anteriores atribuíam a `EXP03` apenas à `EXP02` (README/config) ou à `EXP01` (relatório HTML; também a v1.1 deste roadmap). | **Selecionado na MEQ-03 (`DEC-MEQ-001`, 10/11/2026)**; seleção mantida no reencerramento de 12/11/2026 (`DEC-MEQ-003`/`DEC-MEQ-004`), após a reabertura com SODAR (`DEC-MEQ-002`, 11/11/2026). Não demonstra superioridade universal. |
 | `EXP04`–`EXP06` | Ramo de física sobre `EXP01`: MYNN; + Grell–Freitas; + ciclo diurno da SST de pele. | Sem ganho detectável sobre `EXP01` (EXP04) ou sem benefício consistente (EXP05/EXP06). |
 | `EXP01_BADSST`, `EXP02_BADSST` | Integrações históricas com OISST costeiro contaminado por valor de preenchimento sobre terra. | Preservadas como evidência da falha; **excluídas da seleção científica atual**. |
 
-O registro de análise indica integrações completas nos dois períodos amostrados e auditoria positiva das quatro pernas corrigidas em `results/audit/corrected_runs_validation.json`. Nos testes pareados atuais, `EXP01` é favorecido frente ao `CTL` em **8/8** comparações sítio–período–altura; `EXP02` e `EXP01` não apresentam diferença estatisticamente distinguível em **8/8** comparações, apesar de a malha do `EXP02` possuir aproximadamente **24% mais células**. Esses resultados descrevem a análise da v1.0 (08/10/2026). A comparação atual, com EXP03–EXP06 e a decisão de seleção, está em `results/tables/selection_summary_current.md` e `research/MEQ-03-selection-decision.md` (`DEC-MEQ-001` e a reabertura `DEC-MEQ-002`).
+O registro de análise indica integrações completas nos dois períodos amostrados e auditoria positiva das quatro pernas corrigidas em `results/audit/corrected_runs_validation.json`. Nos testes pareados atuais, `EXP01` é favorecido frente ao `CTL` em **8/8** comparações sítio–período–altura; `EXP02` e `EXP01` não apresentam diferença estatisticamente distinguível em **8/8** comparações, apesar de a malha do `EXP02` possuir aproximadamente **24% mais células**. Esses resultados descrevem a análise da v1.0 (08/10/2026). A comparação atual, com EXP03–EXP06 e a decisão de seleção, está em `results/tables/selection_summary_current.md` e `research/MEQ-03-selection-decision.md` (`DEC-MEQ-001`, a reabertura `DEC-MEQ-002` e o reencerramento `DEC-MEQ-003`/`DEC-MEQ-004`).
 
 A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a média da SST também muda. Comparações devem usar horas comuns e distinguir melhora estatística, mecanismo físico, representatividade observacional e custo computacional.
 
@@ -97,11 +98,11 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 
 - **Objetivo:** determinar a faixa eficiente de núcleos/processos para a malha selecionada e estimar o custo de simulações multianuais.
 - **Situação:** em andamento
-- **Evidências:** seção de andamento/custo e limitações do HTML; `results/tables/runtime_metrics.csv`; configurações e registros operacionais preservados; Os custos históricos documentados não constituem uma curva de saturação confiável, pois usam números diferentes de ranks e incluem tempos estimados/reconstruídos; Benchmark MEQ-05.2 autorizado em 13/11/2026: 1 nó (56 núcleos físicos), ensaios de 3 h a partir de restart; resultados em `results/tables/meq05_parallel_benchmark.csv`.
-- **Dependências:** infraestrutura de execução estável, configuração controlada, métricas mensuráveis e, para a recomendação definitiva, conclusão da reavaliação da MEQ-03 (`DEC-MEQ-002`) e a malha/configuração dela resultante. Ensaios exploratórios podem começar antes, se aprovados.
+- **Evidências:** seção de andamento/custo e limitações do HTML; `results/tables/runtime_metrics.csv`; configurações e registros operacionais preservados; os custos históricos documentados não constituem uma curva de saturação confiável, pois usam números diferentes de ranks e incluem tempos estimados/reconstruídos; Benchmark MEQ-05.2 autorizado em 13/11/2026: 1 nó (56 núcleos físicos), ensaios de 3 h a partir de restart; resultados em `results/tables/meq05_parallel_benchmark.csv`.
+- **Dependências:** infraestrutura de execução estável, configuração controlada, métricas mensuráveis e, para a recomendação definitiva, a MEQ-03 concluída (`DEC-MEQ-004`, 12/11/2026), com `EXP03` e sua malha `meqbr_05km_oval_meq02a`.
 - **Método proposto:** série de integrações curtas e comparáveis com números crescentes de núcleos/processos; **um dia simulado é hipótese inicial, não duração já aprovada**. Separar tempo de inicialização do regime representativo, manter constantes condições/saídas/ambiente, repetir medições quando viável e registrar tempo de parede, núcleo-horas, aceleração, eficiência paralela e efeitos de I/O. A curva deve apoiar uma decisão de compromisso entre prazo e consumo de recursos, e não simplesmente maximizar núcleos.
 - **Critério de encerramento:** curva de saturação reproduzível, faixa de paralelismo recomendada para a malha definitiva e estimativa fundamentada do custo da MEQ-06.
-- **Decisões pendentes:** plano concreto de números de processos, duração/repetições dos testes, recursos máximos e critério de eficiência aceitável.
+- **Decisões pendentes:** números de processos, duração dos ensaios, recursos e critério de eficiência foram decididos na MEQ-05.1/05.2. Pendente: a configuração de produção da MEQ-06 (90 processos compactos, 90 espalhados ou 112), a decidir com o supervisor; um ensaio de confirmação de cerca de 1 h com 90 processos fica como opção.
 
 ### MEQ-06 — Integrações climatológicas
 
@@ -123,7 +124,7 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 
 ## 5. Dependências e prioridades
 
-A sequência principal é **MEQ-02 → MEQ-03 → MEQ-05 (recomendação final) → MEQ-06 → MEQ-07**. A MEQ-03 foi reaberta em 11/11/2026 (`DEC-MEQ-002`); a recomendação final da MEQ-05 aguarda a conclusão dessa reavaliação. A MEQ-04 aproveita resultados já disponíveis e prossegue em paralelo, sendo atualizada para a configuração selecionada quando necessário. A MEQ-01 sustenta a governança das demais frentes; a MEQ-00 está encerrada.
+A sequência principal é **MEQ-02 → MEQ-03 → MEQ-05 (recomendação final) → MEQ-06 → MEQ-07**. A MEQ-03 está concluída com `EXP03` (`DEC-MEQ-003`/`DEC-MEQ-004`, 12/11/2026), após reabertura temporária com SODAR em 11/11/2026 (`DEC-MEQ-002`); a recomendação final da MEQ-05 já não depende dela. A MEQ-04 aproveita resultados já disponíveis e prossegue em paralelo, sendo atualizada para a configuração selecionada quando necessário. A MEQ-01 sustenta a governança das demais frentes; a MEQ-00 está encerrada.
 
 Avançar entre frentes exige verificar **condições relevantes ao próximo passo**, não eliminar toda incerteza do projeto. Identificar um risco não autoriza alterar scripts de `usp-utils`, código MPAS, dados ou simulações sem a aprovação específica exigida.
 
@@ -149,14 +150,19 @@ Registrar decisões aprovadas no histórico versionado com um identificador est�
 
 Mudanças no roadmap devem indicar o que mudou, por quê, quem aprovou e em que commit/PR; nunca pressupor autorização de publicação, modificação do código do MPAS, alteração de `usp-utils`, execução de simulações ou remoção de dados. Antes de operações Git, conferir novamente branches, commits, divergências e estado de trabalho das cópias relevantes; suspender publicação diante de risco novo.
 
-## 8. Próximas ações e decisões científicas
+## 8. Fila de pendências
 
-Situação em 12/11/2026 (v1.2); os textos da v1.0 (`fe16f0b`) e da v1.1 (`c2e15cd`) desta seção estão preservados no histórico do repositório.
+Situação em 15/11/2026 (v1.3); os textos anteriores desta seção (v1.0 `fe16f0b`, v1.1 `c2e15cd`, v1.2) estão preservados no histórico do repositório. Estados conforme a seção 7.
 
-- **MEQ-03 — reavaliação com SODAR (`DEC-MEQ-002`):** incorporar o SODAR P1 ao pipeline completo, com peso igual ao LiDAR; preparar as entregas registradas na frente (síntese do HTML em três visões e explicitação da resolução temporal); decidir a renomeação de sítios proposta (P0 → ML, SODAR P1 → MS, LPI inalterado); a nova seleção final exige ratificação conjunta do pesquisador e do supervisor. Cada etapa técnica requer autorização própria.
-- **Pai da `EXP03`:** conferir `runs/meqbr_05km/EXPERIMENTS.md` no Swell e alinhar roadmap, `config/experiments.yaml` e `README.md` ao resultado (seção 3) — **atendida em 13/11/2026** por decisão do pesquisador: linhagem dupla (configuração do modelo da `EXP01`, pré-processamento da `EXP02`); o `EXPERIMENTS.md` não registra a `EXP03`.
-- **MEQ-05:** próxima frente operacional prevista; requer plano concreto e autorização explícita antes de qualquer execução; a recomendação definitiva aguarda a conclusão da reavaliação da MEQ-03.
-- **MEQ-04:** síntese do valor agregado a ratificar pelo pesquisador para a configuração que resultar da reavaliação.
-- **Revisão editorial do HTML principal para a `DEC-MEQ-001`:** refletir a seleção da EXP03 no template `docs/templates/technical_report_v2.html.j2`, ajustar o validador `scripts/06_report/validate_technical_report.py` e regenerar o relatório, sem recalcular resultados — **atendida em 11/11/2026, PR #9, merge `784e9bc`**.
-- **`SCIENTIFIC_NOTES.md`:** registro da decisão da MEQ-03 — **atendido**: entrada datada de 10/11/2026 com a `DEC-MEQ-001`; a entrada de 07/10/2026 está marcada como *superseded*. A v1.2 acrescenta entrada datada da reabertura (`DEC-MEQ-002`).
-- **MEQ-06:** não autorizada; depende das condições da própria frente.
+- `MEQ-05.4` — curva de saturação no HTML principal, ascendência da `EXP03` (`build_technical_report.py:1253`, `report.js:157`, template v1) e aba de timelines em "Rede observacional" — `planejada`.
+- `PEND-01` — corrigir `results/tables/runtime_metrics.csv`: EXP02/2021 tem 888 h no log e 984 h no CSV; exige regeneração por script — `planejada`.
+- `PEND-02` — versionar `source_hashes.txt` e `gpmetis_part60.log`, hoje só no Swell — `planejada`.
+- `PEND-03` — links quebrados do `init.nc` da EXP02 corrigida no Swell (arquivos em `EXP02_BADSST/preproc/`) — `planejada`.
+- `PEND-04` — `config/experiments.yaml`: `cu_tiedtke`/`sf_monin_obukhov` contra `cu_ntiedtke`/`sf_monin_obukhov_rev` resolvidos no log — `planejada`.
+- `PEND-05` — fuso do P0 no `README.md` e no `SCIENTIFIC_NOTES.md`, se citado como não confirmado — `planejada`.
+- `PEND-06` — renomeação de sítios P0 → ML (derivada da `DEC-MEQ-002`), decisão opcional do pesquisador — `aguardando decisão`.
+- `MEQ-05` — configuração de produção da MEQ-06 (90 compacto, 90 espalhado ou 112), com o supervisor; ensaio de confirmação de ~1 h com 90 processos como opção — `aguardando decisão`.
+
+Itens superados: a síntese do HTML em três visões e a nota sobre resolução de 10/15 min, derivadas da `DEC-MEQ-002`, deixaram de ser necessárias com a `DEC-MEQ-003`; a renomeação MS do SODAR P1 caiu com a exclusão do sítio.
+
+Governança registrada: o repositório opera sem CI e sem proteção da `main`, por decisão do pesquisador (15/11/2026).

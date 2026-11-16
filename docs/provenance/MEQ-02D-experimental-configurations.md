@@ -182,3 +182,13 @@ A branch local `codex/meq-02d-config-archive` foi criada a partir de
 MEQ-02C no início da tarefa. Já existiam `results/backups/` e
 `results/report.zip` não rastreados; eles foram preservados e não fazem parte
 desta entrega. Não foram feitos commit, push, abertura de PR ou merge.
+
+## Nota MEQ-03.6 — `init.nc` da EXP03/2021 (15/11/2026)
+
+O `init.nc` da EXP03/2021 resolve até
+`preproc/attempt_01_contaminated_oisst/20211101_20211201/meqbr_05km_oval_meq02a.init.nc`
+(cadeia de links registrada em `MEQ-05.2-benchmark-record.md`). A SST inicial,
+porém, vem do `SKINTEMP` do ERA5, pois o namelist usa
+`config_input_sst = false`. O `sfc_update.nc` corrigido é lido no primeiro
+passo, e a SST é idêntica à OISST corrigida de +1 h em diante. A contaminação
+do OISST costeiro não atingiu a janela de análise de nenhum experimento.
