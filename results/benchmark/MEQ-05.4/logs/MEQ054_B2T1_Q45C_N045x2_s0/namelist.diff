@@ -1,0 +1,10 @@
+5,6c5,6
+<     config_start_time = '2021-10-21_00:00:00'
+<     config_run_duration = '41_00:00:00'
+---
+>     config_start_time = '2021-11-15_00:00:00'
+>     config_run_duration = '0_03:00:00'
+46c46
+<     config_do_restart = false
+---
+>     config_do_restart = true

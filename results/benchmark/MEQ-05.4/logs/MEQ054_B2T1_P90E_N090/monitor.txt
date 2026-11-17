@@ -1,0 +1,15 @@
+utc=2026-11-17T21:13:51Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2300 mhz_list=2547
+utc=2026-11-17T21:14:21Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2338 mhz_list=2604
+utc=2026-11-17T21:14:52Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2283 mhz_list=2588
+utc=2026-11-17T21:15:22Z interval_s=5.0 max_other_pct=0.4 other= mhz_all=2337 mhz_list=2670
+utc=2026-11-17T21:15:52Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2251 mhz_list=2547
+utc=2026-11-17T21:16:22Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2360 mhz_list=2700
+utc=2026-11-17T21:16:52Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2232 mhz_list=2543
+utc=2026-11-17T21:17:22Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2524 mhz_list=2580
+utc=2026-11-17T21:17:52Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2069 mhz_list=2311
+utc=2026-11-17T21:18:22Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2163 mhz_list=2442
+utc=2026-11-17T21:18:53Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2075 mhz_list=2297
+utc=2026-11-17T21:19:23Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2124 mhz_list=2391
+utc=2026-11-17T21:19:53Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=1950 mhz_list=2103
+utc=2026-11-17T21:20:23Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2056 mhz_list=2342
+utc=2026-11-17T21:20:53Z interval_s=5.0 max_other_pct=0.2 other= mhz_all=2101 mhz_list=2361

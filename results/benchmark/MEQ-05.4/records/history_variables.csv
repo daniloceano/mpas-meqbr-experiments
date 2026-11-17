@@ -1,0 +1,35 @@
+variable,type,dimensions,dimension_sizes,units,bytes_per_file
+latCell,float,(nCells),102968,rad,411872
+lonCell,float,(nCells),102968,rad,411872
+areaCell,float,(nCells),102968,m^2,411872
+zgrid,float,"(nCells,nVertLevelsP1)",102968x56,m MSL,23064832
+xtime,char,"(Time,StrLen)",1x64,YYYY-MM-DD_hh:mm:ss,64
+uReconstructZonal,float,"(Time,nCells,nVertLevels)",1x102968x55,m s^{-1},22652960
+uReconstructMeridional,float,"(Time,nCells,nVertLevels)",1x102968x55,m s^{-1},22652960
+w,float,"(Time,nCells,nVertLevelsP1)",1x102968x56,m s^{-1},23064832
+pressure,float,"(Time,nCells,nVertLevels)",1x102968x55,Pa,22652960
+surface_pressure,float,"(Time,nCells)",1x102968,Pa,411872
+rho,float,"(Time,nCells,nVertLevels)",1x102968x55,kg m^{-3},22652960
+theta,float,"(Time,nCells,nVertLevels)",1x102968x55,K,22652960
+relhum,float,"(Time,nCells,nVertLevels)",1x102968x55,percent,22652960
+u10,float,"(Time,nCells)",1x102968,m s^{-1},411872
+v10,float,"(Time,nCells)",1x102968,m s^{-1},411872
+t2m,float,"(Time,nCells)",1x102968,K,411872
+q2,float,"(Time,nCells)",1x102968,kg kg^{-1},411872
+hpbl,float,"(Time,nCells)",1x102968,m,411872
+kpbl,int,"(Time,nCells)",1x102968,unitless,411872
+ust,float,"(Time,nCells)",1x102968,m s^{-1},411872
+znt,float,"(Time,nCells)",1x102968,m,411872
+zol,float,"(Time,nCells)",1x102968,unitless,411872
+cd,float,"(Time,nCells)",1x102968,unitless,411872
+ch,float,"(Time,nCells)",1x102968,m s^{-1},411872
+hfx,float,"(Time,nCells)",1x102968,W m^{-2},411872
+qfx,float,"(Time,nCells)",1x102968,kg m^{-2} s^{-1},411872
+lh,float,"(Time,nCells)",1x102968,W m^{-2},411872
+skintemp,float,"(Time,nCells)",1x102968,K,411872
+sst,float,"(Time,nCells)",1x102968,K,411872
+xland,float,"(Time,nCells)",1x102968,unitless,411872
+landmask,int,(nCells),102968,unitless,411872
+precipw,float,"(Time,nCells)",1x102968,kg m^{-2},411872
+rainnc,float,"(Time,nCells)",1x102968,mm,411872
+rainc,float,"(Time,nCells)",1x102968,mm,411872

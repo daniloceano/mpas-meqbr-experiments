@@ -1,0 +1,5 @@
+N	edgecut	comm_volume	balance	contiguous
+45	8770	8891	1.001	yes
+90	12798	13052	1.002	yes
+part.45 lines=102968 distinct=45
+part.90 lines=102968 distinct=90
