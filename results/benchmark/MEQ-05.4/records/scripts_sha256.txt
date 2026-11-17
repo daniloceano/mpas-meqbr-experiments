@@ -1,0 +1,5 @@
+19feb6b7a4cc836c56831647e8121a59ac7f476bfac63e4c7d9d375dee6a0401  MEQ054_scripts/run_meq054.sh
+897e202e8f7186fa166af25974649f8e7fbdc827efab58ce427477e5e394f050  MEQ054_scripts/setup_meq054.sh
+0d56162f4cc8a36cc5b143b4a1bd2a44767b2066a77bc5ac38a64af663c60131  MEQ054_scripts/run_meq054.sh  (launch 2)
+b8e32cba4f219a8396e798c0585ffeb8ff4a160ad658b3375b3f7e528829b352  MEQ054_scripts/run_meq054_blocks.sh  (blocks)
+ee28a40572f04db57c2cd6fdff1079c4a043667cebbc7f6ce804b957f7444f01  MEQ054_scripts/cpu_others.py  (blocks)

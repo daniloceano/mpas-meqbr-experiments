@@ -1,0 +1,521 @@
+# MEQ-05.4 disk inventory (read-only) — captured 2026-11-17T23:03:29Z on swell
+# run root: /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a
+# tools: stat (GNU coreutils), du, find, ncdump (/opt/anaconda3/bin/ncdump; netcdf library version 4.9.1 of Feb 24 2023 22:22:03 $)
+# sizes in bytes; 'apparent' = st_size; 'allocated' = du -B1 (blocks on disk); links followed with -L
+
+================================================================ LEG 20211101_20211201
+## directory: /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/20211101_20211201
+## file counts by prefix (entries in the leg directory; links counted as entries)
+      1 atmosphere_model
+      1 CAM_ABS_DATA
+      1 CAM_AEROPT_DATA
+      1 CCN_ACTIVATE_DATA
+      1 GENPARM
+    985 history
+      1 LANDUSE
+    165 lbc
+      1 log
+      3 meqbr_05km_oval_meq02a
+      1 mpas
+      1 namelist
+      1 NoahmpTable
+      1 OZONE_DAT
+      1 OZONE_LAT
+      1 OZONE_PLEV
+     41 restart
+      1 restart_timestamp
+      2 RRTMG_LW_DATA
+      2 RRTMG_SW_DATA
+      1 SOILPARM
+      5 stream_list
+      1 streams
+      1 VEGPARM
+      1 zeta_wind
+
+## representative files (stat -L: size, type of entry, link target)
+history.2021-10-21_00.00.00.nc	apparent=192475360	allocated=192364544	file
+    format(ncdump -k)=cdf5
+restart.2021-10-22_00.00.00.nc	apparent=2284781648	allocated=2284724224	file
+    format(ncdump -k)=cdf5
+meqbr_05km_oval_meq02a.init.nc	apparent=875129724	allocated=875032576	symlink->/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/attempt_01_contaminated_oisst/20211101_20211201/meqbr_05km_oval_meq02a.init.nc
+    format(ncdump -k)=cdf5
+meqbr_05km_oval_meq02a.sfc_update.nc	apparent=34731176	allocated=34611200	symlink->/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/meqbr_05km_oval_meq02a.sfc_update.nc
+    format(ncdump -k)=cdf5
+lbc.2021-10-21_00.00.00.nc	apparent=159188972	allocated=159072256	symlink->/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/attempt_01_contaminated_oisst/20211101_20211201/lbc.2021-10-21_00.00.00.nc
+    format(ncdump -k)=cdf5
+
+## all history / restart files: size distribution (apparent bytes)
+history	n=985	min=192475360	max=192475360	sum=189588229600
+restart	n=41	min=2284781648	max=2284781648	sum=93676047568
+
+## totals per category (apparent bytes, links followed; allocated via du -L)
+history	n=985	apparent=189588229600	allocated=189479473152
+restart	n=41	apparent=93676047568	allocated=93673693184
+inputs_lbc	n=165	apparent=26266180380	allocated=26246631424
+inputs_init_sfc	n=2	apparent=909860900	allocated=909643776
+other_nc	n=0	apparent=0	allocated=0
+## whole leg directory: du -s (not following links = real files physically in the leg dir) and du -sL
+du_B1_nolinks=283221565440	du_apparent_nolinks=283331840371	du_B1_follow_links=310415572992
+## entries that are symlinks (inputs live elsewhere): 191
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-21_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-21_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-21_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-21_18.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-22_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-22_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-22_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-22_18.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-23_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-23_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-23_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-23_18.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-24_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-24_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-24_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-24_18.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-25_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-25_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-25_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc/20211101_20211201/lbc.2021-10-25_18.00.00.nc
+
+================================================================ LEG 20221001_20221101
+## directory: /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/20221001_20221101
+## file counts by prefix (entries in the leg directory; links counted as entries)
+      1 atmosphere_model
+      1 CAM_ABS_DATA
+      1 CAM_AEROPT_DATA
+      1 CCN_ACTIVATE_DATA
+      1 GENPARM
+    985 history
+      1 LANDUSE
+    165 lbc
+      1 log
+      3 meqbr_05km_oval_meq02a
+      1 mpas
+      1 namelist
+      1 NoahmpTable
+      1 OZONE_DAT
+      1 OZONE_LAT
+      1 OZONE_PLEV
+     41 restart
+      1 restart_timestamp
+      2 RRTMG_LW_DATA
+      2 RRTMG_SW_DATA
+      1 SOILPARM
+      5 stream_list
+      1 streams
+      1 VEGPARM
+      1 zeta_wind
+
+## representative files (stat -L: size, type of entry, link target)
+history.2022-09-21_00.00.00.nc	apparent=192475360	allocated=192364544	file
+    format(ncdump -k)=cdf5
+restart.2022-09-22_00.00.00.nc	apparent=2284781648	allocated=2284724224	file
+    format(ncdump -k)=cdf5
+meqbr_05km_oval_meq02a.init.nc	apparent=875129724	allocated=875032576	symlink->/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/meqbr_05km_oval_meq02a.init.nc
+    format(ncdump -k)=cdf5
+meqbr_05km_oval_meq02a.sfc_update.nc	apparent=34731176	allocated=34611200	symlink->/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/meqbr_05km_oval_meq02a.sfc_update.nc
+    format(ncdump -k)=cdf5
+lbc.2022-09-21_00.00.00.nc	apparent=159188972	allocated=159068160	symlink->/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-21_00.00.00.nc
+    format(ncdump -k)=cdf5
+
+## all history / restart files: size distribution (apparent bytes)
+history	n=985	min=192475360	max=192475360	sum=189588229600
+restart	n=41	min=2284781648	max=2284781648	sum=93676047568
+
+## totals per category (apparent bytes, links followed; allocated via du -L)
+history	n=985	apparent=189588229600	allocated=189479116800
+restart	n=41	apparent=93676047568	allocated=93673693184
+inputs_lbc	n=165	apparent=26266180380	allocated=26246254592
+inputs_init_sfc	n=2	apparent=909860900	allocated=909643776
+other_nc	n=0	apparent=0	allocated=0
+## whole leg directory: du -s (not following links = real files physically in the leg dir) and du -sL
+du_B1_nolinks=283221229568	du_apparent_nolinks=283331850072	du_B1_follow_links=310414856192
+## entries that are symlinks (inputs live elsewhere): 190
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-21_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-21_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-21_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-21_18.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-22_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-22_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-22_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-22_18.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-23_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-23_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-23_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-23_18.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-24_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-24_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-24_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-24_18.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-25_00.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-25_06.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-25_12.00.00.nc
+      1 lbc.*.nc -> /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/preproc_2022/20221001_20221101/lbc.2022-09-25_18.00.00.nc
+
+================================================================ SHARED (run root)
+meqbr_05km_oval_meq02a.static.nc	apparent=171605472	allocated=171495424	format=cdf5
+meqbr_05km_oval_meq02a.grid.nc	apparent=132766232	allocated=132771840	format=64-bit offset
+
+================================================================ COMPRESSION / STORAGE (ncdump -hs, special attributes)
+## history.2021-10-21_00.00.00.nc: format=cdf5
+      1 		latCell:_Storage = "contiguous" ;
+   (no lines above = no per-variable storage/compression attributes reported)
+NetCDF: Attempting netcdf-4 operation on netcdf-3 file
+Location: file ?; fcn ? line 1116
+## restart.2021-10-22_00.00.00.nc: format=cdf5
+      1 		latCell:_Storage = "contiguous" ;
+   (no lines above = no per-variable storage/compression attributes reported)
+
+================================================================ HISTORY HEADER: ncdump -h history.2021-10-21_00.00.00.nc
+NetCDF: Attempting netcdf-4 operation on netcdf-3 file
+Location: file ?; fcn ? line 1116
+netcdf history.2021-10-21_00.00.00 {
+dimensions:
+	nCells = 102968 ;
+	nVertLevelsP1 = 56 ;
+	StrLen = 64 ;
+	Time = UNLIMITED ; // (1 currently)
+	nVertLevels = 55 ;
+variables:
+	float latCell(nCells) ;
+		latCell:units = "rad" ;
+		latCell:long_name = "Latitude of cells" ;
+	float lonCell(nCells) ;
+		lonCell:units = "rad" ;
+		lonCell:long_name = "Longitude of cells" ;
+	float areaCell(nCells) ;
+		areaCell:units = "m^2" ;
+		areaCell:long_name = "Spherical area of a Voronoi cell" ;
+	float zgrid(nCells, nVertLevelsP1) ;
+		zgrid:units = "m MSL" ;
+		zgrid:long_name = "Geometric height of layer interfaces" ;
+	char xtime(Time, StrLen) ;
+		xtime:units = "YYYY-MM-DD_hh:mm:ss" ;
+		xtime:long_name = "Model valid time" ;
+	float uReconstructZonal(Time, nCells, nVertLevels) ;
+		uReconstructZonal:units = "m s^{-1}" ;
+		uReconstructZonal:long_name = "Zonal component of reconstructed horizontal velocity at cell centers" ;
+	float uReconstructMeridional(Time, nCells, nVertLevels) ;
+		uReconstructMeridional:units = "m s^{-1}" ;
+		uReconstructMeridional:long_name = "Meridional component of reconstructed horizontal velocity at cell centers" ;
+	float w(Time, nCells, nVertLevelsP1) ;
+		w:units = "m s^{-1}" ;
+		w:long_name = "Vertical velocity at vertical cell faces" ;
+	float pressure(Time, nCells, nVertLevels) ;
+		pressure:units = "Pa" ;
+		pressure:long_name = "Pressure" ;
+	float surface_pressure(Time, nCells) ;
+		surface_pressure:units = "Pa" ;
+		surface_pressure:long_name = "Diagnosed surface pressure" ;
+	float rho(Time, nCells, nVertLevels) ;
+		rho:units = "kg m^{-3}" ;
+		rho:long_name = "Dry air density" ;
+	float theta(Time, nCells, nVertLevels) ;
+		theta:units = "K" ;
+		theta:long_name = "Potential temperature" ;
+	float relhum(Time, nCells, nVertLevels) ;
+		relhum:units = "percent" ;
+		relhum:long_name = "Relative humidity" ;
+	float u10(Time, nCells) ;
+		u10:units = "m s^{-1}" ;
+		u10:long_name = "10-meter zonal wind" ;
+	float v10(Time, nCells) ;
+		v10:units = "m s^{-1}" ;
+		v10:long_name = "10-meter meridional wind" ;
+	float t2m(Time, nCells) ;
+		t2m:units = "K" ;
+		t2m:long_name = "2-meter temperature" ;
+	float q2(Time, nCells) ;
+		q2:units = "kg kg^{-1}" ;
+		q2:long_name = "2-meter specific humidity" ;
+	float hpbl(Time, nCells) ;
+		hpbl:units = "m" ;
+		hpbl:long_name = "Planetary Boundary Layer (PBL) height" ;
+	int kpbl(Time, nCells) ;
+		kpbl:units = "unitless" ;
+		kpbl:long_name = "index level of PBL top" ;
+	float ust(Time, nCells) ;
+		ust:units = "m s^{-1}" ;
+		ust:long_name = "U* in similarity theory" ;
+	float znt(Time, nCells) ;
+		znt:units = "m" ;
+		znt:long_name = "roughness length" ;
+	float zol(Time, nCells) ;
+		zol:units = "unitless" ;
+		zol:long_name = "z/L height over Monin-Obukhov length" ;
+	float cd(Time, nCells) ;
+		cd:units = "unitless" ;
+		cd:long_name = "drag coefficient at 10-meter" ;
+	float ch(Time, nCells) ;
+		ch:units = "m s^{-1}" ;
+		ch:long_name = "surface exchange coefficient for heat" ;
+	float hfx(Time, nCells) ;
+		hfx:units = "W m^{-2}" ;
+		hfx:long_name = "upward heat flux at the surface" ;
+	float qfx(Time, nCells) ;
+		qfx:units = "kg m^{-2} s^{-1}" ;
+		qfx:long_name = "upward moisture flux at the surface" ;
+	float lh(Time, nCells) ;
+		lh:units = "W m^{-2}" ;
+		lh:long_name = "latent heat flux at the surface" ;
+	float skintemp(Time, nCells) ;
+		skintemp:units = "K" ;
+		skintemp:long_name = "ground or water surface temperature" ;
+	float sst(Time, nCells) ;
+		sst:units = "K" ;
+		sst:long_name = "sea-surface temperature" ;
+	float xland(Time, nCells) ;
+		xland:units = "unitless" ;
+		xland:long_name = "land-ocean mask (1=land including sea-ice ; 2=ocean)" ;
+	int landmask(nCells) ;
+		landmask:units = "unitless" ;
+		landmask:long_name = "land-ocean mask (1=land ; 0=ocean)" ;
+	float precipw(Time, nCells) ;
+		precipw:units = "kg m^{-2}" ;
+		precipw:long_name = "precipitable water" ;
+	float rainnc(Time, nCells) ;
+		rainnc:units = "mm" ;
+		rainnc:long_name = "accumulated total grid-scale precipitation" ;
+	float rainc(Time, nCells) ;
+		rainc:units = "mm" ;
+		rainc:long_name = "accumulated convective precipitation" ;
+
+// global attributes:
+		:model_name = "mpas" ;
+		:core_name = "atmosphere" ;
+		:version = "8.4.1" ;
+		:source = "MPAS" ;
+		:Conventions = "MPAS" ;
+		:git_version = "v8.4.1-92-gb5fb94d2" ;
+		:on_a_sphere = "YES" ;
+		:sphere_radius = 6371229.f ;
+		:is_periodic = "NO" ;
+		:x_period = 0.f ;
+		:y_period = 0.f ;
+		:history = "mpirun -n 60 ./atmosphere_model" ;
+		:parent_id = "d7tmlm2x9v\n",
+			"5bnky34w9r\n",
+			"" ;
+		:mesh_spec = "0.0" ;
+		:config_time_integration = "SRK3" ;
+		:config_time_integration_order = 2 ;
+		:config_dt = 30.f ;
+		:config_calendar_type = "gregorian" ;
+		:config_start_time = "2021-10-21_00:00:00" ;
+		:config_stop_time = "none" ;
+		:config_run_duration = "41_00:00:00" ;
+		:config_split_dynamics_transport = "YES" ;
+		:config_number_of_sub_steps = 2 ;
+		:config_dynamics_split_steps = 3 ;
+		:config_h_mom_eddy_visc2 = 0.f ;
+		:config_h_mom_eddy_visc4 = 0.f ;
+		:config_v_mom_eddy_visc2 = 0.f ;
+		:config_h_theta_eddy_visc2 = 0.f ;
+		:config_h_theta_eddy_visc4 = 0.f ;
+		:config_v_theta_eddy_visc2 = 0.f ;
+		:config_horiz_mixing = "2d_smagorinsky" ;
+		:config_les_model = "none" ;
+		:config_les_surface = "none" ;
+		:config_surface_heat_flux = 0.f ;
+		:config_surface_moisture_flux = 0.f ;
+		:config_surface_drag_coefficient = 0.f ;
+		:config_len_disp = 5000.f ;
+		:config_visc4_2dsmag = 0.05f ;
+		:config_mix_scalars = "NO" ;
+		:config_del4u_div_factor = 10.f ;
+		:config_w_adv_order = 3 ;
+		:config_theta_adv_order = 3 ;
+		:config_scalar_adv_order = 3 ;
+		:config_u_vadv_order = 3 ;
+		:config_w_vadv_order = 3 ;
+		:config_theta_vadv_order = 3 ;
+		:config_scalar_vadv_order = 3 ;
+		:config_scalar_advection = "YES" ;
+		:config_positive_definite = "NO" ;
+		:config_monotonic = "YES" ;
+		:config_coef_3rd_order = 0.25f ;
+		:config_smagorinsky_coef = 0.125f ;
+		:config_mix_full = "YES" ;
+		:config_epssm = 0.f ;
+		:config_smdiv = 0.1f ;
+		:config_apvm_upwinding = 0.5f ;
+		:config_h_ScaleWithMesh = "YES" ;
+		:config_num_halos = 2 ;
+		:config_relax_zone_divdamp_coef = 6.f ;
+		:config_use_custom_weightsOnEdge = "NO" ;
+		:config_use_custom_coeffs_reconstruct = "NO" ;
+		:config_ke_use_reconstructed_vel = "NO" ;
+		:config_ke_use_vertex_reconstructed_vel = "NO" ;
+		:config_zd = 22000.f ;
+		:config_xnutr = 0.2f ;
+		:config_mpas_cam_coef = 0.f ;
+		:config_number_cam_damping_levels = 4 ;
+		:config_rayleigh_damp_u = "NO" ;
+		:config_rayleigh_damp_u_timescale_days = 5.f ;
+		:config_number_rayleigh_damp_u_levels = 6 ;
+		:config_epssm_minimum = 0.1f ;
+		:config_epssm_maximum = 0.5f ;
+		:config_epssm_transition_bottom_z = 30000.f ;
+		:config_epssm_transition_top_z = 50000.f ;
+		:config_apply_lbcs = "YES" ;
+		:config_restart_timestamp_name = "restart_timestamp" ;
+		:config_pio_num_iotasks = 0 ;
+		:config_pio_stride = 1 ;
+		:config_block_decomp_file_prefix = "meqbr_05km_oval_meq02a.graph.info.part." ;
+		:config_number_of_blocks = 0 ;
+		:config_explicit_proc_decomp = "NO" ;
+		:config_proc_decomp_file_prefix = "graph.info.part." ;
+		:config_do_restart = "NO" ;
+		:config_do_DAcycling = "NO" ;
+		:config_print_global_minmax_vel = "YES" ;
+		:config_print_detailed_minmax_vel = "NO" ;
+		:config_print_global_minmax_sca = "NO" ;
+		:config_IAU_option = "off" ;
+		:config_IAU_window_length_s = 21600.f ;
+		:config_jedi_da = "NO" ;
+		:config_halo_exch_method = "mpas_halo" ;
+		:config_gpu_aware_mpi = "NO" ;
+		:input_soil_data = "STAS" ;
+		:input_soil_temperature_lag = 140 ;
+		:num_soil_layers = 4 ;
+		:months = 12 ;
+		:noznlev = 59 ;
+		:naerlev = 29 ;
+		:camdim1 = 4 ;
+		:config_frac_seaice = "YES" ;
+		:config_sfc_albedo = "YES" ;
+		:config_sfc_snowalbedo = "YES" ;
+		:config_sst_update = "YES" ;
+		:config_sstdiurn_update = "NO" ;
+		:config_deepsoiltemp_update = "NO" ;
+		:config_o3climatology = "YES" ;
+		:config_microp_re = "NO" ;
+		:config_ysu_pblmix = "NO" ;
+		:config_urban_physics = "NO" ;
+		:config_n_microp = 1 ;
+		:config_microphysics_top = 45000.f ;
+		:config_radtlw_interval = "00:30:00" ;
+		:config_radtsw_interval = "00:30:00" ;
+		:config_conv_interval = "none" ;
+		:config_pbl_interval = "none" ;
+		:config_camrad_abs_update = "06:00:00" ;
+		:config_greeness_update = "24:00:00" ;
+		:config_bucket_update = "none" ;
+		:config_physics_suite = "mesoscale_reference" ;
+		:config_microp_scheme = "mp_wsm6" ;
+		:config_convection_scheme = "cu_ntiedtke" ;
+		:config_lsm_scheme = "sf_noah" ;
+		:config_pbl_scheme = "bl_ysu" ;
+		:config_gwdo_scheme = "bl_ysu_gwdo" ;
+		:config_ngw_scheme = "NO" ;
+		:config_knob_ugwp_tauamp = 0.00013f ;
+		:config_ugwp_diags = "NO" ;
+		:config_radt_cld_scheme = "cld_fraction" ;
+		:config_radt_lw_scheme = "rrtmg_lw" ;
+		:config_radt_sw_scheme = "rrtmg_sw" ;
+		:config_sfclayer_scheme = "sf_monin_obukhov_rev" ;
+		:config_radt_cld_overlap = "maximum_random" ;
+		:config_radt_cld_dcorrlen = "constant" ;
+		:config_gfconv_closure_deep = 0 ;
+		:config_gfconv_closure_shallow = 8 ;
+		:config_mynn_tkeadvect = "NO" ;
+		:config_mynn_tkebudget = 0 ;
+		:config_mynn_closure = 2.5f ;
+		:config_mynn_cloudpdf = 2 ;
+		:config_mynn_mixlength = 2 ;
+		:config_mynn_stfunc = 1 ;
+		:config_mynn_topdown = 0 ;
+		:config_mynn_scaleaware = 1 ;
+		:config_mynn_dheat_opt = 1 ;
+		:config_mynn_edmf = 1 ;
+		:config_mynn_edmf_dd = 0 ;
+		:config_mynn_edmf_mom = 0 ;
+		:config_mynn_edmf_tke = 0 ;
+		:config_mynn_edmf_output = 0 ;
+		:config_mynn_mixscalars = 1 ;
+		:config_mynn_mixclouds = 1 ;
+		:config_mynn_mixqt = 0 ;
+		:config_bucket_radt = 1.e+09f ;
+		:config_bucket_rainc = 100.f ;
+		:config_bucket_rainnc = 100.f ;
+		:config_oml1d = "NO" ;
+		:config_oml_hml0 = 30.f ;
+		:config_oml_gamma = 0.14f ;
+		:config_oml_relaxation_time = 864000.f ;
+		:config_sounding_interval = "none" ;
+		:config_noahmp_iopt_dveg = 4 ;
+		:config_noahmp_iopt_crs = 1 ;
+		:config_noahmp_iopt_btr = 1 ;
+		:config_noahmp_iopt_runsrf = 3 ;
+		:config_noahmp_iopt_runsub = 3 ;
+		:config_noahmp_iopt_sfc = 1 ;
+		:config_noahmp_iopt_frz = 1 ;
+		:config_noahmp_iopt_inf = 1 ;
+		:config_noahmp_iopt_rad = 3 ;
+		:config_noahmp_iopt_alb = 1 ;
+		:config_noahmp_iopt_snf = 1 ;
+		:config_noahmp_iopt_tksno = 1 ;
+		:config_noahmp_iopt_tbot = 2 ;
+		:config_noahmp_iopt_stc = 1 ;
+		:config_noahmp_iopt_gla = 1 ;
+		:config_noahmp_iopt_rsf = 4 ;
+		:config_noahmp_iopt_soil = 1 ;
+		:config_noahmp_iopt_pedo = 1 ;
+		:config_noahmp_iopt_crop = 0 ;
+		:config_noahmp_iopt_irr = 0 ;
+		:config_noahmp_iopt_irrm = 0 ;
+		:config_noahmp_iopt_infdv = 1 ;
+		:config_noahmp_iopt_tdrn = 0 ;
+		:file_id = "mtku550qmg" ;
+}
+
+================================================================ stream_list.atmosphere.wind_energy (production leg 2021)
+## target: /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km/stream_list.atmosphere.wind_energy
+## lines (incl. last line without newline): 34
+latCell
+lonCell
+areaCell
+zgrid
+xtime
+uReconstructZonal
+uReconstructMeridional
+w
+pressure
+surface_pressure
+rho
+theta
+relhum
+u10
+v10
+t2m
+q2
+hpbl
+kpbl
+ust
+znt
+zol
+cd
+ch
+hfx
+qfx
+lh
+skintemp
+sst
+xland
+landmask
+precipw
+rainnc
+rainc
+## 2022 leg list identical to 2021: yes
+## streams.atmosphere (output stream) in both legs:
+20211101_20211201: /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/streams.atmosphere
+20221001_20221101: /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/20221001_20221101/streams.atmosphere
+<stream name="output"
+        type="output"
+        filename_template="history.$Y-$M-$D_$h.$m.$s.nc"
+        output_interval="1:00:00" >
+
+	<file name="stream_list.atmosphere.wind_energy"/>
+</stream>
+# end 2026-11-17T23:03:31Z

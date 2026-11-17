@@ -1,0 +1,3 @@
+block	attempt	ref_first_trial	ref_first_t_int	ref_last_trial	ref_last_t_int	rel_diff	valid
+1	1	MEQ054_B1T1_REF_A56_first_redo	448.53192	MEQ054_B1T1_REF_A56_last	436.90936	-0.02625	yes
+2	1	MEQ054_B2T1_REF_A56_first	431.28198	MEQ054_B2T1_REF_A56_last	434.71695	0.00793	yes
