@@ -88,7 +88,7 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 ### MEQ-04 — Valor agregado sobre ERA5
 
 - **Objetivo:** estabelecer onde e em que condições o MPAS oferece ganho confiável sobre ERA5 na observação de vento offshore e na representação espacial do recurso.
-- **Situação:** **em andamento** (decisão do pesquisador, 10/11/2026), com análise extensa já disponível e síntese ainda não ratificada. Para a configuração selecionada na `DEC-MEQ-001` (`EXP03`, seleção em reavaliação pela `DEC-MEQ-002`), o skill de Murphy (MSE) a 100 m frente ao ERA5 é aproximadamente **+0,39 em P0/2021** (IC95% 0,25–0,59) e **+0,43 em LPI/2022** (IC95% 0,32–0,55). Referência histórica da v1.0: `EXP01` com +0,34 e +0,30.
+- **Situação:** **em andamento** (decisão do pesquisador, 10/11/2026), com análise extensa já disponível e síntese ainda não ratificada. Para a configuração selecionada na `DEC-MEQ-001` (`EXP03`, mantida pelas `DEC-MEQ-003` e `DEC-MEQ-004` após a reavaliação), o skill de Murphy (MSE) a 100 m frente ao ERA5 é aproximadamente **+0,39 em P0/2021** (IC95% 0,25–0,59) e **+0,43 em LPI/2022** (IC95% 0,32–0,55). Referência histórica da v1.0: `EXP01` com +0,34 e +0,30.
 - **Evidências:** `results/tables/era5_added_value_current.csv`, `resource_comparison.csv`, `era5_month_representativeness.csv`; seção 6 e demais figuras do relatório HTML principal.
 - **Dependências:** interpretação da representatividade e da comparabilidade, e atualização seletiva para a configuração que resultar da reavaliação da MEQ-03 (`DEC-MEQ-002`). A análise existente não deve ser repetida sem justificativa.
 - **Critério de encerramento:** síntese científica aprovada do ganho e de suas limitações **para os períodos e variáveis avaliados**, distinção entre habilidade observacional e estrutura espacial plausível, e atualização do HTML principal quando necessária.
@@ -111,7 +111,7 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 - **Evidências futuras:** experimentos, logs, metadados, inventários, verificações de integridade e produtos das integrações.
 - **Dependências:** decisão final MEQ-03; avaliação pertinente MEQ-04; dimensionamento MEQ-05; disponibilidade de forçantes/recursos; verificação do código e **correção OISST efetivamente utilizada**. A correção está no PR [#19](https://github.com/CGFD-USP/MPAS-Research/pull/19), branch `fix/oisst-coastal-land-fill` do repositório do modelo (verificação de 08/10/2026); consulta somente leitura de 12/11/2026 indica o PR como integrado em `develop` em 09/10/2026. O **merge do PR não é pré-requisito** desta frente: é necessário usar e identificar uma implementação corrigida e validada por commit, não confiar apenas no nome da branch.
 - **Critério de encerramento:** períodos definidos efetivamente simulados, produtos íntegros e reprodutíveis, eventuais falhas e reinícios documentados, custos e limitações registrados.
-- **Decisões pendentes:** períodos climatológicos exatos, resolução temporal das saídas, orçamento e autorização explícita de execução.
+- **Decisões pendentes:** períodos climatológicos exatos, resolução temporal das saídas, orçamento e autorização explícita de execução; redução da lista de saída (cerca de 1,7 TB por ano com saída horária, dos quais 8 variáveis 3D ocupam 95 %); partição de 90 processos (`graph.info.part.90`) no diretório de produção.
 
 ### MEQ-07 — Avaliação climatológica do recurso eólico offshore
 
@@ -154,16 +154,17 @@ Mudanças no roadmap devem indicar o que mudou, por quê, quem aprovou e em que 
 
 Situação em 15/11/2026 (v1.3); os textos anteriores desta seção (v1.0 `fe16f0b`, v1.1 `c2e15cd`, v1.2) estão preservados no histórico do repositório. Estados conforme a seção 7.
 
-- `MEQ-05.4` — corrigir no HTML principal a ascendência da `EXP03` (`build_technical_report.py:1253`, `report_v2/report.js:157`, template v1) e criar a aba de timelines das observações em "Rede observacional"; a curva de saturação passou ao relatório separado `results/report/meq05_parallel_benchmark.html` (PR #19), por decisão do pesquisador — `planejada`.
+- `GOV.4` (antiga pendência `MEQ-05.4` do HTML) — corrigir no HTML principal a ascendência da `EXP03` (`build_technical_report.py:1253`, `report_v2/report.js:157`, template v1), criar a aba de timelines das observações em "Rede observacional" e acrescentar, de forma discreta, a curva de saturação (o detalhe permanece no relatório separado `results/report/meq05_parallel_benchmark.html`, PR #19) — `planejada`.
 - `MEQ-05.5` — ensaio complementar de paralelismo (N = 45 e 90, compacto e espalhado, pares simultâneos; dois blocos com referência `REF_A56`) e levantamento de disco das pernas de produção da `EXP03`; diretórios no Swell com prefixo `MEQ054_*` — `concluída`.
 - `MEQ-05.6` — atualizar o relatório do benchmark com os resultados da `MEQ-05.5`: curva estendida além de 56 processos, com linha vertical em 56 ("a partir daqui, processos dividem núcleo físico (SMT)") e o 90 compacto como ponto à parte; opção de ver vazão e vazão por núcleo; explicação simples de SMT; capítulo de disco com a saída horária no armazenamento final, sem restarts, e o tamanho do restart como limite operacional — `concluída`.
 - `PEND-01` — corrigir `results/tables/runtime_metrics.csv`: EXP02/2021 tem 888 h no log e 984 h no CSV; exige regeneração por script — `planejada`.
 - `PEND-02` — versionar `source_hashes.txt` e `gpmetis_part60.log`, hoje só no Swell — `planejada`.
 - `PEND-03` — links quebrados do `init.nc` da EXP02 corrigida no Swell (arquivos em `EXP02_BADSST/preproc/`) — `planejada`.
 - `PEND-04` — `config/experiments.yaml`: `cu_tiedtke`/`sf_monin_obukhov` contra `cu_ntiedtke`/`sf_monin_obukhov_rev` resolvidos no log — `planejada`.
-- `PEND-05` — fuso do P0 no `README.md` e no `SCIENTIFIC_NOTES.md`, se citado como não confirmado — `planejada`.
+- `PEND-05` — fuso do P0 no `README.md` e no `SCIENTIFIC_NOTES.md`, se citado como não confirmado — `concluída` (verificação de 18/11/2026: nenhum dos dois arquivos cita o fuso do P0; nada a corrigir).
 - `PEND-06` — renomeação de sítios P0 → ML (derivada da `DEC-MEQ-002`), decisão opcional do pesquisador — `aguardando decisão`.
-- `MEQ-05` — configuração de produção da MEQ-06 (90 compacto, 90 espalhado ou 112), com o supervisor; ensaio de confirmação de ~1 h com 90 processos como opção — `concluída` (decisão de 17/11/2026: 90 compacto).
+- `MEQ-05` — configuração de produção da MEQ-06 decidida com o supervisor: 1 ano a 90 processos compactos (45 núcleos × 2, 11 núcleos livres), com fixação explícita de processos; alternativas 90 espalhado e 112 descartadas (`DEC-MEQ-005`, 17/11/2026) — `concluída`.
+- `GOV.5` — registro pós-MEQ-05: `DEC-MEQ-005`, ajustes desta seção e das frentes MEQ-04 e MEQ-06, limpeza de branches integradas e de NetCDF de benchmark no Swell (18/11/2026) — `concluída`.
 
 Itens superados: a síntese do HTML em três visões e a nota sobre resolução de 10/15 min, derivadas da `DEC-MEQ-002`, deixaram de ser necessárias com a `DEC-MEQ-003`; a renomeação MS do SODAR P1 caiu com a exclusão do sítio.
 
