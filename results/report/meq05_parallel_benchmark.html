@@ -244,7 +244,7 @@ pre.cmd { background: var(--bg-soft); border-left: 2px solid var(--rule-strong);
   <div class="masthead-inner">
     <p class="kicker">MPAS-Atmosphere · Margem Equatorial Brasileira · MEQ-05 · benchmark de paralelismo</p>
     <h1>Quantos processos usar no Swell para as integrações da MEQ-06?</h1>
-    <p class="meta">Relatório gerado em 2026-11-17T23:35:59+00:00 · análise <code>f3d8eca</code> · dados dos benchmarks MEQ-05.2 (20 ensaios) e MEQ-05.5 (24 ensaios usados de 26) · atualização MEQ-05.6</p>
+    <p class="meta">Relatório gerado em 2026-11-18T01:02:40+00:00 · análise <code>c838be3</code> · dados dos benchmarks MEQ-05.2 (20 ensaios) e MEQ-05.5 (24 ensaios usados de 26) · atualização MEQ-05.6</p>
   </div>
 </header>
 
@@ -269,8 +269,7 @@ pre.cmd { background: var(--bg-soft); border-left: 2px solid var(--rule-strong);
 <main>
   <div class="status"><strong>Status:</strong> tempos medidos nos benchmarks MEQ-05.2 e MEQ-05.5 (90
     processos e rodadas em pares agora medidos). Os custos e as durações da MEQ-06 continuam sendo
-    estimativas, porque estendem um trecho de 3 h para anos. Decisão preliminar do pesquisador e do supervisor: simulação de 1 ano com 90 processos — aguardando confirmação final.
-    Nada está decidido neste relatório.</div>
+    estimativas, porque estendem um trecho de 3 h para anos. Decisão do pesquisador e do supervisor (17/11/2026): a MEQ-06 começa com uma simulação de 1 ano com 90 processos compactos (45 núcleos físicos, cada um com suas 2 tarefas; 11 núcleos inteiros livres) — a configuração recomendada por este benchmark.</div>
 
   <section id="termos" class="chapter">
     <h2>Termos usados neste relatório</h2>
@@ -584,7 +583,7 @@ pre.cmd { background: var(--bg-soft); border-left: 2px solid var(--rule-strong);
       <p class="caption">"Dias por ano de rodada" = tempo de relógio para uma rodada avançar um ano
         simulado, sem spin-up. Nos pares, os dois blocos avançam ao mesmo tempo, e conta o mais lento.</p>
     </details>
-    <div class="note practice"><b>O que isso significa na prática.</b> Com 90 processos compactos, 1 ano simulado leva cerca de 17 dias de relógio e 10 anos cerca de 5,5 meses, deixando 11 núcleos livres; usando a máquina inteira (112), 10 anos levam cerca de 5,1 meses. Os pares não encurtam o prazo. Nenhuma configuração foi decidida.</div>
+    <div class="note practice"><b>O que isso significa na prática.</b> Com 90 processos compactos, 1 ano simulado leva cerca de 17 dias de relógio e 10 anos cerca de 5,5 meses, deixando 11 núcleos livres; usando a máquina inteira (112), 10 anos levam cerca de 5,1 meses. Os pares não encurtam o prazo.</div>
     <nav class="pager"><a href="#custo">← Custo por ano simulado</a><a href="#opcoes">Opções →</a></nav>
   </section>
 
@@ -597,7 +596,7 @@ pre.cmd { background: var(--bg-soft); border-left: 2px solid var(--rule-strong);
       na MEQ-05.5. Não há pesos nem nota composta.</p>
     <div class="scorecard-wrap"><table class="decision">
       <thead><tr><th>Opção</th><th>Processos / núcleos físicos</th><th>Núcleos inteiros livres</th><th>Vazão (dias sim. por dia de máquina)</th><th>Efic. por núcleo físico</th><th>Cumpre 70 %?</th><th>Custo MEQ-06 (a), dias de máquina/ano</th><th>Custo MEQ-06 (b), dias de máquina/ano</th><th style="text-align:left">Situação</th></tr></thead>
-      <tbody><tr><th>A56</th><td>56 / 56</td><td>0</td><td>24,52</td><td>64,1 %</td><td>não</td><td>14,9</td><td>17,0</td><td style='text-align:left'>—</td></tr><tr><th>B112</th><td>112 / 56</td><td>0</td><td>27,10</td><td>70,8 %</td><td>sim</td><td>13,5</td><td>15,4</td><td style='text-align:left'>—</td></tr><tr><th>C60</th><td>60 / 56</td><td>0</td><td>19,35</td><td>50,5 %</td><td>não</td><td>18,9</td><td>21,6</td><td style='text-align:left'>—</td></tr><tr><th>D (2 × 28)</th><td>56 / 56</td><td>0</td><td>23,22</td><td>60,6 %</td><td>não</td><td>15,7</td><td>18,0</td><td style='text-align:left'>—</td></tr><tr class=proposed><th>90 compacto</th><td>90 / 45</td><td>11</td><td>25,04</td><td>81,4 %</td><td>sim</td><td>14,6</td><td>16,7</td><td style='text-align:left'><span class='pill gain'>recomendação proposta</span></td></tr><tr><th>90 espalhado</th><td>90 / 56</td><td>0</td><td>24,84</td><td>64,9 %</td><td>não</td><td>14,7</td><td>16,8</td><td style='text-align:left'>—</td></tr><tr><th>45/45 por soquete</th><td>90 / 56</td><td>0</td><td>24,10</td><td>63,0 %</td><td>não</td><td>15,1</td><td>17,3</td><td style='text-align:left'>—</td></tr><tr><th>45/45 compacto</th><td>90 / 46</td><td>10</td><td>24,29</td><td>77,3 %</td><td>sim</td><td>15,0</td><td>17,2</td><td style='text-align:left'>—</td></tr><tr><th>56/56</th><td>112 / 56</td><td>0</td><td>26,52</td><td>69,3 %</td><td>não</td><td>13,8</td><td>15,7</td><td style='text-align:left'>—</td></tr></tbody></table></div>
+      <tbody><tr><th>A56</th><td>56 / 56</td><td>0</td><td>24,52</td><td>64,1 %</td><td>não</td><td>14,9</td><td>17,0</td><td style='text-align:left'>—</td></tr><tr><th>B112</th><td>112 / 56</td><td>0</td><td>27,10</td><td>70,8 %</td><td>sim</td><td>13,5</td><td>15,4</td><td style='text-align:left'>—</td></tr><tr><th>C60</th><td>60 / 56</td><td>0</td><td>19,35</td><td>50,5 %</td><td>não</td><td>18,9</td><td>21,6</td><td style='text-align:left'>—</td></tr><tr><th>D (2 × 28)</th><td>56 / 56</td><td>0</td><td>23,22</td><td>60,6 %</td><td>não</td><td>15,7</td><td>18,0</td><td style='text-align:left'>—</td></tr><tr class=proposed><th>90 compacto</th><td>90 / 45</td><td>11</td><td>25,04</td><td>81,4 %</td><td>sim</td><td>14,6</td><td>16,7</td><td style='text-align:left'><span class='pill gain'>configuração adotada</span></td></tr><tr><th>90 espalhado</th><td>90 / 56</td><td>0</td><td>24,84</td><td>64,9 %</td><td>não</td><td>14,7</td><td>16,8</td><td style='text-align:left'>—</td></tr><tr><th>45/45 por soquete</th><td>90 / 56</td><td>0</td><td>24,10</td><td>63,0 %</td><td>não</td><td>15,1</td><td>17,3</td><td style='text-align:left'>—</td></tr><tr><th>45/45 compacto</th><td>90 / 46</td><td>10</td><td>24,29</td><td>77,3 %</td><td>sim</td><td>15,0</td><td>17,2</td><td style='text-align:left'>—</td></tr><tr><th>56/56</th><td>112 / 56</td><td>0</td><td>26,52</td><td>69,3 %</td><td>não</td><td>13,8</td><td>15,7</td><td style='text-align:left'>—</td></tr></tbody></table></div>
     <p class="caption">Vazão e custos com o s/passo médio de cada configuração (MEQ-05.5 combinada por
       normalização); custos são estimativas (capítulo 6). Eficiência relativa a A8, pelos
       núcleos físicos ocupados. Nos pares (D, 45/45, 56/56), vazão somada das duas rodadas e eficiência do
@@ -607,11 +606,9 @@ pre.cmd { background: var(--bg-soft); border-left: 2px solid var(--rule-strong);
       corrigido pela média da produção da EXP03, que foi cerca de 14 % mais lenta que
       esse trecho.</p>
     <div class="conclusion">
-      <h3>Situação da decisão</h3>
-      <p class="verdict">Registro: <b>decisão preliminar do pesquisador e do supervisor: simulação de 1 ano com 90 processos — aguardando confirmação final</b>. O 90 compacto aparece como
-        <b>recomendação proposta</b>. Nenhuma configuração está decidida neste relatório. A escolha final cabe ao
-        pesquisador, considerando também as limitações (capítulo 11), em especial a igualdade numérica
-        entre números de processos, que não foi verificada.</p>
+      <h3>Decisão</h3>
+      <p class="verdict"><b>Decisão do pesquisador e do supervisor (17/11/2026): a MEQ-06 começa com uma simulação de 1 ano com 90 processos compactos (45 núcleos físicos, cada um com suas 2 tarefas; 11 núcleos inteiros livres) — a configuração recomendada por este benchmark.</b> O 90 compacto aparece na tabela como
+        <b>configuração adotada</b>. A execução da simulação depende de autorização própria na MEQ-06.</p>
     </div>
     <div class="note practice"><b>O que isso significa na prática.</b> O 90 compacto entrega 25,0 dias simulados por dia de máquina, 8 % menos que a B112, cumpre o critério de 70 % (81,4 %) e deixa 11 núcleos livres para outros usuários. Um ano simulado leva cerca de 17 dias de relógio (capítulo 7).</div>
     <nav class="pager"><a href="#duracao">← Duração da MEQ-06</a><a href="#como-rodar">Como rodar →</a></nav>
@@ -722,10 +719,11 @@ done</pre>
         0,83 TB; manter só os últimos 2, 4,6 GB.</li>
       <li><b>Forçantes de contorno:</b> 0,23 TB por ano simulado
         (365 × 4 arquivos), mais a condição inicial e a atualização de superfície.</li>
-      <li><b>Espaço livre em <code>/p1-swell</code>:</b> não registrado no benchmark MEQ-05.5 (o inventário de
-        2026-11-17T23:03:29Z não leu o espaço livre do disco). O Swell não foi consultado de novo para este relatório.</li>
+      <li><b>Espaço livre em <code>/p1-swell</code>:</b> cerca de 126 TB em 13/11/2026 (diagnóstico inicial
+        da frente MEQ-05, relatado pelo Claude Code; não registrado no repositório e não verificado novamente).
+        A saída horária ocuparia dessa área: 1 ano, 1,7 TB (1,3 %); 5 anos, 8,4 TB (6,7 %); 10 anos, 16,9 TB (13,4 %); 15 anos, 25,3 TB (20,1 %).</li>
     </ul>
-    <div class="note practice"><b>O que isso significa na prática.</b> Cada ano simulado deixa cerca de 1,7 TB de saída horária; 10 anos, cerca de 17 TB, sem compressão. Durante a rodada, manter todos os restarts de um ano somaria mais 0,8 TB; guardar só os últimos 2 reduz isso a 5 GB. O espaço livre do disco precisa ser conferido antes da MEQ-06.</div>
+    <div class="note practice"><b>O que isso significa na prática.</b> Cada ano simulado deixa cerca de 1,7 TB de saída horária; 10 anos, cerca de 17 TB, sem compressão. Durante a rodada, manter todos os restarts de um ano somaria mais 0,8 TB; guardar só os últimos 2 reduz isso a 5 GB. Os cerca de 126 TB livres em 13/11/2026 comportam essa saída, mas precisam ser conferidos antes da MEQ-06.</div>
     <nav class="pager"><a href="#como-rodar">← Como rodar</a><a href="#limitacoes">Limitações →</a></nav>
   </section>
 
@@ -761,7 +759,8 @@ done</pre>
       <li><b>Rodadas em blocos.</b> Dividir o período em blocos interrompe a continuidade da simulação
         (por exemplo, a umidade do solo recomeça em cada bloco). Se isso é aceitável, e com qual spin-up,
         é decisão da MEQ-06.</li>
-      <li><b>Espaço livre em disco</b> não foi registrado no benchmark; os volumes do capítulo 10 vêm dos
+      <li><b>Espaço livre em disco</b> varia com o uso do servidor; o valor do capítulo 10 (13/11/2026) deve ser
+        conferido antes de rodar. Os volumes do capítulo 10 vêm dos
         tamanhos reais dos arquivos da EXP03 e supõem a mesma lista de variáveis e o mesmo formato sem compressão.</li>
     </ul>
     <div class="note practice"><b>O que isso significa na prática.</b> Os números deste relatório servem para escolher a configuração e estimar prazos e espaço, não para garantir prazos exatos. As configurações de 90 processos e os pares já foram medidos; o que falta conferir antes de uma rodada longa é a igualdade numérica e o espaço livre em disco.</div>
