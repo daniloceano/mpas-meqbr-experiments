@@ -18,10 +18,12 @@ edited by hand). Method detail: `docs/validation_protocol.md`.
    justify its cost, and consistently across two independent site-periods?
    The question was first posed for `CTL`/`EXP01`/`EXP02`; the candidate set
    was extended in MEQ-02 with `EXP03` (Oval MEQ-02A geometry) and the physics
-   branch `EXP04`–`EXP06` (definitions in `config/experiments.yaml`). Since
-   2026-11-11 the answer is under re-evaluation with the EOSOLAR P1 SODAR as an
-   additional wind profiler (`DEC-MEQ-002`; entry of that date
-   below).
+   branch `EXP04`–`EXP06` (definitions in `config/experiments.yaml`).
+   **Current answer: `EXP03`** (`DEC-MEQ-001`, 2026-11-10; maintained by
+   `DEC-MEQ-003`/`DEC-MEQ-004`). History: the 2026-10-07 entry pointed to
+   `EXP01` (superseded 2026-11-10); a re-evaluation with the EOSOLAR P1 SODAR
+   opened on 2026-11-11 (`DEC-MEQ-002`) was closed with the selection
+   maintained (entries of those dates below).
 
 2. **Does the 5 km MPAS hindcast add skill over the ERA5 reanalysis that drives
    it?** ERA5 supplies the initial and lateral boundary conditions, so any skill
@@ -255,7 +257,7 @@ report (LiDAR/SODAR, INMET, overall) and an explicit statement of the temporal
 resolution of each comparison. A site renaming (P0 → ML, SODAR P1 → MS, LPI
 unchanged) is proposed and pending; names here are unchanged.
 
-### 2026-11-10 — MEQ-03 decision: `EXP03` selected — **[current conclusion; under re-evaluation since 2026-11-11 → `DEC-MEQ-002`]**
+### 2026-11-10 — MEQ-03 decision: `EXP03` selected — **[current conclusion; re-evaluation closed by `DEC-MEQ-003` and `DEC-MEQ-004`, selection maintained]**
 
 On 2026-11-10 the researcher and supervisor selected `EXP03` (Oval MEQ-02A mesh
 `meqbr_05km_oval_meq02a`, corrected daily OISST, wider ERA5 box) as the
@@ -270,6 +272,12 @@ rests on two one-month periods (P0/Nov 2021, LPI/Oct 2022); paired contrasts are
 exploratory, with no global multiplicity adjustment; the LPI score is sensitive
 to the choice of ocean cell; and differences in domain, geometry and forcing do
 not allow the gain to be attributed to the oval design alone.
+
+The re-evaluation opened on 2026-11-11 (`DEC-MEQ-002`) was closed with the
+selection maintained: `DEC-MEQ-003` excluded the EOSOLAR P1 SODAR from
+validation and selection, and `DEC-MEQ-004` recorded the `to_hourly` hourly-bin
+divergence as a limitation (effect on the metrics not quantified), both in
+[`research/MEQ-03-selection-decision.md`](research/MEQ-03-selection-decision.md).
 
 ### 2026-10-07 — Corrected OISST forcing: the ranking reverses — **[superseded 2026-11-10 → MEQ-03 decision]**
 
@@ -651,10 +659,11 @@ a property of this comparison, not of the site.
 
 ## Next Steps
 
-**Current (2026-11-11, `DEC-MEQ-002`):** re-evaluate the MEQ-03 selection
-with the EOSOLAR P1 SODAR in the full pipeline, at the same weight as the
-LiDARs; the new selection needs joint ratification by researcher and
-supervisor. Planning and status: `research/ROADMAP.md`, MEQ-03. The numbered
+**Current:** the selected configuration is `EXP03` (`DEC-MEQ-001`); MEQ-03 is
+closed (`DEC-MEQ-004`). History: on 2026-11-11 (`DEC-MEQ-002`) the next step
+was to re-evaluate the selection with the EOSOLAR P1 SODAR; the SODAR was
+excluded by `DEC-MEQ-003` and the re-evaluation closed by `DEC-MEQ-004`, with
+`EXP03` maintained. Planning and status: `research/ROADMAP.md`, MEQ-03. The numbered
 list below is the 2026-10-07 list, with status notes added where items were
 later resolved.
 
