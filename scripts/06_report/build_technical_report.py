@@ -1229,7 +1229,36 @@ V2_TABLES = {
     "runtime": "results/tables/runtime_metrics.csv",
     "inventory": "results/tables/experiment_inventory.csv",
     "mesh_profile": "results/tables/mesh_spacing_profile.csv",
+    # MEQ-04.3 paired component tests and exact MSE decomposition (100 m LiDAR).
+    "paired_components": "results/tables/meq04_3_paired_components.csv",
+    "error_decomposition": "results/tables/meq04_3_error_decomposition.csv",
+    # GOV.4 observation timelines (scripts/02_validation/export_observation_availability.py).
+    "observation_availability": "results/tables/observation_availability.csv",
 }
+
+BENCHMARK_TABLE = "results/tables/meq05_parallel_benchmark.csv"
+
+
+def _benchmark_saturation() -> list[dict]:
+    """Mean throughput per MEQ-05 configuration for the small saturation curve.
+
+    Series A (8-56 ranks, one per physical core) and B (112 ranks, both SMT
+    threads); repetitions averaged exactly as in the benchmark report. The
+    detail stays in results/report/meq05_parallel_benchmark.html.
+    """
+    path = REPO_ROOT / BENCHMARK_TABLE
+    if not path.exists():
+        return []
+    bench = pd.read_csv(path)
+    bench = bench[bench["series"].isin(["A", "B"]) & (bench["status"] == "ok")]
+    out = []
+    for (series, config), grp in bench.groupby(["series", "config"]):
+        out.append({"series": series, "config": config,
+                    "ranks": int(grp["ranks"].iloc[0]),
+                    "physical_cores": int(grp["physical_cores"].iloc[0]),
+                    "n_reps": int(len(grp)),
+                    "sim_days_per_wall_day": float(grp["sim_days_per_wall_day_integration"].mean())})
+    return sorted(out, key=lambda r: r["ranks"])
 
 MESH_FIGURES = {
     "meqbr_05km": "experimental_design_ctl_mesh.png",
@@ -1250,8 +1279,14 @@ EXPERIMENT_SHORT = {
     "EXP05": "+ convecção Grell–Freitas",
     "EXP06": "+ SST diurna (pele)",
 }
-EXPERIMENT_PARENT = {"CTL": None, "EXP01": "CTL", "EXP02": "EXP01", "EXP03": "EXP01",
+# EXP03 has a dual ancestry (GOV.4): model configuration from EXP01 and
+# preprocessing (corrected daily OISST, wide ERA5 box) from EXP02.
+EXPERIMENT_PARENT = {"CTL": None, "EXP01": "CTL", "EXP02": "EXP01",
+                     "EXP03": ["EXP01", "EXP02"],
                      "EXP04": "EXP01", "EXP05": "EXP04", "EXP06": "EXP05"}
+EXPERIMENT_PARENT_ROLES = {
+    "EXP03": {"EXP01": "configuração do modelo", "EXP02": "pré-processamento"},
+}
 
 
 def _records(df: pd.DataFrame) -> list[dict]:
@@ -1399,6 +1434,7 @@ def build_v2_payload(cfg, report_dir: Path, superseded: set[str],
     for exp in experiments:
         exp["short"] = EXPERIMENT_SHORT.get(exp["id"], "")
         exp["parent"] = EXPERIMENT_PARENT.get(exp["id"])
+        exp["parent_roles"] = EXPERIMENT_PARENT_ROLES.get(exp["id"])
     sst_fig = design_items.get("experimental_design_exp01_sst.png")
 
     # Point series: copied next to the page and loaded on demand.
@@ -1462,6 +1498,7 @@ def build_v2_payload(cfg, report_dir: Path, superseded: set[str],
         "geography": geography,
         **data,
     }
+    payload["benchmark_saturation"] = _benchmark_saturation()
     payload["decision"] = _decision_matrix(payload)
     payload["tradeoff"] = _tradeoff(payload["decision"])
     return payload, copied, vendor
@@ -1595,6 +1632,11 @@ def main() -> int:
                 REPO_ROOT / "results" / "interactive" / "validation_panel.json",
                 REPO_ROOT / "results" / "interactive" / "meteorological_viewer.json",
             ) if path.exists()
+        ],
+        "v2_table_files": [
+            file_record(REPO_ROOT / rel)
+            for rel in list(V2_TABLES.values()) + [BENCHMARK_TABLE]
+            if (REPO_ROOT / rel).exists()
         ],
         "index": file_record(output),
         "builder": "scripts/06_report/build_technical_report.py",

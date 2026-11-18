@@ -35,7 +35,9 @@ previous/next links. Each chapter answers one question with one primary
 interactive view; detail is one click away.
 
 1. **Experiments and meshes** — clickable cumulative-design tree, the three
-   distinct meshes (not one per experiment), integration windows and cost.
+   distinct meshes (not one per experiment), integration windows and cost,
+   plus a collapsed drawer with the MEQ-05 parallel-saturation curve
+   (`meq05_parallel_benchmark.csv`; detail in `meq05_parallel_benchmark.html`).
 2. **Simulated fields** — separate tabs for static mean fields (Leaflet map,
    EPSG:4326, coastline and state boundaries, A|B swipe comparison on a shared
    colour scale with ERA5 selectable, and an in-browser A − B difference mode),
@@ -43,13 +45,18 @@ interactive view; detail is one click away.
    animations.
 3. **Observation network** — map of LiDARs and INMET stations; clicking a point
    loads its paired hourly series (observation, ERA5, seven experiments), the
-   mean diurnal cycle, the speed distribution and its metrics.
+   mean diurnal cycle, the speed distribution and its metrics. A second tab
+   shows daily observation availability per unit
+   (`observation_availability.csv`, from
+   `scripts/02_validation/export_observation_availability.py`, run on Swell).
 4. **Validation** — scorecard (unit × source, colour relative to the row,
    metric switch), confidence-interval chart and pairwise-test matrix for the
    selected unit, LiDAR vertical profiles, and per-network summary.
 5. **Added value vs ERA5** — Murphy skill with CIs (LiDAR and INMET), month
    representativeness and domain resource difference (MPAS × ERA5 maps live in
-   chapter 2's field viewer).
+   chapter 2's field viewer). Opens with the MEQ-04 synthesis and adds the
+   MEQ-04.3 paired component tests (metric and comparison switches), the MSE
+   decomposition for ERA5 and EXP03, and a "how the paired test works" drawer.
 6. **Physical coherence** — hypothesis → evidence → verdict blocks (SST chain,
    boundary influence, EXP04–06 contrast matrix, EXP06 skin SST, cell sensitivity).
 7. **Synthesis** — criteria × experiment matrix without weights, pairwise

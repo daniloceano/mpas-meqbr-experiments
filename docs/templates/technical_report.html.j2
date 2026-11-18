@@ -615,8 +615,9 @@
          convecção, SST e geometria variam conforme o ramo experimental. O desenho
          é cumulativo, não fatorial: EXP02 − EXP01 representa o efeito
          <em>incremental</em> do tratamento de fronteira com a atualização de
-         SST já ligada; EXP03 avalia a geometria Oval preservando a OISST
-         corrigida e a caixa ERA5 ampla. O ramo EXP04→EXP06 parte diretamente do
+         SST já ligada; EXP03 tem ascendência dupla — configuração do modelo da
+         EXP01 e pré-processamento da EXP02 (OISST corrigida e caixa ERA5
+         ampla) — e avalia a geometria Oval. O ramo EXP04→EXP06 parte diretamente do
          EXP01 e acumula MYNN, Grell–Freitas e o ciclo diurno da temperatura de pele.</p>
 
       <div id="configuracao-comum">
@@ -660,7 +661,7 @@
           <div class="arrow">→</div>
           <div class="step"><strong>EXP02</strong><br>EXP01 + tratamento de fronteira</div>
           <div class="arrow">→</div>
-          <div class="step"><strong>EXP03</strong><br>OISST corrigida + malha Oval</div>
+          <div class="step"><strong>EXP03</strong><br>modelo do EXP01 + pré-processamento do EXP02 + malha Oval</div>
         </div>
         <div class="flow" aria-label="Ramo cumulativo de física EXP04 a EXP06">
           <div class="step"><strong>EXP01</strong><br>malha original + OISST diária</div>

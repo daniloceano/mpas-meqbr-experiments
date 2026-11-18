@@ -1,0 +1,245 @@
+network,point,label,period,date,hours_valid,hours_total,source_script
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-01,0,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-02,0,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-03,0,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-04,0,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-05,0,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-06,0,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-07,0,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-08,0,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-09,10,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-10,19,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-11,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-12,21,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-13,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-14,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-15,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-16,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-17,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-18,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-19,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-20,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-21,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-22,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-23,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-24,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-25,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-26,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-27,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-28,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-29,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,P0,LiDAR P0 · 100 m,2021,2021-11-30,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-01,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-02,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-03,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-04,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-05,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-06,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-07,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-08,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-09,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-10,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-11,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-12,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-13,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-14,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-15,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-16,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-17,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-18,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-19,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-20,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-21,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-22,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-23,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-24,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-25,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-26,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-27,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-28,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-29,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-30,24,24,scripts/02_validation/export_observation_availability.py
+LiDAR,LPI,LiDAR LPI · 100 m,2022,2022-10-31,20,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-01,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-02,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-03,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-04,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-05,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-06,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-07,21,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-08,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-09,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-10,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-11,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-12,19,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-13,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-14,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-15,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-16,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-17,20,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-18,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-19,20,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-20,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-21,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-22,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-23,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-24,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-25,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-26,19,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-27,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-28,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-29,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2021,2021-11-30,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-01,9,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-02,10,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-03,9,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-04,10,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-05,8,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-06,9,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-07,8,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-08,8,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-09,6,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-10,4,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-11,5,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-12,5,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-13,4,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-14,8,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-15,7,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-16,6,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-17,2,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-18,0,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-19,1,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-20,2,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-21,2,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-22,4,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-23,12,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-24,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-25,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-26,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-27,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-28,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-29,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2021,2021-11-30,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-01,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-02,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-03,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-04,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-05,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-06,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-07,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-08,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-09,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-10,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-11,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-12,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-13,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-14,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-15,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-16,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-17,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-18,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-19,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-20,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-21,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-22,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-23,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-24,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-25,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-26,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-27,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-28,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-29,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81798099999,INMET JAGUARUANA (INMET A) · 10 m,2021,2021-11-30,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-01,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-02,15,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-03,17,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-04,21,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-05,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-06,21,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-07,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-08,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-09,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-10,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-11,19,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-12,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-13,12,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-14,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-15,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-16,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-17,19,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-18,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-19,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-20,21,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-21,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-22,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-23,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-24,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-25,21,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-26,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-27,20,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-28,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-29,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-30,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81715099999,INMET SAO LUIS (INMET A) · 10 m,2022,2022-10-31,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-01,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-02,15,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-03,17,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-04,20,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-05,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-06,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-07,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-08,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-09,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-10,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-11,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-12,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-13,13,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-14,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-15,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-16,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-17,18,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-18,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-19,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-20,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-21,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-22,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-23,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-24,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-25,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-26,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-27,21,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-28,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-29,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-30,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81758099999,INMET FORTALEZA (INMET A) · 10 m,2022,2022-10-31,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-01,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-02,15,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-03,17,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-04,20,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-05,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-06,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-07,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-08,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-09,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-10,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-11,20,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-12,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-13,13,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-14,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-15,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-16,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-17,18,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-18,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-19,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-20,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-21,22,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-22,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-23,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-24,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-25,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-26,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-27,23,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-28,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-29,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-30,24,24,scripts/02_validation/export_observation_availability.py
+INMET,81835099999,INMET APODI (INMET A) · 10 m,2022,2022-10-31,24,24,scripts/02_validation/export_observation_availability.py

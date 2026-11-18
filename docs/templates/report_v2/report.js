@@ -154,7 +154,7 @@
     var rowLabels = [[1, 'SST e fronteira'], [2, 'Geometria'], [3, 'Física da CLP']];
     var html = '';
     rowLabels.forEach(function (r) {
-      if (r[0] > 1) html += '<div class="tree-row-label" style="grid-row:' + r[0] + ';grid-column:1">' + r[1] + '<br><small>a partir de EXP01</small></div>';
+      if (r[0] > 1) html += '<div class="tree-row-label" style="grid-row:' + r[0] + ';grid-column:1">' + r[1] + '<br><small>' + (r[0] === 2 ? 'modelo do EXP01 · pré-processamento do EXP02' : 'a partir de EXP01') + '</small></div>';
     });
     layoutTree.forEach(function (n) {
       var e = exps[n[0]]; if (!e) return;
@@ -165,7 +165,14 @@
     function show(id) {
       var e = exps[id]; if (!e) return;
       Array.prototype.forEach.call(tree.querySelectorAll('.node'), function (b) { b.classList.toggle('active', b.dataset.exp === id); });
-      var detail = '<p><b>' + e.id + '</b>' + (e.parent ? ' — muda em relação a <b>' + e.parent + '</b>' : ' — referência') + '. ' + esc(e.description) + '</p>' +
+      var origin;
+      if (Array.isArray(e.parent)) {
+        var roles = e.parent_roles || {};
+        origin = ' — ascendência dupla: ' + e.parent.map(function (p) { return (roles[p] ? esc(roles[p]) + ' da ' : '') + '<b>' + p + '</b>'; }).join(' e ');
+      } else {
+        origin = e.parent ? ' — muda em relação a <b>' + e.parent + '</b>' : ' — referência';
+      }
+      var detail = '<p><b>' + e.id + '</b>' + origin + '. ' + esc(e.description) + '</p>' +
         '<p><span class="chip">malha ' + esc(e.mesh) + '</span><span class="chip">' + esc(e.n_cells) + ' células</span>' +
         '<span class="chip">' + esc(e.mpi_ranks) + ' ranks MPI</span><span class="chip">' + esc(e.status) + '</span></p>';
       if (e.id === 'EXP01' && D.sst_figure) detail += '<figure class="panel"><img src="' + D.sst_figure + '" alt="SST EXP01 − CTL" loading="lazy"><figcaption>SST média EXP01 − CTL, nov 2021: combina atualização diária e diferença do estado médio OISST × SST inicial do ERA5.</figcaption></figure>';
@@ -267,6 +274,25 @@
     }
     segment('cost-mode', function (d) { drawCost(d.c); });
     drawCost('hour');
+
+    // MEQ-05 saturation curve, drawn when its drawer is first opened.
+    var satDrawer = $('saturation-drawer'), satDone = false;
+    if (satDrawer) satDrawer.addEventListener('toggle', function () {
+      if (!satDrawer.open || satDone) return;
+      satDone = true;
+      var sat = D.benchmark_saturation || [];
+      var phys = sat.filter(function (r) { return r.series === 'A'; }), smt = sat.filter(function (r) { return r.series === 'B'; });
+      var hov = '%{x} processos: %{y:.1f} dias simulados/dia (%{customdata} repetições)<extra></extra>';
+      plot('chart-saturation', [
+        { type: 'scatter', mode: 'lines+markers', name: 'um processo por núcleo físico', x: phys.map(function (r) { return r.ranks; }), y: phys.map(function (r) { return r.sim_days_per_wall_day; }),
+          line: { color: '#1a1a1a', width: 1.1 }, marker: { size: 7, color: '#1a1a1a' }, customdata: phys.map(function (r) { return r.n_reps; }), hovertemplate: hov },
+        { type: 'scatter', mode: 'markers', name: '112 processos (SMT)', x: smt.map(function (r) { return r.ranks; }), y: smt.map(function (r) { return r.sim_days_per_wall_day; }),
+          marker: { symbol: 'diamond-open', size: 9, color: '#1a1a1a', line: { width: 1.3 } }, customdata: smt.map(function (r) { return r.n_reps; }), hovertemplate: hov }
+      ], { showlegend: true, legend: { orientation: 'h', y: 1.16, x: 0 }, margin: { l: 56, r: 12, t: 30, b: 40 },
+        shapes: [{ type: 'line', xref: 'x', yref: 'paper', x0: 56, x1: 56, y0: 0, y1: 1, line: { color: '#7a7a7a', width: 0.8, dash: 'dot' } }],
+        annotations: [{ xref: 'x', yref: 'paper', x: 56, y: 0.04, xanchor: 'left', showarrow: false, text: ' 56 núcleos físicos', font: { size: 9, color: '#4a4a4a' } }],
+        xaxis: { title: { text: 'processos MPI' }, rangemode: 'tozero' }, yaxis: { title: { text: 'dias simulados por dia' }, rangemode: 'tozero' } });
+    });
   }
 
   // ======================================================================
@@ -550,6 +576,29 @@
   }
   function initNetwork() {
     var map = baseMap('network-map');
+    var netTabs = $('net-tabs');
+    if (netTabs) netTabs.addEventListener('click', function (ev) {
+      var b = ev.target.closest('button'); if (!b) return;
+      if (b.dataset.tab === 'net-map') setTimeout(function () { map.invalidateSize(); }, 30);
+      if (b.dataset.tab === 'net-avail') setTimeout(function () { drawAvailability(availPeriod); }, 30);
+    });
+    var availPeriod = '2021';
+    function drawAvailability(period) {
+      var rows = (D.observation_availability || []).filter(function (r) { return String(r.period) === period; });
+      var units = uniq(rows.map(function (r) { return r.label; }));
+      units.sort(function (a, b) { return (a.indexOf('LiDAR') === 0 ? 0 : 1) - (b.indexOf('LiDAR') === 0 ? 0 : 1) || (a < b ? -1 : 1); });
+      var have = rows.filter(function (r) { return r.hours_valid > 0; });
+      var totals = {};
+      rows.forEach(function (r) { totals[r.label] = (totals[r.label] || 0) + r.hours_valid; });
+      var tr = [{ type: 'scatter', mode: 'markers', x: have.map(function (r) { return r.date; }), y: have.map(function (r) { return r.label; }),
+        marker: { symbol: 'square', size: 13, color: have.map(function (r) { var f = r.hours_valid / r.hours_total; return 'rgba(26,26,26,' + (0.15 + 0.85 * f).toFixed(3) + ')'; }), line: { width: 0 } },
+        customdata: have.map(function (r) { return r.hours_valid; }), hovertemplate: '%{y}<br>%{x}: %{customdata} de 24 h válidas<extra></extra>' }];
+      plot('chart-availability', tr, { margin: { l: 200, r: 60, t: 8, b: 40 },
+        xaxis: { type: 'date', tickformat: '%d/%m', title: { text: 'dia (UTC)' } },
+        yaxis: { categoryorder: 'array', categoryarray: units.slice().reverse(), ticks: '' },
+        annotations: units.map(function (u) { return { xref: 'paper', yref: 'y', x: 1.0, y: u, xanchor: 'left', showarrow: false, text: ' ' + totals[u] + ' h', font: { size: 10, color: '#4a4a4a' } }; }) });
+    }
+    segment('avail-period', function (d) { availPeriod = d.p; drawAvailability(availPeriod); });
     var points = D.points || [];
     var series = D.series || {};
     var state = { point: null };
@@ -955,6 +1004,89 @@
     plot('chart-resource', tr4, { barmode: 'group', bargap: 0.25, showlegend: true, legend: { orientation: 'h', y: 1.12, x: 0 }, margin: { l: 56, r: 12, t: 30, b: 36 },
       yaxis: { title: { text: 'Δ WPD relativa ao ERA5 (%)' }, zeroline: true, zerolinecolor: '#1a1a1a', zerolinewidth: 0.8 } });
 
+    safe(initComponents, 'paired components');
+    safe(initDecomposition, 'error decomposition');
+  }
+
+  // MEQ-04.3: paired component tests (B − A) for the LiDAR at 100 m.
+  var PC_META = {
+    rmse: { label: 'ΔRMSE (m s⁻¹)', d: 2, better: 'negativo favorece o experimento B (menor RMSE)' },
+    skill_vs_era5: { label: 'Δskill vs ERA5', d: 2, better: 'positivo favorece o experimento B (ΔMSE/MSE do ERA5)' },
+    abs_bias: { label: 'Δ|viés| (m s⁻¹)', d: 2, better: 'negativo favorece o experimento B (menor |viés|)' },
+    r: { label: 'Δr', d: 3, better: 'positivo favorece o experimento B (maior correlação)' },
+    amplitude: { label: 'Δamplitude = Δ|1 − σ_m/σ_o|', d: 3, better: 'negativo favorece o experimento B (amplitude mais realista)' }
+  };
+  function initComponents() {
+    var rows = D.paired_components || [];
+    var state = { metric: 'rmse', view: 'vs_ERA5' };
+    function render() {
+      var m = state.metric, meta = PC_META[m];
+      $('pc-r-note').style.display = m === 'r' ? '' : 'none';
+      $('pc-era5').style.display = state.view === 'vs_ERA5' ? '' : 'none';
+      $('pc-pairwise').style.display = state.view === 'pairwise' ? '' : 'none';
+      if (state.view === 'vs_ERA5') {
+        var sub = rows.filter(function (r) { return r.comparison === 'vs_ERA5'; });
+        var yIndex = {}; ORDER.forEach(function (e, i) { yIndex[e] = ORDER.length - 1 - i; });
+        var tr = [['P0', 'circle', -0.15, 'P0 · nov 2021'], ['LPI', 'square', 0.15, 'LPI · out 2022']].map(function (s) {
+          var rr = sub.filter(function (r) { return r.site === s[0]; });
+          return { type: 'scatter', mode: 'markers', name: s[3],
+            x: rr.map(function (r) { return r['d_' + m]; }), y: rr.map(function (r) { return yIndex[r.source_b] + s[2]; }),
+            error_x: { type: 'data', symmetric: false, array: rr.map(function (r) { return r['d_' + m + '_hi'] - r['d_' + m]; }),
+              arrayminus: rr.map(function (r) { return r['d_' + m] - r['d_' + m + '_lo']; }), color: '#1a1a1a', thickness: 1, width: 3 },
+            marker: { symbol: rr.map(function (r) { return r['better_' + m] !== 'no difference' ? s[1] : s[1] + '-open'; }), size: 9,
+              color: rr.map(function (r) { return color(r.source_b); }), line: { width: 1.6, color: rr.map(function (r) { return color(r.source_b); }) } },
+            customdata: rr.map(function (r) { return [r.source_b, r['d_' + m + '_lo'], r['d_' + m + '_hi'], r['better_' + m] === 'no difference' ? 'sem diferença detectável' : 'melhor: ' + r['better_' + m]]; }),
+            hovertemplate: '%{customdata[0]} − ERA5 · ' + s[0] + ': %{x:.' + meta.d + 'f} [%{customdata[1]:.' + meta.d + 'f}; %{customdata[2]:.' + meta.d + 'f}]<br>%{customdata[3]}<extra></extra>' };
+        });
+        plot('chart-components', tr, { showlegend: true, legend: { orientation: 'h', y: 1.1, x: 0 }, margin: { l: 56, r: 12, t: 28, b: 42 },
+          shapes: [{ type: 'line', xref: 'x', yref: 'paper', x0: 0, x1: 0, y0: 0, y1: 1, line: { color: '#1a1a1a', width: 0.8 } }],
+          xaxis: { title: { text: meta.label + ', experimento − ERA5' } },
+          yaxis: { tickvals: ORDER.map(function (e) { return yIndex[e]; }), ticktext: ORDER, range: [-0.6, ORDER.length - 0.4] } });
+        $('pc-caption').innerHTML = 'Diferença B − A (A = ERA5, B = experimento) no componente selecionado, mesmas horas e mesmo LiDAR a 100 m; ' + meta.better +
+          '. Barra = IC95% por bootstrap pareado em blocos de 24 h (2000 reamostragens, mesmos sorteios para as duas fontes). Símbolo cheio = IC exclui zero; vazado = sem diferença detectável. Contrastes exploratórios, sem ajuste de multiplicidade. Fonte: <code>meq04_3_paired_components.csv</code>.';
+      } else {
+        ['P0', 'LPI'].forEach(function (site) {
+          var pw = rows.filter(function (r) { return r.comparison === 'pairwise' && r.site === site; });
+          var html = '<table><thead><tr><th></th>' + ORDER.map(function (b) { return '<th>' + b.replace('EXP', 'E') + '</th>'; }).join('') + '</tr></thead><tbody>';
+          ORDER.forEach(function (a) {
+            html += '<tr><th>' + a + '</th>';
+            ORDER.forEach(function (b) {
+              if (a === b) { html += '<td class="diag"></td>'; return; }
+              var r = pw.filter(function (x) { return (x.source_a === a && x.source_b === b) || (x.source_a === b && x.source_b === a); })[0];
+              if (!r) { html += '<td>—</td>'; return; }
+              var w = r['better_' + m];
+              var tip = meta.label + ' ' + r.source_b + '−' + r.source_a + ' = ' + fmt(r['d_' + m], meta.d) + ' [' + fmt(r['d_' + m + '_lo'], meta.d) + '; ' + fmt(r['d_' + m + '_hi'], meta.d) + ']';
+              if (w !== 'no difference') html += '<td style="background:' + color(w) + ';color:#fff" title="' + esc(tip) + '">' + w.replace('EXP', 'E') + '</td>';
+              else html += '<td class="nd" title="' + esc(tip) + '">·</td>';
+            });
+            html += '</tr>';
+          });
+          $('pc-grid-' + site).innerHTML = html + '</tbody></table>';
+        });
+        $('pc-caption').innerHTML = 'Cada célula indica o experimento melhor no componente selecionado (' + esc(meta.label) + ') quando o IC95% da diferença exclui zero; “·” = sem diferença detectável, não equivalência. Passe o cursor para ver a diferença e o intervalo. Mesmos pares e reamostragem em blocos de 24 h que respeitam lacunas da matriz de ΔMSE da Validação; contrastes exploratórios, sem ajuste de multiplicidade. Fonte: <code>meq04_3_paired_components.csv</code>.';
+      }
+    }
+    segment('pc-metric', function (d) { state.metric = d.m; render(); });
+    segment('pc-view', function (d) { state.view = d.v; render(); });
+    render();
+  }
+
+  function initDecomposition() {
+    var dec = (D.error_decomposition || []).filter(function (r) { return r.source === 'ERA5' || r.source === 'EXP03'; });
+    var order = [['P0', 'ERA5'], ['P0', 'EXP03'], ['LPI', 'ERA5'], ['LPI', 'EXP03']];
+    var cats = order.map(function (o) { return o[0] + ' · ' + o[1]; });
+    var pick = order.map(function (o) { return dec.filter(function (r) { return r.site === o[0] && r.source === o[1]; })[0] || {}; });
+    var terms = [['term_bias2', 'frac_bias2', 'viés²', 0.12, '#fff'], ['term_amplitude', 'frac_amplitude', 'amplitude', 0.5, '#1a1a1a'], ['term_correlation', 'frac_correlation', 'correlação (sincronia)', 0.88, '#1a1a1a']];
+    var tr = terms.map(function (t) {
+      var col = paletteAt('batlow', t[3]);
+      return { type: 'bar', orientation: 'h', name: t[2], y: cats, x: pick.map(function (r) { return r[t[0]]; }), marker: { color: col },
+        text: pick.map(function (r) { return r[t[1]] >= 0.08 ? fmt(100 * r[t[1]], 0) + '%' : ''; }), textposition: 'inside', insidetextanchor: 'middle',
+        textfont: { size: 10, color: t[4] },
+        customdata: pick.map(function (r) { return [100 * r[t[1]], r.rmse]; }),
+        hovertemplate: '%{y} · ' + t[2] + ': %{x:.2f} m² s⁻² (%{customdata[0]:.0f}% do MSE; RMSE %{customdata[1]:.2f} m s⁻¹)<extra></extra>' };
+    });
+    plot('chart-decomposition', tr, { barmode: 'stack', showlegend: true, legend: { orientation: 'h', y: 1.16, x: 0, traceorder: 'normal' }, margin: { l: 90, r: 12, t: 30, b: 40 },
+      xaxis: { title: { text: 'MSE (m² s⁻²)' }, rangemode: 'tozero' }, yaxis: { categoryorder: 'array', categoryarray: cats.slice().reverse() } });
   }
 
   // ======================================================================
