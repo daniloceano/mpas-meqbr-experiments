@@ -1072,22 +1072,49 @@
   }
 
   function initDecomposition() {
-    var dec = (D.error_decomposition || []).filter(function (r) { return r.source === 'ERA5' || r.source === 'EXP03'; });
-    var order = [['P0', 'ERA5'], ['P0', 'EXP03'], ['LPI', 'ERA5'], ['LPI', 'EXP03']];
-    var cats = order.map(function (o) { return o[0] + ' · ' + o[1]; });
-    var pick = order.map(function (o) { return dec.filter(function (r) { return r.site === o[0] && r.source === o[1]; })[0] || {}; });
+    var dec = D.error_decomposition || [];
+    var sources = SOURCES.filter(function (src) { return dec.some(function (r) { return r.source === src; }); });
+    var on = { ERA5: true, EXP03: true };
     var terms = [['term_bias2', 'frac_bias2', 'viés²', 0.12, '#fff'], ['term_amplitude', 'frac_amplitude', 'amplitude', 0.5, '#1a1a1a'], ['term_correlation', 'frac_correlation', 'correlação (sincronia)', 0.88, '#1a1a1a']];
-    var tr = terms.map(function (t) {
-      var col = paletteAt('batlow', t[3]);
-      return { type: 'bar', orientation: 'h', name: t[2], y: cats, x: pick.map(function (r) { return r[t[0]]; }), marker: { color: col },
-        text: pick.map(function (r) { return r[t[1]] >= 0.08 ? fmt(100 * r[t[1]], 0) + '%' : ''; }), textposition: 'inside', insidetextanchor: 'middle',
-        textfont: { size: 10, color: t[4] },
-        customdata: pick.map(function (r) { return [100 * r[t[1]], r.rmse]; }),
-        hovertemplate: '%{y} · ' + t[2] + ': %{x:.2f} m² s⁻² (%{customdata[0]:.0f}% do MSE; RMSE %{customdata[1]:.2f} m s⁻¹)<extra></extra>' };
+    var chips = $('dec-sources');
+    chips.innerHTML = sources.map(function (src) {
+      var c = color(src);
+      return '<button type="button" data-src="' + src + '" class="' + (on[src] ? '' : 'off') + '" aria-pressed="' + (on[src] ? 'true' : 'false') + '" style="--c:' + c + '"><i' +
+        (src === 'ERA5' ? ' style="background:repeating-linear-gradient(90deg,' + c + ' 0 3px,transparent 3px 5px)"' : '') + '></i>' + src + (src === 'ERA5' ? ' (referência)' : '') + '</button>';
+    }).join('');
+    chips.addEventListener('click', function (ev) {
+      var b = ev.target.closest('button'); if (!b) return;
+      var src = b.dataset.src;
+      if (on[src] && sources.filter(function (x) { return on[x]; }).length === 1) return; // keep at least one source
+      on[src] = !on[src];
+      b.classList.toggle('off', !on[src]);
+      b.setAttribute('aria-pressed', on[src] ? 'true' : 'false');
+      render();
     });
-    plot('chart-decomposition', tr, { barmode: 'stack', showlegend: true, legend: { orientation: 'h', y: 1.16, x: 0, traceorder: 'normal' }, margin: { l: 90, r: 12, t: 30, b: 40 },
-      xaxis: { title: { text: 'MSE (m² s⁻²)' }, rangemode: 'tozero' }, yaxis: { categoryorder: 'array', categoryarray: cats.slice().reverse() } });
+    function render() {
+      var shown = sources.filter(function (src) { return on[src]; });
+      var xmax = 0;
+      dec.forEach(function (r) { if (shown.indexOf(r.source) >= 0) xmax = Math.max(xmax, r.mse); });
+      var height = 90 + 30 * shown.length;
+      ['P0', 'LPI'].forEach(function (site, k) {
+        var pick = shown.map(function (src) { return dec.filter(function (r) { return r.site === site && r.source === src; })[0] || {}; });
+        var tr = terms.map(function (t) {
+          return { type: 'bar', orientation: 'h', name: t[2], showlegend: k === 0, y: shown, x: pick.map(function (r) { return r[t[0]]; }), marker: { color: paletteAt('batlow', t[3]) },
+            text: pick.map(function (r) { return r[t[1]] >= 0.1 ? fmt(100 * r[t[1]], 0) + '%' : ''; }), textposition: 'inside', insidetextanchor: 'middle',
+            textfont: { size: 9, color: t[4] }, constraintext: 'none',
+            customdata: pick.map(function (r) { return [100 * r[t[1]], r.rmse]; }),
+            hovertemplate: '%{y} · ' + site + ' · ' + t[2] + ': %{x:.2f} m² s⁻² (%{customdata[0]:.0f}% do MSE; RMSE %{customdata[1]:.2f} m s⁻¹)<extra></extra>' };
+        });
+        var node = $('chart-decomposition-' + site); if (node) node.style.height = height + 'px';
+        plot('chart-decomposition-' + site, tr, { barmode: 'stack', bargap: 0.3, showlegend: k === 0, legend: { orientation: 'h', y: 1.02, yanchor: 'bottom', x: 0, traceorder: 'normal' },
+          height: height, margin: { l: 52, r: 10, t: 30, b: 38 },
+          xaxis: { title: { text: 'MSE (m² s⁻²)' }, range: [0, xmax * 1.03] },
+          yaxis: { categoryorder: 'array', categoryarray: shown.slice().reverse(), tickmode: 'array', tickvals: shown, ticktext: shown, tickfont: { size: 10 } } });
+      });
+    }
+    render();
   }
+
 
   // ======================================================================
   // 6 · Physics

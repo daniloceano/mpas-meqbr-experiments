@@ -400,12 +400,17 @@
       conclusão.</p>
 
     <h3>Decomposição do erro</h3>
-    <div class="chart" id="chart-decomposition" style="height:230px"></div>
+    <div class="source-chips" id="dec-sources" role="group" aria-label="Fontes na decomposição"></div>
+    <div class="grid-2 tight">
+      <div><h4>P0 · nov 2021</h4><div class="chart" id="chart-decomposition-P0" style="height:200px"></div></div>
+      <div><h4>LPI · out 2022</h4><div class="chart" id="chart-decomposition-LPI" style="height:200px"></div></div>
+    </div>
     <p class="caption">MSE = viés² + (σ<sub>m</sub> − σ<sub>o</sub>)² +
       2·σ<sub>m</sub>·σ<sub>o</sub>·(1 − r), com desvios-padrão populacionais; a
-      identidade é exata. Cada barra é o MSE total (m² s⁻²) de ERA5 ou EXP03 em cada
-      sítio, dividido em viés², amplitude e correlação (sincronia temporal); o
-      rótulo dá a fração de cada termo. Fonte:
+      identidade é exata. Cada barra é o MSE total (m² s⁻²) de uma fonte no sítio,
+      dividido em viés², amplitude e correlação (sincronia temporal); o rótulo dá
+      a fração de cada termo. Marque ou desmarque as fontes acima (padrão: ERA5 e
+      EXP03); os dois painéis usam a mesma escala. Fonte:
       <code>meq04_3_error_decomposition.csv</code>.</p>
 
     <details class="drawer">
