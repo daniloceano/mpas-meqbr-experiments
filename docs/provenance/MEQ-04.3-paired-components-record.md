@@ -111,6 +111,10 @@ Número de pares com IC excluindo zero, por componente:
 
 Detalhe por par em `meq04_3_paired_components.csv`.
 
+## Nota de 18/11/2026 — contagem de horas no fim da janela
+
+Os resultados acima não mudam. O pareamento de P0 inclui a hora 2021-12-01 00:00: o fim da janela de análise é inclusivo, o que dá 507 h. Já a aba "Disponibilidade das observações" do relatório HTML (MEQ-04.4, `observation_availability.csv`) conta as horas em [início, fim), excluindo essa hora, e por isso mostra 506 h para o LiDAR P0 a 100 m. A diferença é só de convenção de borda.
+
 ## Limites
 
 - Contrastes exploratórios, **sem ajuste de multiplicidade** (5 componentes × 56 comparações).
