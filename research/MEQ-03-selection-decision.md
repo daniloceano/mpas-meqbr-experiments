@@ -128,3 +128,20 @@ Tratamento da divergência de `to_hourly` (pendência 1 da `DEC-MEQ-003`) e ence
 - **Limitações:** o efeito da divergência nas métricas e na seleção não foi quantificado. A docstring de `to_hourly` e a descrição do pareamento em `docs/validation_protocol.md` continuam descrevendo a janela de 6 amostras; esta última passa a remeter a esta entrada.
 - **Consequências:** `DEC-MEQ-001` mantida (`EXP03`, malha oval `meqbr_05km_oval_meq02a`); MEQ-03 **encerrada**. Nenhuma alteração de código, configuração, dados ou resultados. Uma correção futura de `to_hourly` exige decisão própria e recálculo com trilha de proveniência. As pendências 2 e 3 da `DEC-MEQ-003` (origem da `EXP03`; fusos não documentados de P0 e `config/experiments.yaml`) seguem registradas como não bloqueantes.
 - **Condição de revisão:** nova entrada `DEC-MEQ-NNN` que autorize a correção de `to_hourly` ou substitua a `DEC-MEQ-001`. Esta entrada não é apagada.
+
+## Registro de decisão `DEC-MEQ-005`
+
+Configuração de paralelismo da produção climatológica, a partir do benchmark da MEQ-05. Entrada no formato da seção 7 do [ROADMAP](ROADMAP.md); as entradas `DEC-MEQ-001` a `DEC-MEQ-004` acima não são apagadas nem alteradas.
+
+- **Identificador:** `DEC-MEQ-005`
+- **Data:** 17/11/2026
+- **Frente:** MEQ-05 — Benchmark de paralelismo e viabilidade computacional (consequência para a MEQ-06)
+- **Referencia:** `DEC-MEQ-001` (configuração `EXP03`, malha `meqbr_05km_oval_meq02a`, cujo paralelismo é dimensionado aqui).
+- **Enunciado:** a MEQ-06 começa com **1 ano a 90 processos compactos** (45 núcleos físicos × 2 tarefas SMT, 11 núcleos livres no nó de 56), com **fixação explícita de processos** a núcleos.
+- **Responsável pela aprovação:** o pesquisador responsável e o supervisor, em 17/11/2026.
+- **Alternativas consideradas:** 90 processos espalhados (um por núcleo físico, sem SMT concentrado) e 112 processos (nó inteiro com SMT).
+- **Justificativa:** vazão medida no ensaio complementar MEQ-05.5 (`results/tables/meq05_5_parallel_benchmark_complement.csv`; registro em `docs/provenance/MEQ-05.5-benchmark-complement-record.md`; relatório `results/report/meq05_parallel_benchmark.html`) e a necessidade de manter a máquina utilizável por terceiros, deixando 11 núcleos livres.
+- **Fontes:** decisão comunicada pelo pesquisador em 17/11/2026; MEQ-05.5 (PR #21, merge `5e740cf`) e MEQ-05.6 (PR #22, merge `479ea2d`); registro da conclusão no ROADMAP (PR #23, merge `aee207f`).
+- **Limitações:** medições em janelas de 3 h a partir de restart, não em rodada longa; **invariância numérica dos resultados com o número de processos não testada**; nó compartilhado, sujeito a interferência de outros usuários.
+- **Consequências:** a mesma configuração (90 compactos, fixação explícita) é usada em toda a MEQ-06, para comparabilidade entre anos. Este registro **não autoriza abrir a MEQ-06**: a abertura depende das decisões pendentes listadas na frente MEQ-06 do ROADMAP.
+- **Condição de revisão:** desempenho medido na rodada longa muito diferente do previsto pelo benchmark. Esta entrada não é apagada.
