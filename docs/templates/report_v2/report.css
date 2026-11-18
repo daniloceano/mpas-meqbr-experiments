@@ -147,6 +147,10 @@ table.scorecard, table.contrast, table.decision { font-variant-numeric: tabular-
 .pairwise th, .pairwise td { padding: 3px 4px; text-align: center; border: 1px solid #fff; min-width: 38px; }
 .pairwise td.diag { background: #f0f0f0; }
 .pairwise td.nd { color: #9c9c9c; }
+.meq04-synthesis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 22px; border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule); margin: 14px 0 18px; }
+.meq04-synthesis > div { padding: 2px 0 8px; }
+.meq04-synthesis p { font-size: .88rem; margin: .2rem 0; }
+.pairwise h4 { margin-top: .4rem; }
 
 .pill { font-size: .76rem; padding: 2px 8px; border: 1px solid; }
 .pill.gain { color: var(--gain); }
@@ -186,6 +190,7 @@ input[type=range] { width: 100%; accent-color: var(--ink); }
   main { margin-left: 0; padding: 0 16px 40px; }
   .grid-2, .video-pair { grid-template-columns: 1fr; }
   .design-tree { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .meq04-synthesis { grid-template-columns: 1fr; }
   .map { height: 360px; }
   .map.tall { height: 400px; }
   h2 { font-size: 1.35rem; }

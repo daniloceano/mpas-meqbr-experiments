@@ -45,6 +45,9 @@ valor-adicionado, mecanismos, sintese`.
    LiDAR and INMET are never pooled. P0/250 m is descriptive only. ERA5 only
    at 100 m (LiDAR) / 10 m (INMET); elsewhere "Não avaliado nesta altura".
 5. Added value — Murphy skill with CIs (filled = detectable, open = not).
+   MEQ-04 synthesis block on top; MEQ-04.3 paired component tests
+   (`meq04_3_paired_components.csv`) and MSE decomposition
+   (`meq04_3_error_decomposition.csv`) below the skill charts.
 6. Physics — blocks *hypothesis → evidence chart → verdict*.
 7. Synthesis — criteria × experiment matrix, **no weights or composite
    score**; every criterion traceable to one CSV (`_decision_matrix`).

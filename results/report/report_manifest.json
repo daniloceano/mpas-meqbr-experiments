@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-11-11T20:11:45+00:00",
-  "analysis_commit": "0a19b65",
-  "analysis_branch": "feat/report-v2-review",
+  "generated_utc": "2026-11-18T13:30:31+00:00",
+  "analysis_commit": "274f5c7",
+  "analysis_branch": "report/meq-04-4-html",
   "working_tree_dirty": false,
   "execution_environment": "Swell working tree /p1-swell/danilocs/mpas-meqbr-experiments",
   "exp03_completion_record": {
@@ -2077,10 +2077,142 @@
       "sha256": "10373081a5f594aaf20fe570725e810178d627ddc492e352a40be2b73fa4bb18"
     }
   ],
+  "v2_table_files": [
+    {
+      "path": "results/tables/validation_point_metrics.csv",
+      "bytes": 37533,
+      "sha256": "cd10b9f72447fdf669123011e941b1ea52d7621321b81ecfa521f5e265c812c8"
+    },
+    {
+      "path": "results/tables/validation_network_summary.csv",
+      "bytes": 1966,
+      "sha256": "af72bf40f048e493b7cde7fab79924b73bb00150c688eca78002523c91319427"
+    },
+    {
+      "path": "results/tables/site_metrics.csv",
+      "bytes": 46528,
+      "sha256": "d1c37c33d76eb395701fcb0174a5f929888520e92ee8fe818aca269d61155e74"
+    },
+    {
+      "path": "results/tables/experiment_ranking_current.csv",
+      "bytes": 11762,
+      "sha256": "d9fcf9e3dcec96209b33602bd5a6650358af2fe1fb53419246bf4d913a573547"
+    },
+    {
+      "path": "results/tables/pairwise_tests_current.csv",
+      "bytes": 24874,
+      "sha256": "c36037471b6a462a4d6a817b68cc8c65578417a56c77ee5f7f160652cc51425a"
+    },
+    {
+      "path": "results/tables/era5_added_value_current.csv",
+      "bytes": 2914,
+      "sha256": "b0bc7e776245120ad9be3845e77ef40efa0f321f2971ce1b880d6a4a15153921"
+    },
+    {
+      "path": "results/tables/inmet_added_value.csv",
+      "bytes": 17110,
+      "sha256": "4b83a976a6c343f62135b635a08c88cecd91b45289ffd3c1117d933adc181678"
+    },
+    {
+      "path": "results/tables/inmet_summary.csv",
+      "bytes": 581,
+      "sha256": "3ba797e429cb72a71e8f523a3fb1dfc883c5ec1c5915aa9cd8bb22622f90f110"
+    },
+    {
+      "path": "results/tables/inmet_station_metrics.csv",
+      "bytes": 20279,
+      "sha256": "e7c2928fe7bb02a26fbae561cccd09e4ff260ca116256ce2b84b05670f02d222"
+    },
+    {
+      "path": "results/tables/resource_comparison.csv",
+      "bytes": 3998,
+      "sha256": "3d5e1c0e5b4951bd31c449b1da590e6909e379ce8a7dd04b83e1e5f39ff06a2b"
+    },
+    {
+      "path": "results/tables/era5_climatology_sites.csv",
+      "bytes": 67865,
+      "sha256": "72d5ef2f51533dc5b7c5a8f4418c02b317db02b715201631fba09cb7d6c8f1da"
+    },
+    {
+      "path": "results/tables/era5_month_representativeness.csv",
+      "bytes": 254,
+      "sha256": "94eafffa27d04cbe007804bec31f4c786adf91596fdf7110fc886ce738691646"
+    },
+    {
+      "path": "results/tables/exp04_06_priority_tests.csv",
+      "bytes": 19680,
+      "sha256": "a39539a15f3260f041d95d40a43c512de1f2a8a80f7db489f71906fe51013ec3"
+    },
+    {
+      "path": "results/tables/exp04_06_contrast_summary.csv",
+      "bytes": 400,
+      "sha256": "0125477317e7480c0519000f04f09dd8bd35fc3ede3bed605463f2ee1e79d584"
+    },
+    {
+      "path": "results/tables/exp06_sst_spatial_summary.csv",
+      "bytes": 2016,
+      "sha256": "67eac6334b11b21a6cb0dfdb95f6ba766dbab0db135da924cb533e01e5c71f35"
+    },
+    {
+      "path": "results/tables/exp06_sst_site_cycle.csv",
+      "bytes": 21995,
+      "sha256": "7f1fcaf2238e60993c5b9507d33843f69158e5c46b22dd0868da5f613c3db19e"
+    },
+    {
+      "path": "results/tables/attribution_summary.csv",
+      "bytes": 1856,
+      "sha256": "7bfa34505f54881e6db205a31c05328d001d38b1fe15fff28e48cb1ebf4aac9b"
+    },
+    {
+      "path": "results/tables/boundary_influence.csv",
+      "bytes": 540,
+      "sha256": "94691c8d52a5814fb49da0e21284bc5e4ae126806b7bbe7c39769c61c984f9cc"
+    },
+    {
+      "path": "results/tables/cell_sensitivity.csv",
+      "bytes": 6311,
+      "sha256": "bf4c2d60c6a63ccf4a354f326d3582221d970ea325fa0ff5c8d6f3454f956092"
+    },
+    {
+      "path": "results/tables/runtime_metrics.csv",
+      "bytes": 4008,
+      "sha256": "25dd84f47934c34d6a8b12796e99e680d7faaf1bbfa8dc99ffa9bcc496ffd8c4"
+    },
+    {
+      "path": "results/tables/experiment_inventory.csv",
+      "bytes": 2979,
+      "sha256": "43c671b582747bdc2a83c816df4079a8568afccf630d9f6877ebe8030521b26a"
+    },
+    {
+      "path": "results/tables/mesh_spacing_profile.csv",
+      "bytes": 433407,
+      "sha256": "6658c9849b85d7988171effca03e2a3c8c5fad7801aa5d5ff84518f85c30985b"
+    },
+    {
+      "path": "results/tables/meq04_3_paired_components.csv",
+      "bytes": 27207,
+      "sha256": "873a58de9daae28a301b8643c0c55404f790f32663f43e23b3ea8a09f0a3dd75"
+    },
+    {
+      "path": "results/tables/meq04_3_error_decomposition.csv",
+      "bytes": 5136,
+      "sha256": "95dc8b6690d7b6ae55c7c0c5eaf8080149dfcaa48377c685ebe60156ae2906f2"
+    },
+    {
+      "path": "results/tables/observation_availability.csv",
+      "bytes": 30388,
+      "sha256": "24900d4eb99a673db68d9fb570f16699c9aa667cb88463502c7e095fdacd69cf"
+    },
+    {
+      "path": "results/tables/meq05_parallel_benchmark.csv",
+      "bytes": 10895,
+      "sha256": "f35a979fd55f53ccc7ee1757caa8b1241f36e6d70dd49f182f3c3f132326510b"
+    }
+  ],
   "index": {
     "path": "results/report/index.html",
-    "bytes": 1666168,
-    "sha256": "bcc1d21aa9c91f5b1e9ede3f506cec949cffb800658fd9a4425a8d37b4031d51"
+    "bytes": 1813557,
+    "sha256": "eeae0862be50e669e28b8ffd52ad8c5b6be2f096880c7dd05f2787f4f484ed92"
   },
   "builder": "scripts/06_report/build_technical_report.py",
   "editorial_schema_version": 2

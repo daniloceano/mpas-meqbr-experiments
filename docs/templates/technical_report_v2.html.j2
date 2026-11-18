@@ -99,6 +99,18 @@
       </div>
     </div>
 
+    <details class="drawer" id="saturation-drawer">
+      <summary>Saturação do paralelismo (benchmark MEQ-05)</summary>
+      <div class="chart" id="chart-saturation" style="height:220px"></div>
+      <p class="caption">Vazão média (dias simulados por dia de relógio, fase de
+        integração) contra o número de processos MPI, em um nó do Swell com 56
+        núcleos físicos. Pontos cheios = um processo por núcleo físico (série A);
+        losango vazado = 112 processos, dois por núcleo (SMT, série B). Linha
+        vertical em 56: a partir daqui, processos dividem núcleo físico. Detalhes,
+        repetições e o ensaio complementar estão no
+        <a href="meq05_parallel_benchmark.html">relatório do benchmark</a>.</p>
+    </details>
+
     <details class="drawer">
       <summary>Configuração comum a todos os experimentos</summary>
       <table class="kv">
@@ -188,6 +200,10 @@
     <p class="lead">Dois eixos independentes: LiDARs offshore (P0, LPI) em altura
       de rotor e estações automáticas INMET a 10 m. Clique em um ponto para ver
       as séries pareadas com ERA5 e os sete experimentos.</p>
+    <div class="tabs" id="net-tabs" role="tablist">
+      <button type="button" class="active" data-tab="net-map">Mapa e séries</button><button type="button" data-tab="net-avail">Disponibilidade das observações</button>
+    </div>
+    <div class="tabpane active" id="net-map">
     <div class="network">
       <div>
         <div class="map tall" id="network-map"></div>
@@ -208,6 +224,18 @@
         </div>
         <table class="mini" id="pt-metrics"></table>
       </aside>
+    </div>
+    </div>
+    <div class="tabpane" id="net-avail">
+      <div class="controls compact">
+        <div class="seg" id="avail-period" role="radiogroup" aria-label="Período"><button type="button" data-p="2021" class="active">nov 2021</button><button type="button" data-p="2022">out 2022</button></div>
+      </div>
+      <div class="chart" id="chart-availability" style="height:260px"></div>
+      <p class="caption">Horas com observação horária válida em cada dia da janela de
+        análise [início, fim), por unidade observacional: LiDAR a 100 m (após QC e
+        agregação horária usadas no pareamento, antes do pareamento com o modelo) e
+        estações INMET a 10 m. Tom mais escuro = mais horas válidas (0–24); célula
+        vazia = nenhuma hora. Fonte: <code>observation_availability.csv</code>.</p>
     </div>
     <details class="drawer">
       <summary>Tratamento dos dados observacionais e pareamento</summary>
@@ -302,6 +330,35 @@
       = 1 − MSE<sub>MPAS</sub>/MSE<sub>ERA5</sub>, nas mesmas horas e no mesmo
       instrumento: 0,41 significa redução de 41% do MSE; valores negativos
       significam perda.</p>
+
+    <div class="meq04-synthesis" id="meq04-synthesis">
+      <div>
+        <h4>Ganho medido</h4>
+        <p>A EXP03 reduz o erro quadrático médio do ERA5 a 100 m em ~39% em P0
+          (nov/2021; IC95% 25–59%) e ~43% no LPI (out/2022; IC95% 32–55%). O ganho
+          vem principalmente da correção da subestimação sistemática do ERA5
+          (|viés| −1,0 m/s em P0 e −1,5 m/s no LPI) e, no LPI, também de uma
+          amplitude de variação mais realista. A correlação horária do MPAS é menor
+          que a do ERA5, com diferença significativa no LPI (−0,07). Após a correção
+          do viés, o erro restante do MPAS é dominado pela sincronia temporal.</p>
+      </div>
+      <div>
+        <h4>Habilidade nos sítios × estrutura no domínio</h4>
+        <p>O ganho foi verificado em dois pontos; no domínio o MPAS produz ventos
+          médios mais fortes (+0,4 e +0,9 m/s; densidade de potência +16% e +30%),
+          coerente em direção com os sítios, mas estrutura espacial apenas
+          plausível, não validada fora deles; diferença sensível à máscara.</p>
+      </div>
+      <div>
+        <h4>Limitações</h4>
+        <p>Um mês e um LiDAR por sítio (nov/2021 foi o novembro mais fraco em 31
+          anos); viés negativo residual; agregação horária das observações difere
+          da documentada, efeito não medido (DEC-MEQ-004); SODAR excluído
+          (DEC-MEQ-003); contrastes exploratórios sem ajuste de multiplicidade; só
+          100 m. Não demonstra superioridade climatológica ou universal.</p>
+      </div>
+    </div>
+
     <div class="grid-2">
       <div>
         <h3>LiDAR a 100 m</h3>
@@ -319,6 +376,50 @@
       <span class="pill loss">Perda detectável</span>
       <span class="pill nd">Diferença não detectável</span>
     </div>
+
+    <h3>De onde vem o ganho: testes pareados por componente (LiDAR, 100 m)</h3>
+    <div class="controls">
+      <div class="seg" id="pc-metric" role="radiogroup" aria-label="Componente">
+        <button type="button" data-m="rmse" class="active">ΔRMSE (m/s)</button><button type="button" data-m="skill_vs_era5">Δskill vs ERA5</button><button type="button" data-m="abs_bias">Δ|viés|</button><button type="button" data-m="r">Δr</button><button type="button" data-m="amplitude">Δamplitude</button>
+      </div>
+      <div class="seg" id="pc-view" role="radiogroup" aria-label="Comparação">
+        <button type="button" data-v="vs_ERA5" class="active">contra ERA5</button><button type="button" data-v="pairwise">entre experimentos</button>
+      </div>
+    </div>
+    <div id="pc-era5">
+      <div class="chart" id="chart-components" style="height:330px"></div>
+    </div>
+    <div id="pc-pairwise" class="grid-2 pairwise" style="display:none">
+      <div><h4>P0 · nov 2021</h4><div id="pc-grid-P0"></div></div>
+      <div><h4>LPI · out 2022</h4><div id="pc-grid-LPI"></div></div>
+    </div>
+    <p class="caption" id="pc-caption"></p>
+    <p class="note" id="pc-r-note"><b>Nota sobre a correlação.</b> A correlação
+      menor do MPAS pode decorrer em parte de detalhes de mesoescala ligeiramente
+      fora de fase, penalizados duas vezes (double-penalty) — interpretação, não
+      conclusão.</p>
+
+    <h3>Decomposição do erro</h3>
+    <div class="chart" id="chart-decomposition" style="height:230px"></div>
+    <p class="caption">MSE = viés² + (σ<sub>m</sub> − σ<sub>o</sub>)² +
+      2·σ<sub>m</sub>·σ<sub>o</sub>·(1 − r), com desvios-padrão populacionais; a
+      identidade é exata. Cada barra é o MSE total (m² s⁻²) de ERA5 ou EXP03 em cada
+      sítio, dividido em viés², amplitude e correlação (sincronia temporal); o
+      rótulo dá a fração de cada termo. Fonte:
+      <code>meq04_3_error_decomposition.csv</code>.</p>
+
+    <details class="drawer">
+      <summary>Como funciona o teste pareado</summary>
+      <p>Comparamos dois experimentos nas mesmas horas, contra a mesma observação.
+        Em cada hora, vemos qual dos dois errou menos. Como os dois enfrentaram o
+        mesmo tempo, o que é comum se cancela e sobra só a diferença de qualidade.
+        Para saber se essa diferença é real ou acaso, sorteamos dias inteiros com
+        reposição 2000 vezes (dias, e não horas soltas, porque o vento de uma hora
+        depende da anterior) e recalculamos a diferença a cada sorteio. Se 95% dos
+        resultados ficam do mesmo lado do zero, a diferença é considerada
+        significativa; caso contrário, dizemos 'sem diferença detectável', o que
+        não significa 'iguais'.</p>
+    </details>
 
     <div class="grid-2">
       <div>
