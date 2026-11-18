@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-11-18T13:30:31+00:00",
-  "analysis_commit": "274f5c7",
-  "analysis_branch": "report/meq-04-4-html",
+  "generated_utc": "2026-11-18T13:57:40+00:00",
+  "analysis_commit": "2ab5ee9",
+  "analysis_branch": "report/meq-04-5-decomposition-selector",
   "working_tree_dirty": false,
   "execution_environment": "Swell working tree /p1-swell/danilocs/mpas-meqbr-experiments",
   "exp03_completion_record": {
@@ -2211,8 +2211,8 @@
   ],
   "index": {
     "path": "results/report/index.html",
-    "bytes": 1813557,
-    "sha256": "eeae0862be50e669e28b8ffd52ad8c5b6be2f096880c7dd05f2787f4f484ed92"
+    "bytes": 1815472,
+    "sha256": "872f9cc410eb2a009df7135f16f8f0d2c8988e371f51ce844c26c0b1fd4ab8b7"
   },
   "builder": "scripts/06_report/build_technical_report.py",
   "editorial_schema_version": 2
