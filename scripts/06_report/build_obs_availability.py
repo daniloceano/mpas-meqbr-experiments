@@ -820,7 +820,7 @@ footer code { font-size: 11px; }
     I.filter(function (it, k) { return k < 4 || k === 4; }).map(function (it) { return esc(it.label) + ' — ' + esc(it.qc); }).join('; ') +
     '. Hora válida: média horária centrada com ≥ 4 de 6 amostras de 10 min (profiladores); média dos relatos na hora (estações). Lacunas: ≥ 3 h (profiladores) e ≥ 24 h (estações), contadas entre o primeiro e o último dado válido.</p>' +
     '<p><b>Fontes</b>: ' + I.map(function (it) { return esc(it.label) + ': <code>' + esc(it.source) + '</code>'; }).join(' · ') +
-    '. As estações ISD só têm arquivos de 2021 e 2022 no projeto; os demais anos aparecem como "sem fonte" (nada foi baixado nesta etapa).</p>' +
+    '. As estações ISD têm arquivos de 2021, 2022 e 2023 (2023 baixado em 18/11/2026 com autorização do responsável; proveniência em <code>results/obs_availability/isd_2023_download.json</code>); 2024–2025 aparecem como "sem fonte".</p>' +
     '<p>Gerado por <code>scripts/06_report/build_obs_availability.py</code> · commit <code>' + esc(D.sha) + '</code> · ' + esc(D.generated) + ' · MEQ-06.2. Tabelas: <code>results/obs_availability/*.csv</code>.</p>';
 
   setWin(win.s);
