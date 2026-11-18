@@ -88,9 +88,13 @@ EXP03_ID = "EXP03"
 OPTIONS = ["A_N056", "B_N112", "C_N060", "D",    # decision options, this order
            "P90C", "P90E", "Q45S", "Q45C", "Q56"]
 PROPOSED = "P90C"
-PROPOSED_LABEL = "recomendação proposta"
-PRELIM_DECISION = ("decisão preliminar do pesquisador e do supervisor: simulação de 1 ano "
-                   "com 90 processos — aguardando confirmação final")
+PROPOSED_LABEL = "configuração adotada"
+PRELIM_DECISION = ("Decisão do pesquisador e do supervisor (17/11/2026): a MEQ-06 começa com uma "
+                   "simulação de 1 ano com 90 processos compactos (45 núcleos físicos, cada um com "
+                   "suas 2 tarefas; 11 núcleos inteiros livres) — a configuração recomendada por "
+                   "este benchmark.")
+FREE_SPACE_TB = 126            # /p1-swell, 13/11/2026 (initial MEQ-05 diagnosis; not re-verified)
+FREE_SPACE_YEARS = (1, 5, 10, 15)
 # MEQ-05.5 configurations (complement CSV). Pairs: (socket 0, socket 1).
 COMPL_SINGLE = ("P90C", "P90E", "E90C")
 COMPL_PAIRS = {"Q45S": ("Q45S_s0", "Q45S_s1"), "Q45C": ("Q45C_s0", "Q45C_s1"),
@@ -525,7 +529,7 @@ def disk_facts() -> dict:
         "rst_year_tb": DAYS_PER_YEAR * sizes["restart"] / 1e12,
         "rst_keep_gb": RESTARTS_KEPT * sizes["restart"] / 1e9,
         "lbc_year_tb": DAYS_PER_YEAR * LBC_PER_DAY * sizes["lbc"] / 1e12,
-        "free_space": None,   # not recorded by the MEQ-05.5 benchmark
+        "free_space": FREE_SPACE_TB,  # reported in the initial MEQ-05 diagnosis
     }
 
 
@@ -1045,8 +1049,7 @@ def build_html(r: dict, meta: dict) -> str:
 <main>
   <div class="status"><strong>Status:</strong> tempos medidos nos benchmarks MEQ-05.2 e MEQ-05.5 (90
     processos e rodadas em pares agora medidos). Os custos e as durações da MEQ-06 continuam sendo
-    estimativas, porque estendem um trecho de {br(r['window_h'], 0)} h para anos. {esc(PRELIM_DECISION[0].upper() + PRELIM_DECISION[1:])}.
-    Nada está decidido neste relatório.</div>
+    estimativas, porque estendem um trecho de {br(r['window_h'], 0)} h para anos. {esc(PRELIM_DECISION)}</div>
 
   <section id="termos" class="chapter">
     <h2>Termos usados neste relatório</h2>
@@ -1360,7 +1363,7 @@ def build_html(r: dict, meta: dict) -> str:
       <p class="caption">"Dias por ano de rodada" = tempo de relógio para uma rodada avançar um ano
         simulado, sem spin-up. Nos pares, os dois blocos avançam ao mesmo tempo, e conta o mais lento.</p>
     </details>
-    {means(f"Com {PROJ_RANKS} processos compactos, 1 ano simulado leva cerca de {br(pk['P90C']['durations'][i1], 0)} dias de relógio e 10 anos cerca de {br(pk['P90C']['durations'][PROJ_YEARS.index(10)] / DAYS_PER_MONTH, 1)} meses, deixando {pk['P90C']['free_cores']} núcleos livres; usando a máquina inteira ({n_log}), 10 anos levam cerca de {br(pk['B_N112']['durations'][PROJ_YEARS.index(10)] / DAYS_PER_MONTH, 1)} meses. Os pares não encurtam o prazo. Nenhuma configuração foi decidida.")}
+    {means(f"Com {PROJ_RANKS} processos compactos, 1 ano simulado leva cerca de {br(pk['P90C']['durations'][i1], 0)} dias de relógio e 10 anos cerca de {br(pk['P90C']['durations'][PROJ_YEARS.index(10)] / DAYS_PER_MONTH, 1)} meses, deixando {pk['P90C']['free_cores']} núcleos livres; usando a máquina inteira ({n_log}), 10 anos levam cerca de {br(pk['B_N112']['durations'][PROJ_YEARS.index(10)] / DAYS_PER_MONTH, 1)} meses. Os pares não encurtam o prazo.")}
     <nav class="pager"><a href="#custo">← Custo por ano simulado</a><a href="#opcoes">Opções →</a></nav>
   </section>
 
@@ -1383,11 +1386,9 @@ def build_html(r: dict, meta: dict) -> str:
       corrigido pela média da produção da EXP03, que foi cerca de {pct(r['corr'] - 1, 0)} mais lenta que
       esse trecho.</p>
     <div class="conclusion">
-      <h3>Situação da decisão</h3>
-      <p class="verdict">Registro: <b>{esc(PRELIM_DECISION)}</b>. O {label_of(PROPOSED)} aparece como
-        <b>{esc(PROPOSED_LABEL)}</b>. Nenhuma configuração está decidida neste relatório. A escolha final cabe ao
-        pesquisador, considerando também as limitações (capítulo 11), em especial a igualdade numérica
-        entre números de processos, que não foi verificada.</p>
+      <h3>Decisão</h3>
+      <p class="verdict"><b>{esc(PRELIM_DECISION)}</b> O {label_of(PROPOSED)} aparece na tabela como
+        <b>{esc(PROPOSED_LABEL)}</b>. A execução da simulação depende de autorização própria na MEQ-06.</p>
     </div>
     {means(f"O {label_of(PROPOSED)} entrega {br(o[PROPOSED]['throughput'], 1)} dias simulados por dia de máquina, {pct(1 - o[PROPOSED]['throughput'] / b112['throughput'], 0)} menos que a B112, cumpre o critério de {pct(EFFICIENCY_CRITERION, 0)} ({pct(o[PROPOSED]['eff_phys'])}) e deixa {n_phys - o[PROPOSED]['physical_cores']} núcleos livres para outros usuários. Um ano simulado leva cerca de {br(pk[PROPOSED]['durations'][i1], 0)} dias de relógio (capítulo 7).")}
     <nav class="pager"><a href="#duracao">← Duração da MEQ-06</a><a href="#como-rodar">Como rodar →</a></nav>
@@ -1496,10 +1497,11 @@ def build_html(r: dict, meta: dict) -> str:
         {br(dk['rst_year_tb'], 2)} TB; manter só os últimos {RESTARTS_KEPT}, {br(dk['rst_keep_gb'], 1)} GB.</li>
       <li><b>Forçantes de contorno:</b> {br(dk['lbc_year_tb'], 2)} TB por ano simulado
         ({DAYS_PER_YEAR} × {LBC_PER_DAY} arquivos), mais a condição inicial e a atualização de superfície.</li>
-      <li><b>Espaço livre em <code>/p1-swell</code>:</b> não registrado no benchmark MEQ-05.5 (o inventário de
-        {esc(dk['captured'])} não leu o espaço livre do disco). O Swell não foi consultado de novo para este relatório.</li>
+      <li><b>Espaço livre em <code>/p1-swell</code>:</b> cerca de {dk['free_space']} TB em 13/11/2026 (diagnóstico inicial
+        da frente MEQ-05, relatado pelo Claude Code; não registrado no repositório e não verificado novamente).
+        A saída horária ocuparia dessa área: {"; ".join(f"{n} {'ano' if n == 1 else 'anos'}, {br(dict(dk['final_tb'])[n], 1)} TB ({pct(dict(dk['final_tb'])[n] / dk['free_space'])})" for n in FREE_SPACE_YEARS)}.</li>
     </ul>
-    {means(f"Cada ano simulado deixa cerca de {br(dk['final_tb'][0][1], 1)} TB de saída horária; 10 anos, cerca de {br(dict(dk['final_tb'])[10], 0)} TB, sem compressão. Durante a rodada, manter todos os restarts de um ano somaria mais {br(dk['rst_year_tb'], 1)} TB; guardar só os últimos {RESTARTS_KEPT} reduz isso a {br(dk['rst_keep_gb'], 0)} GB. O espaço livre do disco precisa ser conferido antes da MEQ-06.")}
+    {means(f"Cada ano simulado deixa cerca de {br(dk['final_tb'][0][1], 1)} TB de saída horária; 10 anos, cerca de {br(dict(dk['final_tb'])[10], 0)} TB, sem compressão. Durante a rodada, manter todos os restarts de um ano somaria mais {br(dk['rst_year_tb'], 1)} TB; guardar só os últimos {RESTARTS_KEPT} reduz isso a {br(dk['rst_keep_gb'], 0)} GB. Os cerca de {dk['free_space']} TB livres em 13/11/2026 comportam essa saída, mas precisam ser conferidos antes da MEQ-06.")}
     <nav class="pager"><a href="#como-rodar">← Como rodar</a><a href="#limitacoes">Limitações →</a></nav>
   </section>
 
@@ -1535,7 +1537,8 @@ def build_html(r: dict, meta: dict) -> str:
       <li><b>Rodadas em blocos.</b> Dividir o período em blocos interrompe a continuidade da simulação
         (por exemplo, a umidade do solo recomeça em cada bloco). Se isso é aceitável, e com qual spin-up,
         é decisão da MEQ-06.</li>
-      <li><b>Espaço livre em disco</b> não foi registrado no benchmark; os volumes do capítulo 10 vêm dos
+      <li><b>Espaço livre em disco</b> varia com o uso do servidor; o valor do capítulo 10 (13/11/2026) deve ser
+        conferido antes de rodar. Os volumes do capítulo 10 vêm dos
         tamanhos reais dos arquivos da EXP03 e supõem a mesma lista de variáveis e o mesmo formato sem compressão.</li>
     </ul>
     {means("Os números deste relatório servem para escolher a configuração e estimar prazos e espaço, não para garantir prazos exatos. As configurações de 90 processos e os pares já foram medidos; o que falta conferir antes de uma rodada longa é a igualdade numérica e o espaço livre em disco.")}
