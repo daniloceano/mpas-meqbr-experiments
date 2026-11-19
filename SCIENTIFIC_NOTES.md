@@ -100,7 +100,7 @@ removes.
 ### Model
 
 MPAS-Atmosphere regional experiments, hourly history output, over two 41-day
-integrations each (10-day spin-up discarded). Full configuration is in the
+integrations each (spin-up discarded: 11 days in 2021, from 2021-10-21; 10 days in 2022, from 2022-09-21). Full configuration is in the
 simulation repository (`runs/meqbr_05km/README.md` and `EXPERIMENTS.md`);
 `config/experiments.yaml` mirrors what the analysis needs.
 

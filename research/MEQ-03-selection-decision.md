@@ -145,3 +145,35 @@ Configuração de paralelismo da produção climatológica, a partir do benchmar
 - **Limitações:** medições em janelas de 3 h a partir de restart, não em rodada longa; **invariância numérica dos resultados com o número de processos não testada**; nó compartilhado, sujeito a interferência de outros usuários.
 - **Consequências:** a mesma configuração (90 compactos, fixação explícita) é usada em toda a MEQ-06, para comparabilidade entre anos. Este registro **não autoriza abrir a MEQ-06**: a abertura depende das decisões pendentes listadas na frente MEQ-06 do ROADMAP.
 - **Condição de revisão:** desempenho medido na rodada longa muito diferente do previsto pelo benchmark. Esta entrada não é apagada.
+
+## Registro de decisão `DEC-MEQ-006`
+
+Período da produção climatológica da `EXP03` e extensão do escopo de 1 ano da `DEC-MEQ-005`. Entrada no formato da seção 7 do [ROADMAP](ROADMAP.md); as entradas `DEC-MEQ-001` a `DEC-MEQ-005` acima não são apagadas nem alteradas. Plano de execução em [`MEQ-06-production-plan.md`](MEQ-06-production-plan.md).
+
+- **Identificador:** `DEC-MEQ-006`
+- **Data:** 19/11/2026
+- **Frente:** MEQ-06 — Integrações climatológicas
+- **Referencia:** `DEC-MEQ-005` (estende o escopo de 1 ano; mantém o restante); `DEC-MEQ-001` (configuração `EXP03`); `DEC-MEQ-003` (complementa quanto ao SODAR P1).
+- **Enunciado:**
+  1. **Início da produção:** 2021-11-01 00 UTC, com spin-up desde 2021-10-21 00 UTC (11 dias, descartados), como na perna 2021 das rodadas validadas.
+  2. **Duração aberta**, avançando em trechos mensais por restart. **Pontos de decisão:** 2023-06-30, 2023-11-30 e 2025-01-31. Seguir além de cada ponto exige nova autorização do responsável.
+  3. **Escopo:** esta entrada substitui apenas o escopo de 1 ano da `DEC-MEQ-005`; o restante da `DEC-MEQ-005` continua valendo: 90 processos compactos com fixação explícita e a mesma configuração do início ao fim.
+  4. **Rodada existente de out–nov/2021** (60 processos, sem fixação): **não** é emendada à produção. Serve de referência: nov/2021 é refeito a 90 processos e comparado com ela (teste de invariância entre 60 e 90 processos, pendente na `DEC-MEQ-005`).
+  5. **Validação final:** nov/2021 e out/2022 são meses "dentro da amostra" (usados na seleção MEQ-03); os demais são independentes. Os resultados dos dois grupos são reportados em separado.
+  6. **SODAR P1:** não foi usado na seleção (`DEC-MEQ-003`), mas será usado na validação final, porque cobre períodos sem LiDAR. Complementa a `DEC-MEQ-003`.
+  7. **ANM-1/PPE1A:** qualificada por avaliação independente, segundo o responsável. Altura do anemômetro e fuso ainda não informados.
+- **Responsável pela aprovação:** o pesquisador responsável, com o orientador, em 19/11/2026.
+- **Alternativas consideradas:** janelas fixas de 12, 24 ou 36 meses (painel MEQ-06.4), inclusive as de maior total de horas válidas (início em 2023-02/2023-03 para 12 meses), que não contêm meses da seleção nem perfiladores além do LPI.
+- **Justificativa:** pelo painel MEQ-06.2/06.4 (`results/obs_availability/candidate_windows_12_24_36.csv`), as janelas com início em 2021-11 são as únicas que reúnem os três perfiladores (P0, SODAR P1, LPI), os 2 meses da MEQ-04 e os 121 dias com perfiladores simultâneos:
+
+  | Janela (início 2021-11-01) | Fim | Horas válidas (total) | Horas de perfiladores | SODAR P1 | ANM-1/PPE1A | Sítios perfiladores | Dias simultâneos | Meses MEQ-04 | Maior lacuna (h) |
+  |---|---|---|---|---|---|---|---|---|---|
+  | 12 meses | 2022-10-31 | 70 443 | 10 944 | 6 830 | 6 768 | 3 | 121 | 2 | 200 |
+  | 24 meses | 2023-10-31 | 153 445 | 19 092 | 6 830 | 14 781 | 3 | 121 | 2 | 251 |
+  | 36 meses | 2024-10-31 | 232 026 | 27 745 | 6 830 | 23 213 | 3 | 121 | 2 | 251 |
+
+  A janela de 12 meses é a 1ª em horas de perfiladores entre as de 12 meses (`results/obs_availability/preoptions.csv`). A duração aberta com pontos de decisão permite avaliar o custo real antes de comprometer anos adicionais.
+- **Fontes:** decisão comunicada pelo responsável em 19/11/2026; painel MEQ-06.2 (PR #30, merge `94d14a8`) e MEQ-06.4 (PR #32, merge `d5e4c88`; ajuste `94f6b0c`); `DEC-MEQ-005`.
+- **Limitações:** invariância 60 × 90 ainda não testada (será medida em nov/2021); fuso e altura da ANM-1/PPE1A não informados (horário tratado como UTC no painel); o controle de qualidade do SODAR é mais simples que o do P0 (nota de 13/11/2026 da `DEC-MEQ-003`); custo e disco além do 1º ponto de decisão são projeções do benchmark, não medições da rodada longa.
+- **Consequências:** MEQ-06 em andamento com o plano `research/MEQ-06-production-plan.md`. Esta entrada **não autoriza** pré-processamento, testes nem integrações: cada missão (MEQ-06.5, 06.6, 06.7) exige autorização própria.
+- **Condição de revisão:** em cada ponto de decisão (continuar, parar ou alterar), por nova entrada `DEC-MEQ-NNN`; ou se o teste 60 × 90 ou o teste de restart indicarem diferença não aceitável. Esta entrada não é apagada.
