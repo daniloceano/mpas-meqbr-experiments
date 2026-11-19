@@ -77,7 +77,7 @@ Comparar nov/2021 da produção (90 processos, fixação) com a rodada existente
 | sfc_update (OISST diária corrigida) | 34 731 176 B por perna de 41 dias (~0,85 MB/dia) | ~0,5 GB |
 | **Total do bloco 1** | | **~455 GB** |
 
-- **Tempo:** não há tempo de pré-processamento medido no repositório (o benchmark mediu só a integração). A MEQ-06.5 deve medir e registrar o tempo do 1º mês e extrapolar antes de seguir.
+- **Tempo (estimativa, sem contar o download):** o pré-processamento da perna 2022 da `EXP03` (`run_preproc_2022.log` no Swell; `init_atmosphere` casos 7/9/8) levou ≈ 148 s para 41 dias. O registro versionado em `results/provenance/EXP03_2022/` dá `preproc.elapsed_seconds` = 149 s (2026-10-14 16:12:25 → 16:14:54 UTC) e 12 s para a conversão da OISST (`oisst_conversion.elapsed_seconds`). Extrapolado linearmente para os 618 dias do bloco 1: ~37 min de pré-processamento e ~3 min de conversão da OISST. O download do ERA5 não está incluído e tende a dominar. A MEQ-06.5 mede e registra o tempo real do 1º mês antes de seguir.
 - **Fonte dos números:** LBC, init e sfc_update em `docs/provenance/MEQ-05.5-benchmark-complement-record.md`; o valor do ERA5 (~2,85 GB/mês) foi informado na missão e **não está registrado no repositório**; a MEQ-06.5 deve medi-lo e registrá-lo em `data/metadata/`.
 - **Correção costeira da OISST:** a conversão OISST → intermediário deve usar `usp-utils/pre_proc/real_data/oisst_to_intermediate.py` com `oisst_land_fill.py` (função `fill_land_sst_nearest_ocean`). Log esperado, por arquivo: `[QC] coastal-safe SST: preserved N ocean cells; extended M land cells from nearest ocean; ocean range a..b degC`, seguido de `[OK] <arquivo> (… MB)`. Depois do `init_atmosphere` caso 8, `scripts/03_selection/check_sst_forcing.py` é **portão obrigatório**: deve retornar zero células oceânicas no valor de preenchimento de terra.
 - **Verificação do MPAS-Research em `6754c6f` (consulta somente leitura à API do GitHub, 19/11/2026):** `6754c6f40fa41c96416067c82ee3219a6526acac` (09/10/2026 11:28 UTC; mensagem "Merge pull request #19 from CGFD-USP/fix/oisst-coastal-land-fill") é a ponta de `master` e ancestral de `develop` (124 commits atrás). Tem um único pai, e nem a cabeça do PR #19 (`df62398`) nem o merge registrado pelo GitHub (`13eced8`, em `develop`) são seus ancestrais: é uma reaplicação do PR #19 em `master`, não o mesmo commit. **Conteúdo:** os 5 arquivos alterados pelo PR #19 (`README.md`, `oisst_to_intermediate.py`, `oisst_clim_to_intermediate.py`, `oisst_land_fill.py`, `test_oisst_land_fill.py`, em `usp-utils/pre_proc/real_data/`) têm blobs Git idênticos em `6754c6f` e em `df62398`. **Conclusão:** `6754c6f` contém a correção do PR #19. Falta confirmar, na MEQ-06.5, que a cópia usada no Swell está nesse commit (`git rev-parse HEAD` e `git status` limpo).
@@ -94,7 +94,7 @@ Vazão de referência: **25,2 dias simulados por dia de máquina** (90 compactos
 | Ponto 3 — 2025-01-31 | 1 199 (+428) | 47,6 (+17,0) | 54,9 (+19,6) | 5,54 | 98 | 764 | 114 | ~6,5 |
 
 - History com a lista atual (192,5 MB/h, spin-up incluído); restarts = dia 1 de cada mês + 3 mais recentes (2,28 GB cada); init e sfc_update somam menos de 2 GB.
-- Mais o teste de restart (~0,16 dia de máquina, ~18,5 GB temporários) e o pré-processamento (tempo não medido).
+- Mais o teste de restart (~0,16 dia de máquina, ~18,5 GB temporários) e o pré-processamento (~37 min estimados para o bloco 1, sem o download).
 - Espaço livre em `/p1-swell`: ~126 TB em 13/11/2026 (diagnóstico não versionado; reconferir antes de cada trecho).
 - Dias de máquina supõem execução contínua no nó compartilhado; interferência de outros usuários aumenta o prazo.
 
@@ -123,7 +123,7 @@ Vazão de referência: **25,2 dias simulados por dia de máquina** (90 compactos
 **Novas:**
 - Invariância 60 × 90 não testada até a MEQ-06.7; se houver diferença, nov/2021 da produção e da seleção não são idênticos.
 - ANM-1/PPE1A sem altura nem fuso informados (horário tratado como UTC); qualificação por avaliação independente não versionada.
-- Volume do ERA5 por mês não registrado no repositório; tempo de pré-processamento não medido.
+- Volume do ERA5 por mês não registrado no repositório; tempo de pré-processamento estimado por extrapolação linear de uma perna de 41 dias (download não incluído).
 - `6754c6f` é uma reaplicação do PR #19 em `master`, não o merge registrado em `develop`; conteúdo idêntico nos arquivos do PR, demais diferenças de histórico não avaliadas.
 - Custos além do ponto 1 são projeções; a condição de revisão da `DEC-MEQ-005` (vazão muito diferente) é avaliada com os números reais do 1º trecho.
 - Meses dentro da amostra (nov/2021, out/2022) não são validação independente.
