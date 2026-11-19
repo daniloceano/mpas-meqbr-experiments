@@ -107,11 +107,11 @@ A diferença `EXP01 − CTL` não isola apenas a evolução temporal da SST: a m
 ### MEQ-06 — Integrações climatológicas
 
 - **Objetivo:** executar séries multianuais com a configuração aprovada e proveniência suficiente para avaliação do recurso eólico.
-- **Situação:** **planejada; não iniciada neste roadmap**.
-- **Evidências futuras:** experimentos, logs, metadados, inventários, verificações de integridade e produtos das integrações.
+- **Situação:** **em andamento** — abertura para planejamento autorizada pelo responsável em 18/11/2026; nenhuma integração autorizada ou iniciada.
+- **Evidências futuras:** experimentos, logs, metadados, inventários, verificações de integridade e produtos das integrações. Planejamento: diagnóstico somente leitura MEQ-06.1 (18/11/2026) e painel de disponibilidade das observações MEQ-06.2 ([`results/obs_availability/index.html`](../results/obs_availability/index.html), tabelas em `results/obs_availability/*.csv`, gerado por `scripts/06_report/build_obs_availability.py`).
 - **Dependências:** decisão final MEQ-03; avaliação pertinente MEQ-04; dimensionamento MEQ-05; disponibilidade de forçantes/recursos; verificação do código e **correção OISST efetivamente utilizada**. A correção está no PR [#19](https://github.com/CGFD-USP/MPAS-Research/pull/19), branch `fix/oisst-coastal-land-fill` do repositório do modelo (verificação de 08/10/2026); consulta somente leitura de 12/11/2026 indica o PR como integrado em `develop` em 09/10/2026. O **merge do PR não é pré-requisito** desta frente: é necessário usar e identificar uma implementação corrigida e validada por commit, não confiar apenas no nome da branch.
 - **Critério de encerramento:** períodos definidos efetivamente simulados, produtos íntegros e reprodutíveis, eventuais falhas e reinícios documentados, custos e limitações registrados.
-- **Decisões pendentes:** períodos climatológicos exatos, resolução temporal das saídas, orçamento e autorização explícita de execução; redução da lista de saída (cerca de 1,7 TB por ano com saída horária, dos quais 8 variáveis 3D ocupam 95 %); partição de 90 processos (`graph.info.part.90`) no diretório de produção.
+- **Decisões pendentes:** períodos climatológicos exatos, resolução temporal das saídas, orçamento e autorização explícita de execução; redução da lista de saída (cerca de 1,7 TB por ano com saída horária, dos quais 8 variáveis 3D ocupam 95 %); partição de 90 processos (`graph.info.part.90`) no diretório de produção; ano a simular (avaliação em MEQ-06.2); registro do spin-up: a documentação diz 10 dias, as rodadas usaram 11 (verificar e corrigir).
 
 ### MEQ-07 — Avaliação climatológica do recurso eólico offshore
 
@@ -152,7 +152,7 @@ Mudanças no roadmap devem indicar o que mudou, por quê, quem aprovou e em que 
 
 ## 8. Fila de pendências
 
-Situação em 15/11/2026 (v1.3); os textos anteriores desta seção (v1.0 `fe16f0b`, v1.1 `c2e15cd`, v1.2) estão preservados no histórico do repositório. Estados conforme a seção 7.
+Situação em 18/11/2026 (v1.4); os textos anteriores desta seção (v1.0 `fe16f0b`, v1.1 `c2e15cd`, v1.2, v1.3 `8be00b8`) estão preservados no histórico do repositório. Estados conforme a seção 7.
 
 - `GOV.4` (antiga pendência `MEQ-05.4` do HTML) — corrigir no HTML principal a ascendência da `EXP03` (`build_technical_report.py:1253`, `report_v2/report.js:157`, template v1), criar a aba de timelines das observações em "Rede observacional" e acrescentar, de forma discreta, a curva de saturação (o detalhe permanece no relatório separado `results/report/meq05_parallel_benchmark.html`, PR #19) — `concluída` (ao merge do PR da branch `report/meq-04-4-html`: ascendência dupla da `EXP03` — configuração do modelo da `EXP01`, pré-processamento da `EXP02` — no builder, no `report.js` e no template v1; aba "Disponibilidade das observações"; gaveta "Saturação do paralelismo" no capítulo 1).
 - `MEQ-05.5` — ensaio complementar de paralelismo (N = 45 e 90, compacto e espalhado, pares simultâneos; dois blocos com referência `REF_A56`) e levantamento de disco das pernas de produção da `EXP03`; diretórios no Swell com prefixo `MEQ054_*` — `concluída`.
@@ -170,6 +170,8 @@ Situação em 15/11/2026 (v1.3); os textos anteriores desta seção (v1.0 `fe16f
 - `MEQ-04.4` — atualização do HTML com os resultados da MEQ-04.3; anotar no HTML a ressalva de que a correlação menor do MPAS decorre em parte de detalhes de mesoescala fora de fase (double-penalty), como interpretação e não conclusão — `concluída` (ao merge do PR da branch `report/meq-04-4-html`).
 - `MEQ-04.5` — seletor de múltipla escolha das fontes na "Decomposição do erro" do HTML (padrão ERA5 + EXP03; P0 e LPI lado a lado) — `concluída` (ao merge do PR da branch `report/meq-04-5-decomposition-selector`).
 - `MEQ-04.6` — encerramento da MEQ-04: ratificação final da síntese do valor agregado pelo pesquisador (18/11/2026) e registro da limitação herdada pela MEQ-06 — `concluída` (ao merge do PR da branch `docs/meq-04-6-closure`).
+- `MEQ-06.2` — painel de disponibilidade das observações para escolher o ano da integração anual (LiDAR P0, LiDAR P1, SODAR P1, LiDAR LPI e estações ISD; 2021-10 a 2025-06; mesmo QC da MEQ-04), sem recomendação de ano; `results/obs_availability/`; ISD 2023 incorporado (autorizado em 18/11/2026) — `em andamento` (PR aberto da branch `meq-06.2-obs-availability`).
+- `MEQ-06.3` — plano de produção da integração anual da `EXP03` (ano, spin-up, saída, disco, restart e cronograma a 90 processos compactos, `DEC-MEQ-005`) — `planejada`.
 
 Itens superados: a síntese do HTML em três visões e a nota sobre resolução de 10/15 min, derivadas da `DEC-MEQ-002`, deixaram de ser necessárias com a `DEC-MEQ-003`; a renomeação MS do SODAR P1 caiu com a exclusão do sítio.
 
