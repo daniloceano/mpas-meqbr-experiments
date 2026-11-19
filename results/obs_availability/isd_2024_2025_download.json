@@ -1,0 +1,264 @@
+{
+ "dataset": "NOAA NCEI Integrated Surface Database (ISD), global-hourly",
+ "years": [
+  2024,
+  2025
+ ],
+ "source_url": "https://www.ncei.noaa.gov/data/global-hourly/access/{year}/{station}.csv",
+ "resolved_url": "https://noaa-global-hourly-pds.s3.amazonaws.com/{year}/{station}.csv",
+ "note": "Same source and procedure as isd_2023_download.json. Downloaded on the Swell into data/stations/ for MEQ-06.4 (authorised by the researcher 2026-11-19); only the 11 panel stations; total 33.8 MB (< 100 MB limit). Existing files untouched (download skipped if the file existed). Three station-years return HTTP 404 at the source and are 'sem fonte' in the panel.",
+ "download_date": "2026-11-19",
+ "downloaded_by": "Danilo Couto de Souza",
+ "tool": "curl",
+ "total_bytes": 33816519,
+ "files": [
+  {
+   "station": "81752099999",
+   "year": 2024,
+   "file": "data/stations/isd_81752099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/81752099999.csv",
+   "size_bytes": 2313710,
+   "md5": "bde9c4e469a1a373ca6f9eb3011cfa40",
+   "md5_equals_s3_etag": true,
+   "rows": 8369,
+   "first": "2024-01-01T00:00:00",
+   "last": "2024-12-31T23:00:00"
+  },
+  {
+   "station": "82288099999",
+   "year": 2024,
+   "file": "data/stations/isd_82288099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/82288099999.csv",
+   "size_bytes": 1734215,
+   "md5": "67dad00a624025aedab7b8f25780e1d2",
+   "md5_equals_s3_etag": true,
+   "rows": 4558,
+   "first": "2024-01-01T03:40:00",
+   "last": "2024-12-31T21:45:00"
+  },
+  {
+   "station": "81715099999",
+   "year": 2024,
+   "file": "data/stations/isd_81715099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/81715099999.csv",
+   "size_bytes": 2488781,
+   "md5": "04e9f1858051410ee0177333d35008fc",
+   "md5_equals_s3_etag": true,
+   "rows": 8368,
+   "first": "2024-01-01T00:00:00",
+   "last": "2024-12-31T23:00:00"
+  },
+  {
+   "station": "82281099999",
+   "year": 2024,
+   "file": "data/stations/isd_82281099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/82281099999.csv",
+   "size_bytes": 3989570,
+   "md5": "ab98406e829ba33b1ed180b07dfdec74",
+   "md5_equals_s3_etag": true,
+   "rows": 10229,
+   "first": "2024-01-01T00:00:00",
+   "last": "2024-12-31T23:00:00"
+  },
+  {
+   "station": "81758099999",
+   "year": 2024,
+   "file": "data/stations/isd_81758099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/81758099999.csv",
+   "size_bytes": 950821,
+   "md5": "22868dbb4efd2aa0d20765c171a83812",
+   "md5_equals_s3_etag": true,
+   "rows": 3509,
+   "first": "2024-01-01T00:00:00",
+   "last": "2024-06-03T16:00:00"
+  },
+  {
+   "station": "82398099999",
+   "year": 2024,
+   "file": "data/stations/isd_82398099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/82398099999.csv",
+   "size_bytes": 3799371,
+   "md5": "12fbfd17a0c644d51e293b39c3256636",
+   "md5_equals_s3_etag": true,
+   "rows": 9880,
+   "first": "2024-01-01T00:00:00",
+   "last": "2024-12-31T23:00:00"
+  },
+  {
+   "station": "81798099999",
+   "year": 2024,
+   "file": "data/stations/isd_81798099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/81798099999.csv",
+   "size_bytes": 2495779,
+   "md5": "93ae4ae0d1c64c140556be6059902fea",
+   "md5_equals_s3_etag": true,
+   "rows": 8372,
+   "first": "2024-01-01T00:00:00",
+   "last": "2024-12-31T23:00:00"
+  },
+  {
+   "station": "82591099999",
+   "year": 2024,
+   "file": "data/stations/isd_82591099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/82591099999.csv",
+   "size_bytes": 2125510,
+   "md5": "af9d3c6f0b45321e57ae0b57533ed845",
+   "md5_equals_s3_etag": true,
+   "rows": 6310,
+   "first": "2024-01-01T12:00:00",
+   "last": "2024-12-31T23:00:00"
+  },
+  {
+   "station": "81835099999",
+   "year": 2024,
+   "file": "data/stations/isd_81835099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/81835099999.csv",
+   "size_bytes": 1104493,
+   "md5": "23cf4a717878d70228e4de2223f84b9d",
+   "md5_equals_s3_etag": true,
+   "rows": 3927,
+   "first": "2024-01-01T00:00:00",
+   "last": "2024-06-20T16:00:00"
+  },
+  {
+   "station": "82595099999",
+   "year": 2024,
+   "file": "data/stations/isd_82595099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/82595099999.csv",
+   "size_bytes": 178429,
+   "md5": "269df81f1d2ccd54bb8c2d9bea6fb0ea",
+   "md5_equals_s3_etag": true,
+   "rows": 475,
+   "first": "2024-01-01T00:00:00",
+   "last": "2024-07-02T12:00:00"
+  },
+  {
+   "station": "81754099999",
+   "year": 2024,
+   "file": "data/stations/isd_81754099999_2024.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2024/81754099999.csv",
+   "size_bytes": 945823,
+   "md5": "0b47e4681edae25470c4ab6802e50129",
+   "md5_equals_s3_etag": true,
+   "rows": 3508,
+   "first": "2024-01-01T00:00:00",
+   "last": "2024-06-03T16:00:00"
+  },
+  {
+   "station": "81752099999",
+   "year": 2025,
+   "file": "data/stations/isd_81752099999_2025.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/81752099999.csv",
+   "size_bytes": 13420,
+   "md5": "579ad85f3ae6fac6c02ade816865490d",
+   "md5_equals_s3_etag": true,
+   "rows": 66,
+   "first": "2025-01-01T00:00:00",
+   "last": "2025-01-03T17:00:00"
+  },
+  {
+   "station": "82288099999",
+   "year": 2025,
+   "file": "data/stations/isd_82288099999_2025.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/82288099999.csv",
+   "size_bytes": 1182064,
+   "md5": "a4526ef7d31f8b61f47988180dba009e",
+   "md5_equals_s3_etag": true,
+   "rows": 3015,
+   "first": "2025-01-01T10:15:00",
+   "last": "2025-08-24T21:45:00"
+  },
+  {
+   "station": "81715099999",
+   "year": 2025,
+   "file": "data/stations/isd_81715099999_2025.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/81715099999.csv",
+   "size_bytes": 1623302,
+   "md5": "770c4e57401960fac009d7c4de97b945",
+   "md5_equals_s3_etag": true,
+   "rows": 5536,
+   "first": "2025-01-01T00:00:00",
+   "last": "2025-08-24T21:00:00"
+  },
+  {
+   "station": "82281099999",
+   "year": 2025,
+   "file": "data/stations/isd_82281099999_2025.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/82281099999.csv",
+   "size_bytes": 2846090,
+   "md5": "c8c5e190754b78e7f7aa090794f3dc6e",
+   "md5_equals_s3_etag": true,
+   "rows": 6931,
+   "first": "2025-01-01T00:00:00",
+   "last": "2025-08-24T21:00:00"
+  },
+  {
+   "station": "82398099999",
+   "year": 2025,
+   "file": "data/stations/isd_82398099999_2025.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/82398099999.csv",
+   "size_bytes": 2880711,
+   "md5": "1c7831b87e2c5a93653d4324e42e37bd",
+   "md5_equals_s3_etag": true,
+   "rows": 7309,
+   "first": "2025-01-01T00:00:00",
+   "last": "2025-08-24T21:00:00"
+  },
+  {
+   "station": "81798099999",
+   "year": 2025,
+   "file": "data/stations/isd_81798099999_2025.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/81798099999.csv",
+   "size_bytes": 1250097,
+   "md5": "c32aea0d16f0ca266fe83fb76635042e",
+   "md5_equals_s3_etag": true,
+   "rows": 4347,
+   "first": "2025-01-01T00:00:00",
+   "last": "2025-07-04T13:00:00"
+  },
+  {
+   "station": "82591099999",
+   "year": 2025,
+   "file": "data/stations/isd_82591099999_2025.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/82591099999.csv",
+   "size_bytes": 1893645,
+   "md5": "c43b623c47d4519ba342db7a1d66c1cc",
+   "md5_equals_s3_etag": true,
+   "rows": 5773,
+   "first": "2025-01-01T00:00:00",
+   "last": "2025-08-24T21:04:00"
+  },
+  {
+   "station": "82595099999",
+   "year": 2025,
+   "file": "data/stations/isd_82595099999_2025.csv",
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/82595099999.csv",
+   "size_bytes": 688,
+   "md5": "f6e49c90814deb9ca551c6401b71897d",
+   "md5_equals_s3_etag": true,
+   "rows": 1,
+   "first": "2025-07-04T12:00:00",
+   "last": "2025-07-04T12:00:00"
+  }
+ ],
+ "not_available": [
+  {
+   "station": "81758099999",
+   "year": 2025,
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/81758099999.csv",
+   "http": 404
+  },
+  {
+   "station": "81835099999",
+   "year": 2025,
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/81835099999.csv",
+   "http": 404
+  },
+  {
+   "station": "81754099999",
+   "year": 2025,
+   "url": "https://noaa-global-hourly-pds.s3.amazonaws.com/2025/81754099999.csv",
+   "http": 404
+  }
+ ]
+}
