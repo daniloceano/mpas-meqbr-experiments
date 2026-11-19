@@ -1,0 +1,54 @@
+{
+ "operation": "copy to the Swell (observations directory), originals unchanged",
+ "date": "2026-11-19",
+ "authorised_by": "researcher, 2026-11-19 (MEQ-06.4)",
+ "by": "Danilo Couto de Souza (Claude Code)",
+ "tool": "rsync -a --ignore-existing; md5 (macOS) vs md5sum (Swell)",
+ "swell_dir": "/p1-swell/danilocs/mpas-meqbr-experiments/data/obs",
+ "files": [
+  {
+   "file": "WIND_DATA_ANM_1_PPE1A_20250819100158.csv",
+   "size_bytes": 3353195,
+   "md5_origin": "85d17dc5836766b800ea23d9958eb375",
+   "md5_swell": "85d17dc5836766b800ea23d9958eb375",
+   "origin": "MacBook ~/Downloads/WIND_DATA_ANM_1_PPE1A_20250819100158.csv (ANM-1/PPE1A, platform PPE-1A, Bacia Potiguar; YOUNG anemometer, hourly 2022-01-01 to 2025-08-19)"
+  }
+ ],
+ "backup": {
+  "dir": "/p1-swell/danilocs/mpas-meqbr-experiments/data/obs/EOSOLAR_P1_Maranhao_LIDAR_SODAR/",
+  "origin": "MacBook ~/Downloads/EOSOLAR_P1_Maranhao_LIDAR_SODAR/",
+  "files": [
+   {
+    "file": "P1_LIDAR_matrix.mat",
+    "md5": "9f97db13be1955670c1d1f64cb845400",
+    "md5_instruments_csv": "9f97db13be1955670c1d1f64cb845400"
+   },
+   {
+    "file": "P1_SODAR.mat",
+    "md5": "dfb33de066d7778e3397bdb0da969bb7",
+    "md5_instruments_csv": "dfb33de066d7778e3397bdb0da969bb7"
+   },
+   {
+    "file": "P1_Lidar_export.ipynb",
+    "md5": "c42737ec833c70958dab06f0bcd6c439"
+   },
+   {
+    "file": "P1_Sodar_export.ipynb",
+    "md5": "7dd6e15969bc6f62bcde9e6ec4c25216"
+   },
+   {
+    "file": "Mensagem_Danilo.txt",
+    "md5": "e96baec7db2b3d9ad829eb784ea6b4cf"
+   },
+   {
+    "file": "images/petro_logo_col.png",
+    "md5": "3d715692ca42c183f44fd05793405039"
+   },
+   {
+    "file": ".DS_Store",
+    "md5": "9e79324ca4d9bc8bc681bad4af352f55"
+   }
+  ],
+  "note": "Every file: MD5 on the Swell equals MD5 of the original. The two .mat files equal the MD5 recorded in results/obs_availability/instruments.csv. Until now P1 existed only as local copies (DEC-MEQ-003 note)."
+ }
+}

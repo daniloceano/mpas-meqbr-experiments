@@ -1,4 +1,4 @@
-"""MEQ-06.2 — observation availability panel for choosing the annual-run year.
+"""MEQ-06.2 / MEQ-06.4 — observation availability panel for choosing the simulation period.
 
 Reads every observed-wind record the project holds, applies the SAME quality
 control used by the MEQ-04 validations, reduces each record to valid hours at
@@ -10,6 +10,8 @@ the reference height, and writes:
 * ``results/obs_availability/availability_monthly.csv`` — % of valid hours per month;
 * ``results/obs_availability/gaps.csv`` — gaps >= 3 h (profilers) / >= 24 h (stations);
 * ``results/obs_availability/windows_preloaded.csv`` — the three preloaded 12-month windows;
+* ``results/obs_availability/candidate_windows_12_24.csv`` — every window starting on the
+  1st of a month (2021-10 onwards) of 12 and 24 months, one column per criterion (MEQ-06.4);
 * ``results/obs_availability/index.html`` — self-contained interactive panel
   (layout-v2 aesthetic; Leaflet inlined from ``docs/templates/vendor``).
 
@@ -22,11 +24,16 @@ QC and hourly reduction (identical to MEQ-04, see ``src/mpas_meqbr/obs.py``):
   ``scripts/06_audit/verify_sodar_p0_overlap.py:read_sodar`` (finite values,
   duplicated stamps dropped) plus the same 0-40 m/s range; 100 m level.
 * Profilers -> hourly with ``obs.to_hourly`` (hour centred, >= 4 of 6 10-min samples).
+* ANM-1/PPE1A (platform PPE-1A, Bacia Potiguar; hourly YOUNG anemometer, height and
+  time zone not given in the file): "fonte não classificada", outside every total.
+  Already hourly, so the >= 4/6 rule cannot apply; equivalent criterion: a valid hour
+  has FLG_BRT_WSPD == 1 (pass), FLG_OP_WSPD == 0 (operational) and 0-40 m/s. The
+  4-digit FLG_CONSIST_WSPD code is undocumented and not used. Time stamps taken as UTC.
 * ISD stations: ``obs.parse_isd_wind`` — quality codes 2/3/6/7 dropped,
   0-40 m/s, hourly mean of the reports in each hour; 10 m anemometer.
 
 An hour is valid when it survives that chain. Periods without a source file
-(ISD years other than 2021-2022; outside an instrument's record) are reported
+(ISD years without a file; outside an instrument's record) are reported
 as "no data", never as 0 %.
 
 Run (paths are arguments; nothing is downloaded or modified)::
@@ -34,7 +41,7 @@ Run (paths are arguments; nothing is downloaded or modified)::
     python scripts/06_report/build_obs_availability.py \\
         --p0 data/obs/P0_LIDAR_matrix.mat --lpi data/obs/LPI_processed.csv.gz \\
         --p1-lidar /path/P1_LIDAR_matrix.mat --p1-sodar /path/P1_SODAR.mat \\
-        --isd-dir data/stations
+        --anm /path/WIND_DATA_ANM_1_PPE1A_20250819100158.csv --isd-dir data/stations
 """
 
 from __future__ import annotations
@@ -58,16 +65,18 @@ from mpas_meqbr import obs, sci_colormaps  # noqa: E402
 
 OUT = REPO / "results" / "obs_availability"
 T0 = pd.Timestamp("2021-10-01 00:00")
-T1 = pd.Timestamp("2025-06-30 23:00")
+T1 = pd.Timestamp("2025-08-31 23:00")
 HOURS = pd.date_range(T0, T1, freq="h")
 DAYS = pd.date_range(T0.normalize(), T1.normalize(), freq="D")
 REF_HEIGHT = 100.0
-GAP_MIN_H = {"profiler": 3, "station": 24}
+GAP_MIN_H = {"profiler": 3, "station": 24, "unclassified": 24}
 VALID_DAY_H = 12                 # a "valid day" in the window panel: >= 12 of 24 h
 STATION_OK_PCT = 80.0
-CANDIDATES = [("A", "2021-11-01", "2022-10-31"), ("B", "2022-07-01", "2023-06-30")]
+DURATIONS = (12, 24)              # months; candidate windows start on the 1st of each month
+WIN_FIRST = pd.Timestamp("2021-10-01")
 SPINUP_DAYS = 11
 GROUPS = [("LIDAR", "LiDAR"), ("SODAR", "SODAR (excluído, DEC-MEQ-003)"),
+          ("UNCL", "Fonte não classificada (ANM-1/PPE1A)"),
           ("INMET", "INMET"), ("AERO", "Aeroportos (ISD)")]
 PRELOADED = [("nov/21–out/22", "2021-11-01"), ("22/06/22–21/06/23", "2022-06-22"),
              ("jul/22–jun/23", "2022-07-01")]
@@ -120,6 +129,21 @@ def lidar_coords(path: Path):
     if "lat" in L:
         return float(np.nanmedian(L["lat"])), float(np.nanmedian(L["lon"]))
     return None, None
+
+
+def read_anm(path: Path) -> dict:
+    """ANM-1/PPE1A hourly CSV (';' separated, decimal comma) -> valid hours.
+
+    The file is treated as untrusted data: read with pandas only. Valid hour:
+    FLG_BRT_WSPD == 1, FLG_OP_WSPD == 0 and 0 <= speed <= 40 m/s.
+    """
+    df = pd.read_csv(path, sep=";", dtype=str)
+    t = pd.to_datetime(df["DT_ACQUISITION"], format="%d/%m/%Y %H:%M")
+    spd = pd.to_numeric(df["METE_VL_WSPD"].str.replace(",", "."), errors="coerce")
+    ok = (df["FLG_BRT_WSPD"] == "1") & (df["FLG_OP_WSPD"] == "0") & spd.between(0, 40)
+    hrs = pd.DatetimeIndex(t[ok.values]).unique().sort_values()
+    return {"hours": hrs, "native": pd.DatetimeIndex(t[ok.values]), "pairs": None,
+            "n_rows": len(df)}
 
 
 def isd_hours(isd_dir: Path, sid: str):
@@ -184,6 +208,7 @@ def main():
     ap.add_argument("--lpi", type=Path, default=REPO / "data/obs/LPI_processed.csv.gz")
     ap.add_argument("--p1-lidar", type=Path, required=True)
     ap.add_argument("--p1-sodar", type=Path, required=True)
+    ap.add_argument("--anm", type=Path, required=True)
     ap.add_argument("--isd-dir", type=Path, default=REPO / "data/stations")
     ap.add_argument("--out", type=Path, default=OUT)
     a = ap.parse_args()
@@ -238,6 +263,14 @@ def main():
         ref="100 m", qc="obs.read_lpi_lidar: 0–40 m/s; obs.to_hourly ≥ 4/6",
         status="validação MEQ-04 (2022)", group="LIDAR",
         hours=hourly_profiler(obs.read_lpi_lidar(a.lpi), HMAP_LPI))
+    print("ANM-1/PPE1A ...")
+    anm = read_anm(a.anm)
+    anm.pop("n_rows")
+    add(key="ANM_PPE1A", label="ANM-1/PPE1A · anemômetro (plataforma)", kind="unclassified",
+        sym="ANM", lat=-4.70467, lon=-36.82571, source=a.anm.name, md5=md5(a.anm),
+        native="horária", heights="não informada no arquivo", ref="altura desconhecida",
+        qc="FLG_BRT_WSPD = 1, FLG_OP_WSPD = 0, 0–40 m/s (já horário; ≥ 4/6 não se aplica)",
+        status="fonte não classificada (fora dos totais)", group="UNCL", hours=anm)
     for st in sites["surface"]["stations"]:
         print(st["id"], "...")
         hrs, years, files = isd_hours(a.isd_dir, st["id"])
@@ -345,16 +378,22 @@ def main():
             it["src_d"] = np.isin(DAYS.year, it["years"])
         else:
             it["src_d"] = np.ones(len(DAYS), bool)
-    tot_rows = []
-    for name, s0, e0 in CANDIDATES:
-        wt = window_table(insts, pd.Timestamp(s0), pd.Timestamp(e0))
-        for r in wt["rows"] + wt["groups"]:
-            tot_rows.append({"window": name, "start": s0, "end": e0, **r})
-    pd.DataFrame(tot_rows).to_csv(a.out / "window_totals.csv", index=False)
-    cands = [candidate_column(insts, n, pd.Timestamp(s0), pd.Timestamp(e0), sites_cfg=REPO)
-             for n, s0, e0 in CANDIDATES]
-    pd.DataFrame([{"window": c["name"], "start": c["start"], "end": c["end"], **c["values"]}
-                  for c in cands]).to_csv(a.out / "candidate_windows.csv", index=False)
+    exps = yaml.safe_load(open(REPO / "config/experiments.yaml"))
+    periods = [{"label": v["label"], "site": v["validation_site"],
+                "start": pd.Timestamp(v["analysis_start"]).date().isoformat(),
+                "end": pd.Timestamp(v["analysis_end"]).date().isoformat()}
+               for v in exps["periods"].values()]
+    lid_union = np.any([it["valid"] for it in insts if it["group"] == "LIDAR"], axis=0)
+    wins = []
+    for dur in DURATIONS:
+        s0 = WIN_FIRST
+        while s0 + pd.DateOffset(months=dur) - pd.Timedelta(days=1) <= T1.normalize():
+            wins.append(window_metrics(insts, lid_union, periods, s0, dur))
+            s0 += pd.DateOffset(months=1)
+    mark_best(wins)
+    pd.DataFrame([{"months": w["months"], "start": w["start"], "end": w["end"], **w["v"],
+                   "best_cols": ";".join(w["best"]), "best_row": w["best_row"]} for w in wins]
+                 ).to_csv(a.out / "candidate_windows_12_24.csv", index=False)
 
     # ---------------------------------------------------------------- HTML
     sha = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"],
@@ -364,7 +403,8 @@ def main():
         "valid_day_h": VALID_DAY_H, "station_ok": STATION_OK_PCT,
         "preloaded": [{"name": n, "start": s} for n, s in PRELOADED],
         "groups": [{"key": k, "label": v} for k, v in GROUPS],
-        "candidates": cands,
+        "windows": wins, "win_cols": WIN_COLS, "periods": periods,
+        "lidar_union": "".join("1" if x else "0" for x in lid_union),
         "months": [str(p) for p in pd.period_range(T0, T1, freq="M")],
         "instruments": [],
         "geography": json.load(open(REPO / "results/interactive/geo/geography.json")),
@@ -401,104 +441,79 @@ def main():
     print("wrote", a.out)
 
 
-def window_table(insts, s, e):
-    """Per-instrument and per-group counts in [s, e] (days, inclusive). Mirrors drawWin() in JS."""
-    m = (DAYS >= s) & (DAYS <= e)
-    nd = int(m.sum())
-    rows, groups = [], []
-    for g, _ in GROUPS:
-        members = [it for it in insts if it["group"] == g]
-        anyv = np.zeros(nd, bool)
-        G = {"level": "group", "group": g, "instrument": "SUBTOTAL_" + g, "native_records": 0,
-             "valid_hours": 0, "pairs": 0 if g in ("LIDAR", "SODAR") else None,
-             "valid_days": 0, "days": nd, "pct_days": 0.0, "source": "completo"}
-        for it in members:
-            src = it["src_d"][m]
-            vd = it["h_d"][m] >= VALID_DAY_H
-            r = {"level": "instrument", "group": g, "instrument": it["key"],
-                 "native_records": int(it["nat_d"][m][src].sum()),
-                 "valid_hours": int(it["h_d"][m][src].sum()),
-                 "pairs": int(it["pair_d"][m].sum()) if it["pair_d"] is not None else None,
-                 "valid_days": int((vd & src).sum()), "days": nd,
-                 "pct_days": round(100 * (vd & src).sum() / nd, 1),
-                 "source": "sem fonte" if not src.any() else ("parcial" if not src.all() else "completo")}
-            rows.append(r)
-            anyv |= vd & src
-            if r["source"] != "completo":
-                G["source"] = "parcial"
-            if r["source"] == "sem fonte":
-                continue
-            for k in ("native_records", "valid_hours"):
-                G[k] += r[k]
-            if r["pairs"] is not None:
-                G["pairs"] += r["pairs"]
-        G["valid_days"] = int(anyv.sum())
-        G["pct_days"] = round(100 * anyv.sum() / nd, 1)
-        groups.append(G)
-    return {"rows": rows, "groups": groups}
+# (key, header, better, group) — better: "max", "min" or None; group "sod"/"uncl" = grey, apart.
+WIN_COLS = [
+    ["lidar_days", "Dias com LiDAR (≥ 12 h)", "max", ""],
+    ["lidar_hours", "Horas de LiDAR a 100 m", "max", ""],
+    ["lidar_pairs", "Pares hora×altura (LiDAR)", "max", ""],
+    ["lidar_sites", "Sítios de perfilador (LiDAR)", "max", ""],
+    ["simul_days", "Dias com ≥ 2 sítios LiDAR simultâneos", "max", ""],
+    ["meq04_months", "Meses validados na MEQ-04", "max", ""],
+    ["inmet_hours", "Horas INMET", "max", ""],
+    ["aero_hours", "Horas em aeroportos", "max", ""],
+    ["stations_ge80", "Estações ≥ 80 %", "max", ""],
+    ["longest_gap_h", "Maior lacuna de perfilador (h)", "min", ""],
+    ["spinup_start", "Início do spin-up (11 d)", None, ""],
+    ["sodar_hours", "SODAR P1: horas a 100 m", None, "sod"],
+    ["anm_hours", "ANM-1/PPE1A: horas", None, "uncl"],
+]
 
 
-def candidate_column(insts, name, s, e, sites_cfg):
-    """Fixed 'Janelas candidatas' column, computed (nothing typed by hand)."""
-    wt = window_table(insts, s, e)
-    G = {g["group"]: g for g in wt["groups"]}
+def window_metrics(insts, lid_union, periods, s, months):
+    """Criteria of one candidate window [s, s + months). Mirrors computeWin() in JS.
+
+    Hours and days only count where a source exists (ISD years without a file).
+    Longest profiler gap: longest run of consecutive hours in the window with no
+    valid 100 m hour at ANY LiDAR site (SODAR excluded), window edges included.
+    """
+    e = s + pd.DateOffset(months=months) - pd.Timedelta(days=1)
     m = (DAYS >= s) & (DAYS <= e)
     hm = (HOURS >= s) & (HOURS < e + pd.Timedelta(days=1))
-    lid = [it for it in insts if it["group"] == "LIDAR"]
-    per = np.array([(it["h_d"][m] >= VALID_DAY_H) for it in lid])
-    sites = [it["label"].split(" ·")[0] for it, row in zip(lid, per) if row.any()]
-    simul = int((per.sum(0) >= 2).sum())
-    exps = yaml.safe_load(open(sites_cfg / "config/experiments.yaml"))
-    months = [f"{v['label']} ({v['validation_site']})" for v in exps["periods"].values()
-              if pd.Timestamp(v["analysis_start"]) >= s
-              and pd.Timestamp(v["analysis_end"]) <= e + pd.Timedelta(days=1)]
-    best = None
-    for it in lid:
-        for gs, ge, n in it["gaps"]:
-            cs, ce = max(gs, s), min(ge, e + pd.Timedelta(hours=23))
-            if ce >= cs:
-                L = int((ce - cs) / pd.Timedelta(hours=1)) + 1
-                if best is None or L > best[0]:
-                    best = (L, it["label"].split(" ·")[0], cs, ce)
+    by = lambda g: [it for it in insts if it["group"] == g]
+    lid = by("LIDAR")
+    vd = np.array([it["h_d"][m] >= VALID_DAY_H for it in lid])
+    hsum = lambda its: int(sum(it["h_d"][m][it["src_d"][m]].sum() for it in its))
+    run = best = 0
+    for ok in lid_union[hm]:
+        run = 0 if ok else run + 1
+        best = max(best, run)
     st = [it for it in insts if it["kind"] == "station"]
-    n_ok = sum(1 for it in st if 100 * it["valid"][hm].mean() >= STATION_OK_PCT)
-    partial_st = any(not it["src_d"][m].all() for it in st)
-
-    def src_note(g):
-        return "" if G[g]["source"] == "completo" else f" ({G[g]['source']}: anos ISD sem arquivo = sem fonte)"
     v = {
-        "lidar_valid_days": G["LIDAR"]["valid_days"],
-        "lidar_valid_hours_100m": G["LIDAR"]["valid_hours"],
-        "lidar_native_records_100m": G["LIDAR"]["native_records"],
-        "lidar_sites": ", ".join(sites) if sites else "nenhum",
-        "lidar_simultaneous_days": simul,
-        "meq04_months": "; ".join(months) if months else "nenhum",
-        "inmet_native_records": G["INMET"]["native_records"],
-        "inmet_source": G["INMET"]["source"],
-        "aero_native_records": G["AERO"]["native_records"],
-        "aero_source": G["AERO"]["source"],
-        "stations_ge80": f"{n_ok} de {len(st)}" + (" (parcial)" if partial_st else ""),
-        "longest_lidar_gap_h": best[0] if best else 0,
-        "longest_lidar_gap": (f"{best[0]} h — {best[1]}, {best[2]:%d/%m/%Y %H}h → {best[3]:%d/%m/%Y %H}h UTC"
-                              if best else "nenhuma ≥ 3 h"),
+        "lidar_days": int(vd.any(0).sum()),
+        "lidar_hours": hsum(lid),
+        "lidar_pairs": int(sum(it["pair_d"][m].sum() for it in lid)),
+        "lidar_sites": int(vd.any(1).sum()),
+        "simul_days": int((vd.sum(0) >= 2).sum()),
+        "meq04_months": sum(1 for p in periods if pd.Timestamp(p["start"]) >= s
+                            and pd.Timestamp(p["end"]) <= e + pd.Timedelta(days=1)),
+        "inmet_hours": hsum(by("INMET")),
+        "aero_hours": hsum(by("AERO")),
+        "stations_ge80": sum(1 for it in st if 100 * it["valid"][hm].mean() >= STATION_OK_PCT),
+        "longest_gap_h": int(best),
         "spinup_start": (s - pd.Timedelta(days=SPINUP_DAYS)).date().isoformat(),
+        "sodar_hours": hsum(by("SODAR")),
+        "anm_hours": hsum(by("UNCL")),
     }
-    fmt = lambda x: f"{x:,}".replace(",", ".")
-    disp = [
-        ["Dias com LiDAR válido (≥ 12 h)", fmt(v["lidar_valid_days"])],
-        ["Horas válidas de LiDAR (100 m, ≥ 4/6)", fmt(v["lidar_valid_hours_100m"])],
-        ["Registros nativos de LiDAR (10 min, 100 m)", fmt(v["lidar_native_records_100m"])],
-        ["Sítios com LiDAR", v["lidar_sites"] + (f" — simultâneos em {simul} dias" if simul
-                                                 else " — não medem ao mesmo tempo (0 dias)")],
-        ["Meses já validados na MEQ-04 contidos", v["meq04_months"]],
-        ["Registros válidos INMET", fmt(v["inmet_native_records"]) + src_note("INMET")],
-        ["Registros válidos de aeroportos (ISD)", fmt(v["aero_native_records"]) + src_note("AERO")],
-        ["Estações ≥ 80 % das horas", v["stations_ge80"]],
-        ["Maior lacuna de LiDAR (dentro do registro)", v["longest_lidar_gap"]],
-        [f"Início do spin-up de {SPINUP_DAYS} dias", pd.Timestamp(v["spinup_start"]).strftime("%d/%m/%Y")],
-    ]
-    return {"name": name, "start": s.date().isoformat(), "end": e.date().isoformat(),
-            "values": v, "display": disp}
+    return {"months": months, "start": s.date().isoformat(), "end": e.date().isoformat(), "v": v}
+
+
+def mark_best(wins):
+    """Per duration: best cell(s) of each column (ties all) and the best row by LiDAR hours."""
+    for dur in DURATIONS:
+        ws = [w for w in wins if w["months"] == dur]
+        for w in ws:
+            w["best"] = []
+        for key, _, better, grp in WIN_COLS:
+            if better is None:
+                continue
+            vals = [w["v"][key] for w in ws]
+            t = max(vals) if better == "max" else min(vals)
+            for w in ws:
+                if w["v"][key] == t:
+                    w["best"].append(key)
+        top = max(w["v"]["lidar_hours"] for w in ws)
+        for w in ws:
+            w["best_row"] = w["v"]["lidar_hours"] == top
 
 
 def mesh_extent():
@@ -516,7 +531,7 @@ TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MEQ-06.2 · Disponibilidade das observações</title>
+<title>MEQ-06.4 · Disponibilidade das observações</title>
 <style>/*LEAFLET_CSS*/</style>
 <style>
 /*ROOT_VARS*/
@@ -556,10 +571,19 @@ tr.grp td { font-weight: 700; border-bottom: 1px solid var(--ink); }
 tr.sod td { color: #8c8c8c; }
 tr.tot td { font-weight: 700; border-top: 1px solid var(--ink); }
 td.na { color: #8c8c8c; font-style: italic; }
-.cand th.col { cursor: pointer; text-decoration: underline dotted; }
-.cand th.col.active { background: var(--ink); color: #fff; }
-.cand td { white-space: normal; text-align: left; vertical-align: top; }
-.cand td:first-child { white-space: nowrap; color: var(--muted); }
+.cand th { cursor: pointer; white-space: normal; vertical-align: bottom; min-width: 64px; }
+.cand th.sorted::after { content: ' ▾'; } .cand th.sorted.asc::after { content: ' ▴'; }
+.cand tbody tr { cursor: pointer; }
+.cand tbody tr:hover td { background: #f3f3f3; }
+.cand td.best { background: #d9ead3; font-weight: 700; }
+.cand tr.bestrow td { background: #eef6eb; }
+.cand tr.bestrow td.best { background: #d9ead3; }
+.cand tr.sel td { box-shadow: inset 0 1px 0 var(--ink), inset 0 -1px 0 var(--ink); }
+.cand th.g, .cand td.g { color: #8c8c8c; }
+.cand td.g { background: #fafafa; }
+.sw.best { background: #d9ead3; } .sw.bestrow { background: #eef6eb; }
+#hm-wrap { position: relative; display: inline-block; min-width: 100%; }
+#hm-win { position: absolute; border: 1.6px solid #1a1a1a; pointer-events: none; display: none; }
 #map { height: 520px; border: 1px solid var(--rule); background: #fff; }
 .leaflet-popup-content { font: 12px/1.4 var(--font); }
 footer { margin-top: 36px; border-top: 1px solid var(--rule-strong); padding-top: 8px; font-size: 11.5px; color: var(--muted); }
@@ -569,36 +593,40 @@ footer code { font-size: 11px; }
 </head>
 <body>
 <main>
-<h1>Disponibilidade das observações de vento — 2021-10 a 2025-06</h1>
-<p class="lead">MEQ-06.2 · Painel de apoio à escolha do ano da integração anual da EXP03. Mostra apenas os dados: horas válidas por instrumento após o mesmo controle de qualidade das validações da MEQ-04. Não contém recomendação de ano.</p>
+<h1>Disponibilidade das observações de vento — 2021-10 a 2025-08</h1>
+<p class="lead">MEQ-06.4 · Painel de apoio à escolha do período da integração longa da EXP03 (12 ou 24 meses). Mostra apenas os dados: horas válidas por instrumento após o mesmo controle de qualidade das validações da MEQ-04.</p>
 
 <h2>a · Linha do tempo</h2>
 <div class="ctrl" id="win-ctrl">
-  <span>Janela de 12 meses a partir de</span>
-  <input type="date" id="win-start" min="2021-10-01" max="2024-07-01">
+  <span>Janela de</span>
+  <span id="win-dur"><button type="button" data-m="12" class="active">12 meses</button><button type="button" data-m="24">24 meses</button></span>
+  <span>a partir de</span>
+  <input type="date" id="win-start" min="2021-10-01">
   <span id="win-pre"></span>
 </div>
 <div id="tl-wrap"><canvas id="tl"></canvas></div>
 <div class="legend" id="tl-legend"></div>
-<p class="caption"><b>a</b> Uma faixa por instrumento (profiladores no topo, estações abaixo). A cor é a disponibilidade diária (% das 24 h com dado válido na altura de referência: 100 m nos profiladores, 10 m nas estações). Branco: dia sem nenhuma hora válida dentro do registro do instrumento (lacuna). Cinza-claro: sem fonte (fora do registro do instrumento ou ano ISD não baixado). O retângulo preto marca a janela de 12 meses selecionada. Passe o cursor para ver a data, o % e a lacuna que contém o dia.</p>
+<p class="caption"><b>a</b> Uma faixa por instrumento (profiladores no topo, estações abaixo). A cor é a disponibilidade diária (% das 24 h com dado válido na altura de referência: 100 m nos profiladores, 10 m nas estações). Branco: dia sem nenhuma hora válida dentro do registro do instrumento (lacuna). Cinza-claro: sem fonte (fora do registro do instrumento ou ano ISD sem arquivo). O retângulo preto marca a janela selecionada (12 ou 24 meses). A ANM-1/PPE1A (anemômetro de plataforma, altura não informada) é "fonte não classificada" e fica fora de todos os totais. Passe o cursor para ver a data, o % e a lacuna que contém o dia.</p>
 
-<h2>b · Janela móvel de 12 meses</h2>
-<h3 class="sub">Janelas candidatas</h3>
+<h2>b · Disponibilidade mensal</h2>
+<div class="scroll"><div id="hm-wrap"><table class="hm" id="hm"></table><div id="hm-win"></div></div></div>
+<p class="caption"><b>b</b> % das horas do mês com dado válido, por instrumento. Célula em branco com borda: 0 %; cinza-claro: sem fonte no mês. O retângulo preto é a mesma janela selecionada em (a). Mapa de cor Crameri <i>devon</i>.</p>
+
+<h2>c · Janelas candidatas</h2>
+<div class="ctrl" id="cand-dur"><span>Duração:</span><button type="button" data-m="12" class="active">12 meses</button><button type="button" data-m="24">24 meses</button><span id="cand-n"></span></div>
+<div class="legend"><span><span class="sw best"></span>melhor valor da coluna (empates: todas as células)</span><span><span class="sw bestrow"></span>janela com mais horas de LiDAR a 100 m (linha inteira)</span><span style="color:#8c8c8c">cinza: SODAR P1 e ANM-1/PPE1A, à parte, sem destaque</span></div>
 <div class="scroll"><table id="cand" class="cand"></table></div>
-<p class="caption">Quadro fixo calculado pelo builder (<code>candidate_windows.csv</code>). Clique no cabeçalho de uma coluna para aplicar a janela ao seletor.</p>
+<p class="caption"><b>c</b> Todas as janelas que começam no dia 1 de cada mês, de 2021-10 até a última que cabe nos dados (fim ≤ 31/08/2025). Clique no cabeçalho para ordenar e numa linha para aplicar a janela ao seletor. <b>Dias com LiDAR</b>: dias com ≥ <span class="vdh"></span> válidas em pelo menos um sítio LiDAR. <b>Horas de LiDAR</b>: soma das horas válidas a 100 m (≥ 4 de 6 amostras) nos três LiDARs. <b>Pares hora×altura</b>: horas válidas em cada altura da validação da MEQ-04. <b>Sítios</b>: LiDARs com ≥ 1 dia válido. <b>Simultâneos</b>: dias válidos em ≥ 2 LiDARs. <b>Meses MEQ-04</b>: meses já validados (Nov 2021 em P0; Oct 2022 em LPI) inteiramente contidos. <b>Horas INMET / aeroportos</b>: horas com dado válido, só onde há arquivo ISD. <b>Estações ≥ 80 %</b>: das 11 estações. <b>Maior lacuna de perfilador</b>: maior sequência de horas sem nenhuma hora válida de LiDAR (o SODAR não conta); quanto menor, melhor. <b>Spin-up</b>: início da integração, 11 dias antes da janela.</p>
+
 <h3 class="sub">Janela selecionada</h3>
 <div class="kpis" id="win-kpis"></div>
 <div class="scroll"><table id="win-table"></table></div>
-<p class="caption"><b>b</b> Contagens na janela selecionada, por grupo, com subtotal. <b>Registros nativos</b>: amostras de 10 min válidas a 100 m (LiDAR/SODAR) ou relatos ISD válidos (estações). <b>Horas válidas</b>: média horária com ≥ 4 de 6 amostras a 100 m (profiladores) ou hora com relato válido (estações). <b>Pares hora×altura</b>: horas válidas em cada altura da validação da MEQ-04 (50, 100, 150, 200 e 250 m; LPI sem 250 m). "sem fonte": nenhum arquivo ISD no período (2023 em diante); "parcial": parte da janela sem arquivo. O SODAR (cinza) fica fora do total. <b>Dia válido</b>: ≥ <span class="vdh"></span> das 24 h válidas. <b>Dias com ≥ 2 profiladores</b>: dias válidos simultaneamente em pelo menos dois profiladores, sem contar o SODAR P1 (excluído, DEC-MEQ-003); a contagem com o SODAR aparece ao lado, só como informação. <b>Estações ≥ 80 %</b>: estações com ≥ 80 % das horas da janela válidas.</p>
-
-<h2>c · Disponibilidade mensal</h2>
-<div class="scroll"><table class="hm" id="hm"></table></div>
-<p class="caption"><b>c</b> % das horas do mês com dado válido, por instrumento. Célula em branco com borda: 0 %; cinza-claro: sem fonte no mês. Mapa de cor Crameri <i>devon</i>.</p>
+<p class="caption">Contagens na janela selecionada, por grupo, com subtotal. <b>Registros nativos</b>: amostras de 10 min válidas a 100 m (LiDAR/SODAR), relatos ISD válidos (estações) ou registros horários válidos (ANM). <b>Horas válidas</b>: média horária com ≥ 4 de 6 amostras a 100 m (profiladores) ou hora com relato válido (estações, ANM). <b>Pares hora×altura</b>: horas válidas em cada altura da validação da MEQ-04 (50, 100, 150, 200 e 250 m; LPI sem 250 m). "sem fonte": nenhum arquivo ISD no período; "parcial": parte da janela sem arquivo. O SODAR e a ANM-1/PPE1A (cinza) ficam fora do total. <b>Dia válido</b>: ≥ <span class="vdh"></span> das 24 h válidas. <b>Dias com ≥ 2 profiladores</b>: sem contar o SODAR P1 (DEC-MEQ-003). <b>Estações ≥ 80 %</b>: estações com ≥ 80 % das horas da janela válidas.</p>
 
 <h2>d · Mapa da rede</h2>
 <div id="map"></div>
 <div class="legend" id="map-legend"></div>
-<p class="caption"><b>d</b> Sítios e estações; clique para ver o período válido e a disponibilidade na janela selecionada em (a). Tracejado: extensão da malha da EXP03 (<span id="mesh-name"></span>), como no relatório principal.</p>
+<p class="caption"><b>d</b> Sítios e estações; clique para ver o período válido e a disponibilidade na janela selecionada em (a). A ANM-1/PPE1A está na célula 35433 da malha da EXP03, a 40,6 km do LPI. Tracejado: extensão da malha da EXP03 (<span id="mesh-name"></span>), como no relatório principal.</p>
 
 <footer id="foot"></footer>
 </main>
@@ -636,21 +664,27 @@ footer code { font-size: 11px; }
   Array.prototype.forEach.call(document.querySelectorAll('.vdh'), function (e) { e.textContent = D.valid_day_h + ' h'; });
 
   // ---------------- window state
-  function winEnd(s) { var d = new Date(T0 + s * DAY); d.setUTCFullYear(d.getUTCFullYear() + 1); return Math.round((d - T0) / DAY) - 1; }
-  var win = { s: dayIdx(D.preloaded[0].start) }; win.e = winEnd(win.s);
+  function addMonths(s, m) { var d = new Date(T0 + s * DAY); d.setUTCMonth(d.getUTCMonth() + m); return Math.round((d - T0) / DAY); }
+  function winEnd(s, m) { return addMonths(s, m || win.m) - 1; }
+  var win = { m: 12, s: dayIdx(D.preloaded[0].start) }; win.e = winEnd(win.s);
+  $('win-dur').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; win.m = +b.dataset.m; setWin(win.s); });
   $('win-pre').innerHTML = D.preloaded.map(function (p, i) { return '<button type="button" data-s="' + p.start + '"' + (i === 0 ? ' class="active"' : '') + '>' + esc(p.name) + '</button>'; }).join('');
   $('win-pre').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; setWin(dayIdx(b.dataset.s)); });
   $('win-start').addEventListener('change', function () { if (this.value) setWin(dayIdx(this.value)); });
-  function setWin(s) {
-    win.s = Math.max(0, Math.min(s, N - 366)); win.e = winEnd(win.s);
+  function setWin(s, m) {
+    if (m) win.m = m;
+    s = Math.max(0, s); while (s > 0 && winEnd(s) > N - 1) s--;
+    win.s = s; win.e = winEnd(win.s);
     $('win-start').value = isoDay(win.s);
+    var mx = 0; while (winEnd(mx + 1) <= N - 1) mx++; $('win-start').max = isoDay(mx);
+    Array.prototype.forEach.call($('win-dur').querySelectorAll('button'), function (b) { b.classList.toggle('active', +b.dataset.m === win.m); });
     Array.prototype.forEach.call($('win-pre').querySelectorAll('button'), function (b) { b.classList.toggle('active', dayIdx(b.dataset.s) === win.s); });
-    drawTL(); drawWin(); updatePopups();
+    drawTL(); drawWin(); drawHmWin(); markCand(); updatePopups();
   }
 
   // ---------------- a · timeline (canvas)
   var cv = $('tl'), ctx = cv.getContext('2d'), LBLW = 230, ROWH = 15, TOP = 22, SEP = 10, geo = {};
-  function rows() { var r = [], y = TOP; I.forEach(function (it, k) { if (k > 0 && it.kind === 'station' && I[k - 1].kind !== 'station') y += SEP; r.push(y); y += ROWH; }); return { y: r, h: y + 6 }; }
+  function rows() { var r = [], y = TOP; I.forEach(function (it, k) { if (k > 0 && it.kind !== I[k - 1].kind) y += SEP; r.push(y); y += ROWH; }); return { y: r, h: y + 6 }; }
   function drawTL() {
     var W = cv.parentNode.clientWidth, R = rows(), dpr = window.devicePixelRatio || 1;
     var lw = W < 600 ? 120 : LBLW;
@@ -677,9 +711,12 @@ footer code { font-size: 11px; }
         ctx.fillRect(x0 + i * pw, y + 1, Math.max(pw, 0.6) + 0.3, ROWH - 3);
       }
       ctx.strokeStyle = '#d4d4d4'; ctx.lineWidth = 0.5; ctx.strokeRect(x0, y + 1, N * pw, ROWH - 3);
-      if (it.instrument === 'P1_SODAR') {
-        ctx.fillStyle = '#883007'; ctx.font = 'italic 10px Arial'; ctx.textAlign = 'right';
-        ctx.fillText('excluído da validação (DEC-MEQ-003)', W - 6, y + ROWH / 2); ctx.textAlign = 'left';
+      if (it.instrument === 'P1_SODAR' || it.kind === 'unclassified') {
+        var note = it.kind === 'unclassified' ? 'fonte não classificada (fora dos totais)' : 'excluído da validação (DEC-MEQ-003)';
+        ctx.font = 'italic 10px Arial'; var tw = ctx.measureText(note).width;
+        ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fillRect(W - 10 - tw, y + 1, tw + 8, ROWH - 3);
+        ctx.fillStyle = '#883007'; ctx.textAlign = 'right';
+        ctx.fillText(it.kind === 'unclassified' ? 'fonte não classificada (fora dos totais)' : 'excluído da validação (DEC-MEQ-003)', W - 6, y + ROWH / 2); ctx.textAlign = 'left';
       }
     });
     if (win.e != null) {
@@ -697,6 +734,7 @@ footer code { font-size: 11px; }
     var html = '<b>' + esc(it.label) + '</b><br>' + br(isoDay(i)) + ' · ' + (h < 0 ? 'sem fonte' : fmt(100 * h / 24, 0) + ' % (' + h + ' de 24 h)');
     if (g) html += '<br>lacuna de ' + fmt(g[2]) + ' h (' + (g[2] >= 48 ? fmt(g[2] / 24, 1) + ' d, ' : '') + br(g[0]) + ' ' + g[0].slice(11, 16) + ' → ' + br(g[1]) + ' ' + g[1].slice(11, 16) + ' UTC)';
     if (it.instrument === 'P1_SODAR') html += '<br><span class="excl">excluído da validação (DEC-MEQ-003)</span>';
+    if (it.kind === 'unclassified') html += '<br><span class="excl">fonte não classificada: altura e fuso não informados</span>';
     tip.innerHTML = html; tip.style.display = 'block';
     tip.style.left = Math.min(ev.clientX + 12, window.innerWidth - 290) + 'px'; tip.style.top = (ev.clientY + 12) + 'px';
   });
@@ -730,31 +768,85 @@ footer code { font-size: 11px; }
         if (src !== 'completo') G.src = 'parcial';
         if (src !== 'sem fonte') { G.nat += nat; G.hrs += hrs; if (pairs != null) G.pairs += pairs; }
         var na = '<td class="na">sem fonte</td>';
-        rowsH += '<tr' + (g.key === 'SODAR' ? ' class="sod"' : '') + '><td>' + esc(it.label) + (src === 'parcial' ? ' <span class="na">(parcial)</span>' : '') + '</td>' +
+        rowsH += '<tr' + (g.key === 'SODAR' || g.key === 'UNCL' ? ' class="sod"' : '') + '><td>' + esc(it.label) + (src === 'parcial' ? ' <span class="na">(parcial)</span>' : '') + '</td>' +
           (src === 'sem fonte' ? na + na + '<td>—</td>' + na + na :
           '<td>' + fmt(nat) + '</td><td>' + fmt(hrs) + '</td><td>' + (pairs == null ? '—' : fmt(pairs)) + '</td><td>' + fmt(vd) + '</td><td>' + fmt(100 * vd / nd, 1) + '</td>') + '</tr>';
       });
       for (var k in anyv) G.vd++;
       totals[g.key] = G;
-      if (g.key !== 'SODAR') { grand.nat += G.nat; grand.hrs += G.hrs; grand.pairs += G.pairs || 0; }
-      body += '<tr class="grp' + (g.key === 'SODAR' ? ' sod' : '') + '"><td>' + esc(g.label) + (G.src !== 'completo' ? ' — <span class="na">parcial</span>' : '') + '</td><td>' + fmt(G.nat) + '</td><td>' + fmt(G.hrs) + '</td><td>' + (G.pairs == null ? '—' : fmt(G.pairs)) + '</td><td>' + fmt(G.vd) + '</td><td>' + fmt(100 * G.vd / nd, 1) + '</td></tr>' + rowsH;
+      if (g.key !== 'SODAR' && g.key !== 'UNCL') { grand.nat += G.nat; grand.hrs += G.hrs; grand.pairs += G.pairs || 0; }
+      body += '<tr class="grp' + (g.key === 'SODAR' || g.key === 'UNCL' ? ' sod' : '') + '"><td>' + esc(g.label) + (G.src !== 'completo' ? ' — <span class="na">parcial</span>' : '') + '</td><td>' + fmt(G.nat) + '</td><td>' + fmt(G.hrs) + '</td><td>' + (G.pairs == null ? '—' : fmt(G.pairs)) + '</td><td>' + fmt(G.vd) + '</td><td>' + fmt(100 * G.vd / nd, 1) + '</td></tr>' + rowsH;
     });
-    body += '<tr class="tot"><td>Total sem o SODAR (LiDAR + INMET + aeroportos)</td><td>' + fmt(grand.nat) + '</td><td>' + fmt(grand.hrs) + '</td><td>' + fmt(grand.pairs) + '</td><td></td><td></td></tr>';
+    body += '<tr class="tot"><td>Total sem o SODAR e a ANM (LiDAR + INMET + aeroportos)</td><td>' + fmt(grand.nat) + '</td><td>' + fmt(grand.hrs) + '</td><td>' + fmt(grand.pairs) + '</td><td></td><td></td></tr>';
     window.__groupTotals = totals;
     $('win-table').innerHTML = '<thead><tr><th>Grupo / instrumento</th><th>Registros nativos válidos</th><th>Horas válidas</th><th>Pares hora×altura</th><th>Dias válidos (de ' + nd + ')</th><th>% do período</th></tr></thead><tbody>' + body + '</tbody>';
     $('win-kpis').innerHTML = '<div><b>' + br(isoDay(win.s)) + ' – ' + br(isoDay(win.e)) + '</b>janela (' + nd + ' dias)</div>' +
       '<div><b>' + fmt(both) + '</b>dias com ≥ 2 profiladores válidos (sem o SODAR)</div><div><b>' + fmt(bothS) + '</b>idem, contando o SODAR P1</div><div><b>' + okSt + ' de ' + nSt + '</b>estações com ≥ 80 %</div>';
-    Array.prototype.forEach.call(document.querySelectorAll('#cand th.col'), function (th) { th.classList.toggle('active', dayIdx(th.dataset.s) === win.s && dayIdx(th.dataset.e) === win.e); });
   }
-  (function () {
-    var C = D.candidates;
-    var h = '<thead><tr><th></th>' + C.map(function (c) { return '<th class="col" data-s="' + c.start + '" data-e="' + c.end + '">' + c.name + ' = ' + br(c.start) + ' → ' + br(c.end) + '</th>'; }).join('') + '</tr></thead><tbody>';
-    C[0].display.forEach(function (row, k) { h += '<tr><td>' + esc(row[0]) + '</td>' + C.map(function (c) { return '<td>' + esc(c.display[k][1]) + '</td>'; }).join('') + '</tr>'; });
-    $('cand').innerHTML = h + '</tbody>';
-    $('cand').addEventListener('click', function (ev) { var th = ev.target.closest('th.col'); if (th) setWin(dayIdx(th.dataset.s)); });
-  })();
+  // ---------------- independent JS recomputation of a candidate window (parity check with Python)
+  var LU = D.lidar_union;
+  function computeWin(startIso, months) {
+    var s = dayIdx(startIso), e = addMonths(s, months) - 1;
+    var lid = I.filter(function (it) { return it.group === 'LIDAR'; });
+    function hsum(g) { var t = 0; I.forEach(function (it) { if (it.group !== g) return; for (var i = s; i <= e; i++) if (it.src[i]) t += Math.max(it.h[i], 0); }); return t; }
+    var days = 0, simul = 0, pairs = 0, sites = 0;
+    for (var i = s; i <= e; i++) { var c = 0; lid.forEach(function (it) { if (it.h[i] >= D.valid_day_h) c++; }); if (c >= 1) days++; if (c >= 2) simul++; }
+    lid.forEach(function (it) { var any = false; for (var i = s; i <= e; i++) { pairs += it.p[i]; if (it.h[i] >= D.valid_day_h) any = true; } if (any) sites++; });
+    var run = 0, gap = 0; for (var h = s * 24; h < (e + 1) * 24; h++) { run = LU.charAt(h) === '1' ? 0 : run + 1; if (run > gap) gap = run; }
+    var ok = 0; I.forEach(function (it) { if (it.kind !== 'station') return; var v = 0; for (var i = s; i <= e; i++) v += Math.max(it.h[i], 0); if (100 * v / (24 * (e - s + 1)) >= D.station_ok) ok++; });
+    var months04 = D.periods.filter(function (p) { return dayIdx(p.start) >= s && dayIdx(p.end) <= e + 1; }).length;
+    return { lidar_days: days, lidar_hours: hsum('LIDAR'), lidar_pairs: pairs, lidar_sites: sites, simul_days: simul, meq04_months: months04,
+      inmet_hours: hsum('INMET'), aero_hours: hsum('AERO'), stations_ge80: ok, longest_gap_h: gap, spinup_start: isoDay(s - 11),
+      sodar_hours: hsum('SODAR'), anm_hours: hsum('UNCL') };
+  }
+  window.__computeWin = computeWin;
 
-  // ---------------- c · monthly heatmap table
+  // ---------------- c · candidate windows (sortable; click a row -> selector)
+  var cand = { m: 12, key: 'start', asc: true };
+  function drawCand() {
+    var W = D.windows.filter(function (w) { return w.months === cand.m; }), C = D.win_cols;
+    W.sort(function (a, b) {
+      var x = cand.key === 'start' ? a.start : a.v[cand.key], y = cand.key === 'start' ? b.start : b.v[cand.key];
+      return (x < y ? -1 : x > y ? 1 : 0) * (cand.asc ? 1 : -1) || (a.start < b.start ? -1 : 1);
+    });
+    function th(k, lbl, g) { return '<th data-k="' + k + '" class="' + (g ? 'g ' : '') + (cand.key === k ? 'sorted' + (cand.asc ? ' asc' : '') : '') + '">' + esc(lbl) + '</th>'; }
+    var h = '<thead><tr>' + th('start', 'Janela') + C.map(function (c) { return th(c[0], c[1], c[3]); }).join('') + '</tr></thead><tbody>';
+    W.forEach(function (w) {
+      h += '<tr data-s="' + w.start + '" class="' + (w.best_row ? 'bestrow' : '') + '"><td>' + br(w.start) + ' → ' + br(w.end) + '</td>' + C.map(function (c) {
+        var v = w.v[c[0]], cls = (c[3] ? 'g' : '') + (w.best.indexOf(c[0]) >= 0 ? ' best' : '');
+        return '<td class="' + cls + '">' + (c[0] === 'spinup_start' ? br(v) : fmt(v)) + '</td>';
+      }).join('') + '</tr>';
+    });
+    $('cand').innerHTML = h + '</tbody>';
+    $('cand-n').textContent = W.length + ' janelas';
+    Array.prototype.forEach.call($('cand-dur').querySelectorAll('button'), function (b) { b.classList.toggle('active', +b.dataset.m === cand.m); });
+    markCand();
+  }
+  function markCand() {
+    Array.prototype.forEach.call(document.querySelectorAll('#cand tbody tr'), function (tr) { tr.classList.toggle('sel', cand.m === win.m && dayIdx(tr.dataset.s) === win.s); });
+  }
+  $('cand').addEventListener('click', function (ev) {
+    var t = ev.target.closest('th');
+    if (t) { var k = t.dataset.k; if (cand.key === k) cand.asc = !cand.asc; else { cand.key = k; cand.asc = k === 'start' || k === 'longest_gap_h'; } drawCand(); return; }
+    var tr = ev.target.closest('tbody tr'); if (tr) setWin(dayIdx(tr.dataset.s), cand.m);
+  });
+  $('cand-dur').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; cand.m = +b.dataset.m; drawCand(); });
+  drawCand();
+
+  // ---------------- b · rectangle of the selected window on the monthly table
+  function drawHmWin() {
+    var box = $('hm-win'), tb = $('hm'); if (!tb.tBodies.length) return;
+    var m0 = isoDay(win.s).slice(0, 7), m1 = isoDay(win.e).slice(0, 7), j0 = D.months.indexOf(m0), j1 = D.months.indexOf(m1);
+    if (j0 < 0 || j1 < 0) { box.style.display = 'none'; return; }
+    var hr = tb.tHead.rows[0], c0 = hr.cells[j0 + 1], c1 = hr.cells[j1 + 1], last = tb.tBodies[0].rows[tb.tBodies[0].rows.length - 1];
+    var wr = $('hm-wrap').getBoundingClientRect(), a = c0.getBoundingClientRect(), b = c1.getBoundingClientRect(), z = last.getBoundingClientRect();
+    box.style.display = 'block'; box.style.left = (a.left - wr.left - 1) + 'px'; box.style.top = (a.top - wr.top) + 'px';
+    box.style.width = (b.right - a.left + 2) + 'px'; box.style.height = (z.bottom - a.top + 1) + 'px';
+    box.title = 'Janela ' + br(isoDay(win.s)) + ' – ' + br(isoDay(win.e));
+  }
+  window.addEventListener('resize', drawHmWin);
+
+  // ---------------- b · monthly heatmap table
   (function () {
     var head = '<thead><tr><th></th>' + D.months.map(function (m, j) { var mm = m.slice(5); return '<th>' + (mm === '01' || j === 0 ? m.slice(2, 4) + '<br>' : '<br>') + mm + '</th>'; }).join('') + '</tr></thead>';
     var body = I.map(function (it) {
@@ -776,6 +868,7 @@ footer code { font-size: 11px; }
     else if (sym === 'LPI') s = '<rect x="2.5" y="2.5" width="13" height="13" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>';
     else if (sym === 'P1L') s = '<polygon points="9,1.5 16.5,9 9,16.5 1.5,9" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>';
     else if (sym === 'SODAR') s = '<path d="M3 3 L15 15 M15 3 L3 15" stroke="#883007" stroke-width="2.4"/>';
+    else if (sym === 'ANM') s = '<polygon points="9,1.5 11,7 16.5,7 12,10.5 13.8,16 9,12.7 4.2,16 6,10.5 1.5,7 7,7" fill="#fff" stroke="#883007" stroke-width="1.5"/>';
     else if (sym === 'INMET') s = '<polygon points="9,2 16,15.5 2,15.5" fill="#fff" stroke="#1a1a1a" stroke-width="1.6"/>';
     else s = '<polygon points="9,16 16,2.5 2,2.5" fill="#fff" stroke="#5c5c5c" stroke-width="1.4" stroke-dasharray="2 1.5"/>';
     return L.divIcon({ className: '', html: '<svg width="18" height="18" viewBox="0 0 18 18">' + s + '</svg>', iconSize: [18, 18], iconAnchor: [9, 9] });
@@ -811,17 +904,17 @@ footer code { font-size: 11px; }
       var mk = L.marker([it.lat, it.lon], { icon: icon(it.symbol), title: it.label }).bindTooltip(it.label, { direction: 'top', offset: [0, -8] }).bindPopup(popup(it));
       mk.addTo(map); markers.push({ mk: mk, it: it });
     });
-    $('map-legend').innerHTML = [['P0', 'P0 — LiDAR flutuante'], ['P1L', 'P1 — LiDAR (EOSOLAR)'], ['SODAR', 'P1 — SODAR (excluído)'], ['LPI', 'LPI — LiDAR fixo'], ['INMET', 'Estação automática INMET (10 m)'], ['SYNOP', 'Aeroporto/sinótica (suplementar)']]
+    $('map-legend').innerHTML = [['P0', 'P0 — LiDAR flutuante'], ['P1L', 'P1 — LiDAR (EOSOLAR)'], ['SODAR', 'P1 — SODAR (excluído)'], ['LPI', 'LPI — LiDAR fixo'], ['ANM', 'ANM-1/PPE1A — anemômetro de plataforma (não classificada)'], ['INMET', 'Estação automática INMET (10 m)'], ['SYNOP', 'Aeroporto/sinótica (suplementar)']]
       .map(function (p) { return '<span>' + icon(p[0]).options.html + ' ' + p[1] + '</span>'; }).join('') + '<span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#1a1a1a" stroke-dasharray="5 4"/></svg> malha EXP03</span>';
   })();
 
   // ---------------- e · footer
   $('foot').innerHTML = '<p><b>Critério de QC</b> (o mesmo das validações da MEQ-04, <code>src/mpas_meqbr/obs.py</code>): ' +
-    I.filter(function (it, k) { return k < 4 || k === 4; }).map(function (it) { return esc(it.label) + ' — ' + esc(it.qc); }).join('; ') +
+    I.filter(function (it, k) { return k <= 5; }).map(function (it) { return esc(it.label) + ' — ' + esc(it.qc); }).join('; ') +
     '. Hora válida: média horária centrada com ≥ 4 de 6 amostras de 10 min (profiladores); média dos relatos na hora (estações). Lacunas: ≥ 3 h (profiladores) e ≥ 24 h (estações), contadas entre o primeiro e o último dado válido.</p>' +
     '<p><b>Fontes</b>: ' + I.map(function (it) { return esc(it.label) + ': <code>' + esc(it.source) + '</code>'; }).join(' · ') +
-    '. As estações ISD têm arquivos de 2021, 2022 e 2023 (2023 baixado em 18/11/2026 com autorização do responsável; proveniência em <code>results/obs_availability/isd_2023_download.json</code>); 2024–2025 aparecem como "sem fonte".</p>' +
-    '<p>Gerado por <code>scripts/06_report/build_obs_availability.py</code> · commit <code>' + esc(D.sha) + '</code> · ' + esc(D.generated) + ' · MEQ-06.2. Tabelas: <code>results/obs_availability/*.csv</code>.</p>';
+    '. As estações ISD têm arquivos de 2021 a 2025 (2023 baixado em 18/11/2026 e 2024–2025 em 19/11/2026, com autorização do responsável; proveniência em <code>results/obs_availability/isd_*_download.json</code>). Em 2025 não há arquivo para FORTALEZA, APODI e SOBRAL (INMET), que aparecem como "sem fonte". A ANM-1/PPE1A é registro horário: não há ≥ 4/6; vale hora com FLG_BRT_WSPD = 1, FLG_OP_WSPD = 0 e 0–40 m/s; o código FLG_CONSIST (4 dígitos, sem documentação) não é usado; horário tratado como UTC.</p>' +
+    '<p>Gerado por <code>scripts/06_report/build_obs_availability.py</code> · commit <code>' + esc(D.sha) + '</code> · ' + esc(D.generated) + ' · MEQ-06.2 / MEQ-06.4. Tabelas: <code>results/obs_availability/*.csv</code>.</p>';
 
   setWin(win.s);
 })();
