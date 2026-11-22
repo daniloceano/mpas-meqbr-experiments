@@ -617,10 +617,13 @@ def tl_svg(S):
         dash = "" if pt["authorized"] else ' stroke-dasharray="4 3"'
         col = "#1a1a1a" if pt["authorized"] else "#8c8c8c"
         o.append(f'<line x1="{xx:.1f}" x2="{xx:.1f}" y1="18" y2="140" stroke="{col}" stroke-width="1.5"{dash}/>')
-        anchor = "end" if xx > W - 120 else "middle"
-        o.append(f'<text x="{xx:.1f}" y="172" text-anchor="{anchor}" fill="{col}">{pt["label"]}</text>')
-        o.append(f'<text x="{xx:.1f}" y="188" text-anchor="{anchor}" fill="{col}">ETA {pt["eta"][:10]}'
-                 f'{"" if pt["authorized"] else " (pressupõe ERA5 e autorização a tempo)"}</text>')
+        anchor = "end" if xx > W - 60 else "middle"
+        eta = dt.datetime.strptime(pt["eta"][:10], "%Y-%m-%d")
+        star = "" if pt["authorized"] else "*"
+        o.append(f'<g class="dp-lab" data-x="{xx:.1f}"><line class="dp-lead" x1="{xx:.1f}" x2="{xx:.1f}" y1="160" '
+                 f'y2="160" stroke="{col}" stroke-width=".8"/>'
+                 f'<text x="{xx:.1f}" y="172" text-anchor="{anchor}" fill="{col}">{pt["label"]}</text>'
+                 f'<text x="{xx:.1f}" y="187" text-anchor="{anchor}" fill="{col}">ETA{star} {eta:%d/%m/%y}</text></g>')
     o.append(f'<text x="{x(SPINUP):.1f}" y="14" text-anchor="start" fill="#5c5c5c">spin-up 2021-10-21</text>')
     o.append("</svg>")
     return "".join(o)
@@ -727,7 +730,8 @@ def render(S, hist_rows, sha, runtime_s):
 <p class="caption"><b>a</b> Barras: instante simulado atual, contorno lateral pronto (manifestos <code>PRONTO</code>
 consecutivos) e ERA5 baixado (intermediários <code>ERA5:*</code> consecutivos). Retângulo vazado: bloco 1
 (2021-10-21 → 2023-07-01); hachura: além do bloco 1, ainda sem ERA5 nem autorização. Linhas verticais: pontos de
-decisão; contínua = autorizado; tracejada = projeção que exige ERA5 e autorização.</p>
+decisão; contínua = autorizado; tracejada = projeção. Rótulos: ponto de decisão e ETA (dd/mm/aa).
+<b>* projeção: pressupõe ERA5 e autorização a tempo.</b></p>
 <h2>b · Vazão</h2>{rate_svg(S, hist_rows)}
 <p class="caption"><b>b</b> Dias simulados por dia de máquina em janelas de 6 h, a partir do mtime dos
 <code>history.*.nc</code> (inclui esperas por contorno e reinícios). Linha tracejada: referência de 21,9 dias/dia
@@ -762,7 +766,28 @@ restart há &gt; {TH_STALL_H:.0f} h; falha/retomada do driver nas últimas {DRIV
 {TH_DISK_TB:.0f} TB; folga de contorno &lt; {TH_SLACK_D:.0f} d. Vazão medida pelo mtime dos history (resolução de 1 h
 simulada). ETAs supõem vazão e ritmo de download constantes. Pontos 2 e 3 são projeções: pressupõem ERA5 e autorização
 a tempo, que ainda não existem. Painel não substitui a verificação do log; nada é escrito na produção.</footer>
-</main></body></html>"""
+</main><script>
+(function () {{
+  // Stagger decision-point labels whose centres are < 110 screen px apart.
+  var GAP = 110, DY = 34;
+  function lay() {{
+    var svg = document.querySelector('svg[aria-label="Linha do tempo"]');
+    if (!svg) return;
+    var k = svg.getBoundingClientRect().width / 1100, last = [], maxRow = 0;
+    Array.prototype.forEach.call(svg.querySelectorAll('g.dp-lab'), function (g) {{
+      var x = parseFloat(g.getAttribute('data-x')) * k, row = 0;
+      while (last[row] !== undefined && x - last[row] < GAP) row++;
+      last[row] = x;
+      g.setAttribute('transform', 'translate(0,' + row * DY + ')');
+      var ld = g.querySelector('.dp-lead');
+      ld.setAttribute('y1', String(row ? 140 - row * DY : 160));
+      maxRow = Math.max(maxRow, row);
+    }});
+    svg.setAttribute('viewBox', '0 0 1100 ' + (200 + maxRow * DY));
+  }}
+  lay(); window.addEventListener('resize', lay);
+}})();
+</script></body></html>"""
 
 
 # ---------------------------------------------------------------- publish ---
