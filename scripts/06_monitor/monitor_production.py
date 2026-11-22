@@ -5,7 +5,7 @@ Runs ON Swell (cron, every 6 h). Reads the production directory WITHOUT writing
 to it: simulated time (history names + tail of log.atmosphere.0000.out),
 restarts, history mtimes (per-step timestamps), driver log
 (logs/production.log: legs, failures, retries), LBC manifests (PRONTO), ERA5
-intermediates, df, /proc/loadavg and per-core CPU (ps -eLo psr,pcpu,user,comm).
+intermediates, df, /proc/loadavg and per-core instantaneous CPU (two reads of /proc/<pid>/task/*/stat, 5 s apart).
 
 Writes ONLY into --out (a separate git work clone): index.html, status.json and
 status_history.csv (appended each run). With --publish, commits the outputs as
@@ -139,6 +139,55 @@ class Progress:
         return days(sb - sa) / ((b - a) / 86400.0)
 
 
+CPU_SAMPLE_S = 5.0
+
+
+def _read_tasks():
+    """{(pid, tid): (utime+stime ticks, processor, uid, comm)} from /proc."""
+    out = {}
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit():
+            continue
+        try:
+            uid = os.stat(f"/proc/{pid}").st_uid
+            tids = os.listdir(f"/proc/{pid}/task")
+        except OSError:
+            continue
+        for tid in tids:
+            try:
+                with open(f"/proc/{pid}/task/{tid}/stat") as fh:
+                    st = fh.read()
+            except OSError:
+                continue
+            comm = st[st.index("(") + 1:st.rindex(")")]
+            f = st[st.rindex(")") + 2:].split()  # f[0] = field 3 (state)
+            out[(pid, tid)] = (int(f[11]) + int(f[12]), int(f[36]), uid, comm)
+    return out
+
+
+def cpu_sample(interval: float):
+    """Instantaneous %CPU per thread over `interval` s: [(core, pct, user, comm)]."""
+    import pwd
+    hz = os.sysconf("SC_CLK_TCK")
+    a = _read_tasks()
+    t0 = time.monotonic()
+    time.sleep(interval)
+    b = _read_tasks()
+    dtw = time.monotonic() - t0
+    names, res = {}, []
+    for k, (tk, cpu, uid, comm) in b.items():
+        if k not in a:
+            continue
+        pct = 100.0 * (tk - a[k][0]) / hz / dtw
+        if uid not in names:
+            try:
+                names[uid] = pwd.getpwuid(uid).pw_name
+            except KeyError:
+                names[uid] = str(uid)
+        res.append((cpu, pct, names[uid], comm))
+    return res
+
+
 # ------------------------------------------------------------- collectors ---
 def collect(now: float) -> dict:
     got, missing = [], []
@@ -251,12 +300,9 @@ def collect(now: float) -> dict:
         missing.append("/proc/loadavg")
     try:
         R["nproc"] = os.cpu_count()
-        out = subprocess.run(["ps", "-eLo", "psr,pcpu,user:32,comm", "--no-headers"],
-                             capture_output=True, text=True, timeout=30).stdout
-        R["ps"] = [(int(a), float(b), c, d) for a, b, c, d in
-                   (ln.split(None, 3) for ln in out.splitlines() if len(ln.split(None, 3)) == 4)]
+        R["ps"] = cpu_sample(CPU_SAMPLE_S)
         R["n_model"] = sum(1 for p in R["ps"] if p[3].startswith("atmosphere_mod"))
-        got.append(f"CPU por núcleo e usuário: {len(R['ps'])} threads")
+        got.append(f"CPU instantânea por thread ({CPU_SAMPLE_S:.0f} s, /proc/*/task/*/stat): {len(R['ps'])} threads")
     except Exception as ex:  # noqa: BLE001
         R["ps"], R["n_model"] = [], None
         missing.append(f"ps: {ex}")
@@ -383,7 +429,7 @@ def analyse(R: dict, history_rows: list[dict]) -> dict:
         free_at = (R["disk_free"] - rem * GROWTH_B_DAY) if R["disk_free"] is not None else None
         pts.append({
             "label": lab, "target": iso(tgt), "authorized": auth,
-            "status": "autorizado (MEQ-06.7)" if auth else "projeção; exige ERA5 e autorização",
+            "status": "autorizado (MEQ-06.7)" if auth else "projeção; pressupõe ERA5 e autorização a tempo",
             "sim_days_total": days(tgt - SPINUP), "sim_days_left": rem,
             "pct": min(100.0, 100.0 * S["sim_days"] / days(tgt - SPINUP)),
             "machine_days_left": rem / rate,
@@ -445,7 +491,7 @@ def analyse(R: dict, history_rows: list[dict]) -> dict:
     for (user, comm), lst in foreign.items():
         ev = ", ".join(f"núcleo {p}: {c:.0f} %" for p, c in sorted(lst)[:8])
         alert("cpu_alheia", f"indício de disputa de núcleo: {user}/{comm} em {len(lst)} núcleo(s) da produção",
-              nowd, ev + " (ps -eLo; %CPU médio da vida da thread)")
+              nowd, ev + f" (%CPU instantâneo em {CPU_SAMPLE_S:.0f} s, /proc/*/task/*/stat; núcleo = último em que a thread rodou)")
     if R["load"] and R["load"][0] > TH_LOAD:
         alert("carga", f"carga {R['load'][0]:.1f} > {TH_LOAD:.0f}", nowd,
               f"/proc/loadavg = {' '.join(f'{x:.2f}' for x in R['load'])}; nproc = {R['nproc']}")
@@ -472,6 +518,9 @@ def analyse(R: dict, history_rows: list[dict]) -> dict:
     if lbc_ready < BLOCK1_END and S["lbc_slack_days"] < TH_SLACK_D:
         alert("folga", f"folga de contorno {S['lbc_slack_days']:.1f} d < {TH_SLACK_D:.0f} d", nowd,
               f"LBC PRONTO até {iso(lbc_ready)}; simulado {iso(sim)}; ERA5 até {iso(era_until)}")
+    sync_err = os.environ.get("MONITOR_SYNC_ERR", "").strip()
+    if sync_err:
+        alert("sync", "script não sincronizado com origin/main (rodou a cópia local)", nowd, sync_err[:240])
     S["alerts"] = A
 
     # Misc.
@@ -571,7 +620,7 @@ def tl_svg(S):
         anchor = "end" if xx > W - 120 else "middle"
         o.append(f'<text x="{xx:.1f}" y="172" text-anchor="{anchor}" fill="{col}">{pt["label"]}</text>')
         o.append(f'<text x="{xx:.1f}" y="188" text-anchor="{anchor}" fill="{col}">ETA {pt["eta"][:10]}'
-                 f'{"" if pt["authorized"] else " (projeção)"}</text>')
+                 f'{"" if pt["authorized"] else " (pressupõe ERA5 e autorização a tempo)"}</text>')
     o.append(f'<text x="{x(SPINUP):.1f}" y="14" text-anchor="start" fill="#5c5c5c">spin-up 2021-10-21</text>')
     o.append("</svg>")
     return "".join(o)
@@ -692,7 +741,7 @@ dos últimos 200 passos do log): {f(S["s_per_step"], 3)}.</p>
 a conta pela vazão e a conta pela chegada dos dados (só para o ponto 1, o único com ERA5 previsto: chegada do ERA5
 ao ponto pelo ritmo de download das últimas 72 h, mais um trecho mensal de integração). Disco projetado = ocupação
 atual de <code>meq06_production/</code> + {f(GROWTH_B_DAY / 1e9, 2)} GB por dia simulado (24 history + 4 LBC +
-ERA5), sem restarts adicionais. Linhas em itálico: projeção; exige ERA5 e autorização.</p>
+ERA5), sem restarts adicionais. Linhas em itálico: projeção; pressupõe ERA5 e autorização a tempo.</p>
 <h2>d · Trechos mensais</h2><div class="scroll"><table><thead><tr><th>Trecho</th><th>Período simulado</th>
 <th>Início (UTC)</th><th>Fim (UTC)</th><th>Duração (h)</th><th>Vazão (d/d)</th><th>Tentativas</th><th>Estado</th></tr>
 </thead><tbody>{legs}</tbody></table></div>
@@ -707,12 +756,12 @@ LBC: {S["lbc_months_ready"]}/{S["lbc_months_total"]} meses PRONTO.</p>
 <p class="caption"><b>Não obtido:</b></p><ul class="caption">{miss}</ul>
 <footer>Gerado em {now:%Y-%m-%d %H:%M} UTC ({spn:%Y-%m-%d %H:%M} America/Sao_Paulo) em {runtime_s:.1f} s ·
 <code>scripts/06_monitor/monitor_production.py</code> blob <code>{sha[:12]}</code>.<br>
-<b>Limites:</b> limiares — CPU alheia &gt; {TH_CPU_OTHER:.0f} % por thread nos núcleos da produção (ps reporta o %CPU
-médio da vida da thread, não o instantâneo); carga (1 min) &gt; {TH_LOAD:.0f}; vazão 6 h &lt; 90 % da mediana; sem
+<b>Limites:</b> limiares — CPU alheia &gt; {TH_CPU_OTHER:.0f} % por thread nos núcleos da produção (%CPU instantâneo
+em {CPU_SAMPLE_S:.0f} s; o núcleo é o último em que a thread rodou); carga (1 min) &gt; {TH_LOAD:.0f}; vazão 6 h &lt; 90 % da mediana; sem
 restart há &gt; {TH_STALL_H:.0f} h; falha/retomada do driver nas últimas {DRIVER_RECENT_H:.0f} h; disco &lt;
 {TH_DISK_TB:.0f} TB; folga de contorno &lt; {TH_SLACK_D:.0f} d. Vazão medida pelo mtime dos history (resolução de 1 h
-simulada). ETAs supõem vazão e ritmo de download constantes. Pontos 2 e 3 são projeções: exigem ERA5 e autorização
-que ainda não existem. Painel não substitui a verificação do log; nada é escrito na produção.</footer>
+simulada). ETAs supõem vazão e ritmo de download constantes. Pontos 2 e 3 são projeções: pressupõem ERA5 e autorização
+a tempo, que ainda não existem. Painel não substitui a verificação do log; nada é escrito na produção.</footer>
 </main></body></html>"""
 
 
