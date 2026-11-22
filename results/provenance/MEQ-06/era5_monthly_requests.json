@@ -1,0 +1,148 @@
+{
+  "dataset": "ERA5",
+  "source": "Copernicus CDS (cdsapi)",
+  "area_NWSE": [
+    15.0,
+    -64.0,
+    -16.0,
+    -24.0
+  ],
+  "pressure_variables": [
+    "geopotential",
+    "temperature",
+    "u_component_of_wind",
+    "v_component_of_wind",
+    "relative_humidity"
+  ],
+  "pressure_levels_hpa": [
+    1000,
+    975,
+    950,
+    925,
+    900,
+    875,
+    850,
+    825,
+    800,
+    775,
+    750,
+    700,
+    650,
+    600,
+    550,
+    500,
+    450,
+    400,
+    350,
+    300,
+    250,
+    225,
+    200,
+    175,
+    150,
+    125,
+    100,
+    70,
+    50,
+    30,
+    20,
+    10,
+    7,
+    5,
+    3,
+    2,
+    1
+  ],
+  "single_variables": [
+    "surface_pressure",
+    "mean_sea_level_pressure",
+    "skin_temperature",
+    "geopotential",
+    "land_sea_mask",
+    "sea_ice_cover",
+    "snow_depth",
+    "soil_temperature_level_1",
+    "soil_temperature_level_2",
+    "soil_temperature_level_3",
+    "soil_temperature_level_4",
+    "volumetric_soil_water_layer_1",
+    "volumetric_soil_water_layer_2",
+    "volumetric_soil_water_layer_3",
+    "volumetric_soil_water_layer_4"
+  ],
+  "cadence_h": 6,
+  "months": [
+    {
+      "month": "2021-10",
+      "n_times": 44,
+      "first": "2021-10-21_00",
+      "last": "2021-10-31_18",
+      "files": {
+        "pl": {
+          "path": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/meq06_production/met_data/era5_monthly/era5_pl_202110.grib",
+          "bytes": 328514120,
+          "md5": "3b19587c9e2df7ed50e736949d911822",
+          "download_seconds": 0.5,
+          "dataset": "reanalysis-era5-pressure-levels"
+        },
+        "sl": {
+          "path": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/meq06_production/met_data/era5_monthly/era5_sl_202110.grib",
+          "bytes": 28693016,
+          "md5": "fa97e45a7b891b039d68897651fad92f",
+          "download_seconds": 88.9,
+          "dataset": "reanalysis-era5-single-levels"
+        }
+      },
+      "convert_seconds": 8.7,
+      "convert_fail": []
+    },
+    {
+      "month": "2021-11",
+      "n_times": 120,
+      "first": "2021-11-01_00",
+      "last": "2021-11-30_18",
+      "files": {
+        "pl": {
+          "path": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/meq06_production/met_data/era5_monthly/era5_pl_202111.grib",
+          "bytes": 895947600,
+          "md5": "40a1b7e28868f8ba71faa0d0eb1dbe8f",
+          "download_seconds": 11502.8,
+          "dataset": "reanalysis-era5-pressure-levels"
+        },
+        "sl": {
+          "path": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/meq06_production/met_data/era5_monthly/era5_sl_202111.grib",
+          "bytes": 78253680,
+          "md5": "f631afb95212b2fa478bf7f018989d8b",
+          "download_seconds": 10386.4,
+          "dataset": "reanalysis-era5-single-levels"
+        }
+      },
+      "convert_seconds": 51.5,
+      "convert_fail": []
+    },
+    {
+      "month": "2021-12",
+      "n_times": 124,
+      "first": "2021-12-01_00",
+      "last": "2021-12-31_18",
+      "files": {
+        "pl": {
+          "path": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/meq06_production/met_data/era5_monthly/era5_pl_202112.grib",
+          "bytes": 925812520,
+          "md5": "dbc1669f10342bafc4a5c4a00ce99383",
+          "download_seconds": 10973.8,
+          "dataset": "reanalysis-era5-pressure-levels"
+        },
+        "sl": {
+          "path": "/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/meq06_production/met_data/era5_monthly/era5_sl_202112.grib",
+          "bytes": 80862136,
+          "md5": "3748eb9efffbc72a05324f3828cd03d1",
+          "download_seconds": 11569.6,
+          "dataset": "reanalysis-era5-single-levels"
+        }
+      },
+      "convert_seconds": 24.2,
+      "convert_fail": []
+    }
+  ]
+}

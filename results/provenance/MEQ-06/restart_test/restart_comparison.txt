@@ -1,0 +1,4 @@
+history: 34 variables compared, 34 bit-identical, 0 differ
+restart: 296 variables compared, 296 bit-identical, 0 differ
+history pairs compared: 49; restart pairs: 1
+VERDICT: IDENTICAL (bit for bit)

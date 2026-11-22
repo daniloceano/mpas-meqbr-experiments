@@ -1,0 +1,10 @@
+{
+  "dataset": "NOAA OISST v2.1 (daily, 0.25 deg)",
+  "purpose": "MEQ-06 block 1 sfc_update (EXP03), 2021-10-21 to 2023-07-01",
+  "tool": "usp-utils download_oisst.py + oisst_to_intermediate.py (oisst_land_fill coastal-safe)",
+  "converter_sha256": "results/provenance/MEQ-06/oisst_converter_sha256.txt",
+  "raw_location_swell": "runs/meqbr_05km_oval_meq02a/meq06_production/met_data/oisst (901 MB)",
+  "intermediates_swell": "runs/meqbr_05km_oval_meq02a/meq06_production/oisst_corrected (619 SST files, 7.2 GB)",
+  "download_date": "2026-11-19",
+  "qc": "[QC] coastal-safe SST; SST gate log results/provenance/MEQ-06/sst_gate_block1.log"
+}
