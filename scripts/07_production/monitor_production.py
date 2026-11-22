@@ -186,7 +186,7 @@ def throughput(hist, window_h):
 
 def render(cfg: dict, r: dict, st: Style) -> str:
     now = int(r.get("NOW", time.time()))
-    out = [st.bold(f"MEQ-06 produção — EXP03   ({cfg['host']}:{cfg['run_dir']})"),
+    out = [st.bold(f"Simulação climatológica (configuração EXP03)   ({cfg['host']}:{cfg['run_dir']})"),
            st.dim(f"consulta {dt.datetime.fromtimestamp(now, dt.timezone.utc).replace(tzinfo=None):%Y-%m-%d %H:%M} UTC")]
     procs = [p.split() for p in r["PS"]]
     model = [p for p in procs if len(p) >= 3 and p[2] == cfg["process"]]
