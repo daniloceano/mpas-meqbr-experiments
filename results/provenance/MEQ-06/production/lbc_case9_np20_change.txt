@@ -1,0 +1,8 @@
+MEQ-06.7 adjustment (responsible, 2026-11-22), applied 2026-11-22T13:26Z, from the next LBC month (2021-12) on.
+- case 9 (LBC) concurrent with production: 20 MPI ranks (was 60), nice 19 (unchanged),
+  pinned ONLY outside P90C: -bind-to user:23,24,25,26,27,50,51,52,53,54,55,79,80,81,82,83,106,107,108,109
+  (11 free physical cores + 9 of their SMT siblings).
+- partition: partitions/meqbr_05km_oval_meq02a.graph.info.part.20 (gpmetis, same graph.info); MD5s in partitions/partition20_md5.txt
+- cases 7 and 8 unchanged (60 ranks, part.60). Previous launcher kept: records/preproc_prod.sh.meq065_np60
+- check (preproc/lbc_np20_check, 2021-11-01_00/06/12): 7/7 variables bit-identical to the 60-rank LBC; only global attrs
+  file_id/history/config_stop_time differ. Manifests 2021-10 and 2021-11 were made with 60 ranks.

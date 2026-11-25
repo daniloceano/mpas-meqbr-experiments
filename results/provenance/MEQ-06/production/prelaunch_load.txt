@@ -1,0 +1,10 @@
+2026-11-22T13:14:45Z
+0.09 0.03 0.01 2/1341 1444062
+112
+%CPU COMMAND
+ 0.7 sshd
+ 0.5 jupyter-lab
+ 0.4 bash
+ 0.1 kworker/0:1-qat_misc_wq
+ 0.1 python
+/dev/sda2       182T   47T  126T  28% /p1-swell

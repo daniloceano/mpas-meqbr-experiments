@@ -1,0 +1,150 @@
+ --- time to apply limit to accumulated radiation diags. L_ACRADT   = F
+ --- time to calculate additional physics_diagnostics               = F
+  split dynamics-transport integration 3
+ 
+ global min, max w -3.27422 17.0441
+ global min, max u -49.0331 49.2879
+  Timing for integration step: 1.44547 s
+ 
+ Begin timestep 2021-10-31_23:57:00
+ --- time to run the LW radiation scheme L_RADLW = F
+ --- time to run the SW radiation scheme L_RADSW = F
+ --- time to run the convection scheme L_CONV    = T
+ --- time to apply limit to accumulated rainc and rainnc L_ACRAIN   = F
+ --- time to apply limit to accumulated radiation diags. L_ACRADT   = F
+ --- time to calculate additional physics_diagnostics               = F
+  split dynamics-transport integration 3
+ 
+ global min, max w -3.28731 17.2910
+ global min, max u -49.0291 49.2501
+  Timing for integration step: 1.43236 s
+ 
+ Begin timestep 2021-10-31_23:57:30
+ --- time to run the LW radiation scheme L_RADLW = F
+ --- time to run the SW radiation scheme L_RADSW = F
+ --- time to run the convection scheme L_CONV    = T
+ --- time to apply limit to accumulated rainc and rainnc L_ACRAIN   = F
+ --- time to apply limit to accumulated radiation diags. L_ACRADT   = F
+ --- time to calculate additional physics_diagnostics               = F
+  split dynamics-transport integration 3
+ 
+ global min, max w -3.29086 17.6592
+ global min, max u -49.0265 49.2081
+  Timing for integration step: 1.42922 s
+ 
+ Begin timestep 2021-10-31_23:58:00
+ --- time to run the LW radiation scheme L_RADLW = F
+ --- time to run the SW radiation scheme L_RADSW = F
+ --- time to run the convection scheme L_CONV    = T
+ --- time to apply limit to accumulated rainc and rainnc L_ACRAIN   = F
+ --- time to apply limit to accumulated radiation diags. L_ACRADT   = F
+ --- time to calculate additional physics_diagnostics               = F
+  split dynamics-transport integration 3
+ 
+ global min, max w -3.26490 17.6362
+ global min, max u -49.0138 49.1744
+  Timing for integration step: 1.42400 s
+ 
+ Begin timestep 2021-10-31_23:58:30
+ --- time to run the LW radiation scheme L_RADLW = F
+ --- time to run the SW radiation scheme L_RADSW = F
+ --- time to run the convection scheme L_CONV    = T
+ --- time to apply limit to accumulated rainc and rainnc L_ACRAIN   = F
+ --- time to apply limit to accumulated radiation diags. L_ACRADT   = F
+ --- time to calculate additional physics_diagnostics               = F
+  split dynamics-transport integration 3
+ 
+ global min, max w -3.22314 18.1017
+ global min, max u -48.9910 49.1656
+  Timing for integration step: 1.43266 s
+ 
+ Begin timestep 2021-10-31_23:59:00
+ --- time to run the LW radiation scheme L_RADLW = F
+ --- time to run the SW radiation scheme L_RADSW = F
+ --- time to run the convection scheme L_CONV    = T
+ --- time to apply limit to accumulated rainc and rainnc L_ACRAIN   = F
+ --- time to apply limit to accumulated radiation diags. L_ACRADT   = F
+ --- time to calculate additional physics_diagnostics               = F
+  split dynamics-transport integration 3
+ 
+ global min, max w -3.14235 18.0284
+ global min, max u -48.9581 49.1525
+  Timing for integration step: 1.43881 s
+ 
+ Begin timestep 2021-10-31_23:59:30
+ --- time to run the LW radiation scheme L_RADLW = F
+ --- time to run the SW radiation scheme L_RADSW = F
+ --- time to run the convection scheme L_CONV    = T
+ --- time to apply limit to accumulated rainc and rainnc L_ACRAIN   = F
+ --- time to apply limit to accumulated radiation diags. L_ACRADT   = F
+ --- time to calculate additional physics_diagnostics               = T
+  split dynamics-transport integration 3
+ 
+ global min, max w -3.02640 17.8303
+ global min, max u -48.9150 49.1351
+  Timing for integration step: 1.45347 s
+ Timing for diagnostic computation: 0.421506E-01 s
+ Timing for stream output: 5.70064 s
+ 
+ ********************************************************
+    Finished running the atmosphere core
+ ********************************************************
+ 
+ 
+  Timer information:
+     Globals are computed across all threads and processors
+ 
+  Columns:
+     total time: Global max of accumulated time spent in timer
+     calls: Total number of times this timer was started / stopped.
+     min: Global min of time spent in a single start / stop
+     max: Global max of time spent in a single start / stop
+     avg: Global max of average time spent in a single start / stop
+     pct_tot: Percent of the timer at level 1
+     pct_par: Percent of the parent timer (one level up)
+     par_eff: Parallel efficiency, global average total time / global max total time
+ 
+ 
+    timer_name                                            total       calls        min            max            avg      pct_tot   pct_par     par_eff
+  1 total time                                       45278.64844         1    45278.64453    45278.64844    45278.64844   100.00       0.00       1.00
+  2  initialize                                          2.32605         1        2.32516        2.32605        2.32562     0.01       0.01       1.00
+  3   mpas_block_decomp_cells_for_proc                   0.13051         1        0.12991        0.13051        0.13011     0.00       5.61       1.00
+  3   read_ICs                                           1.33942         1        1.33781        1.33942        1.33865     0.00      57.58       1.00
+  2  diagnostic_fields                                  50.83954     63362        0.00001        0.07317        0.00060     0.11       0.11       0.75
+  2  stream_output                                     188.86267     31681        0.00000        5.70165        0.00594     0.42       0.42       1.00
+  2  stream_input                                        2.19871        14        0.00001        0.20468        0.15634     0.00       0.00       1.00
+  2  time integration                                45044.07422     31680        0.77953        5.10411        1.42161    99.48      99.48       1.00
+  3   physics driver                                  5409.82129     31680        0.06013        3.92021        0.13919    11.95      12.01       0.82
+  4    calc_cldfraction                                  0.60101       528        0.00016        0.00270        0.00068     0.00       0.01       0.60
+  4    rrtmg_swrad                                     684.90094       528        0.00007        2.78570        0.98926     1.51      12.66       0.76
+  4    rrtmg_lwrad                                     514.86554       528        0.48252        1.07548        0.73918     1.14       9.52       0.76
+  4    sf_monin_obukhov_rev                            354.98300     31680        0.00315        0.02199        0.00816     0.78       6.56       0.73
+  4    sf_noah                                         143.83359     31680        0.00006        0.00942        0.00162     0.32       2.66       0.36
+  4    bl_ysu                                          874.55353     31680        0.01104        0.06222        0.02313     1.93      16.17       0.84
+  4    bl_gwdo                                         165.35782     31680        0.00213        0.01691        0.00417     0.37       3.06       0.80
+  4    cu_ntiedtke                                    1871.56445     31680        0.01799        0.11590        0.04668     4.13      34.60       0.79
+  3   atm_rk_integration_setup                          82.15192     31680        0.00125        0.00930        0.00191     0.18       0.18       0.74
+  3   atm_compute_moist_coefficients                   465.15335     31680        0.00204        0.02851        0.00938     1.03       1.03       0.64
+  3   physics_get_tend                                1540.07886     31680        0.00338        2.86947        0.02304     3.40       3.42       0.47
+  3   atm_compute_vert_imp_coefs                       182.99734     95040        0.00094        0.00776        0.00137     0.40       0.41       0.71
+  3   atm_compute_dyn_tend                           11170.72559    285120        0.01636        0.17092        0.02754    24.67      24.80       0.70
+  3   small_step_prep                                  429.33286    285120        0.00055        0.00748        0.00100     0.95       0.95       0.66
+  3   atm_bdy_adjust_dynamics_relaxzone_tend           508.88815    285120        0.00005        0.00789        0.00019     1.12       1.13       0.11
+  3   atm_advance_acoustic_step                       1508.35181    380160        0.00153        0.01527        0.00262     3.33       3.35       0.66
+  3   atm_divergence_damping_3d                        567.51392    380160        0.00058        0.00762        0.00095     1.25       1.26       0.64
+  3   atm_recover_large_step_variables                1533.58655    285120        0.00132        0.01630        0.00387     3.39       3.40       0.72
+  3   atm_compute_solve_diagnostics                   2167.89062    285120        0.00256        0.02219        0.00571     4.79       4.81       0.75
+  3   atm_rk_dynamics_substep_finish                   287.06296     95040        0.00059        0.00950        0.00195     0.63       0.64       0.64
+  3   atm_advance_scalars                             8640.44336     63360        0.01457        0.24574        0.09535    19.08      19.18       0.70
+  3   atm_advance_scalars_mono                        6582.88037     31680        0.04494        0.36165        0.18207    14.54      14.61       0.88
+  3   microphysics                                    3885.98950     31680        0.05318        0.20069        0.09499     8.58       8.63       0.77
+  4    mp_wsm6                                        3298.24341     31680        0.03740        0.17953        0.07851     7.28      84.88       0.75
+ 
+ -----------------------------------------
+ Total log messages printed:
+    Output messages =               413674
+    Warning messages =                 230
+    Error messages =                     0
+    Critical error messages =            0
+ -----------------------------------------
+ Logging complete.  Closing file at 2026/11/23 01:49:26
