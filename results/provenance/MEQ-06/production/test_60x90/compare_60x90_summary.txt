@@ -1,0 +1,37 @@
+60 x 90 test, Nov/2021: 721 hourly pairs (2021-11-01_00 .. 2021-12-01_00)
+ref (60 ranks): /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/20211101_20211201
+prod (90 ranks): /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/meq06_production/run
+site cells (nearest ocean): P0=12266 (-2.708,-42.564), P1=12266 (-2.708,-42.564), LPI=84205 (-4.883,-37.151), ANM=35433 (-4.722,-36.815)
+first hour with any difference: 2021-11-01_00.00.00
+
+scope	level	comp	max_abs_diff_m/s	rms_diff_m/s
+domain	100m	speed	16.77	0.8662
+domain	100m	u	22.67	0.8896
+domain	100m	v	24.96	0.9121
+ANM	100m	speed	2.017	0.4499
+ANM	100m	u	1.759	0.4507
+ANM	100m	v	2.069	0.4738
+LPI	100m	speed	3.011	0.5039
+LPI	100m	u	3.837	0.5583
+LPI	100m	v	2.537	0.5141
+P0	100m	speed	3.047	0.6092
+P0	100m	u	3.288	0.6115
+P0	100m	v	3.463	0.5606
+P1	100m	speed	3.047	0.6092
+P1	100m	u	3.288	0.6115
+P1	100m	v	3.463	0.5606
+domain	10m	speed	14.22	0.6221
+domain	10m	u	20.46	0.6699
+domain	10m	v	17.58	0.7058
+ANM	10m	speed	1.76	0.3811
+ANM	10m	u	1.41	0.3823
+ANM	10m	v	1.814	0.4369
+LPI	10m	speed	2.698	0.4269
+LPI	10m	u	3.78	0.4938
+LPI	10m	v	2.316	0.4755
+P0	10m	speed	2.466	0.5143
+P0	10m	u	2.948	0.5296
+P0	10m	v	3.05	0.511
+P1	10m	speed	2.466	0.5143
+P1	10m	u	2.948	0.5296
+P1	10m	v	3.05	0.511

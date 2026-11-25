@@ -1,0 +1,2 @@
+d5ce01a9be52655ebd4e5d7f9f23982e  namelist.atmosphere
+e9de7d1725d50db941df26168a601ab6  /p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a/meq06_production/manifests/lbc_manifest_2021-10.txt

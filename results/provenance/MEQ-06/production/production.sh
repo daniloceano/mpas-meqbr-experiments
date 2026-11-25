@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# MEQ-06.7 — EXP03 climatological production to 2023-07-01 00 (authorized 2026-11-22).
+# EXP03 namelist/streams verbatim (only start/duration/do_restart edited), 90 ranks,
+# part.90 copy, P90C pinning, hourly output, daily restart. One run dir, restart chain.
+# Legs: spin-up 2021-10-21 -> 2021-11-01, then one per month up to 2023-06.
+# Leg N starts only if manifests/lbc_manifest_N is PRONTO (sfc_update block 1 covers to 2023-07-01).
+# Failure: resume from last restart (max 2 retries per leg); otherwise STOP.
+# Fix 2026-11-23: mpiexec stdin from /dev/null (it consumed the leg list); 60 s polling.
+# Never deletes anything: restarts outside the retention rule are only LISTED.
+#   nohup ./production.sh > logs/production.log 2>&1 &
+set -uo pipefail
+source "$HOME/mpas-build/mpas_build_env.sh"
+export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+REG=/p1-swell/danilocs/MPAS-Research/runs/meqbr_05km_oval_meq02a
+REF=$REG/20211101_20211201
+P=$REG/meq06_production
+R=$P/run
+M=meqbr_05km_oval_meq02a
+PIN="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105"
+STOP_AT="2023-07-01 00:00"
+ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+log() { echo "[$(ts)] $*"; }
+mkdir -p "$R" "$P/records/legs"
+
+if [ ! -e "$R/atmosphere_model" ]; then
+  cd "$R"
+  for f in "$REF"/*; do b=$(basename "$f")
+    case "$b" in history.*|restart.*|lbc.*|diag.*|log.*|mpas.out|*.init.nc|*.sfc_update.nc|*.part.60|namelist.atmosphere|restart_timestamp) ;;
+      *) if [ -L "$f" ]; then ln -sfn "$(readlink -f "$f")" .; else cp -n "$f" .; fi ;; esac
+  done
+  cp -n "$P/$M.graph.info.part.90" .
+  md5sum "$P/$M.graph.info.part.90" "$R/$M.graph.info.part.90" > "$P/records/production_partition_md5.txt"
+  ln -sfn "$P/preproc/init_20211021/$M.init.nc" .
+  ln -sfn "$P/preproc/sfc_block1/$M.sfc_update.nc" .
+  diff "$REF/streams.atmosphere" streams.atmosphere > "$P/records/production_streams.diff"
+  md5sum stream_list.atmosphere.* streams.atmosphere atmosphere_model > "$P/records/production_config_md5.txt"
+  log "SETUP done in $R"
+fi
+cd "$R"
+
+legs() {  # month tag, start, end
+  echo "2021-10 2021-10-21 2021-11-01"
+  local t="2021-11-01"
+  while [ "$(date -u -d "$t" +%s)" -lt "$(date -u -d "$STOP_AT" +%s)" ]; do
+    local n; n=$(date -u -d "$t +1 month" +%Y-%m-%d); echo "${t:0:7} $t $n"; t=$n
+  done
+}
+dur() { local s=$(( ($(date -u -d "$2" +%s) - $(date -u -d "$1" +%s)) )); printf "%d_%02d:%02d:00" $((s/86400)) $((s%86400/3600)) $((s%3600/60)); }
+last_restart() { ls restart.*.nc 2>/dev/null | sed 's/restart\.\(.*\)\.nc/\1/' | sort | tail -1; }  # YYYY-MM-DD_HH.00.00
+rtime() { echo "$1" | sed 's/_\(..\)\.\(..\)\.\(..\)/ \1:\2/'; }
+
+status() {
+  local lr; lr=$(last_restart)
+  log "STATUS sim=$(ls history.*.nc 2>/dev/null | sort | tail -1 | cut -d. -f2) last_restart=${lr:-none} load=$(cut -d' ' -f1-3 /proc/loadavg) disk_free=$(df -h "$P" | awk 'NR==2{print $4}') run_size=$(du -sh "$R" 2>/dev/null | cut -f1)"
+}
+
+retention() {  # keep restart of day 1 of each month + 3 most recent; list the rest (no deletion)
+  local all keep
+  all=$(ls restart.*.nc 2>/dev/null | sort)
+  keep=$( { echo "$all" | grep -E 'restart\.....-..-01_00'; echo "$all" | tail -3; } | sort -u)
+  comm -23 <(echo "$all") <(echo "$keep") | sed '/^$/d' > "$P/records/restarts_deletable_pending_authorization.txt"
+}
+
+run_leg() {  # tag start end
+  local tag=$1 s=$2 e=$3 man="$P/manifests/lbc_manifest_$1.txt" attempt=0
+  local end_restart="restart.${e}_00.00.00.nc"
+  [ -e "$end_restart" ] && { log "SKIP $tag (already done)"; return 0; }
+  while ! grep -q '^status: PRONTO' "$man" 2>/dev/null; do
+    grep -q '^status: FALHA' "$man" 2>/dev/null && { log "STOP: manifest $tag FALHA"; exit 4; }
+    log "WAIT $tag: manifest not PRONTO"; status; sleep 1800
+  done
+  for f in "$P"/preproc/lbc_"$tag"/lbc.*.nc; do ln -sfn "$f" .; done
+  while :; do
+    local st do_r
+    if [ "$attempt" -eq 0 ] && [ "$tag" = "2021-10" ]; then st="${s}_00:00:00"; do_r=false
+    else
+      local lr; lr=$(last_restart); [ -z "$lr" ] && { log "STOP: no restart to continue from"; exit 5; }
+      st="$(echo "$lr" | sed 's/\.\(..\)\.\(..\)$/:\1:\2/')"; do_r=true
+    fi
+    local stsec; stsec=$(rtime "$(echo "$st" | sed 's/:\(..\):\(..\)$/.\1.\2/')");
+    local d; d=$(dur "$stsec" "$e 00:00")
+    sed -e "s/config_start_time = .*/config_start_time = '$st'/" \
+        -e "s/config_run_duration = .*/config_run_duration = '$d'/" \
+        -e "s/config_do_restart = .*/config_do_restart = $do_r/" "$REF/namelist.atmosphere" > namelist.atmosphere
+    local L="$P/records/legs/${tag}_a${attempt}"; mkdir -p "$L"
+    diff "$REF/namelist.atmosphere" namelist.atmosphere > "$L/namelist.diff"
+    md5sum namelist.atmosphere "$man" > "$L/config_md5.txt"
+    echo "mpiexec -n 90 -bind-to user:$PIN ./atmosphere_model" > "$L/mpiexec_cmd.txt"
+    log "START $tag attempt=$attempt start=$st duration=$d do_restart=$do_r load=$(cut -d' ' -f1-3 /proc/loadavg)"
+    local t0; t0=$(date +%s)
+    mpiexec -n 90 -bind-to user:$PIN ./atmosphere_model > mpas.out 2>&1 < /dev/null &
+    local pid=$!
+    local k=0; while kill -0 "$pid" 2>/dev/null; do sleep 60; k=$((k+1)); [ $((k % 360)) -eq 0 ] && status; done
+    wait "$pid"; local rc=$? dt=$(( $(date +%s) - t0 ))
+    cp -f log.atmosphere.0000.out "$L/" 2>/dev/null; cp -f mpas.out "$L/" 2>/dev/null; echo "$dt" > "$L/wall_s.txt"
+    local nerr; nerr=$(grep -E "^ *(Error|Critical error) messages =" log.atmosphere.0000.out 2>/dev/null | awk '{s+=$NF} END{print s+0}')
+    log "END $tag attempt=$attempt rc=$rc errors=$nerr wall=${dt}s last_restart=$(last_restart)"
+    retention
+    if [ "$rc" -eq 0 ] && [ "$nerr" -eq 0 ] && [ -e "$end_restart" ]; then
+      log "DONE $tag"; status; return 0
+    fi
+    if grep -qE "\bNaN\b|CFL|[Uu]nstable|[Ii]nstabil" log.atmosphere.0000.out 2>/dev/null; then
+      log "STOP: possible numerical instability in $tag (see $L)"; exit 6
+    fi
+    attempt=$((attempt+1))
+    [ "$attempt" -gt 2 ] && { log "STOP: $tag failed after 2 retries"; exit 7; }
+    log "RETRY $tag from last restart $(last_restart)"
+  done
+}
+
+log "BEGIN production (stop at $STOP_AT) load=$(cut -d' ' -f1-3 /proc/loadavg)"
+while read -r tag s e; do run_leg "$tag" "$s" "$e"; done < <(legs)
+if [ -e "restart.2023-07-01_00.00.00.nc" ]; then log "REACHED $STOP_AT — mandatory stop (decision point 1)"; else log "STOP: leg loop ended before $STOP_AT (driver error)"; fi; status
