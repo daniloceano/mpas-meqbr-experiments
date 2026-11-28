@@ -1,0 +1,275 @@
+{
+ "generated_utc": "2026-11-28T18:17Z",
+ "sim_now": "2022-02-09T11:51Z",
+ "sim_days": 111.49409722222222,
+ "prod_start": "2026-11-22T13:14Z",
+ "rate_mean": 17.954212241942248,
+ "rate_24h": 19.327430555555555,
+ "rate_6h": 18.976388888888888,
+ "rate_step": 19.438927748745378,
+ "s_per_step": 1.543295,
+ "bins6": [
+  {
+   "t": "2026-11-22T16:14Z",
+   "rate": 21.166666666666668
+  },
+  {
+   "t": "2026-11-22T22:14Z",
+   "rate": 20.833333333333332
+  },
+  {
+   "t": "2026-11-23T04:14Z",
+   "rate": 2.0
+  },
+  {
+   "t": "2026-11-23T10:14Z",
+   "rate": 14.0
+  },
+  {
+   "t": "2026-11-23T16:14Z",
+   "rate": 13.833333333333334
+  },
+  {
+   "t": "2026-11-23T22:14Z",
+   "rate": 14.333333333333334
+  },
+  {
+   "t": "2026-11-24T04:14Z",
+   "rate": 14.666666666666666
+  },
+  {
+   "t": "2026-11-24T10:14Z",
+   "rate": 15.666666666666666
+  },
+  {
+   "t": "2026-11-24T16:14Z",
+   "rate": 18.666666666666668
+  },
+  {
+   "t": "2026-11-24T22:14Z",
+   "rate": 20.166666666666668
+  },
+  {
+   "t": "2026-11-25T04:14Z",
+   "rate": 19.833333333333332
+  },
+  {
+   "t": "2026-11-25T10:14Z",
+   "rate": 19.0
+  },
+  {
+   "t": "2026-11-25T16:14Z",
+   "rate": 18.0
+  },
+  {
+   "t": "2026-11-25T22:14Z",
+   "rate": 17.833333333333332
+  },
+  {
+   "t": "2026-11-26T04:14Z",
+   "rate": 20.166666666666668
+  },
+  {
+   "t": "2026-11-26T10:14Z",
+   "rate": 20.5
+  },
+  {
+   "t": "2026-11-26T16:14Z",
+   "rate": 20.666666666666668
+  },
+  {
+   "t": "2026-11-26T22:14Z",
+   "rate": 20.5
+  },
+  {
+   "t": "2026-11-27T04:14Z",
+   "rate": 20.0
+  },
+  {
+   "t": "2026-11-27T10:14Z",
+   "rate": 20.166666666666668
+  },
+  {
+   "t": "2026-11-27T16:14Z",
+   "rate": 19.833333333333332
+  },
+  {
+   "t": "2026-11-27T22:14Z",
+   "rate": 20.0
+  },
+  {
+   "t": "2026-11-28T04:14Z",
+   "rate": 19.333333333333332
+  },
+  {
+   "t": "2026-11-28T10:14Z",
+   "rate": 19.0
+  }
+ ],
+ "rate_median6": 19.583333333333332,
+ "n_restarts": 111,
+ "last_restart": "2022-02-09T00:00Z",
+ "last_restart_written": "2026-11-28T17:39Z",
+ "lbc_ready_until": "2023-01-01T00:00Z",
+ "lbc_months_ready": 15,
+ "lbc_months_total": 21,
+ "lbc_failed": [],
+ "era5_until": "2023-01-31T18:00Z",
+ "era5_n": 1872,
+ "era5_last_log": "[2026-11-28T16:06:36Z] GET sl 2023-02 (112 times) attempt 1",
+ "era5_rate": 61.333333333333336,
+ "lbc_slack_days": 325.5059027777778,
+ "rate_used": 19.327430555555555,
+ "rate_used_src": "24 h",
+ "decisions": [
+  {
+   "label": "2023-06-30",
+   "target": "2023-07-01T00:00Z",
+   "authorized": true,
+   "status": "autorizado (MEQ-06.7)",
+   "sim_days_total": 618.0,
+   "sim_days_left": 506.5059027777778,
+   "pct": 18.041116055375763,
+   "machine_days_left": 26.20658246950398,
+   "eta_rate": "2026-12-24T23:14Z",
+   "eta_data": "2026-12-02T18:49Z",
+   "eta": "2026-12-24T23:14Z",
+   "eta_limited_by": "vazão",
+   "data_note": "dados até 2026-12-01T05:04Z + último trecho mensal",
+   "disk_used_tb": 3.8351795713346166,
+   "disk_free_tb_at": 134.01416247970738
+  },
+  {
+   "label": "2023-11-30",
+   "target": "2023-12-01T00:00Z",
+   "authorized": false,
+   "status": "projeção; pressupõe ERA5 e autorização a tempo",
+   "sim_days_total": 771.0,
+   "sim_days_left": 659.5059027777778,
+   "pct": 14.460972402363453,
+   "machine_days_left": 34.12279251926774,
+   "eta_rate": "2027-01-01T21:13Z",
+   "eta_data": null,
+   "eta": "2027-01-01T21:13Z",
+   "eta_limited_by": "vazão",
+   "data_note": "",
+   "disk_used_tb": 4.654213744118617,
+   "disk_free_tb_at": 133.19512830692338
+  },
+  {
+   "label": "2025-01-31",
+   "target": "2025-02-01T00:00Z",
+   "authorized": false,
+   "status": "projeção; pressupõe ERA5 e autorização a tempo",
+   "sim_days_total": 1199.0,
+   "sim_days_left": 1087.5059027777777,
+   "pct": 9.298923871744973,
+   "machine_days_left": 56.267484684619944,
+   "eta_rate": "2027-01-24T00:42Z",
+   "eta_data": null,
+   "eta": "2027-01-24T00:42Z",
+   "eta_limited_by": "vazão",
+   "data_note": "",
+   "disk_used_tb": 6.945368162102616,
+   "disk_free_tb_at": 130.9039738889394
+  }
+ ],
+ "legs": [
+  {
+   "tag": "2021-10",
+   "sim_start": "2021-10-21T00:00Z",
+   "sim_end": "2021-11-01T00:00Z",
+   "start": "2026-11-22T13:14Z",
+   "done": "2026-11-23T07:14Z",
+   "attempts": 1,
+   "waits": 0,
+   "dur_h": 18.0,
+   "rate": 14.666666666666666,
+   "state": "concluído"
+  },
+  {
+   "tag": "2021-11",
+   "sim_start": "2021-11-01T00:00Z",
+   "sim_end": "2021-12-01T00:00Z",
+   "start": "2026-11-23T07:20Z",
+   "done": "2026-11-25T03:40Z",
+   "attempts": 1,
+   "waits": 0,
+   "dur_h": 44.33611111111111,
+   "rate": 16.23958398596579,
+   "state": "concluído"
+  },
+  {
+   "tag": "2021-12",
+   "sim_start": "2021-12-01T00:00Z",
+   "sim_end": "2022-01-01T00:00Z",
+   "start": "2026-11-25T03:40Z",
+   "done": "2026-11-26T18:13Z",
+   "attempts": 1,
+   "waits": 0,
+   "dur_h": 38.56027777777778,
+   "rate": 19.294466816023974,
+   "state": "concluído"
+  },
+  {
+   "tag": "2022-01",
+   "sim_start": "2022-01-01T00:00Z",
+   "sim_end": "2022-02-01T00:00Z",
+   "start": "2026-11-26T18:13Z",
+   "done": "2026-11-28T07:28Z",
+   "attempts": 1,
+   "waits": 0,
+   "dur_h": 37.235277777777775,
+   "rate": 19.981051422262343,
+   "state": "concluído"
+  },
+  {
+   "tag": "2022-02",
+   "sim_start": "2022-02-01T00:00Z",
+   "sim_end": "2022-03-01T00:00Z",
+   "start": "2026-11-28T07:28Z",
+   "done": null,
+   "attempts": 1,
+   "waits": 0,
+   "dur_h": 10.817358070277777,
+   "rate": 18.845482603877464,
+   "state": "em execução"
+  }
+ ],
+ "alerts": [],
+ "load": [
+  90.0,
+  90.02,
+  90.01
+ ],
+ "nproc": 112,
+ "n_model_threads": 270,
+ "disk_free_tb": 136.72557191168,
+ "disk_total_tb": 199.202097184768,
+ "used_prod_tb": 1.123770139362,
+ "reached_stop": true,
+ "last_driver": [
+  "[2026-11-27T18:13Z] STATUS sim=2022-01-21_03 last_restart=2022-01-21_00.00.00 load=90.20 90.08 90.41 disk_free=125T run_size=593G",
+  "[2026-11-28T00:13Z] STATUS sim=2022-01-26_02 last_restart=2022-01-26_00.00.00 load=90.10 90.08 90.03 disk_free=125T run_size=625G",
+  "[2026-11-28T06:14Z] STATUS sim=2022-01-31_00 last_restart=2022-01-31_00.00.00 load=90.07 90.04 90.01 disk_free=125T run_size=656G",
+  "[2026-11-28T07:28Z] END 2022-01 attempt=0 rc=0 errors=0 wall=134047s last_restart=2022-02-01_00.00.00",
+  "[2026-11-28T07:28Z] DONE 2022-01",
+  "[2026-11-28T07:28Z] STATUS sim=2022-02-01_00 last_restart=2022-02-01_00.00.00 load=64.88 84.28 88.11 disk_free=125T run_size=663G",
+  "[2026-11-28T07:28Z] START 2022-02 attempt=0 start=2022-02-01_00:00:00 duration=28_00:00:00 do_restart=true load=64.88 84.28 88.11",
+  "[2026-11-28T13:28Z] STATUS sim=2022-02-05_17 last_restart=2022-02-05_00.00.00 load=90.05 90.04 90.04 disk_free=125T run_size=691G"
+ ],
+ "cpu_other_users": {},
+ "got": [
+  "history horários: 2676 arquivos (nome e mtime)",
+  "restarts: 111",
+  "log.atmosphere.0000.out (último passo, s/passo)",
+  "log do driver: 46 linhas com carimbo",
+  "manifestos LBC: 15",
+  "ERA5 intermediários prontos: 1872",
+  "df e tamanho do diretório da produção",
+  "CPU instantânea por thread (5 s, /proc/*/task/*/stat): 1658 threads"
+ ],
+ "missing": [],
+ "script_blob_sha": "d023914d7a63d15612d86a02c3cdc616f069a59c",
+ "runtime_s": 5.38
+}
